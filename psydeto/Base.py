@@ -8,6 +8,12 @@ from psychopy import core, event, visual
 import PIL.Image
 import PIL.ImageDraw
 
+import coord_utils
+
+class TobiiController:
+    def __init__(self, win):
+        
+
 
 class InfantStimuli:
     """Stimuli for infant-friendly calibration."""
@@ -115,6 +121,10 @@ class TobiiController:
         """
         Initialize the TobiiController.
 
+        The TobiiController class is a simplified wrapper around the Tobii
+        eye tracker API. It provides methods for starting/stopping gaze data
+        recording and saving the data to a file.
+
         Args:
             win: Psychopy window object
             id: ID of the Tobii eye tracker to use (default: 0)
@@ -126,13 +136,10 @@ class TobiiController:
         self.eyetracker_id = id
         self.win = win
         self.event_mode = event_mode
+        
+        # Set the filename
+        self.filename = filename or f"{datetime.now().strftime('%Y-%m-%d_%H-%M-%S')}.tsv"
 
-        if filename:
-            self.filename = filename
-        else:
-            timestamp = datetime.now().strftime('%Y-%m-%d_%H-%M-%S')
-            self.filename = f"{timestamp}.tsv"
-            
         # For precise event mode, create events filename
         if self.event_mode == 'precise':
             base_name = os.path.splitext(self.filename)[0]
@@ -148,7 +155,7 @@ class TobiiController:
         # Connect to the eye tracker
         eyetrackers = tr.find_all_eyetrackers()
         if len(eyetrackers) == 0:
-            raise RuntimeError("No Tobii eyetrackers detected.")
+            raise RuntimeError("No Tobii eyetrackers detected./nVerify the connection and make sure to power on the eyetracker before starting your computer.")
         else:
             self.eyetracker = eyetrackers[self.eyetracker_id]
 
@@ -626,6 +633,91 @@ class TobiiController:
             self.save_calibration(calib_filename)
 
         return success
+
+
+    def show_status(self, decision_key="space"):
+        """Show participant's gaze position in track box.
+
+        This function creates a visualization of the participant's gaze
+        position in the track box. The visualization consists of a green
+        bar representing the z-position of the user, and circles for the
+        left and right eye positions.
+
+        Parameters
+        ----------
+        decision_key : str, optional
+            The key to press to exit the visualization. Default is 'space'.
+        """
+        # Create visual elements
+        bgrect = visual.Rect(self.win, pos=(0, 0.4), width=0.25, height=0.2,
+                            lineColor="white", fillColor="black", units="height")
+        leye = visual.Circle(self.win, size=0.02, units="height",
+                            lineColor=None, fillColor="green")
+        reye = visual.Circle(self.win, size=0.02, units="height", 
+                            lineColor=None, fillColor="red")
+        zbar = visual.Rect(self.win, pos=(0, 0.28), width=0.25, height=0.03,
+                        lineColor="green", fillColor="green", units="height")
+        zc = visual.Rect(self.win, pos=(0, 0.28), width=0.01, height=0.03,
+                        lineColor="white", fillColor="white", units="height")
+        zpos = visual.Rect(self.win, pos=(0, 0.28), width=0.005, height=0.03,
+                        lineColor="black", fillColor="black", units="height")
+
+        if self.eyetracker is None:
+            raise ValueError("Eyetracker not found")
+            
+        self.eyetracker.subscribe_to(tr.EYETRACKER_USER_POSITION_GUIDE,
+                                    self._on_gaze_data,
+                                    as_dictionary=True)
+        core.wait(1)
+
+        b_show_status = True
+        while b_show_status:
+            bgrect.draw()
+            zbar.draw()
+            zc.draw()
+            
+            # Get latest gaze data
+            gaze_data = self.gaze_data[-1]
+            lv = gaze_data["left_user_position_validity"]
+            rv = gaze_data["right_user_position_validity"]
+            lx, ly, lz = gaze_data["left_user_position"]
+            rx, ry, rz = gaze_data["right_user_position"]
+            
+            # Update left eye position
+            if lv:
+                # Convert TBCS coordinates to PsychoPy coordinates
+                lx, ly = coord_utils.get_psychopy_pos_from_trackbox(self.win, [lx, ly], "height") 
+                leye.setPos((round(lx * 0.25, 4), round(ly * 0.2 + 0.4, 4)))
+                leye.draw()
+                
+            # Update right eye position  
+            if rv:
+                # Convert TBCS coordinates to PsychoPy coordinates
+                rx, ry = coord_utils.get_psychopy_pos_from_trackbox(self.win, [rx, ry], "height")
+                reye.setPos((round(rx * 0.25, 4), round(ry * 0.2 + 0.4, 4)))
+                reye.draw()
+                
+            # Update z-position indicator
+            if lv or rv:
+                # Calculate z-position as weighted average of left and right eye z-positions
+                zpos.setPos((
+                    round((((lz * int(lv) + rz * int(rv)) /
+                            (int(lv) + int(rv))) - 0.5) * 0.125, 4),
+                    0.28,
+                ))
+                zpos.draw()
+                
+            # Check for exit key
+            for key in event.getKeys():
+                if key == decision_key:
+                    b_show_status = False
+                    break
+                    
+            self.win.flip()
+            
+        self.eyetracker.unsubscribe_from(tr.EYETRACKER_USER_POSITION_GUIDE,
+                                        self._on_gaze_data)
+
 
 # Example usage:
 '''
