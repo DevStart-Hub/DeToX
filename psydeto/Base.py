@@ -99,17 +99,13 @@ class TobiiController:
         "9": 8, "num_9": 8,
     }
     
-        # Default settings dictionary
+    # Default settings dictionary
     _animation_settings = {
-        'shrink_speed': 1.0,  # Slower for infants
-        'shrink_sec': 3.0,    # Will be divided by shrink_speed
+        'animation_speed': 1.0,  # Slower for infants
         'target_min': 0.2,    # Minimum size for calibration target
     }
 
-    _shrink_speed = 1  # Slower for infants
-    calibration_dot_color = (0, 0, 0)
-    calibration_disc_color = (-1, -1, 0)
-    calibration_target_min = 0.2
+    # Flag indicating whether recording is currently active
     recording = False
 
     def __init__(self, win, id=0, filename=None, event_mode='samplebased'):
@@ -526,12 +522,12 @@ class TobiiController:
         None
         """
         # Get current time and adjust with a shrink speed factor
-        time = clock.getTime() * self._shrink_speed
+        time = clock.getTime() * self.animation_settings['animation_speed']
 
         if anim_type == 'zoom':
             # Calculate the scale factor for zoom animation
             orig_size = self.targets.get_stim_original_size(point_idx)
-            scale_factor = np.sin(time)**2 + self.calibration_target_min
+            scale_factor = np.sin(time)**2 + self.animation_settings['target_min']
             newsize = [scale_factor * size for size in orig_size]
             # Set the size of the stimulus to the new size
             stim.setSize(newsize)
