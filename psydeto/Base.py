@@ -508,68 +508,122 @@ class TobiiController:
         if self.recording:
             self.stop_recording()
 
+    def _animate(self, stim, point_idx, clock, anim_type='zoom', rotation_range=15):
+        """
+        Animate a stimulus with either zoom or rotation effect.
+
+        This function takes a stimulus and animates it with either a zoom or
+        trill (rotational) effect. The animation is updated based on the
+        current time of the provided clock, and the animation style and
+        parameters are determined by the other arguments.
+
+        Parameters
+        ----------
+        stim : visual.ImageStim
+            The PsychoPy stimulus to animate.
+        point_idx : int
+            Index of the calibration point.
+        clock : psychopy.core.Clock
+            Clock for timing the animation.
+        anim_type : str, optional
+            Type of animation ('zoom' or 'trill'). Default is 'zoom'.
+        rotation_range : float, optional
+            Range of rotation in degrees for trill animation. Default is 15.
+
+        Returns
+        -------
+        None
+        """
+        # Get current time and adjust with a shrink speed factor
+        time = clock.getTime() * self._shrink_speed
+
+        if anim_type == 'zoom':
+            # Calculate the scale factor for zoom animation
+            orig_size = self.targets.get_stim_original_size(point_idx)
+            scale_factor = np.sin(time)**2 + self.calibration_target_min
+            newsize = [scale_factor * size for size in orig_size]
+            # Set the size of the stimulus to the new size
+            stim.setSize(newsize)
+
+        elif anim_type == 'trill':
+            # Calculate the new orientation angle for trill animation
+            new_angle = np.sin(time) * rotation_range
+            # Set the orientation of the stimulus to the new angle
+            stim.setOri(new_angle)
+
+        # Draw the stimulus with the updated properties
+        stim.draw()
 
     def run_calibration(self, calibration_points, infant_stims, shuffle=True, 
-                        audio=None, focus_time=0.5, save_calib=False):
+                    audio=None, focus_time=0.5, save_calib=False):
         """
-        Run infant-friendly calibration with point selection and animated stimuli.
-        
+        Run an infant-friendly calibration procedure with point selection and
+        animated stimuli. The calibration points are presented in a sequence
+        (either in order or shuffled) and at each point, an animated stimulus
+        is presented (either zooming or trilling). The procedure can optionally
+        play an attention-getting audio during the calibration process. The
+        calibration data can be saved to a file if desired.
+
         Parameters
         ----------
         calibration_points : list of tuple
-            Calibration points coordinates 
+            List of (x, y) coordinates for calibration points
         infant_stims : list of str
-            List of image paths for calibration stimuli
+            List of image file paths for calibration stimuli
         shuffle : bool, optional
             Whether to shuffle stimuli order. Default is True
-        audio : sound object, optional
+        audio : psychopy.sound.Sound, optional
             Audio to play during calibration. Default is None
         focus_time : float, optional
             Time to wait before collecting data. Default is 0.5s
         save_calib : bool, optional
-            Whether to save calibration. Default is False
-        
+            Whether to save calibration data. Default is False
+
         Returns
         -------
         bool
             True if calibration successful, False otherwise
         """
+        # Check if number of calibration points is valid
         if len(calibration_points) < 2 or len(calibration_points) > 9:
             raise ValueError("Calibration points must be between 2 and 9")
 
         # Initialize stimuli and settings
         self.targets = InfantStimuli(self.win, infant_stims, shuffle=shuffle)
         self._audio = audio
-        
+
         # Animation parameters
         self._shrink_speed = 1.0  # Slower for infants
         self._shrink_sec = 3 / self._shrink_speed
         self.calibration_target_min = 0.2
-        
+
         # Setup calibration points
         self.original_calibration_points = calibration_points[:]
         cp_num = len(self.original_calibration_points)
         self.retry_points = list(range(cp_num))
+
+        # Enter calibration mode once at start
+        self.calibration.enter_calibration_mode()
         
         # Main calibration loop
         in_calibration_loop = True
         clock = core.Clock()  # For animation timing
-        
+
         while in_calibration_loop:
-            self.calibration.enter_calibration_mode()
-            
             # Collection phase
             point_idx = -1
             collecting = True
-            
+
             while collecting:
                 # Handle key presses
                 for key in event.getKeys():
                     if key in self.numkey_dict:
+                        # User selected a point to collect data
                         point_idx = self.numkey_dict[key]
                         if self._audio:
                             self._audio.play()
                     elif key == 'space':
+                        # User wants to accept this point and move on
                         if point_idx in self.retry_points:
                             core.wait(focus_time)
                             # Convert coordinates for Tobii
@@ -583,6 +637,7 @@ class TobiiController:
                             if self._audio:
                                 self._audio.pause()
                     elif key == 'return':
+                        # User wants to move on to the next phase
                         collecting = False
                         break
 
@@ -590,15 +645,8 @@ class TobiiController:
                 if 0 <= point_idx < len(calibration_points):
                     stim = self.targets.get_stim(point_idx)
                     stim.setPos(calibration_points[point_idx])
-                    
-                    # Animate size
-                    t = clock.getTime() * self._shrink_speed
-                    orig_size = self.targets.get_stim_original_size(point_idx)
-                    scale_factor = np.sin(t)**2 + self.calibration_target_min
-                    newsize = [scale_factor * size for size in orig_size]
-                    stim.setSize(newsize)
-                    stim.draw()
-                    
+                    self._animate(stim, point_idx, clock)
+
                 self.win.flip()
 
             # Compute calibration
@@ -622,9 +670,10 @@ class TobiiController:
             while selecting:
                 result_img.draw()
                 instructions.draw()
-                
+
                 for key in event.getKeys():
                     if key in self.numkey_dict:
+                        # User selected a point to recalibrate
                         idx = self.numkey_dict[key]
                         if idx < cp_num:
                             if idx in self.retry_points:
@@ -632,14 +681,16 @@ class TobiiController:
                             else:
                                 self.retry_points.append(idx)
                     elif key == 'space':
+                        # User wants to accept/recalibrate
                         selecting = False
                         if len(self.retry_points) == 0:
                             in_calibration_loop = False
                     elif key == 'escape':
+                        # User wants to abort
                         selecting = False
                         in_calibration_loop = False
 
-                # Show selected points
+                # Show selected points for recalibration
                 for retry_p in self.retry_points:
                     visual.Circle(
                         self.win,
@@ -647,7 +698,7 @@ class TobiiController:
                         pos=calibration_points[retry_p],
                         lineColor='yellow'
                     ).draw()
-                    
+
                 self.win.flip()
 
             # Handle recalibration points
@@ -658,15 +709,31 @@ class TobiiController:
                 )
                 self.calibration.discard_data(tobii_x, tobii_y)
 
+        # Exit calibration mode at end
         self.calibration.leave_calibration_mode()
-        success = self.calibration_result.status == tr.CALIBRATION_STATUS_SUCCESS
         
+        success = self.calibration_result.status == tr.CALIBRATION_STATUS_SUCCESS
+
         # Save if requested and successful
         if success and save_calib:
             self.save_calibration()
-            
-        return success
 
+        return success
+    
+    @property
+    def numkey_dict(self):
+        """
+        Dictionary mapping number keys to point indices.
+
+        Keys are strings, e.g. '1', '2', etc. Values are the indices of the
+        calibration points, e.g. 0, 1, etc.
+
+        Returns
+        -------
+        dict
+            A dictionary mapping number keys to point indices
+        """
+        return self._numkey_dict
 
     def show_status(self, decision_key="space"):
         """
