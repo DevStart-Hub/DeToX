@@ -1,18 +1,18 @@
-import atexit
+# Standard library imports
 import os
+import time
+import atexit
 from datetime import datetime
+
+# Third party imports
 import numpy as np
 import pandas as pd
 import tobii_research as tr
 from psychopy import core, event, visual
-import PIL.Image
-import PIL.ImageDraw
+from PIL import Image, ImageDraw
 
+# Local imports
 import coord_utils
-
-class TobiiController:
-    def __init__(self, win):
-        
 
 
 class InfantStimuli:
@@ -138,12 +138,23 @@ class TobiiController:
         self.event_mode = event_mode
         
         # Set the filename
-        self.filename = filename or f"{datetime.now().strftime('%Y-%m-%d_%H-%M-%S')}.tsv"
+        if filename is None:
+            self.filename = f"{datetime.now().strftime('%Y-%m-%d_%H-%M-%S')}.csv"
+        else:
+            # Check if filename has an extension
+            self.basename, ext = os.path.splitext(filename)
+            if ext:
+                raise Warning(
+                    f"Filename '{filename}' contains extension '{ext}'. "
+                    "Please provide filename without extension. "
+                    "The .csv extension will be added automatically."
+                )
+            self.filename = f"{self.basename}.csv"
+
 
         # For precise event mode, create events filename
         if self.event_mode == 'precise':
-            base_name = os.path.splitext(self.filename)[0]
-            self.events_filename = f"{base_name}_events.tsv"
+            self.events_filename = f"{self.basename}_events.csv"
 
         # Set the default key mappings
         self.numkey_dict = self._default_numkey_dict.copy()
@@ -169,33 +180,46 @@ class TobiiController:
         # Register the close method to be called when the program exits
         atexit.register(self.close)
 
-    def save_calibration(self, filename):
+    def save_calibration(self, filename=None):
         """
         Save calibration data to a file.
 
+        This method saves the current calibration data of the eye tracker to
+        the specified file. The calibration data is retrieved from the eye
+        tracker using the retrieve_calibration_data() method and then written
+        to the file in binary format.
+
         Parameters
         ----------
-        filename : str
-            The name of the file to save the calibration data to.
+        filename : str, optional
+            The name of the file to save the calibration data to. If not provided,
+            a default name based on the basename will be used.
 
         Returns
         -------
         bool
             True if the calibration data was successfully saved, False otherwise.
         """
+        # Determine the filename to use for saving calibration data
+        calibration_name = filename or f"{self.basename}_calibration.dat"
+
         try:
-            # Retrieve the calibration data from the eye tracker
+            # Retrieve calibration data from the eyetracker
             calib_data = self.eyetracker.retrieve_calibration_data()
-            if calib_data:
-                # Open the file in binary write mode
-                with open(filename, 'wb') as f:
-                    # Write the calibration data to the file
-                    f.write(calib_data)
-                print(f"Calibration data saved to {filename}")
-                return True
-            else:
+            
+            # Check if calibration data is available
+            if not calib_data:
                 print("No calibration data available")
                 return False
+
+            # Open the file in binary write mode and save the calibration data
+            with open(calibration_name, 'wb') as f:
+                f.write(calib_data)
+            
+            # Inform the user that the data has been successfully saved
+            print(f"Calibration data saved to {calibration_name}")
+            return True
+
         except Exception as e:
             # Handle any exceptions that occur during the saving process
             print(f"Error saving calibration: {e}")
@@ -230,7 +254,8 @@ class TobiiController:
             return False
 
     def _show_calibration_result(self):
-        """Show calibration results with lines indicating accuracy.
+        """
+        Show calibration results with lines indicating accuracy.
 
         This function is used to display the results of the calibration process.
         It takes the calibration result from the Tobii eye tracker and creates
@@ -247,11 +272,18 @@ class TobiiController:
         SimpleImageStim
             A Psychopy SimpleImageStim object containing the image.
         """
-        img = PIL.Image.new("RGBA", tuple(self.win.size))
-        img_draw = PIL.ImageDraw.Draw(img)
+        # Create a new image with the same size as the PsychoPy window
+        img = Image.new("RGBA", tuple(self.win.size))
+        
+        # Create an ImageDraw object to draw on the image
+        img_draw = ImageDraw.Draw(img)
+        
+        # Create a PsychoPy SimpleImageStim object from the image
         result_img = visual.SimpleImageStim(self.win, img, autoLog=False)
         
+        # Check if the calibration result is not a failure
         if self.calibration_result.status != tr.CALIBRATION_STATUS_FAILURE:
+            # Iterate over each calibration point
             for point in self.calibration_result.calibration_points:
                 p = point.position_on_display_area
                 
@@ -259,28 +291,33 @@ class TobiiController:
                 img_draw.ellipse(
                     ((p[0] * self.win.size[0] - 3, p[1] * self.win.size[1] - 3),
                      (p[0] * self.win.size[0] + 3, p[1] * self.win.size[1] + 3)),
-                    outline=(0, 0, 0, 255)
+                    outline=(0, 0, 0, 255)  # Black outline
                 )
                 
+                # Iterate over each sample in the calibration point
                 for sample in point.calibration_samples:
                     lp = sample.left_eye.position_on_display_area
                     rp = sample.right_eye.position_on_display_area
                     
-                    # Draw a line for the left eye if the sample is valid
+                    # Check if the left eye sample is valid
                     if sample.left_eye.validity == tr.VALIDITY_VALID_AND_USED:
+                        # Draw a line for the left eye if the sample is valid
                         img_draw.line(
                             ((p[0] * self.win.size[0], p[1] * self.win.size[1]),
                              (lp[0] * self.win.size[0], lp[1] * self.win.size[1])),
                             fill=(0, 255, 0, 255)  # Green line for left eye
                         )
-                    # Draw a line for the right eye if the sample is valid
+                    # Check if the right eye sample is valid
                     if sample.right_eye.validity == tr.VALIDITY_VALID_AND_USED:
+                        # Draw a line for the right eye if the sample is valid
                         img_draw.line(
                             ((p[0] * self.win.size[0], p[1] * self.win.size[1]),
                              (rp[0] * self.win.size[0], rp[1] * self.win.size[1])),
                             fill=(255, 0, 0, 255)  # Red line for right eye
                         )
                         
+        # Set the image of the PsychoPy SimpleImageStim object to the
+        # created image
         result_img.setImage(img)
         return result_img
 
@@ -300,136 +337,82 @@ class TobiiController:
         self.gaze_data.append(gaze_data)
 
     def _process_timestamps(self, df):
-        """Convert system timestamps to seconds from start.
-
-        This function takes a DataFrame with gaze data and converts the
-        system timestamps to seconds from the start of the recording.
-
-        Parameters
-        ----------
-        df : pandas.DataFrame
-            DataFrame containing the gaze data.
-
-        Returns
-        -------
-        pandas.DataFrame
-            Modified DataFrame with the timestamps converted to seconds.
-        """
-        # Subtract the start time from all timestamps
-        df.loc[:, 'TimeStamp'] = df['system_time_stamp'] - self.t0
-        
-        # Convert the result to seconds with one decimal place
-        df.loc[:, 'TimeStamp'] = np.round(df['TimeStamp'] / 1000.0, 1)
-        
-        # Sort the DataFrame by timestamp
-        return df.sort_values('TimeStamp')
+        """Convert system timestamps to seconds from start."""
+        # More efficient to operate directly on the series
+        return np.round((df - self.t0) / 1000.0, 1)
 
     def _adapt_gaze_data(self, df):
-        """Adapt gaze data format, rename columns, and process validity flags.
-
-        This function extracts gaze coordinates, renames columns for clarity,
-        and converts validity flags to integers for further processing.
-
-        Parameters
-        ----------
-        df : pandas.DataFrame
-            The input DataFrame containing raw gaze data.
-
-        Returns
-        -------
-        pandas.DataFrame
-            The adapted DataFrame with renamed columns and selected fields.
-        """
-        # Extract gaze coordinates from display area arrays
-        df['Left_X'] = df['left_gaze_point_on_display_area'].str[0]
-        df['Left_Y'] = df['left_gaze_point_on_display_area'].str[1]
-        df['Right_X'] = df['right_gaze_point_on_display_area'].str[0]
-        df['Right_Y'] = df['right_gaze_point_on_display_area'].str[1]
+        """Adapt gaze data format and convert coordinates."""
+        # Convert coordinates more efficiently
+        df['Left_X'], df['Left_Y'] = zip(*[coord_utils.get_psychopy_pos(self.win, coord) 
+                                        for coord in df['left_gaze_point_on_display_area']])
+        df['Right_X'], df['Right_Y'] = zip(*[coord_utils.get_psychopy_pos(self.win, coord) 
+                                            for coord in df['right_gaze_point_on_display_area']])
         
-        # Define a mapping for column renaming to improve readability
-        column_mapping = {
+        # Process timestamps
+        df['TimeStamp'] = self._process_timestamps(df['system_time_stamp'])
+        
+        # Rename and convert in one step
+        df = df.rename(columns={
             'left_gaze_point_validity': 'Left_Validity',
             'left_pupil_diameter': 'Left_Pupil',
             'left_pupil_validity': 'Left_Pupil_Validity',
             'right_gaze_point_validity': 'Right_Validity',
             'right_pupil_diameter': 'Right_Pupil',
             'right_pupil_validity': 'Right_Pupil_Validity'
-        }
-        
-        # Rename columns using the defined mapping
-        df = df.rename(columns=column_mapping)
-        
-        # Convert validity flags to integer type for consistency
-        validity_columns = ['Left_Validity', 'Left_Pupil_Validity', 
-                        'Right_Validity', 'Right_Pupil_Validity']
-        for col in validity_columns:
-            df[col] = df[col].astype(int)
-        
-        # Specify and order the final set of columns for output
-        final_columns = [
-            'TimeStamp',
-            'Left_X', 'Left_Y', 'Left_Validity',
-            'Left_Pupil', 'Left_Pupil_Validity',
-            'Right_X', 'Right_Y', 'Right_Validity',
-            'Right_Pupil', 'Right_Pupil_Validity'
-        ]
-        
-        return df[final_columns]
+        }).astype({
+            'Left_Validity': 'int',
+            'Left_Pupil_Validity': 'int', 
+            'Right_Validity': 'int',
+            'Right_Pupil_Validity': 'int'
+        })
+
+        return df[['TimeStamp', 'Left_X', 'Left_Y', 'Left_Validity',
+                'Left_Pupil', 'Left_Pupil_Validity', 
+                'Right_X', 'Right_Y', 'Right_Validity',
+                'Right_Pupil', 'Right_Pupil_Validity']]
 
     def save_data(self):
-        """Save current buffer data to file and clear the buffer.
+        """Save gaze and event data to files."""
+        start_saving = time.time()
 
-        This method is called internally by :meth:`stop_recording` and
-        :meth:`close` to ensure all data is saved.
-        """
         if not self.gaze_data:
-            return  # Nothing to save
+            print("No gaze data to save.")
+            return
 
         # Make a copy of the buffers and clear them
         gaze_data_copy = self.gaze_data[:]
         event_data_copy = self.event_data[:]
         self.gaze_data.clear()
         self.event_data.clear()
-
+       
         # Process gaze data
         gaze_df = pd.DataFrame(gaze_data_copy)
-        gaze_df = self._process_timestamps(gaze_df)
         gaze_df = self._adapt_gaze_data(gaze_df)
-
+        
         # Process events if they exist
         if event_data_copy:
             events_df = pd.DataFrame(event_data_copy, columns=['system_time_stamp', 'Event'])
-            events_df = self._process_timestamps(events_df)
-
+            events_df['TimeStamp'] = self._process_timestamps(events_df['system_time_stamp'])
+            
             if self.event_mode == 'samplebased':
-                # Match events to nearest gaze samples
-                df = pd.merge_asof(gaze_df, events_df[['TimeStamp', 'Event']],
-                                on='TimeStamp',
-                                direction='nearest',
-                                tolerance=0.1)
-            else:
-                df = gaze_df
-        else:
-            df = gaze_df
-            if self.event_mode == 'samplebased':
-                df['Event'] = ''
+                gaze_df = pd.merge_asof(gaze_df, events_df[['TimeStamp', 'Event']],
+                                    on='TimeStamp', direction='nearest')
+            elif self.event_mode == 'precise':
+                file_exists = os.path.isfile(self.events_filename)
+                events_df[['TimeStamp', 'Event']].to_csv(
+                    self.events_filename, mode='a', 
+                    index=False, header=not file_exists
+                )
+        elif self.event_mode == 'samplebased':
+            gaze_df['Event'] = ''
 
         # Save gaze data
         file_exists = os.path.isfile(self.filename)
-        df.to_csv(self.filename, mode='a', index=False, header=not file_exists)
-
-        # Save events separately in precise mode
-        if self.event_mode == 'precise' and event_data_copy:
-            file_exists = os.path.isfile(self.events_filename)
-            events_df[['TimeStamp', 'Event']].to_csv(
-                self.events_filename, 
-                mode='a', 
-                index=False, 
-                header=not file_exists
-            )
-            
-
-
+        gaze_df.to_csv(self.filename, mode='a', index=False, header=not file_exists)
+        
+        print(f"Data saved in {round(time.time() - start_saving, 3)} seconds.")
+        
     def start_recording(self, filename=None):
         """Start recording gaze data.
 
@@ -491,10 +474,25 @@ class TobiiController:
 
 
     def record_event(self, event_label):
-        """Record an event with timestamp.
+        """
+        Record an event with a timestamp.
 
-        Args:
-            event_label: Event label to record
+        This method adds an event to the event data buffer. The event is
+        represented as a list with two elements: the first element is the
+        timestamp of the event in milliseconds relative to the start of the
+        recording, and the second element is the event label provided as a
+        string.
+
+        The timestamp is obtained using tr.get_system_time_stamp(), which
+        returns the current time in milliseconds since the system was started.
+
+        If the recording is not active, a RuntimeWarning is raised.
+
+        Parameters
+        ----------
+        event_label : str
+            The label for the event to record
+
         """
         if not self.recording:
             raise RuntimeWarning("Not recording now.")
@@ -512,42 +510,60 @@ class TobiiController:
 
 
     def run_calibration(self, calibration_points, infant_stims, shuffle=True, 
-                    audio=None, focus_time=0.5, save_calib=False,
-                    calib_filename="calibration.dat"):
-        """Run infant-friendly calibration with point selection.
-
-        Args:
-            calibration_points: List of calibration point coordinates
-            infant_stims: List of image files for calibration stimuli
-            shuffle: Whether to shuffle stimuli presentation order
-            audio: Audio stimulus to play (optional)
-            focus_time: Time to wait before collecting data at each point
-            save_calib: Whether to save calibration data (default: False)
-            calib_filename: Filename for saving calibration (default: "calibration.dat")
-
-        Returns:
-            Success flag indicating if calibration was successful.
+                        audio=None, focus_time=0.5, save_calib=False):
+        """
+        Run infant-friendly calibration with point selection and animated stimuli.
+        
+        Parameters
+        ----------
+        calibration_points : list of tuple
+            Calibration points coordinates 
+        infant_stims : list of str
+            List of image paths for calibration stimuli
+        shuffle : bool, optional
+            Whether to shuffle stimuli order. Default is True
+        audio : sound object, optional
+            Audio to play during calibration. Default is None
+        focus_time : float, optional
+            Time to wait before collecting data. Default is 0.5s
+        save_calib : bool, optional
+            Whether to save calibration. Default is False
+        
+        Returns
+        -------
+        bool
+            True if calibration successful, False otherwise
         """
         if len(calibration_points) < 2 or len(calibration_points) > 9:
             raise ValueError("Calibration points must be between 2 and 9")
 
+        # Initialize stimuli and settings
         self.targets = InfantStimuli(self.win, infant_stims, shuffle=shuffle)
         self._audio = audio
-
+        
+        # Animation parameters
+        self._shrink_speed = 1.0  # Slower for infants
+        self._shrink_sec = 3 / self._shrink_speed
+        self.calibration_target_min = 0.2
+        
+        # Setup calibration points
         self.original_calibration_points = calibration_points[:]
         cp_num = len(self.original_calibration_points)
         self.retry_points = list(range(cp_num))
-
+        
+        # Main calibration loop
         in_calibration_loop = True
-
+        clock = core.Clock()  # For animation timing
+        
         while in_calibration_loop:
-            # Clear points to recalibrate
             self.calibration.enter_calibration_mode()
-
-            # Collect calibration data for current points
+            
+            # Collection phase
             point_idx = -1
             collecting = True
+            
             while collecting:
+                # Handle key presses
                 for key in event.getKeys():
                     if key in self.numkey_dict:
                         point_idx = self.numkey_dict[key]
@@ -556,22 +572,36 @@ class TobiiController:
                     elif key == 'space':
                         if point_idx in self.retry_points:
                             core.wait(focus_time)
-                            self.calibration.collect_data(
-                                calibration_points[point_idx][0],
-                                calibration_points[point_idx][1]
+                            # Convert coordinates for Tobii
+                            psychopy_point = calibration_points[point_idx]
+                            tobii_x, tobii_y = coord_utils.get_tobii_pos(
+                                self.win, 
+                                psychopy_point
                             )
+                            self.calibration.collect_data(tobii_x, tobii_y)
+                            point_idx = -1  # Reset point index
+                            if self._audio:
+                                self._audio.pause()
                     elif key == 'return':
                         collecting = False
                         break
 
-                if point_idx >= 0 and point_idx < len(calibration_points):
+                # Display animated stimulus
+                if 0 <= point_idx < len(calibration_points):
                     stim = self.targets.get_stim(point_idx)
                     stim.setPos(calibration_points[point_idx])
+                    
+                    # Animate size
+                    t = clock.getTime() * self._shrink_speed
+                    orig_size = self.targets.get_stim_original_size(point_idx)
+                    scale_factor = np.sin(t)**2 + self.calibration_target_min
+                    newsize = [scale_factor * size for size in orig_size]
+                    stim.setSize(newsize)
                     stim.draw()
-
+                    
                 self.win.flip()
 
-            # Compute and show results
+            # Compute calibration
             self.calibration_result = self.calibration.compute_and_apply()
             result_img = self._show_calibration_result()
 
@@ -586,13 +616,13 @@ class TobiiController:
                 height=20
             )
 
-            # Allow selection of points to recalibrate
+            # Handle point selection for recalibration
             self.retry_points = []
             selecting = True
             while selecting:
                 result_img.draw()
                 instructions.draw()
-
+                
                 for key in event.getKeys():
                     if key in self.numkey_dict:
                         idx = self.numkey_dict[key]
@@ -617,31 +647,36 @@ class TobiiController:
                         pos=calibration_points[retry_p],
                         lineColor='yellow'
                     ).draw()
-
+                    
                 self.win.flip()
 
-            # If points were selected, discard their data for recalibration
+            # Handle recalibration points
             for point_index in self.retry_points:
-                x, y = calibration_points[point_index]
-                self.calibration.discard_data(x, y)
+                tobii_x, tobii_y = coord_utils.get_tobii_pos(
+                    self.win, 
+                    calibration_points[point_index]
+                )
+                self.calibration.discard_data(tobii_x, tobii_y)
 
         self.calibration.leave_calibration_mode()
         success = self.calibration_result.status == tr.CALIBRATION_STATUS_SUCCESS
-
-        # Save calibration if requested and successful
+        
+        # Save if requested and successful
         if success and save_calib:
-            self.save_calibration(calib_filename)
-
+            self.save_calibration()
+            
         return success
 
 
     def show_status(self, decision_key="space"):
-        """Show participant's gaze position in track box.
+        """
+        Show participant's gaze position in track box.
 
         This function creates a visualization of the participant's gaze
         position in the track box. The visualization consists of a green
         bar representing the z-position of the user, and circles for the
-        left and right eye positions.
+        left and right eye positions. The visualization is updated in real
+        time based on the latest gaze data received from the eye tracker.
 
         Parameters
         ----------
@@ -649,72 +684,95 @@ class TobiiController:
             The key to press to exit the visualization. Default is 'space'.
         """
         # Create visual elements
+        # Background rectangle
         bgrect = visual.Rect(self.win, pos=(0, 0.4), width=0.25, height=0.2,
                             lineColor="white", fillColor="black", units="height")
+
+        # Left eye circle
         leye = visual.Circle(self.win, size=0.02, units="height",
                             lineColor=None, fillColor="green")
+
+        # Right eye circle
         reye = visual.Circle(self.win, size=0.02, units="height", 
                             lineColor=None, fillColor="red")
+
+        # Z-position bar
         zbar = visual.Rect(self.win, pos=(0, 0.28), width=0.25, height=0.03,
                         lineColor="green", fillColor="green", units="height")
+
+        # Z-position center line
         zc = visual.Rect(self.win, pos=(0, 0.28), width=0.01, height=0.03,
                         lineColor="white", fillColor="white", units="height")
+
+        # Z-position indicator
         zpos = visual.Rect(self.win, pos=(0, 0.28), width=0.005, height=0.03,
                         lineColor="black", fillColor="black", units="height")
 
+        # Check that the eye tracker is present
         if self.eyetracker is None:
             raise ValueError("Eyetracker not found")
-            
+
+        # Subscribe to user position guide events
         self.eyetracker.subscribe_to(tr.EYETRACKER_USER_POSITION_GUIDE,
                                     self._on_gaze_data,
                                     as_dictionary=True)
+
+        # Wait for 1 second to allow the eye tracker to settle
         core.wait(1)
 
+        # Flag to indicate whether to show the status visualization
         b_show_status = True
+
+        # Loop until the user presses the exit key
         while b_show_status:
+            # Draw the background rectangle
             bgrect.draw()
+
+            # Draw the z-position bar and center line
             zbar.draw()
             zc.draw()
-            
-            # Get latest gaze data
+
+            # Get the latest gaze data
             gaze_data = self.gaze_data[-1]
             lv = gaze_data["left_user_position_validity"]
             rv = gaze_data["right_user_position_validity"]
             lx, ly, lz = gaze_data["left_user_position"]
             rx, ry, rz = gaze_data["right_user_position"]
-            
-            # Update left eye position
+
+            # Update the left eye position
             if lv:
                 # Convert TBCS coordinates to PsychoPy coordinates
-                lx, ly = coord_utils.get_psychopy_pos_from_trackbox(self.win, [lx, ly], "height") 
+                lx, ly = coord_utils.get_psychopy_pos_from_trackbox(self.win, [lx, ly], "height")
                 leye.setPos((round(lx * 0.25, 4), round(ly * 0.2 + 0.4, 4)))
                 leye.draw()
-                
-            # Update right eye position  
+
+            # Update the right eye position
             if rv:
                 # Convert TBCS coordinates to PsychoPy coordinates
                 rx, ry = coord_utils.get_psychopy_pos_from_trackbox(self.win, [rx, ry], "height")
                 reye.setPos((round(rx * 0.25, 4), round(ry * 0.2 + 0.4, 4)))
                 reye.draw()
-                
-            # Update z-position indicator
+
+            # Update the z-position indicator
             if lv or rv:
-                # Calculate z-position as weighted average of left and right eye z-positions
+                # Calculate the z-position as a weighted average of left and right eye z-positions
                 zpos.setPos((
                     round((((lz * int(lv) + rz * int(rv)) /
                             (int(lv) + int(rv))) - 0.5) * 0.125, 4),
                     0.28,
                 ))
                 zpos.draw()
-                
-            # Check for exit key
+
+            # Check for the exit key
             for key in event.getKeys():
                 if key == decision_key:
                     b_show_status = False
                     break
-                    
+
+            # Update the display
             self.win.flip()
-            
+
+        # Unsubscribe from user position guide events
         self.eyetracker.unsubscribe_from(tr.EYETRACKER_USER_POSITION_GUIDE,
                                         self._on_gaze_data)
 
