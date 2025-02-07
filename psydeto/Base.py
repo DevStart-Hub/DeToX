@@ -99,9 +99,14 @@ class TobiiController:
         "9": 8, "num_9": 8,
     }
     
-    
+        # Default settings dictionary
+    _animation_settings = {
+        'shrink_speed': 1.0,  # Slower for infants
+        'shrink_sec': 3.0,    # Will be divided by shrink_speed
+        'target_min': 0.2,    # Minimum size for calibration target
+    }
+
     _shrink_speed = 1  # Slower for infants
-    _shrink_sec = 3 / _shrink_speed
     calibration_dot_color = (0, 0, 0)
     calibration_disc_color = (-1, -1, 0)
     calibration_target_min = 0.2
@@ -577,11 +582,6 @@ class TobiiController:
         # Initialize stimuli and settings
         self.targets = InfantStimuli(self.win, infant_stims, shuffle=shuffle)
         self._audio = audio
-
-        # Animation parameters
-        self._shrink_speed = 1.0  # Slower for infants
-        self._shrink_sec = 3 / self._shrink_speed
-        self.calibration_target_min = 0.2
 
         # Setup calibration points
         self.original_calibration_points = calibration_points[:]
