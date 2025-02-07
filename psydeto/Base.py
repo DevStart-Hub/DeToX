@@ -16,7 +16,15 @@ import coord_utils
 
 
 class InfantStimuli:
-    """Stimuli for infant-friendly calibration."""
+    """
+    Stimuli for infant-friendly calibration.
+
+    This class provides a set of animated stimuli for use in infant-friendly
+    calibration procedures. It takes a list of image files and optional
+    keyword arguments for the ImageStim constructor. It can be used to
+    create a sequence of animated stimuli that can be used to calibrate the
+    eye tracker.
+    """
 
     def __init__(self, win, infant_stims, shuffle=True, *kwargs):
         """
@@ -83,10 +91,20 @@ class InfantStimuli:
 
 
 class TobiiController:
-    """Simplified Tobii controller for infant research."""
-    # TODO: better format default settings
+    """Tobii controller for infant research.
 
-    _default_numkey_dict = {
+    The TobiiController class is a simple Python wrapper around the Tobii
+    Pro SDK for use in infant research. It provides convenience methods for
+    starting/stopping gaze data recording and saving the data to a file.
+
+    The TobiiController class is designed to be used with the PsychoPy
+    package, which is a popular Python library for creating psychology
+    experiments. It is compatible with the Tobii Pro SDK version 3.0 or
+    later.
+
+    """
+    # Dictionary mapping key names to numbers
+    _numkey_dict = {
         "0": -1, "num_0": -1,
         "1": 0, "num_1": 0,
         "2": 1, "num_2": 1,
@@ -99,7 +117,7 @@ class TobiiController:
         "9": 8, "num_9": 8,
     }
     
-    # Default settings dictionary
+    # Default animation dictionary
     _animation_settings = {
         'animation_speed': 1.0,  # Slower for infants
         'target_min': 0.2,    # Minimum size for calibration target
@@ -146,9 +164,6 @@ class TobiiController:
         # For precise event mode, create events filename
         if self.event_mode == 'precise':
             self.events_filename = f"{self.basename}_events.csv"
-
-        # Set the default key mappings
-        self.numkey_dict = self._default_numkey_dict.copy()
 
         # Connect to the eye tracker
         eyetrackers = tr.find_all_eyetrackers()
@@ -701,21 +716,6 @@ class TobiiController:
             self.save_calibration()
 
         return success
-    
-    @property
-    def numkey_dict(self):
-        """
-        Dictionary mapping number keys to point indices.
-
-        Keys are strings, e.g. '1', '2', etc. Values are the indices of the
-        calibration points, e.g. 0, 1, etc.
-
-        Returns
-        -------
-        dict
-            A dictionary mapping number keys to point indices
-        """
-        return self._numkey_dict
 
     def show_status(self, decision_key="space"):
         """
