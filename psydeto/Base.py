@@ -84,7 +84,8 @@ class InfantStimuli:
 
 class TobiiController:
     """Simplified Tobii controller for infant research."""
-    
+    # TODO: better format default settings
+
     _default_numkey_dict = {
         "0": -1, "num_0": -1,
         "1": 0, "num_1": 0,
@@ -98,17 +99,6 @@ class TobiiController:
         "9": 8, "num_9": 8,
     }
     
-    _default_calibration_dot_size = {
-        "norm": 0.02,
-        "height": 0.01,
-        "pix": 10.0,
-    }
-    
-    _default_calibration_disc_size = {
-        "norm": 0.08,
-        "height": 0.04,
-        "pix": 40.0,
-    }
     
     _shrink_speed = 1  # Slower for infants
     _shrink_sec = 3 / _shrink_speed
@@ -158,10 +148,6 @@ class TobiiController:
 
         # Set the default key mappings
         self.numkey_dict = self._default_numkey_dict.copy()
-
-        # Set the sizes of the calibration stimuli
-        self.calibration_dot_size = self._default_calibration_dot_size[self.win.units]
-        self.calibration_disc_size = self._default_calibration_disc_size[self.win.units]
 
         # Connect to the eye tracker
         eyetrackers = tr.find_all_eyetrackers()
@@ -555,7 +541,7 @@ class TobiiController:
         stim.draw()
 
     def run_calibration(self, calibration_points, infant_stims, shuffle=True, 
-                    audio=None, focus_time=0.5, save_calib=False):
+                    audio=None, focus_time=0.5, anim_type='zoom', save_calib=False):
         """
         Run an infant-friendly calibration procedure with point selection and
         animated stimuli. The calibration points are presented in a sequence
@@ -645,7 +631,7 @@ class TobiiController:
                 if 0 <= point_idx < len(calibration_points):
                     stim = self.targets.get_stim(point_idx)
                     stim.setPos(calibration_points[point_idx])
-                    self._animate(stim, point_idx, clock)
+                    self._animate(stim, point_idx, clock, anim_type=anim_type)
 
                 self.win.flip()
 
