@@ -2,6 +2,7 @@
 import os
 import time
 import atexit
+import threading
 from datetime import datetime
 
 # Third party imports
@@ -161,6 +162,8 @@ class TobiiController:
         self.win = win
         self.event_mode = event_mode
         self.simulate = simulate
+
+        self._stop_simulation = threading.Event() if simulate else None
 
         # Set the filename
         if filename is None:
@@ -467,7 +470,6 @@ class TobiiController:
 
         # Set up data collection in simulation mode
         if self.simulate:
-            import threading
             # Reset the flag that stops the simulation
             self._stop_simulation.clear()
             # Create a new thread to run the simulation
