@@ -91,7 +91,8 @@ class InfantStimuli:
 
 
 class TobiiController:
-    """Tobii controller for infant research.
+    """
+    Tobii controller for infant research.
 
     The TobiiController class is a simple Python wrapper around the Tobii
     Pro SDK for use in infant research. It provides convenience methods for
@@ -102,6 +103,17 @@ class TobiiController:
     experiments. It is compatible with the Tobii Pro SDK version 3.0 or
     later.
 
+    The TobiiController class provides the following features:
+
+        - Starting and stopping recording of gaze data
+        - Saving the recorded data to a file
+        - Running a calibration procedure
+        - Loading a calibration from a file
+        - Running a recording procedure
+        - Stopping the recording procedure
+
+    The TobiiController class is designed to be easy to use and provides a
+    minimal interface for the user to interact with the Tobii Pro SDK.
     """
     # Dictionary mapping key names to numbers
     _numkey_dict = {
@@ -123,10 +135,14 @@ class TobiiController:
         'target_min': 0.2,    # Minimum size for calibration target
     }
 
+    _simulation_settings = {
+        'framerate': 120,  # Default to Tobii Pro Spectrum rate
+    }
+
     # Flag indicating whether recording is currently active
     recording = False
 
-    def __init__(self, win, id=0, filename=None, event_mode='samplebased'):
+    def __init__(self, win, id=0, filename=None, event_mode='samplebased', simulate=False):
         """
         Initialize the TobiiController.
 
@@ -145,7 +161,8 @@ class TobiiController:
         self.eyetracker_id = id
         self.win = win
         self.event_mode = event_mode
-        
+        self.simulate = simulate
+
         # Set the filename
         if filename is None:
             self.filename = f"{datetime.now().strftime('%Y-%m-%d_%H-%M-%S')}.csv"
@@ -165,15 +182,30 @@ class TobiiController:
         if self.event_mode == 'precise':
             self.events_filename = f"{self.basename}_events.csv"
 
-        # Connect to the eye tracker
-        eyetrackers = tr.find_all_eyetrackers()
-        if len(eyetrackers) == 0:
-            raise RuntimeError("No Tobii eyetrackers detected./nVerify the connection and make sure to power on the eyetracker before starting your computer.")
+        # Simulate the eye tracker if requested. If the eye tracker is
+        # simulated, the TobiiController will use a simulated mouse to
+        # generate gaze data. Otherwise, the TobiiController will connect
+        # to the real eye tracker and retrieve gaze data from it.
+        if self.simulate:
+            from psychopy import event
+            self._stop_simulation = None  # Will be created in start_recording
+            self._simulation_thread = None
+            self.mouse = event.Mouse(win=self.win)
         else:
-            self.eyetracker = eyetrackers[self.eyetracker_id]
+            # Connect to the eye tracker
+            eyetrackers = tr.find_all_eyetrackers()
+            if len(eyetrackers) == 0:
+                raise RuntimeError(
+                    "No Tobii eyetrackers detected.\n"
+                    "Verify the connection and make sure to power on the "
+                    "eyetracker before starting your computer."
+                )
+            else:
+                self.eyetracker = eyetrackers[self.eyetracker_id]
 
-        # Initialize the calibration object
-        self.calibration = tr.ScreenBasedCalibration(self.eyetracker)
+            # Initialize the calibration object
+            self.calibration = tr.ScreenBasedCalibration(self.eyetracker)
+
 
         # Initialize data storage
         self.gaze_data = []
@@ -432,25 +464,39 @@ class TobiiController:
             # Update events filename if in precise mode
             if self.event_mode == 'precise':
                 base_name = os.path.splitext(self.filename)[0]
-                self.events_filename = f"{base_name}_events.tsv"
+                self.events_filename = f"{base_name}_events.csv"
 
-        # Clear previous data
-        self.gaze_data = []
-        self.event_data = []
+        # Set up data collection in simulation mode
+        if self.simulate:
+            import threading
+            # Reset the flag that stops the simulation
+            self._stop_simulation.clear()
+            # Create a new thread to run the simulation
+            self._simulation_thread = threading.Thread(
+                target=self._simulate_gaze_data_loop,
+                daemon=True  # So the thread dies automatically when the main program finishes
+            )
+            # Start the simulation thread
+            self._simulation_thread.start()
+            # Set the flag indicating that the recording is active
+            self.recording = True
+            # Record the current time in milliseconds as the starting point
+            self.t0 = int(time.time() * 1000)
 
-        # Subscribe to gaze data updates
-        self.eyetracker.subscribe_to(
-            tr.EYETRACKER_GAZE_DATA,
-            self._on_gaze_data,
-            as_dictionary=True
-        )
-
-        # Wait briefly before starting the recording
-        core.wait(1)
-
-        # Set recording flag and timestamp
-        self.recording = True
-        self.t0 = tr.get_system_time_stamp()
+        # Set up data collection in real mode
+        else:
+            # Subscribe to the eye tracker callback to get gaze data
+            self.eyetracker.subscribe_to(
+                tr.EYETRACKER_GAZE_DATA,
+                self._on_gaze_data,
+                as_dictionary=True  # Get the data in a dictionary format
+            )
+            # Wait a bit for the subscription to take effect
+            core.wait(1)
+            # Set the flag indicating that the recording is active
+            self.recording = True
+            # Record the current time in milliseconds as the starting point
+            self.t0 = tr.get_system_time_stamp()
 
 
     def stop_recording(self):
@@ -460,20 +506,23 @@ class TobiiController:
         This method unsubscribes from gaze data updates and sets the recording
         flag to False. It also calls the save_data() method to save any
         remaining data to the file.
+
+        Raises
+        ------
+        RuntimeWarning
+            If the recording is not active.
         """
-        # Check if recording is active
         if not self.recording:
             raise RuntimeWarning("Not recording now.")
-
-        # Unsubscribe from gaze data updates
-        self.eyetracker.unsubscribe_from(tr.EYETRACKER_GAZE_DATA, self._on_gaze_data)
-
-        # Set recording flag to False
+        
         self.recording = False
+        if self.simulate:            
+            # Wait for the simulation thread to finish
+            self._simulation_thread.join()
+        else:
+            self.eyetracker.unsubscribe_from(tr.EYETRACKER_GAZE_DATA, self._on_gaze_data)
 
-        # Save any remaining data to file
         self.save_data()
-
 
     def record_event(self, event_label):
         """
@@ -498,7 +547,11 @@ class TobiiController:
         """
         if not self.recording:
             raise RuntimeWarning("Not recording now.")
-        self.event_data.append([tr.get_system_time_stamp(), event_label])
+        
+        if self.simulate:
+            self.event_data.append([int(time.time() * 1000), event_label])
+        else:
+            self.event_data.append([tr.get_system_time_stamp(), event_label])
 
 
     def close(self):
@@ -586,6 +639,10 @@ class TobiiController:
         bool
             True if calibration successful, False otherwise
         """
+        if self.simulate:
+            print("Running in simulation mode - skipping calibration")
+            return True
+
         # Check if number of calibration points is valid
         if len(calibration_points) < 2 or len(calibration_points) > 9:
             raise ValueError("Calibration points must be between 2 and 9")
@@ -758,13 +815,14 @@ class TobiiController:
                         lineColor="black", fillColor="black", units="height")
 
         # Check that the eye tracker is present
-        if self.eyetracker is None:
+        if self.eyetracker is None and not self.simulate:  # Add check for simulation mode
             raise ValueError("Eyetracker not found")
 
         # Subscribe to user position guide events
-        self.eyetracker.subscribe_to(tr.EYETRACKER_USER_POSITION_GUIDE,
-                                    self._on_gaze_data,
-                                    as_dictionary=True)
+        if not self.simulate:
+            self.eyetracker.subscribe_to(tr.EYETRACKER_USER_POSITION_GUIDE,
+                                        self._on_gaze_data,
+                                        as_dictionary=True)
 
         # Wait for 1 second to allow the eye tracker to settle
         core.wait(1)
@@ -826,6 +884,105 @@ class TobiiController:
                                         self._on_gaze_data)
 
 
+
+
+
+    def _simulate_gaze_data_loop(self):
+        """
+        Simulate gaze data at a specified rate using the mouse position.
+
+        This function is intended to run in a separate thread and will
+        continue to generate simulated gaze data until the recording flag
+        is set to False.
+
+        Parameters
+        ----------
+        None
+
+        Returns
+        -------
+        None
+        """
+        sample_interval = 1.0 / self._simulation_settings['framerate']  # Time interval between samples
+        clock = core.Clock()  # Create a clock to manage timing
+        
+        while self.recording and not self._stop_simulation.is_set():
+            start_time = clock.getTime()  # Record the start time for this iteration
+            
+            # Generate and store simulated gaze data based on the current mouse position
+            self._simulate_gaze_data()
+            
+            # Calculate the elapsed time for this iteration
+            elapsed = clock.getTime() - start_time
+            
+            # Calculate remaining time to maintain the desired sample interval
+            remaining = sample_interval - elapsed
+            if remaining > 0:
+                core.wait(remaining)  # Wait for the remaining time if processing was quick
+            # If remaining is <= 0, processing took longer than the interval, start immediately
+
+
+
+    def _simulate_gaze_data(self):
+        """
+        Simulate gaze data at a specified rate using the mouse position.
+
+        This function is intended to run in a separate thread and will
+        continue to generate simulated gaze data until the recording flag
+        is set to False.
+
+        Parameters
+        ----------
+        None
+
+        Returns
+        -------
+        None
+        """
+        # Get the current mouse position.
+        # Depending on how your window is set up, getPos() might return positions in different units.
+        pos = self.mouse.getPos()  # e.g., returns (x, y) in pixel units if win.units is 'pix'
+        
+        # Convert the mouse position to Tobii ADCS coordinates.
+        # This is done to maintain consistency with the real Tobii callback.
+        tobii_pos = coord_utils.get_tobii_pos(self.win, pos)
+        
+        # Build a gaze data dictionary that mimics the structure from the real Tobii callback.
+        # This is done to make sure that the simulated data is compatible with the rest of the code.
+        gaze_data = {
+            'system_time_stamp': int(time.time() * 1000),  # Time stamp in seconds
+            'left_gaze_point_on_display_area': tobii_pos,  # Gaze point in Tobii ADCS coordinates
+            'right_gaze_point_on_display_area': tobii_pos,
+            'left_gaze_point_validity': 1,  # Validity of the left eye's gaze point
+            'right_gaze_point_validity': 1,
+            'left_pupil_diameter': 3.0,  # Typical pupil diameter in mm
+            'right_pupil_diameter': 3.0,
+            'left_pupil_validity': 1,  # Validity of the left eye's pupil diameter
+            'right_pupil_validity': 1,
+            'left_user_position': (0.0, 0.0, 0.6),  # Typical viewing distance in meters
+            'right_user_position': (0.0, 0.0, 0.6),
+            'left_user_position_validity': 1,  # Validity of the left eye's user position
+            'right_user_position_validity': 1
+        }
+        
+        # Append the simulated gaze data to the data buffer.
+        self.gaze_data.append(gaze_data)
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
 # Example usage:
 '''
 from psychopy import visual, sound
@@ -838,9 +995,9 @@ controller = TobiiController(win)
 
 # Define calibration points (in height units)
 cal_points = [
-    (-0.4, 0.4), (0.0, 0.4), (0.4, 0.4),
-    (-0.4, 0.0), (0.0, 0.0), (0.4, 0.0),
-    (-0.4, -0.4), (0.0, -0.4), (0.4, -0.4)
+(-0.4, 0.4), (0.0, 0.4), (0.4, 0.4),
+(-0.4, 0.0), (0.0, 0.0), (0.4, 0.0),
+(-0.4, -0.4), (0.0, -0.4), (0.4, -0.4)
 ]
 
 # Define stimuli paths
