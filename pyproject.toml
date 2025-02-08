@@ -3,7 +3,7 @@ requires = ["setuptools", "wheel"]
 build-backend = "setuptools.build_meta"
 
 [project]
-name = "my_package"
+name = "DeToX"
 version = "0.1.0"
 description = "Lightweight Python wrapper around tobii-researcher"
 readme = "README.md"
@@ -22,4 +22,4 @@ authors = [
 ]
 
 [tool.setuptools]
-packages = ["my_package"]
+packages = ["DeToX"]
