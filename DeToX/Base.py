@@ -12,8 +12,7 @@ from psychopy import core, event, visual
 from PIL import Image, ImageDraw
 
 # Local imports
-import coord_utils
-
+from . import coord_utils
 
 class InfantStimuli:
     """
