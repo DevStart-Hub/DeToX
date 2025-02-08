@@ -163,7 +163,9 @@ class TobiiController:
         self.event_mode = event_mode
         self.simulate = simulate
 
-        self._stop_simulation = threading.Event() if simulate else None
+        # Initialize simulation-related attributes
+        self._stop_simulation = None
+        self._simulation_thread = None
 
         # Set the filename
         if filename is None:
