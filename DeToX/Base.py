@@ -784,17 +784,14 @@ class TobiiController:
                 if not self.simulate:
                     self.calibration.discard_data(tobii_x, tobii_y)
 
-        # Exit calibration mode at end
+        # Exit calibration mode at end and save
         if not self.simulate:
             self.calibration.leave_calibration_mode()
-        
             success = self.calibration_result.status == tr.CALIBRATION_STATUS_SUCCESS
-
-        # Save if requested and successful
-        if self.simulate:
+            if success and save_calib:
+                self.save_calibration()
+        else:
             success = True
-        elif success and save_calib:
-            self.save_calibration()
 
         return success
 
