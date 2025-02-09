@@ -667,9 +667,14 @@ class TobiiController:
         cp_num = len(self.original_calibration_points)
         self.retry_points = list(range(cp_num))
 
-        # Enter calibration mode once at start
-        self.calibration.enter_calibration_mode()
-        
+        # Create calibration object
+        if self.simulate:
+            print("Running calibration in simulation mode")
+            success = True
+        else:
+            # Enter calibration mode once at start
+            self.calibration.enter_calibration_mode()
+            
         # Main calibration loop
         in_calibration_loop = True
         clock = core.Clock()  # For animation timing
@@ -697,10 +702,14 @@ class TobiiController:
                                 self.win, 
                                 psychopy_point
                             )
-                            self.calibration.collect_data(tobii_x, tobii_y)
-                            point_idx = -1  # Reset point index
-                            if self._audio:
-                                self._audio.pause()
+
+                            # Collect data
+                            if not self.simulate:
+                                self.calibration.collect_data(tobii_x, tobii_y)
+                                point_idx = -1  # Reset point index
+                                if self._audio:
+                                    self._audio.pause()
+
                     elif key == 'return':
                         # User wants to move on to the next phase
                         collecting = False
@@ -715,8 +724,9 @@ class TobiiController:
                 self.win.flip()
 
             # Compute calibration
-            self.calibration_result = self.calibration.compute_and_apply()
-            result_img = self._show_calibration_result()
+            if not self.simulate:
+                self.calibration_result = self.calibration.compute_and_apply()
+                result_img = self._show_calibration_result()
 
             # Show instructions
             instructions = visual.TextStim(
@@ -733,7 +743,9 @@ class TobiiController:
             self.retry_points = []
             selecting = True
             while selecting:
-                result_img.draw()
+                
+                if not self.simulate:
+                    result_img.draw()
                 instructions.draw()
 
                 for key in event.getKeys():
@@ -772,15 +784,19 @@ class TobiiController:
                     self.win, 
                     calibration_points[point_index]
                 )
-                self.calibration.discard_data(tobii_x, tobii_y)
+                
+                # remove points
+                if not self.simulate:
+                    self.calibration.discard_data(tobii_x, tobii_y)
 
         # Exit calibration mode at end
-        self.calibration.leave_calibration_mode()
+        if not self.simulate:
+            self.calibration.leave_calibration_mode()
         
-        success = self.calibration_result.status == tr.CALIBRATION_STATUS_SUCCESS
+            success = self.calibration_result.status == tr.CALIBRATION_STATUS_SUCCESS
 
         # Save if requested and successful
-        if success and save_calib:
+        if success and save_calib and not self.simulate:
             self.save_calibration()
 
         return success
