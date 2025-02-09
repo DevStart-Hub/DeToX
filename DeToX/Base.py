@@ -537,7 +537,12 @@ class TobiiController:
                     "Please provide filename without extension. "
                     "The .csv extension will be added automatically."
                 )
+            
             self.filename = f"{self.basename}.csv"
+
+            # Check if the file already exists
+            if os.path.exists(self.filename):
+                raise FileExistsError(f"File '{self.filename}' already exists.")
 
         if self.event_mode == 'precise':
             self.events_filename = f"{self.basename}_events.csv"
