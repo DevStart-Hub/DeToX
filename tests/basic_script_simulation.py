@@ -1,29 +1,37 @@
-import DeToX
-
 import os
 from psychopy import visual, core
-
 from DeToX import TobiiController
 
-# create a Window to control the monitor
+# Create a Window to control the monitor
 win = visual.Window(
     size=[920, 920],
     units='norm',
     fullscr=False,
     allowGUI=True)
-# initialize TobiiInfantController to communicate with the eyetracker
-controller = TobiiController(win,simulate=True)
 
+# Initialize TobiiController to communicate with the eyetracker
+controller = TobiiController(win, simulate=True)
+controller._simulation_settings['framerate'] = 300  # Set to 60 Hz instead of default 120 Hz
 
 # Start recording
-controller.start_recording('demo1-test.csv')
-core.wait(3) # record for 3 seconds
+controller.start_recording('demo1-test')
 
-# stop recording
+# Let's record some simulated data for a few seconds
+core.wait(2)
+
+# Record an event
+controller.record_event('test_event')
+
+# Wait a bit more
+core.wait(2)
+
+# Stop recording
 controller.stop_recording()
-# close the file
-controller.close()
 
-# shut down the experiment
+# Clean up
+controller.close()
 win.close()
-core.quit()
+
+import pandas as pd
+df= pd.read_csv('demo1-test.csv')
+df['TimeDiff']=df.TimeStamp.diff()

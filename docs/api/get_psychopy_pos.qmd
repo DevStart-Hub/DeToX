@@ -1,0 +1,25 @@
+## get_psychopy_pos { #get_psychopy_pos }
+
+`get_psychopy_pos(win, p, units=None)`
+
+Convert Tobii ADCS coordinates to PsychoPy coordinates.
+
+### Parameters
+
+| Name    | Type                   | Description                                                                                     | Default   |
+|---------|------------------------|-------------------------------------------------------------------------------------------------|-----------|
+| `win`   | psychopy.visual.Window | The PsychoPy window which provides information about units and size.                            | required  |
+| `p`     | tuple                  | The Tobii ADCS coordinates to convert.                                                          | required  |
+| `units` | str, optional          | The units for the PsychoPy coordinates. Default is None, which uses the window's default units. | `None`    |
+
+### Returns
+
+| Type   | Description                         |
+|--------|-------------------------------------|
+| tuple  | The converted PsychoPy coordinates. |
+
+### Raises
+
+| Type       | Description                              |
+|------------|------------------------------------------|
+| ValueError | If the provided units are not supported. |

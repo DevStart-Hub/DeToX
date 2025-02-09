@@ -1,0 +1,8 @@
+## close { #close }
+
+`close(self)`
+
+Clean up and ensure all data is saved.
+
+This method is called by atexit and is also available as a public method.
+It stops recording and saves all data that was not saved before.

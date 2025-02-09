@@ -1,0 +1,26 @@
+## TobiiController { #TobiiController }
+
+`TobiiController(self, win, id=0, simulate=False)`
+
+Tobii controller for infant research.
+
+The TobiiController class is a simple Python wrapper around the Tobii
+Pro SDK for use in infant research. It provides convenience methods for
+starting/stopping gaze data recording and saving the data to a file.
+
+The TobiiController class is designed to be used with the PsychoPy
+package, which is a popular Python library for creating psychology
+experiments. It is compatible with the Tobii Pro SDK version 3.0 or
+later.
+
+The TobiiController class provides the following features:
+
+    - Starting and stopping recording of gaze data
+    - Saving the recorded data to a file
+    - Running a calibration procedure
+    - Loading a calibration from a file
+    - Running a recording procedure
+    - Stopping the recording procedure
+
+The TobiiController class is designed to be easy to use and provides a
+minimal interface for the user to interact with the Tobii Pro SDK.

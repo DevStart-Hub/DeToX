@@ -1,0 +1,11 @@
+## InfantStimuli { #InfantStimuli }
+
+`InfantStimuli(self, win, infant_stims, shuffle=True, kwargs)`
+
+Stimuli for infant-friendly calibration.
+
+This class provides a set of animated stimuli for use in infant-friendly
+calibration procedures. It takes a list of image files and optional
+keyword arguments for the ImageStim constructor. It can be used to
+create a sequence of animated stimuli that can be used to calibrate the
+eye tracker.

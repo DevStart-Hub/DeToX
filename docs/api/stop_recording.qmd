@@ -1,0 +1,8 @@
+## stop_recording { #stop_recording }
+
+`stop_recording(self)`
+
+Stop recording with improved thread handling.
+
+This method stops the recording, unsubscribes from the gaze data
+stream if in real mode, and saves the recorded data to files.

@@ -1,0 +1,27 @@
+website:
+  sidebar:
+    contents:
+    - api/index.qmd
+    - contents:
+      - api/InfantStimuli.qmd
+      - api/TobiiController.qmd
+      section: Core Classes
+    - contents:
+      - api/save_calibration.qmd
+      - api/load_calibration.qmd
+      - api/start_recording.qmd
+      - api/stop_recording.qmd
+      - api/record_event.qmd
+      - api/save_data.qmd
+      - api/run_calibration.qmd
+      - api/show_status.qmd
+      - api/close.qmd
+      section: Calibration and Recording Methods
+    - contents:
+      - api/get_psychopy_pos.qmd
+      - api/get_tobii_pos.qmd
+      - api/pix2tobii.qmd
+      - api/tobii2pix.qmd
+      - api/get_psychopy_pos_from_trackbox.qmd
+      section: Coordinate transformation functions
+    id: api

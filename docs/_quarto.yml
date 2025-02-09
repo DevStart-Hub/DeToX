@@ -1,0 +1,57 @@
+project:
+  type: website
+
+metadata-files:
+  - api/_sidebar.yml
+
+website:
+  title: "DeToX_website"
+  navbar:
+    background: dark
+    left:
+      - href: index.qmd
+        text: Home
+      - href: api/index.qmd
+        text: Reference
+
+format:
+  html:
+    theme: litera
+    css:
+      - api/_styles-quartodoc.css
+      - styles.css
+    toc: true
+
+quartodoc:
+  style: pkgdown
+  package: DeToX
+  dir: api
+  sidebar: api/_sidebar.yml
+  sections:
+    - title: Core Classes
+      desc: Main classes for infant eye-tracking research
+      contents:
+        - InfantStimuli
+        - TobiiController
+
+    - title: Calibration and Recording Methods
+      desc: Methods for managing eye-tracking calibration and data recording
+      contents:
+        - Base.TobiiController.save_calibration
+        - Base.TobiiController.load_calibration
+        - Base.TobiiController.start_recording
+        - Base.TobiiController.stop_recording
+        - Base.TobiiController.record_event
+        - Base.TobiiController.save_data
+        - Base.TobiiController.run_calibration
+        - Base.TobiiController.show_status
+        - Base.TobiiController.close
+
+    - title: Coordinate transformation functions
+      desc: Functions for coordinate transformation
+      contents:
+        - coord_utils.get_psychopy_pos
+        - coord_utils.get_tobii_pos
+        - coord_utils.pix2tobii
+        - coord_utils.tobii2pix
+        - coord_utils.get_psychopy_pos_from_trackbox

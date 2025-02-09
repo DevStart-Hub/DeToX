@@ -1,0 +1,38 @@
+# Function reference
+
+## Core Classes
+
+Main classes for infant eye-tracking research
+
+| | |
+| --- | --- |
+| [InfantStimuli](/api/InfantStimuli.qmd) | Stimuli for infant-friendly calibration. |
+| [TobiiController](/api/TobiiController.qmd) | Tobii controller for infant research. |
+
+## Calibration and Recording Methods
+
+Methods for managing eye-tracking calibration and data recording
+
+| | |
+| --- | --- |
+| [save_calibration](/api/save_calibration.qmd) | Save calibration data to a file. |
+| [load_calibration](/api/load_calibration.qmd) | Load calibration data from a file. |
+| [start_recording](/api/start_recording.qmd) | Start recording gaze data with improved thread handling. |
+| [stop_recording](/api/stop_recording.qmd) | Stop recording with improved thread handling. |
+| [record_event](/api/record_event.qmd) | Record an event with a timestamp. |
+| [save_data](/api/save_data.qmd) | Save gaze and event data to files. |
+| [run_calibration](/api/run_calibration.qmd) | Run an infant-friendly calibration procedure with point selection and |
+| [show_status](/api/show_status.qmd) | Show participant's gaze position in track box. |
+| [close](/api/close.qmd) | Clean up and ensure all data is saved. |
+
+## Coordinate transformation functions
+
+Functions for coordinate transformation
+
+| | |
+| --- | --- |
+| [get_psychopy_pos](/api/get_psychopy_pos.qmd) | Convert Tobii ADCS coordinates to PsychoPy coordinates. |
+| [get_tobii_pos](/api/get_tobii_pos.qmd) | Convert PsychoPy coordinates to Tobii ADCS coordinates. |
+| [pix2tobii](/api/pix2tobii.qmd) | Convert PsychoPy pixel coordinates to Tobii ADCS coordinates. |
+| [tobii2pix](/api/tobii2pix.qmd) | Convert Tobii ADCS coordinates to PsychoPy pixel coordinates. |
+| [get_psychopy_pos_from_trackbox](/api/get_psychopy_pos_from_trackbox.qmd) | Convert Tobii TBCS coordinates to PsychoPy coordinates. |

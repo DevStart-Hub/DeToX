@@ -1,0 +1,24 @@
+## pix2tobii { #pix2tobii }
+
+`pix2tobii(win, p)`
+
+Convert PsychoPy pixel coordinates to Tobii ADCS coordinates.
+
+### Parameters
+
+| Name   | Type                   | Description                                                          | Default   |
+|--------|------------------------|----------------------------------------------------------------------|-----------|
+| `win`  | psychopy.visual.Window | The PsychoPy window which provides information about units and size. | required  |
+| `p`    | tuple                  | The PsychoPy pixel coordinates to convert.                           | required  |
+
+### Returns
+
+| Type   | Description                           |
+|--------|---------------------------------------|
+| tuple  | The converted Tobii ADCS coordinates. |
+
+### Notes
+
+The conversion is done by dividing the pixel coordinates by the window size
+and adding 0.5 to the x and y coordinates to center the origin at the
+middle of the screen.

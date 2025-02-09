@@ -1,0 +1,22 @@
+## save_calibration { #save_calibration }
+
+`save_calibration(self, filename=None)`
+
+Save calibration data to a file.
+
+This method saves the current calibration data of the eye tracker to
+the specified file. The calibration data is retrieved from the eye
+tracker using the retrieve_calibration_data() method and then written
+to the file in binary format.
+
+### Parameters
+
+| Name       | Type          | Description                                                                                                               | Default   |
+|------------|---------------|---------------------------------------------------------------------------------------------------------------------------|-----------|
+| `filename` | str, optional | The name of the file to save the calibration data to. If not provided, a default name based on the basename will be used. | `None`    |
+
+### Returns
+
+| Type   | Description                                                           |
+|--------|-----------------------------------------------------------------------|
+| bool   | True if the calibration data was successfully saved, False otherwise. |

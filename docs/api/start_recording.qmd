@@ -1,0 +1,15 @@
+## start_recording { #start_recording }
+
+`start_recording(self, filename=None, event_mode='precise')`
+
+Start recording gaze data with improved thread handling.
+
+This method initializes the recording process for gaze data
+from either a simulated or real eye tracker. It sets up the
+necessary threads and events for data collection.
+
+### Parameters
+
+| Name       | Type          | Description                                                                                                               | Default   |
+|------------|---------------|---------------------------------------------------------------------------------------------------------------------------|-----------|
+| `filename` | str, optional | The name of the file to save the gaze data to. If not provided, the default filename set in the constructor will be used. | `None`    |

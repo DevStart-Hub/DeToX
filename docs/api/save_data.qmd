@@ -1,0 +1,5 @@
+## save_data { #save_data }
+
+`save_data(self)`
+
+Save gaze and event data to files.

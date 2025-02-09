@@ -1,0 +1,17 @@
+## load_calibration { #load_calibration }
+
+`load_calibration(self, filename)`
+
+Load calibration data from a file.
+
+### Parameters
+
+| Name       | Type   | Description                                           | Default   |
+|------------|--------|-------------------------------------------------------|-----------|
+| `filename` | str    | The name of the file containing the calibration data. | required  |
+
+### Returns
+
+| Type   | Description                                                            |
+|--------|------------------------------------------------------------------------|
+| bool   | True if the calibration data was successfully loaded, False otherwise. |
