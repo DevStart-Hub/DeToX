@@ -650,10 +650,6 @@ class TobiiController:
         bool
             True if calibration successful, False otherwise
         """
-        if self.simulate:
-            print("Running in simulation mode - skipping calibration")
-            return True
-
         # Check if number of calibration points is valid
         if len(calibration_points) < 2 or len(calibration_points) > 9:
             raise ValueError("Calibration points must be between 2 and 9")
@@ -670,7 +666,6 @@ class TobiiController:
         # Create calibration object
         if self.simulate:
             print("Running calibration in simulation mode")
-            success = True
         else:
             # Enter calibration mode once at start
             self.calibration.enter_calibration_mode()
@@ -796,7 +791,9 @@ class TobiiController:
             success = self.calibration_result.status == tr.CALIBRATION_STATUS_SUCCESS
 
         # Save if requested and successful
-        if success and save_calib and not self.simulate:
+        if self.simulate:
+            success = True
+        elif success and save_calib:
             self.save_calibration()
 
         return success
