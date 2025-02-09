@@ -1,0 +1,5 @@
+numpy
+pandas
+tobii-research
+psychopy
+pillow

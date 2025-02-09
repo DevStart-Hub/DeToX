@@ -14,7 +14,7 @@ controller = TobiiController(win, simulate=True)
 controller._simulation_settings['framerate'] = 300  # Set to 60 Hz instead of default 120 Hz
 
 # Start recording
-controller.start_recording('demo1-test')
+controller.start_recording('demo1-test', event_mode='samplebased')
 
 # Let's record some simulated data for a few seconds
 core.wait(2)
@@ -35,3 +35,7 @@ win.close()
 import pandas as pd
 df= pd.read_csv('demo1-test.csv')
 df['TimeDiff']=df.TimeStamp.diff()
+
+
+
+

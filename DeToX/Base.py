@@ -4,6 +4,8 @@ import time
 import atexit
 import threading
 from datetime import datetime
+from rich.console import Console
+from rich.panel import Panel
 
 # Third party imports
 import numpy as np
@@ -185,10 +187,11 @@ class TobiiController:
                 )
             else:
                 self.eyetracker = eyetrackers[self.eyetracker_id]
-
             # Initialize the calibration object
             self.calibration = tr.ScreenBasedCalibration(self.eyetracker)
 
+        # Print connection info
+        self.print_info( moment = 'connection')
 
         # Initialize data storage
         self.gaze_data = []
@@ -196,6 +199,64 @@ class TobiiController:
 
         # Register the close method to be called when the program exits
         atexit.register(self.close)
+
+    def print_info(self, moment='connection'):
+        """
+        Print information about the current eyetracker or simulation.
+        """
+        console = Console()
+
+        # If simulating, just show simulated info
+        if self.simulate:
+            if moment == 'connection':
+                multiline_text = (
+                    "Simulating eyetracker:\n"
+                    f" - Simulated frequency: {self._simulation_settings['framerate']} Hz"
+                )
+                title = "Simulated Eyetracker Info"
+            elif moment == 'recording':
+                multiline_text = (
+                    "Recording mouse position:\n"
+                    f" - frequency: {self._simulation_settings['framerate']} Hz"
+                )
+                title = "Recording Info"
+
+        else:
+            # Retrieve current info from the real eyetracker
+            self.fps = self.eyetracker.get_gaze_output_frequency()
+            self.possible_fps = self.eyetracker.get_all_gaze_output_frequencies()
+            self.illumination = self.eyetracker.get_illumination_mode()
+            self.possible_illumination = self.eyetracker.get_all_illumination_modes()
+
+            if moment == 'connection':
+                multiline_text = (
+                    "Connected to the eyetracker:\n"
+                    f" - Model: {self.eyetracker.model}\n"
+                    f" - Current frequency: {self.fps} Hz\n"
+                    f" - Illumination mode: {self.illumination}\n"
+                    "\nOther options:\n"
+                    f" - Possible frequencies: {self.possible_fps}\n"
+                    f" - Possible illumination modes: {self.possible_illumination}"
+                )
+                title = "Eyetracker Info"
+
+            elif moment == 'recording':
+                multiline_text = (
+                    "Starting recording with:\n"
+                    f" - Model: {self.eyetracker.model}\n"
+                    f" - Current frequency: {self.fps} Hz\n"
+                    f" - Illumination mode: {self.illumination}"
+                )
+                title = "Recording Info"
+
+        panel = Panel(
+            multiline_text,
+            title=title,
+            subtitle="Wrapped by DeToX",
+        )
+        console.print(panel)
+
+
 
     def save_calibration(self, filename=None):
         """
@@ -413,8 +474,10 @@ class TobiiController:
             events_df['TimeStamp'] = self._process_timestamps(events_df['system_time_stamp'])
             
             if self.event_mode == 'samplebased':
+                print(events_df)
                 gaze_df = pd.merge_asof(gaze_df, events_df[['TimeStamp', 'Event']],
-                                    on='TimeStamp', direction='nearest')
+                                    on='TimeStamp', direction='nearest',
+                                    tolerance= (1/self._simulation_settings['framerate'])/2)
             elif self.event_mode == 'precise':
                 file_exists = os.path.isfile(self.events_filename)
                 events_df[['TimeStamp', 'Event']].to_csv(
@@ -433,25 +496,40 @@ class TobiiController:
 
     def start_recording(self, filename=None, event_mode='precise'):
         """
-        Start recording gaze data with improved thread handling.
+        Start recording gaze data with thread management.
 
-        This method initializes the recording process for gaze data
-        from either a simulated or real eye tracker. It sets up the
-        necessary threads and events for data collection.
+        Initializes the recording of gaze data from a simulated or real 
+        eye tracker. Sets up the necessary threads and events for data 
+        collection, either simulating data or capturing real data.
 
         Parameters
         ----------
         filename : str, optional
-            The name of the file to save the gaze data to. If not provided,
-            the default filename set in the constructor will be used.
+            The base name of the file to save the gaze data. If not 
+            provided, a default name based on the current datetime will 
+            be used. The .csv extension is added automatically.
+        event_mode : str, optional
+            Mode for event recording. Options are 'samplebased' or 
+            'precise'. Default is 'precise'. In 'precise' mode, events 
+            are saved in a separate file.
+
+        Notes
+        -----
+        The filename should be given without an extension because .csv 
+        will be appended automatically. If a filename with an extension 
+        is provided, a warning is raised.
+
+        Raises
+        ------
+        Warning
+            If the given filename contains an extension.
+
         """
         self.event_mode = event_mode
 
-        # Set the filename
         if filename is None:
             self.filename = f"{datetime.now().strftime('%Y-%m-%d_%H-%M-%S')}.csv"
         else:
-            # Check if filename has an extension
             self.basename, ext = os.path.splitext(filename)
             if ext:
                 raise Warning(
@@ -461,46 +539,37 @@ class TobiiController:
                 )
             self.filename = f"{self.basename}.csv"
 
-
-        # For precise event mode, create events filename
         if self.event_mode == 'precise':
             self.events_filename = f"{self.basename}_events.csv"
 
-        # If recording is already active, exit method
         if self.recording:
             return
 
-        # Handle simulation mode setup
+
+        # print recording info:
+        self.print_info( moment = "recording" )
+
         if self.simulate:
-            # Initialize the stop event if it doesn't exist
             if self._stop_simulation is None:
                 self._stop_simulation = threading.Event()
             else:
-                # Clear the stop event to enable new recording session
                 self._stop_simulation.clear()
 
-            # Create and start the simulation thread
             self._simulation_thread = threading.Thread(
                 target=self._simulate_gaze_data_loop,
-                daemon=True  # Ensure thread closes with the main program
+                daemon=True
             )
-            
-            # Set the recording flag and initial timestamp
             self.recording = True
             self.t0 = time.perf_counter() * 1000
-
-            # Begin the simulation thread
             self._simulation_thread.start()
         else:
-            # Subscribe to gaze data updates if using a real eye tracker
             self.eyetracker.subscribe_to(
                 tr.EYETRACKER_GAZE_DATA,
                 self._on_gaze_data,
                 as_dictionary=True
             )
-            # Short delay to ensure subscription is established
             core.wait(1)
-            # Set recording flag and initial timestamp
+
             self.recording = True
             self.t0 = tr.get_system_time_stamp()
 
