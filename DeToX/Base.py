@@ -1049,33 +1049,48 @@ class TobiiController:
     def get_average_gaze(self, N=5, fallback_offscreen=True):
         """
         Average gaze position over last N samples in Tobii units, then convert to PsychoPy units.
-
         Returns averaged (x, y) or offscreen position based on window size.
+        
+        Parameters
+        ----------
+        N : int
+            Number of samples to average. Default is 5.
+        fallback_offscreen : bool
+            If True, return offscreen position based on window size if no valid gaze data is found.
+            Default is True.
+        
+        Returns
+        -------
+        (x, y) : tuple of float
+            Averaged gaze position in PsychoPy units.
         """
         if not self.gaze_data:
+            raise RuntimeWarning("No gaze data available. Start recording first.")
+        
+        # Create array with NaN for missing/invalid points
+        gaze_points = []
+        for sample in self.gaze_data[-N:]:
+            for eye_key in ('left_gaze_point_on_display_area', 'right_gaze_point_on_display_area'):
+                if (eye_key in sample and sample[eye_key] and len(sample[eye_key]) == 2):
+                    gaze_points.append(sample[eye_key])
+                else:
+                    # Add NaN values for missing/invalid points
+                    gaze_points.append([np.nan, np.nan])
+        
+        # Convert to numpy array
+        gaze_array = np.array(gaze_points)
+        
+        # Check if all values are NaN
+        if np.all(np.isnan(gaze_array)):
             return tuple(np.array(self.win.size) * 2) if fallback_offscreen else None
-
-        # Preallocate list of tuples
-        # We are collecting all the gaze points from the last N samples
-        # and removing any samples that are invalid (i.e. don't have a position)
-        # or are not valid (i.e. have a validity of 0)
-        gaze_points = [
-            sample[eye_key]
-            for sample in self.gaze_data[-N:]
-            for eye_key in ('left_gaze_point_on_display_area', 'right_gaze_point_on_display_area')
-            if eye_key in sample and sample[eye_key] and len(sample[eye_key]) == 2
-        ]
-
-        if not gaze_points:
-            # If there are no valid samples, return the center of the window
-            return tuple(np.array(self.win.size) * 2) if fallback_offscreen else None
-
-        # Compute mean directly
-        # We are calculating the average of the gaze points in Tobii coordinates
-        # and then converting them to PsychoPy coordinates
+        
+        # Compute mean, ignoring NaN values
         avg_tobii_pos = np.nanmean(gaze_array, axis=0)
-        return coord_utils.get_psychopy_pos(self.win, avg_tobii_pos)
-    
+        
+        # Convert to PsychoPy units
+        avg_psychopy_pos = coord_utils.get_psychopy_pos(self.win, avg_tobii_pos)
+        
+        return avg_psychopy_pos
 
 
 
