@@ -983,50 +983,99 @@ class TobiiController:
     def _simulate_gaze_data_loop(self):
         """
         Simulate gaze data using mouse position at a fixed framerate.
-        Uses time.sleep() for simplicity.
+
+        This method is used for simulating gaze data using the mouse position at a
+        fixed framerate. It uses time.sleep() to control the simulation rate and
+        stops when either the recording is stopped or an exception occurs.
         """
         interval = 1.0 / self._simulation_settings['framerate']
         try:
+            # Loop until the recording is stopped or an exception occurs
             while self.recording and not self._stop_simulation.is_set():
+                # Simulate a single gaze data point
                 self._simulate_gaze_data()
+                # Sleep for the specified interval
                 time.sleep(interval)
         except Exception as e:
+            # Print the error if something goes wrong
             print(f"Simulation error: {e}")
+            # Stop the simulation loop
             self._stop_simulation.set()
 
 
     def _simulate_gaze_data(self):
         """
         Simulate a single gaze data point using current mouse position.
+        
+        This method simulates a single gaze data point using the current mouse position.
+        It uses the mouse position to calculate the gaze point coordinates in Tobii ADCS
+        and generates a sample gaze data dictionary with the current timestamp, left and
+        right eye positions, and the user position.
         """
         try:
+            # Get the current mouse position in PsychoPy coordinates
             pos = self.mouse.getPos()
+            
+            # Convert the mouse position to Tobii ADCS coordinates
             tobii_pos = coord_utils.get_tobii_pos(self.win, pos)
-            timestamp = time.time() * 1000  # milliseconds since Unix epoch
-
+            
+            # Get the current timestamp in milliseconds since the Unix epoch
+            timestamp = time.time() * 1000  
+            
+            # Create a sample gaze data dictionary
             gaze_data = {
-                'system_time_stamp': timestamp,
-                'left_gaze_point_on_display_area': tobii_pos,
-                'right_gaze_point_on_display_area': tobii_pos,
-                'left_gaze_point_validity': 1,
-                'right_gaze_point_validity': 1,
-                'left_pupil_diameter': 3.0,
-                'right_pupil_diameter': 3.0,
-                'left_pupil_validity': 1,
-                'right_pupil_validity': 1,
-                'left_user_position': (0.0, 0.0, 0.6),
-                'right_user_position': (0.0, 0.0, 0.6),
-                'left_user_position_validity': 1,
-                'right_user_position_validity': 1
+                'system_time_stamp': timestamp,  # milliseconds since Unix epoch
+                'left_gaze_point_on_display_area': tobii_pos,  # Tobii ADCS coordinates
+                'right_gaze_point_on_display_area': tobii_pos,  # Tobii ADCS coordinates
+                'left_gaze_point_validity': 1,  # 0 or 1 indicating validity
+                'right_gaze_point_validity': 1,  # 0 or 1 indicating validity
+                'left_pupil_diameter': 3.0,  # mm
+                'right_pupil_diameter': 3.0,  # mm
+                'left_pupil_validity': 1,  # 0 or 1 indicating validity
+                'right_pupil_validity': 1,  # 0 or 1 indicating validity
+                'left_user_position': (0.0, 0.0, 0.6),  # Tobii ADCS coordinates
+                'right_user_position': (0.0, 0.0, 0.6),  # Tobii ADCS coordinates
+                'left_user_position_validity': 1,  # 0 or 1 indicating validity
+                'right_user_position_validity': 1  # 0 or 1 indicating validity
             }
-
+            
+            # Append the sample gaze data to the buffer
             self.gaze_data.append(gaze_data)
 
         except Exception as e:
             print(f"Simulated gaze error: {e}")
 
 
+    def get_average_gaze(self, N=5, fallback_offscreen=True):
+        """
+        Average gaze position over last N samples in Tobii units, then convert to PsychoPy units.
 
+        Returns averaged (x, y) or offscreen position based on window size.
+        """
+        if not self.gaze_data:
+            return tuple(np.array(self.win.size) * 2) if fallback_offscreen else None
+
+        # Preallocate list of tuples
+        # We are collecting all the gaze points from the last N samples
+        # and removing any samples that are invalid (i.e. don't have a position)
+        # or are not valid (i.e. have a validity of 0)
+        gaze_points = [
+            sample[eye_key]
+            for sample in self.gaze_data[-N:]
+            for eye_key in ('left_gaze_point_on_display_area', 'right_gaze_point_on_display_area')
+            if eye_key in sample and sample[eye_key] and len(sample[eye_key]) == 2
+        ]
+
+        if not gaze_points:
+            # If there are no valid samples, return the center of the window
+            return tuple(np.array(self.win.size) * 2) if fallback_offscreen else None
+
+        # Compute mean directly
+        # We are calculating the average of the gaze points in Tobii coordinates
+        # and then converting them to PsychoPy coordinates
+        avg_tobii_pos = np.nanmean(gaze_array, axis=0)
+        return coord_utils.get_psychopy_pos(self.win, avg_tobii_pos)
+    
 
 
 
