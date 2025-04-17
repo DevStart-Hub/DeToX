@@ -675,19 +675,19 @@ class TobiiController:
         None
         """
         # Get current time and adjust with a shrink speed factor
-        time = clock.getTime() * self.animation_settings['animation_speed']
+        elapsed_time = clock.getTime() * self.animation_settings['animation_speed']
 
         if anim_type == 'zoom':
             # Calculate the scale factor for zoom animation
             orig_size = self.targets.get_stim_original_size(point_idx)
-            scale_factor = np.sin(time)**2 + self.animation_settings['target_min']
+            scale_factor = np.sin(elapsed_time)**2 + self.animation_settings['target_min']
             newsize = [scale_factor * size for size in orig_size]
             # Set the size of the stimulus to the new size
             stim.setSize(newsize)
 
         elif anim_type == 'trill':
             # Calculate the new orientation angle for trill animation
-            new_angle = np.sin(time) * rotation_range
+            new_angle = np.sin(elapsed_time) * rotation_range
             # Set the orientation of the stimulus to the new angle
             stim.setOri(new_angle)
 
