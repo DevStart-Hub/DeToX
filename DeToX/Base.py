@@ -980,91 +980,50 @@ class TobiiController:
 
 
 
-
-
     def _simulate_gaze_data_loop(self):
         """
-        Simulate gaze data at a specified rate using the mouse position.
-        Uses busy-wait loop for maximum timing precision.
-
-        This method is used for simulating gaze data in a busy-wait loop.
-        It is not recommended to use this method for real-time recording,
-        as it may cause performance issues.
+        Simulate gaze data using mouse position at a fixed framerate.
+        Uses time.sleep() for simplicity.
         """
-
-        # Calculate the target interval in seconds
-        sample_interval = 1.0 / self._simulation_settings['framerate']
-        next_sample = time.perf_counter()
-
+        interval = 1.0 / self._simulation_settings['framerate']
         try:
             while self.recording and not self._stop_simulation.is_set():
-                # Busy-wait for precise timing
-                while time.perf_counter() - next_sample < 0:
-                    continue
-                # Simulate a single gaze data point
                 self._simulate_gaze_data()
-                # Update the next sample time
-                next_sample = time.perf_counter() + sample_interval
+                time.sleep(interval)
         except Exception as e:
-            # Print the error if something goes wrong
-            print(f"Simulation loop error: {e}")
-            # Stop the simulation loop
+            print(f"Simulation error: {e}")
             self._stop_simulation.set()
 
 
     def _simulate_gaze_data(self):
         """
-        Generate a single gaze data point based on the current mouse position.
+        Simulate a single gaze data point using current mouse position.
         """
         try:
-            # Get the current mouse position in PsychoPy coordinates
             pos = self.mouse.getPos()
-            
-            # Convert the mouse position to Tobii ADCS coordinates
             tobii_pos = coord_utils.get_tobii_pos(self.win, pos)
-            
-            # Create the gaze data dictionary
+            timestamp = time.time() * 1000  # milliseconds since Unix epoch
+
             gaze_data = {
-                # Time stamp in milliseconds since the epoch
-                'system_time_stamp': time.perf_counter() * 1000,
-                
-                # Gaze point coordinates in Tobii ADCS
+                'system_time_stamp': timestamp,
                 'left_gaze_point_on_display_area': tobii_pos,
                 'right_gaze_point_on_display_area': tobii_pos,
-                
-                # Validity of the left and right eye gaze points
                 'left_gaze_point_validity': 1,
                 'right_gaze_point_validity': 1,
-                
-                # Pupil diameter in mm
                 'left_pupil_diameter': 3.0,
                 'right_pupil_diameter': 3.0,
-                
-                # Validity of the left and right eye pupil diameters
                 'left_pupil_validity': 1,
                 'right_pupil_validity': 1,
-                
-                # User position in Tobii ADCS coordinates
                 'left_user_position': (0.0, 0.0, 0.6),
                 'right_user_position': (0.0, 0.0, 0.6),
-                
-                # Validity of the left and right eye user positions
                 'left_user_position_validity': 1,
                 'right_user_position_validity': 1
             }
-            
+
             self.gaze_data.append(gaze_data)
+
         except Exception as e:
-            print(f"Error simulating gaze data: {e}")
-
-
-
-
-
-
-
-
-
+            print(f"Simulated gaze error: {e}")
 
 
 
