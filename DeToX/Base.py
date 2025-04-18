@@ -4,6 +4,9 @@ import time
 import atexit
 import threading
 from datetime import datetime
+from collections import deque
+
+
 from rich.console import Console
 from rich.panel import Panel
 
@@ -413,6 +416,13 @@ class TobiiController:
         """
         # Append the latest gaze data to the list for later processing
         self.gaze_data.append(gaze_data)
+
+        if self.recent_gaze_positions:
+            self.recent_gaze_positions.extend(
+                [gaze_data.get('left_gaze_point_on_display_area'),
+                gaze_data.get('right_gaze_point_on_display_area')]
+            )
+
 
     def _process_timestamps(self, times):
         """Convert system timestamps to seconds from start."""
@@ -1046,51 +1056,81 @@ class TobiiController:
             print(f"Simulated gaze error: {e}")
 
 
-    def get_average_gaze(self, N=5, fallback_offscreen=True):
+
+    def gaze_contingent(self, N=5):
         """
-        Average gaze position over last N samples in Tobii units, then convert to PsychoPy units.
-        Returns averaged (x, y) or offscreen position based on window size.
-        
+        Initialize a rolling buffer to store recent gaze positions.
+
+        This method sets up a deque (double-ended queue) to hold the last N gaze samples
+        from both eyes, meaning the buffer can hold up to 2*N samples total. This is useful
+        for real-time gaze contingent logic where you want to compute smooth gaze estimates
+        from recent samples.
+
         Parameters
         ----------
         N : int
-            Number of samples to average. Default is 5.
-        fallback_offscreen : bool
-            If True, return offscreen position based on window size if no valid gaze data is found.
-            Default is True.
-        
+            The number of recent gaze samples (pairs of left/right eye data) to buffer.
+
+        Raises
+        ------
+        TypeError
+            If N is not an integer.
+        """
+        if not isinstance(N, int):
+            raise TypeError(
+                "\n[ERROR] Invalid value for `N` in gaze_contingent().\n"
+                "`N` must be an integer, representing the number of recent gaze samples to buffer.\n"
+                f"Received type: {type(N).__name__} (value: {N})\n"
+            )
+        # Store up to N samples, each consisting of two [x, y] points (left and right eye)
+        self.recent_gaze_positions = deque(maxlen=N * 2)
+
+
+    def get_average_gaze(self, fallback_offscreen=True):
+        """
+        Compute the average gaze position from the most recent gaze samples.
+
+        This method averages valid Tobii ADCS coordinates from the rolling gaze buffer
+        initialized via `gaze_contingent()`. If no valid data is available, it can return
+        a fallback offscreen value to help avoid crashes or unwanted triggers in the experiment.
+
+        Parameters
+        ----------
+        fallback_offscreen : bool, optional
+            Whether to return an offscreen position (win.size * 2) if no valid gaze
+            data is found. Default is True.
+
         Returns
         -------
-        (x, y) : tuple of float
-            Averaged gaze position in PsychoPy units.
+        avg_psychopy_pos : tuple or None
+            The average gaze position as a 2D coordinate in Tobii ADCS units,
+            or offscreen position (tuple) / None if no data is available.
+
+        Raises
+        ------
+        Warning
+            If `gaze_contingent()` was not run before this function.
         """
-        if not self.gaze_data:
-            raise RuntimeWarning("No gaze data available. Start recording first.")
-        
-        # Create array with NaN for missing/invalid points
-        gaze_points = []
-        for sample in self.gaze_data[-N:]:
-            for eye_key in ('left_gaze_point_on_display_area', 'right_gaze_point_on_display_area'):
-                if (eye_key in sample and sample[eye_key] and len(sample[eye_key]) == 2):
-                    gaze_points.append(sample[eye_key])
-                else:
-                    # Add NaN values for missing/invalid points
-                    gaze_points.append([np.nan, np.nan])
-        
-        # Convert to numpy array
-        gaze_array = np.array(gaze_points)
-        
-        # Check if all values are NaN
-        if np.all(np.isnan(gaze_array)):
-            return tuple(np.array(self.win.size) * 2) if fallback_offscreen else None
-        
-        # Compute mean, ignoring NaN values
-        avg_tobii_pos = np.nanmean(gaze_array, axis=0)
-        
-        # Convert to PsychoPy units
-        avg_psychopy_pos = coord_utils.get_psychopy_pos(self.win, avg_tobii_pos)
-        
+        if not self.recent_gaze_positions:
+            raise RuntimeError(
+                "\n[ERROR] Gaze buffer not initialized.\n"
+                "You must call `gaze_contingent(N)` before using `get_average_gaze()`.\n"
+                "This sets up the internal buffer for collecting recent gaze data.\n"
+            )
+
+        # Keep only [x, y] gaze points; skip empty or malformed entries
+        valid_points = [p for p in self.recent_gaze_positions if len(p) == 2]
+
+        if not valid_points:
+            # Return a dummy position far outside the screen if nothing valid is available
+            avg_psychopy_pos = self.win.size * 2 if fallback_offscreen else None
+        else:
+            # Compute average of valid [x, y] points
+            avg_psychopy_pos = np.nanmean(valid_points, axis=0)
+
         return avg_psychopy_pos
+
+
 
 
 
