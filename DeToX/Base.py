@@ -411,12 +411,6 @@ class TobiiController:
                 gaze_data.get('right_gaze_point_on_display_area')]
             )
 
-
-    def _process_timestamps(self, times):
-        """Convert system timestamps to seconds from start."""
-        # More efficient to operate directly on the series
-        return (times - self.t0) / 1000.0
-
     def _adapt_gaze_data(self, df):
         """Adapt gaze data format and convert coordinates."""
         # Convert coordinates more efficiently
@@ -448,49 +442,71 @@ class TobiiController:
                 'Right_X', 'Right_Y', 'Right_Validity',
                 'Right_Pupil', 'Right_Pupil_Validity']]
 
+
     def save_data(self):
-        """Save gaze and event data to files."""
+        """Save gaze and event data to an HDF5 file with two datasets: 'gaze' and 'events'."""
+        import pandas as pd
+        import time
+
+        # Start timing the save process
         start_saving = time.perf_counter()
 
+        # Check if there is gaze data to save
         if not self.gaze_data:
             print("No gaze data to save.")
             return
 
-        # Make a copy of the buffers and clear them
+        # Copy and clear buffers to prevent data loss
         gaze_data_copy = self.gaze_data[:]
         event_data_copy = self.event_data[:]
         self.gaze_data.clear()
         self.event_data.clear()
-       
-        # Process gaze data
-        gaze_df = pd.DataFrame(gaze_data_copy)
-        gaze_df = self._adapt_gaze_data(gaze_df)
-        
-        # Process events if they exist
-        if event_data_copy:
-            events_df = pd.DataFrame(event_data_copy, columns=['system_time_stamp', 'Event'])
-            events_df['TimeStamp'] = self._process_timestamps(events_df['system_time_stamp'])
-            
-            if self.event_mode == 'samplebased':
-                print(events_df)
-                gaze_df = pd.merge_asof(gaze_df, events_df[['TimeStamp', 'Event']],
-                                    on='TimeStamp', direction='nearest',
-                                    tolerance= (1/self._simulation_settings['framerate'])/2)
-            elif self.event_mode == 'precise':
-                file_exists = os.path.isfile(self.events_filename)
-                events_df[['TimeStamp', 'Event']].to_csv(
-                    self.events_filename, mode='a', 
-                    index=False, header=not file_exists
-                )
-        elif self.event_mode == 'samplebased':
-            gaze_df['Event'] = ''
 
-        # Save gaze data
-        file_exists = os.path.isfile(self.filename)
-        gaze_df.to_csv(self.filename, mode='a', index=False, header=not file_exists)
-        
+        # Convert gaze data to a DataFrame and adapt its format
+        gaze_df = pd.DataFrame(gaze_data_copy) 
+        gaze_df = self._adapt_gaze_data(gaze_df)
+
+        # Convert event data to a DataFrame if it exists
+        if event_data_copy:
+            events_df = pd.DataFrame(event_data_copy, columns=["TimeStamp", "Event"])
+
+            # Sort DataFrames to prepare for merging
+            gaze_df.sort_values("TimeStamp", inplace=True)
+            events_df.sort_values("TimeStamp", inplace=True)
+
+            # Merge events with gaze data based on closest previous timestamp
+            merged_df = pd.merge_asof(
+                gaze_df,
+                events_df[["TimeStamp", "Event"]],
+                on="TimeStamp",
+                direction="nearest",  # Match to the closest previous event
+                tolerance=(1 / self._simulation_settings["framerate"]) / 2
+            )
+        else:
+            # If no event data, create an empty 'Event' column in gaze data
+            merged_df = gaze_df
+            merged_df["Event"] = ""
+
+        # Save the merged data and raw event data to an HDF5 file
+        with pd.HDFStore(self.filename, mode="a") as store:
+            # Append gaze data with an 'auto' appending format
+            store.append("gaze", merged_df, format="table", append=True)
+
+            # Append raw events data if they exist
+            if event_data_copy:
+                store.append("events", events_df[["TimeStamp", "Event"]], format="table", append=True)
+
+            # Add metadata attributes if not already present
+            attrs = store.get_storer("gaze").attrs
+            if not hasattr(attrs, "subject_id"):
+                attrs.subject_id = getattr(self, "subject_id", "unknown")
+                attrs.screen_size = tuple(self.win.size)
+                attrs.framerate = self._simulation_settings["framerate"]
+                attrs.notes = "Auto metadata added"
+
+        # Print time taken to save data
         print(f"Data saved in {round(time.perf_counter() - start_saving, 3)} seconds.")
-        
+
 
     def _start_recording(self, filename=None, event_mode='precise'):
         """
