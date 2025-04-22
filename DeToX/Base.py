@@ -148,60 +148,48 @@ class TobiiController:
     recording = False
 
     def __init__(self, win, id=0, simulate=False):
-        """
-        Initialize the TobiiController.
-
-        The TobiiController class is a simplified wrapper around the Tobii
-        eye tracker API. It provides methods for starting/stopping gaze data
-        recording and saving the data to a file.
-
-        Args:
-            win: Psychopy window object
-            id: ID of the Tobii eye tracker to use (default: 0)
-            filename: Name of the file to save the gaze data to (default: None --> datetime)
-            event_mode: How to save events ('samplebased' or 'precise'). Default is 'samplebased'
-                       'samplebased': Events are matched to nearest gaze samples
-                       'precise': Events are saved in a separate file with exact timestamps
-        """
         self.eyetracker_id = id
         self.win = win
         self.simulate = simulate
 
-        # Simulate the eye tracker if requested. If the eye tracker is
-        # simulated, the TobiiController will use a simulated mouse to
-        # generate gaze data. Otherwise, the TobiiController will connect
-        # to the real eye tracker and retrieve gaze data from it.
-        if self.simulate:
-            from psychopy import event
-            self._stop_simulation = threading.Event()
-            self._simulation_thread = None
-            self.mouse = event.Mouse(win=self.win)
-        else:
-            self._stop_simulation = None
-            self._simulation_thread = None
+        self._stop_simulation = None
+        self._simulation_thread = None
 
-            # Connect to the eye tracker
-            eyetrackers = tr.find_all_eyetrackers()
-            if len(eyetrackers) == 0:
-                raise RuntimeError(
-                    "No Tobii eyetrackers detected.\n"
-                    "Verify the connection and make sure to power on the "
-                    "eyetracker before starting your computer."
-                )
-            else:
-                self.eyetracker = eyetrackers[self.eyetracker_id]
-            # Initialize the calibration object
-            self.calibration = tr.ScreenBasedCalibration(self.eyetracker)
-
-        # Print connection info
-        self.print_info( moment = 'connection')
-
-        # Initialize data storage
         self.gaze_data = []
         self.event_data = []
+        self.recording = False
 
-        # Register the close method to be called when the program exits
+        if self.simulate:
+            from psychopy import event
+            self.mouse = event.Mouse(win=self.win)
+
+            # Simulation method bindings
+            self.start_recording = self._start_recording_sim
+            self.stop_recording = self._stop_recording_sim
+            self.record_event = self._record_event_sim
+            self.close = self._close_sim
+        else:
+            eyetrackers = tr.find_all_eyetrackers()
+            if not eyetrackers:
+                raise RuntimeError(
+                                "No Tobii eyetrackers detected.\n"
+                                "Verify the connection and make sure to power on the "
+                                "eyetracker before starting your computer."
+                            )
+
+            self.eyetracker = eyetrackers[self.eyetracker_id]
+            self.calibration = tr.ScreenBasedCalibration(self.eyetracker)
+
+            # Real method bindings (default names)
+            self.start_recording = self._start_recording
+            self.stop_recording = self._stop_recording
+            self.record_event = self._record_event
+            self.close = self._close
+
+        self.print_info(moment='connection')
         atexit.register(self.close)
+
+
 
     def print_info(self, moment='connection'):
         """
@@ -504,122 +492,52 @@ class TobiiController:
         print(f"Data saved in {round(time.perf_counter() - start_saving, 3)} seconds.")
         
 
-    def start_recording(self, filename=None, event_mode='precise'):
+    def _start_recording(self, filename=None, event_mode='precise'):
         """
-        Start recording gaze data with thread management.
+        Start recording gaze data.
 
-        Initializes the recording of gaze data from a simulated or real 
-        eye tracker. Sets up the necessary threads and events for data 
-        collection, either simulating data or capturing real data.
+        This private method prepares the recording environment, subscribes to 
+        the gaze data stream, and sets the recording flag. It initializes the 
+        start time for timestamps.
 
         Parameters
         ----------
         filename : str, optional
-            The base name of the file to save the gaze data. If not 
-            provided, a default name based on the current datetime will 
-            be used. The .csv extension is added automatically.
+            The name of the file to save the gaze data to. If not provided, a 
+            default name based on the current datetime will be used.
         event_mode : str, optional
-            Mode for event recording. Options are 'samplebased' or 
-            'precise'. Default is 'precise'. In 'precise' mode, events 
-            are saved in a separate file.
+            Mode for event recording. Options are 'samplebased' or 'precise'. 
+            Default is 'precise'. In 'precise' mode, events are saved in a 
+            separate file.
 
         Notes
         -----
-        The filename should be given without an extension because .csv 
-        will be appended automatically. If a filename with an extension 
-        is provided, a warning is raised.
-
-        Raises
-        ------
-        Warning
-            If the given filename contains an extension.
-
+        This method is called internally and should not be used directly. It 
+        assumes that the eye tracker is already initialized and ready to stream 
+        data.
         """
-        self.event_mode = event_mode
-
-        if filename is None:
-            self.filename = f"{datetime.now().strftime('%Y-%m-%d_%H-%M-%S')}.csv"
-        else:
-            self.basename, ext = os.path.splitext(filename)
-            if ext:
-                raise Warning(
-                    f"Filename '{filename}' contains extension '{ext}'. "
-                    "Please provide filename without extension. "
-                    "The .csv extension will be added automatically."
-                )
-            
-            self.filename = f"{self.basename}.csv"
-
-            # Check if the file already exists
-            if os.path.exists(self.filename):
-                raise FileExistsError(f"File '{self.filename}' already exists.")
-
-        if self.event_mode == 'precise':
-            self.events_filename = f"{self.basename}_events.csv"
-
-        if self.recording:
-            return
+        self._prepare_recording(filename, event_mode)
+        self.eyetracker.subscribe_to(tr.EYETRACKER_GAZE_DATA, self._on_gaze_data, as_dictionary=True)
+        core.wait(1)
+        self.recording = True
+        self.t0 = tr.get_system_time_stamp()
 
 
-        # print recording info:
-        self.print_info( moment = "recording" )
-
-        if self.simulate:
-            if self._stop_simulation is None:
-                self._stop_simulation = threading.Event()
-            else:
-                self._stop_simulation.clear()
-
-            self._simulation_thread = threading.Thread(
-                target=self._simulate_gaze_data_loop,
-                daemon=True
-            )
-            self.recording = True
-            self.t0 = time.perf_counter() * 1000
-            self._simulation_thread.start()
-        else:
-            self.eyetracker.subscribe_to(
-                tr.EYETRACKER_GAZE_DATA,
-                self._on_gaze_data,
-                as_dictionary=True
-            )
-            core.wait(1)
-
-            self.recording = True
-            self.t0 = tr.get_system_time_stamp()
-
-
-    def stop_recording(self):
+    def _stop_recording(self):
         """
-        Stop recording with improved thread handling.
+        Stop recording gaze data and save it to file.
 
         This method stops the recording, unsubscribes from the gaze data
-        stream if in real mode, and saves the recorded data to files.
+        stream, and saves the recorded data to files.
         """
         if not self.recording:
-            return  # If recording is not active, do nothing
-
-        # Set the recording flag to False
+            return
         self.recording = False
-
-        # Stop the simulation thread if in simulation mode
-        if self.simulate:
-            if self._stop_simulation is not None:
-                # Set the event to signal the thread to stop
-                self._stop_simulation.set()
-                if self._simulation_thread is not None:
-                    # Wait for the thread to finish
-                    self._simulation_thread.join(timeout=1.0)
-        else:
-            # Unsubscribe from the gaze data stream if in real mode
-            self.eyetracker.unsubscribe_from(
-                tr.EYETRACKER_GAZE_DATA, self._on_gaze_data
-            )
-
-        # Save the recorded data to files
+        self.eyetracker.unsubscribe_from(tr.EYETRACKER_GAZE_DATA, self._on_gaze_data)
         self.save_data()
 
-    def record_event(self, event_label):
+
+    def _record_event(self, label):
         """
         Record an event with a timestamp.
 
@@ -629,34 +547,138 @@ class TobiiController:
         recording, and the second element is the event label provided as a
         string.
 
-        The timestamp is obtained using tr.get_system_time_stamp(), which
-        returns the current time in milliseconds since the system was started.
-
         If the recording is not active, a RuntimeWarning is raised.
 
         Parameters
         ----------
-        event_label : str
+        label : str
             The label for the event to record
-
         """
         if not self.recording:
             raise RuntimeWarning("Not recording now.")
-        
-        if self.simulate:
-            self.event_data.append([time.perf_counter() * 1000, event_label])
-        else:
-            self.event_data.append([tr.get_system_time_stamp(), event_label])
+        self.event_data.append([tr.get_system_time_stamp(), label])
 
 
-    def close(self):
-        """Clean up and ensure all data is saved.
+    def _close(self):
+        """
+        Stop recording and perform necessary cleanup.
 
-        This method is called by atexit and is also available as a public method.
-        It stops recording and saves all data that was not saved before.
+        This private method checks if recording is active. If so, it calls
+        the _stop_recording method to ensure that recording is stopped and
+        any necessary data is saved.
         """
         if self.recording:
-            self.stop_recording()
+            self._stop_recording()
+
+
+    def _start_recording_sim(self, filename=None, event_mode='precise'):
+        """
+        Start recording with simulated gaze data.
+
+        This method starts the recording process when in simulation mode.
+        It sets up a separate thread that simulates gaze data and signals
+        it to start. It also sets the recording flag to `True` and records
+        the current time as the starting time stamp.
+
+        Parameters
+        ----------
+        filename : str, optional
+            The name of the file to save the gaze data to. If not provided, a default filename set in the constructor will be used.
+        event_mode : str, optional
+            Mode for event recording. Options are 'samplebased' or 'precise'. Default is 'precise'. In 'precise' mode, events are saved in a separate file.
+        """
+        self._prepare_recording(filename, event_mode)
+        if self._stop_simulation is None:
+            self._stop_simulation = threading.Event()
+        else:
+            self._stop_simulation.clear()
+
+        self._simulation_thread = threading.Thread(target=self._simulate_gaze_data_loop, daemon=True)
+        self.recording = True
+        self.t0 = time.perf_counter() * 1000
+        self._simulation_thread.start()
+
+
+    def _stop_recording_sim(self):
+        """
+        Stop the simulation recording and save data.
+
+        This method stops the recording process when in simulation mode.
+        It signals the simulation thread to stop, waits for the thread
+        to finish, and saves the recorded data to files.
+        If the recording is not active, the method returns immediately.
+        """
+        if not self.recording:
+            return
+        self.recording = False
+        if self._stop_simulation is not None:
+            self._stop_simulation.set()
+        if self._simulation_thread is not None:
+            self._simulation_thread.join(timeout=1.0)
+        self.save_data()
+
+
+    def _record_event_sim(self, label):
+        """
+        Record an event with a timestamp in simulation mode.
+
+        Parameters
+        ----------
+        label : str
+            The label for the event to record
+
+        Raises
+        ------
+        RuntimeWarning
+            If the recording is not active.
+        """
+        if not self.recording:
+            raise RuntimeWarning("Not recording now.")
+        self.event_data.append([time.perf_counter() * 1000, label])
+
+
+    def _close_sim(self):
+        """Stop recording and save data if recording is active."""
+
+        if self.recording:
+            self._stop_recording_sim()
+
+
+    def _prepare_recording(self, filename, event_mode):
+        """
+        Prepare recording by setting filename, event mode and checking for file existence.
+
+        Parameters
+        ----------
+        filename : str, optional
+            The base name of the file to save the gaze data. If not provided, a default name based on the current datetime will be used.
+        event_mode : str, optional
+            Mode for event recording. Options are 'samplebased' or 'precise'. Default is 'precise'. In 'precise' mode, events are saved in a separate file.
+
+        Raises
+        ------
+        Warning
+            If the given filename contains an extension.
+        FileExistsError
+            If the file already exists.
+        """
+        self.event_mode = event_mode
+        if filename is None:
+            self.filename = f"{datetime.now().strftime('%Y-%m-%d_%H-%M-%S')}.csv"
+            self.basename = self.filename[:-4]
+        else:
+            self.basename, ext = os.path.splitext(filename)
+            if ext:
+                raise Warning(f"Please do not include extensions in filename: {filename}")
+            self.filename = f"{self.basename}.csv"
+            if os.path.exists(self.filename):
+                raise FileExistsError(f"File '{self.filename}' already exists.")
+
+        if self.event_mode == 'precise':
+            self.events_filename = f"{self.basename}_events.csv"
+
+        self.print_info(moment="recording")
+
 
     def _animate(self, stim, point_idx, clock, anim_type='zoom', rotation_range=15):
         """
