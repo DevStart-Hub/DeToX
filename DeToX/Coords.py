@@ -52,6 +52,7 @@ def get_psychopy_pos(win, p, units=None):
     else:
         raise ValueError(f"unit ({units}) is not supported.")
 
+
 def get_tobii_pos(win, p, units=None):
     """
     Convert PsychoPy coordinates to Tobii ADCS coordinates.
@@ -101,6 +102,7 @@ def get_tobii_pos(win, p, units=None):
     else:
         raise ValueError(f"unit ({units}) is not supported")
 
+
 def pix2tobii(win, p):
     """
     Convert PsychoPy pixel coordinates to Tobii ADCS coordinates.
@@ -124,6 +126,7 @@ def pix2tobii(win, p):
     middle of the screen.
     """
     return (p[0] / win.size[0] + 0.5, -p[1] / win.size[1] + 0.5)
+
 
 def tobii2pix(win, p):
     """
@@ -149,6 +152,7 @@ def tobii2pix(win, p):
     """
     return (round(win.size[0] * (p[0] - 0.5), 0), 
             round(-win.size[1] * (p[1] - 0.5), 0))
+
 
 def get_psychopy_pos_from_trackbox(win, p, units=None):
     """
