@@ -19,6 +19,7 @@ from PIL import Image, ImageDraw
 
 # Local imports
 from . import coord_utils
+from .Calibration import CalibrationSession
 
 class InfantStimuli:
     """
@@ -629,14 +630,14 @@ class TobiiController:
         self.print_info(moment="recording")
 
 
-    def run_calibration(self,
-                        calibration_points,
-                        infant_stims,
-                        shuffle=True,
-                        audio=None,
-                        focus_time=0.5,
-                        anim_type='zoom',
-                        save_calib=False):
+    def calibrate(self,
+                    calibration_points,
+                    infant_stims,
+                    shuffle=True,
+                    audio=None,
+                    focus_time=0.5,
+                    anim_type='zoom',
+                    save_calib=False):
         """
         Run an infant-friendly calibration procedure…
         """
