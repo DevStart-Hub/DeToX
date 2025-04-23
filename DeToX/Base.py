@@ -18,8 +18,9 @@ from psychopy import core, event, visual
 from PIL import Image, ImageDraw
 
 # Local imports
-from . import coord_utils
+from . import Coords
 from .Calibration import CalibrationSession
+from .Utils import NicePrint
 
 class InfantStimuli:
     """
@@ -348,9 +349,9 @@ class TobiiController:
     def _adapt_gaze_data(self, df):
         """Adapt gaze data format and convert coordinates."""
         # Convert coordinates more efficiently
-        df['Left_X'], df['Left_Y'] = zip(*[coord_utils.get_psychopy_pos(self.win, coord) 
+        df['Left_X'], df['Left_Y'] = zip(*[Coords.get_psychopy_pos(self.win, coord) 
                                         for coord in df['left_gaze_point_on_display_area']])
-        df['Right_X'], df['Right_Y'] = zip(*[coord_utils.get_psychopy_pos(self.win, coord) 
+        df['Right_X'], df['Right_Y'] = zip(*[Coords.get_psychopy_pos(self.win, coord) 
                                             for coord in df['right_gaze_point_on_display_area']])
         
         # Process timestamps
@@ -376,6 +377,7 @@ class TobiiController:
                 'Right_X', 'Right_Y', 'Right_Validity',
                 'Right_Pupil', 'Right_Pupil_Validity']]
 
+#%% test
 
     def save_data(self):
         """Save gaze and event data to an HDF5 file with two datasets: 'gaze' and 'events'."""
@@ -730,14 +732,14 @@ class TobiiController:
             # Update the left eye position
             if lv:
                 # Convert TBCS coordinates to PsychoPy coordinates
-                lx, ly = coord_utils.get_psychopy_pos_from_trackbox(self.win, [lx, ly], "height")
+                lx, ly = Coords.get_psychopy_pos_from_trackbox(self.win, [lx, ly], "height")
                 leye.setPos((round(lx * 0.25, 4), round(ly * 0.2 + 0.4, 4)))
                 leye.draw()
 
             # Update the right eye position
             if rv:
                 # Convert TBCS coordinates to PsychoPy coordinates
-                rx, ry = coord_utils.get_psychopy_pos_from_trackbox(self.win, [rx, ry], "height")
+                rx, ry = Coords.get_psychopy_pos_from_trackbox(self.win, [rx, ry], "height")
                 reye.setPos((round(rx * 0.25, 4), round(ry * 0.2 + 0.4, 4)))
                 reye.draw()
 
@@ -803,7 +805,7 @@ class TobiiController:
             pos = self.mouse.getPos()
             
             # Convert the mouse position to Tobii ADCS coordinates
-            tobii_pos = coord_utils.get_tobii_pos(self.win, pos)
+            tobii_pos = Coords.get_tobii_pos(self.win, pos)
             
             # Get the current timestamp in milliseconds since the Unix epoch
             timestamp = time.time() * 1000  
