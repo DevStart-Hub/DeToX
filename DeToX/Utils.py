@@ -2,24 +2,44 @@
 from psychopy import visual
 
 
-def NicePrint(body: str, title: str = ""):
+def NicePrint(body: str, title: str = "") -> None:
+    """Print a message in a box with an optional title.
+
+    :param body: The string to print inside the box.
+    :param title: An optional title to print on the top border of the box.
+    """
+
+    # Split the body string into lines
     lines = body.splitlines() or [""]
+    # Calculate the maximum width of the lines
     content_w = max(map(len, lines))
-    title_s = f" {title} " if title else ""
-    panel_w = max(content_w, len(title_s)) + 2
+
+    # Calculate the panel width
+    panel_w = max(content_w, len(f" {title} " if title else "")) + 2
+
+    # Unicode characters for the corners and sides of the box
     tl, tr, bl, br, h, v = "┌", "┐", "└", "┘", "─", "│"
+
+    # Construct the top border of the box
     if title:
-        left = (panel_w - len(title_s)) // 2
-        right = panel_w - len(title_s) - left
-        top = f"{tl}{h*left}{title_s}{h*right}{tr}"
+        # Calculate the left and right margins for the title
+        left = (panel_w - len(f" {title} ")) // 2
+        right = panel_w - len(f" {title} ") - left
+        # Construct the top border
+        top = f"{tl}{h*left}{title} {h*right}{tr}"
     else:
+        # Construct the top border if there is no title
         top = f"{tl}{h*panel_w}{tr}"
+
+    # Print the box
     print(
         top,
         *(
+            # Construct each line of the box
             f"{v}{line}{' '*(panel_w-len(line))}{v}"
             for line in lines
         ),
+        # Construct the bottom border
         f"{bl}{h*panel_w}{br}",
         sep="\n"
     )
