@@ -10,38 +10,17 @@ from .coord_utils import get_tobii_pos
 
 class CalibrationSession:
     """
-    Manages an infant-friendly calibration procedure.
+    Infant-friendly calibration session manager.
 
-    Splits the process into steps:
-      1. Verify points
-      2. Prepare stimuli
-      3. Collect data interactively
-      4. Compute and show results
-      5. Let user retry points
-      6. Discard and repeat if needed
-      7. Save calibration data
+    Encapsulates the flow of a full calibration procedure:
+      1. Validate input points
+      2. Initialize stimuli
+      3. Collect calibration data at chosen points
+      4. Compute and display results
+      5. Allow user to select points for re-calibration
+      6. Discard data for retried points and loop back
+      7. Save calibration if requested
     """
-
-    # Animation defaults: speed multiplier and min zoom
-    _animation_settings = {
-        'animation_speed': 1.0,
-        'target_min': 0.2,
-    }
-
-    # Key mappings for number keys -> point indices
-    _numkey_dict = {
-        "0": -1, "num_0": -1,
-        "1": 0,  "num_1": 0,
-        "2": 1,  "num_2": 1,
-        "3": 2,  "num_3": 2,
-        "4": 3,  "num_4": 3,
-        "5": 4,  "num_5": 4,
-        "6": 5,  "num_6": 5,
-        "7": 6,  "num_7": 6,
-        "8": 7,  "num_8": 7,
-        "9": 8,  "num_9": 8,
-    }
-
 
     def __init__(
         self,
@@ -51,18 +30,31 @@ class CalibrationSession:
         shuffle=True,
         audio=None,
         focus_time=0.5,
-        anim_type='zoom'
+        anim_type='zoom',
+        animation_settings=None,
+        numkey_dict=None
     ):
         """
-        Initialize session parameters.
-
-        win            : PsychoPy Window for display.
-        calibration_api: Tobii calibration interface.
-        infant_stims   : list of image paths for attention.
-        shuffle        : randomize stimuli order.
-        audio          : optional sound on selection.
-        focus_time     : delay before data capture.
-        anim_type      : 'zoom' or 'trill' animation style.
+        Parameters
+        ----------
+        win : psychopy.visual.Window
+            PsychoPy window for rendering stimuli and instructions.
+        calibration_api : tobii_research.ScreenBasedCalibration
+            Tobii's calibration interface (real or stub).
+        infant_stims : list of str
+            List of image file paths for attention-getting stimuli.
+        shuffle : bool, optional
+            Whether to randomize stimulus order each run. Default True.
+        audio : psychopy.sound.Sound, optional
+            Sound to play when user selects a point. Default None.
+        focus_time : float, optional
+            Delay (seconds) before collecting data at a point. Default 0.5.
+        anim_type : str, optional
+            Animation style: 'zoom' or 'trill'. Default 'zoom'.
+        animation_settings : dict
+            {'animation_speed':…, 'target_min':…} passed from controller.
+        numkey_dict : dict
+            Mapping of key strings to point indices passed from controller.
         """
         self.win = win
         self.calibration = calibration_api
@@ -72,44 +64,54 @@ class CalibrationSession:
         self.focus_time = focus_time
         self.anim_type = anim_type
 
+        # pulled in from Base.TobiiController
+        self._animation_settings = animation_settings
+        self._numkey_dict = numkey_dict
 
     def run(self, calibration_points, save_calib=False):
         """
-        Execute full calibration: collect, compute, retry, save.
+        Execute the complete calibration loop.
 
-        calibration_points : list of (x, y) positions.
-        save_calib         : whether to write binary `.dat` file.
-        returns True on success.
+        Parameters
+        ----------
+        calibration_points : list of (float, float)
+            PsychoPy-normalized (x, y) coordinates for calibration targets.
+        save_calib : bool, optional
+            If True and calibration succeeds, save binary data to disk.
+
+        Returns
+        -------
+        bool
+            True if calibration succeeded.
         """
-        # Step 1: verify allowed number of points
-        self._check_points(calibration_points)
-        # Step 2: set up stimuli
+        # 1. Verify and prepare
+        self.check_points(calibration_points)
         self._prepare_session(calibration_points)
 
-        # Enter Tobii calibration mode
+        # Enter calibration mode
         self.calibration.enter_calibration_mode()
 
-        # Repeat until no retries
+        # Retry loop
         while True:
-            # Step 3: interactive data collection
+            # 2. Collection phase
             retries = self._collection_phase(calibration_points)
 
-            # Step 4: compute and show
+            # 3. Compute & show
             self.calibration_result = self.calibration.compute_and_apply()
             result_img = self._show_calibration_result()
 
-            # Step 5: select retry points
+            # 4. Selection phase
             retries = self._selection_phase(calibration_points, result_img)
             if not retries:
                 break
 
-            # Step 6: discard and loop
+            # 5. Discard phase
             self._discard_phase(calibration_points, retries)
 
-        # Exit calibration mode
+        # Leave calibration mode
         self.calibration.leave_calibration_mode()
 
-        # Step 7: save if requested
+        # 6. Save calibration data if requested
         success = (self.calibration_result.status == tr.CALIBRATION_STATUS_SUCCESS)
         if success and save_calib:
             data = self.calibration.retrieve_calibration_data()
@@ -119,9 +121,9 @@ class CalibrationSession:
         return success
 
 
-    def _check_points(self, calibration_points):
+    def check_points(self, calibration_points):
         """
-        Ensure there are between 2 and 9 calibration points.
+        Ensure number of calibration points is within allowed range.
         """
         if not (2 <= len(calibration_points) <= 9):
             raise ValueError("Calibration points must be between 2 and 9")
@@ -129,19 +131,24 @@ class CalibrationSession:
 
     def _prepare_session(self, calibration_points):
         """
-        Create and shuffle stimuli; mark all points uncollected.
+        Initialize stimuli sequence and track points pending collection.
         """
         self.targets = InfantStimuli(
-            self.win, self.infant_stims, shuffle=self.shuffle
+            self.win,
+            self.infant_stims,
+            shuffle=self.shuffle
         )
         self.remaining = list(range(len(calibration_points)))
 
 
     def _collection_phase(self, calibration_points):
         """
-        Let user press number keys to select a point.
-        Press Space to collect data after focus_time.
-        Return uncollected point indices.
+        Let user select points by number and collect data on Space.
+
+        Returns
+        -------
+        list of int
+            Indices of points still uncollected.
         """
         clock = core.Clock()
         cp_num = len(calibration_points)
@@ -149,14 +156,16 @@ class CalibrationSession:
         point_idx = -1
 
         while True:
-            # handle key events
+            # Handle keys
             for key in event.getKeys():
                 if key in self._numkey_dict:
+                    # select point; play audio if available
                     point_idx = self._numkey_dict[key]
                     if self.audio:
                         self.audio.play()
                 elif key == 'space' and point_idx in remaining:
-                    core.wait(self.focus_time)  # allow gaze to settle
+                    # wait, collect, pause audio
+                    core.wait(self.focus_time)
                     x, y = get_tobii_pos(self.win, calibration_points[point_idx])
                     self.calibration.collect_data(x, y)
                     if self.audio:
@@ -164,9 +173,10 @@ class CalibrationSession:
                     remaining.remove(point_idx)
                     point_idx = -1
                 elif key == 'return':
+                    # finish early
                     return remaining
 
-            # animate selected stimulus
+            # Animate selected stim
             if 0 <= point_idx < cp_num:
                 stim = self.targets.get_stim(point_idx)
                 stim.setPos(calibration_points[point_idx])
@@ -175,13 +185,18 @@ class CalibrationSession:
                     self.anim_type, rotation_range=15
                 )
 
-            self.win.flip()  # update screen
+            self.win.flip()
 
 
     def _selection_phase(self, calibration_points, result_img):
         """
-        Display result image; toggle retry with number keys.
-        Confirm with Space; abort (retry all) with Esc.
+        Show result image; toggle retry points with number keys.
+        Confirm with Space; abort (retry all) with Escape.
+
+        Returns
+        -------
+        list of int
+            Indices chosen for re-calibration.
         """
         cp_num = len(calibration_points)
         retries = set()
@@ -194,6 +209,7 @@ class CalibrationSession:
         while True:
             result_img.draw()
             instructions.draw()
+
             for key in event.getKeys():
                 if key in self._numkey_dict:
                     idx = self._numkey_dict[key]
@@ -207,10 +223,11 @@ class CalibrationSession:
                 elif key == 'escape':
                     return list(range(cp_num))
 
-            # highlight retry points
+            # highlight retries
             for rp in retries:
                 visual.Circle(
-                    self.win, radius=10,
+                    self.win,
+                    radius=10,
                     pos=calibration_points[rp],
                     lineColor='yellow'
                 ).draw()
@@ -228,32 +245,44 @@ class CalibrationSession:
 
     def _show_calibration_result(self):
         """
-        Draws points and gaze-sample lines on an image.
-        Returns a PsychoPy ImageStim of the result.
+        Show calibration results with lines indicating accuracy.
+
+        Draws markers at each point and lines from each sample:
+        green = left eye, red = right eye.
+
+        Returns
+        -------
+        SimpleImageStim
+            PsychoPy stimulus containing the result image.
         """
+        # Create blank RGBA image matching window size
         img = Image.new("RGBA", tuple(self.win.size))
         img_draw = ImageDraw.Draw(img)
+        # Wrap in SimpleImageStim to avoid resizing later
         result_img = visual.SimpleImageStim(self.win, img, autoLog=False)
 
+        # Only draw if not a full failure
         if self.calibration_result.status != tr.CALIBRATION_STATUS_FAILURE:
             for point in self.calibration_result.calibration_points:
                 p = point.position_on_display_area
-                # marker at calibration target
+                # Draw small circle at target
                 img_draw.ellipse(
                     ((p[0]*self.win.size[0]-3, p[1]*self.win.size[1]-3),
                      (p[0]*self.win.size[0]+3, p[1]*self.win.size[1]+3)),
-                    outline=(0,0,0,255)
+                    outline=(0, 0, 0, 255)
                 )
-                # draw each valid eye sample
+                # Draw lines for each calibration sample
                 for sample in point.calibration_samples:
                     lp = sample.left_eye.position_on_display_area
                     rp = sample.right_eye.position_on_display_area
+                    # Left eye
                     if sample.left_eye.validity == tr.VALIDITY_VALID_AND_USED:
                         img_draw.line(
                             ((p[0]*self.win.size[0], p[1]*self.win.size[1]),
                              (lp[0]*self.win.size[0], lp[1]*self.win.size[1])),
                             fill=(0,255,0,255)
                         )
+                    # Right eye
                     if sample.right_eye.validity == tr.VALIDITY_VALID_AND_USED:
                         img_draw.line(
                             ((p[0]*self.win.size[0], p[1]*self.win.size[1]),
@@ -261,20 +290,24 @@ class CalibrationSession:
                             fill=(255,0,0,255)
                         )
 
+        # Update stim's image and return
         result_img.setImage(img)
         return result_img
 
 
     def _animate(self, stim, point_idx, clock, anim_type='zoom', rotation_range=15):
         """
-        Apply zoom or trill animation to a stimulus.
+        Animate a stimulus with zoom or rotation ('trill').
         """
-        elapsed = clock.getTime() * self._animation_settings['animation_speed']
+        elapsed_time = clock.getTime() * self._animation_settings['animation_speed']
+
         if anim_type == 'zoom':
-            orig = self.targets.get_stim_original_size(point_idx)
-            scale = np.sin(elapsed)**2 + self._animation_settings['target_min']
-            stim.setSize([scale * s for s in orig])
+            orig_size = self.targets.get_stim_original_size(point_idx)
+            scale_factor = np.sin(elapsed_time)**2 + self._animation_settings['target_min']
+            newsize = [scale_factor * s for s in orig_size]
+            stim.setSize(newsize)
         elif anim_type == 'trill':
-            angle = np.sin(elapsed) * rotation_range
+            angle = np.sin(elapsed_time) * rotation_range
             stim.setOri(angle)
+
         stim.draw()

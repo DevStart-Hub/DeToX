@@ -121,6 +121,25 @@ class TobiiController:
     minimal interface for the user to interact with the Tobii Pro SDK.
     """
     
+    _numkey_dict = {
+        "0": -1, "num_0": -1,
+        "1": 0,  "num_1": 0,
+        "2": 1,  "num_2": 1,
+        "3": 2,  "num_3": 2,
+        "4": 3,  "num_4": 3,
+        "5": 4,  "num_5": 4,
+        "6": 5,  "num_6": 5,
+        "7": 6,  "num_7": 6,
+        "8": 7,  "num_8": 7,
+        "9": 8,  "num_9": 8,
+    }
+ 
+    # Animation defaults: speed multiplier and min zoom
+    _animation_settings = {
+        'animation_speed': 1.0,
+        'target_min': 0.2,
+    }
+
     _simulation_settings = {
         'framerate': 120,  # Default to Tobii Pro Spectrum rate
     }
@@ -610,180 +629,30 @@ class TobiiController:
         self.print_info(moment="recording")
 
 
-    def run_calibration(self, calibration_points, infant_stims, shuffle=True, 
-                    audio=None, focus_time=0.5, anim_type='zoom', save_calib=False):
+    def run_calibration(self,
+                        calibration_points,
+                        infant_stims,
+                        shuffle=True,
+                        audio=None,
+                        focus_time=0.5,
+                        anim_type='zoom',
+                        save_calib=False):
         """
-        Run an infant-friendly calibration procedure with point selection and
-        animated stimuli. The calibration points are presented in a sequence
-        (either in order or shuffled) and at each point, an animated stimulus
-        is presented (either zooming or trilling). The procedure can optionally
-        play an attention-getting audio during the calibration process. The
-        calibration data can be saved to a file if desired.
-
-        Parameters
-        ----------
-        calibration_points : list of tuple
-            List of (x, y) coordinates for calibration points
-        infant_stims : list of str
-            List of image file paths for calibration stimuli
-        shuffle : bool, optional
-            Whether to shuffle stimuli order. Default is True
-        audio : psychopy.sound.Sound, optional
-            Audio to play during calibration. Default is None
-        focus_time : float, optional
-            Time to wait before collecting data. Default is 0.5s
-        save_calib : bool, optional
-            Whether to save calibration data. Default is False
-
-        Returns
-        -------
-        bool
-            True if calibration successful, False otherwise
+        Run an infant-friendly calibration procedure…
         """
-        # Check if number of calibration points is valid
-        if len(calibration_points) < 2 or len(calibration_points) > 9:
-            raise ValueError("Calibration points must be between 2 and 9")
-
-        # Initialize stimuli and settings
-        self.targets = InfantStimuli(self.win, infant_stims, shuffle=shuffle)
-        self._audio = audio
-
-        # Setup calibration points
-        self.original_calibration_points = calibration_points[:]
-        cp_num = len(self.original_calibration_points)
-        self.retry_points = list(range(cp_num))
-
-        # Create calibration object
-        if self.simulate:
-            print("Running calibration in simulation mode")
-        else:
-            # Enter calibration mode once at start
-            self.calibration.enter_calibration_mode()
-            
-        # Main calibration loop
-        in_calibration_loop = True
-        clock = core.Clock()  # For animation timing
-
-        while in_calibration_loop:
-            # Collection phase
-            point_idx = -1
-            collecting = True
-
-            while collecting:
-                # Handle key presses
-                for key in event.getKeys():
-                    if key in self.numkey_dict:
-                        # User selected a point to collect data
-                        point_idx = self.numkey_dict[key]
-                        if self._audio:
-                            self._audio.play()
-                    elif key == 'space':
-                        # User wants to accept this point and move on
-                        if point_idx in self.retry_points:
-                            core.wait(focus_time)
-                            # Convert coordinates for Tobii
-                            psychopy_point = calibration_points[point_idx]
-                            tobii_x, tobii_y = coord_utils.get_tobii_pos(
-                                self.win, 
-                                psychopy_point
-                            )
-
-                            # Collect data
-                            if not self.simulate:
-                                self.calibration.collect_data(tobii_x, tobii_y)
-                                point_idx = -1  # Reset point index
-                                if self._audio:
-                                    self._audio.pause()
-
-                    elif key == 'return':
-                        # User wants to move on to the next phase
-                        collecting = False
-                        break
-
-                # Display animated stimulus
-                if 0 <= point_idx < len(calibration_points):
-                    stim = self.targets.get_stim(point_idx)
-                    stim.setPos(calibration_points[point_idx])
-                    self._animate(stim, point_idx, clock, anim_type=anim_type)
-
-                self.win.flip()
-
-            # Compute calibration
-            if not self.simulate:
-                self.calibration_result = self.calibration.compute_and_apply()
-                result_img = self._show_calibration_result()
-
-            # Show instructions
-            instructions = visual.TextStim(
-                self.win,
-                text="Press numbers to select points to recalibrate\n"
-                    "Space to accept/recalibrate\n"
-                    "Escape to abort",
-                pos=(0, -self.win.size[1]/4),
-                color='white',
-                height=20
-            )
-
-            # Handle point selection for recalibration
-            self.retry_points = []
-            selecting = True
-            while selecting:
-                
-                if not self.simulate:
-                    result_img.draw()
-                instructions.draw()
-
-                for key in event.getKeys():
-                    if key in self.numkey_dict:
-                        # User selected a point to recalibrate
-                        idx = self.numkey_dict[key]
-                        if idx < cp_num:
-                            if idx in self.retry_points:
-                                self.retry_points.remove(idx)
-                            else:
-                                self.retry_points.append(idx)
-                    elif key == 'space':
-                        # User wants to accept/recalibrate
-                        selecting = False
-                        if len(self.retry_points) == 0:
-                            in_calibration_loop = False
-                    elif key == 'escape':
-                        # User wants to abort
-                        selecting = False
-                        in_calibration_loop = False
-
-                # Show selected points for recalibration
-                for retry_p in self.retry_points:
-                    visual.Circle(
-                        self.win,
-                        radius=10,
-                        pos=calibration_points[retry_p],
-                        lineColor='yellow'
-                    ).draw()
-
-                self.win.flip()
-
-            # Handle recalibration points
-            for point_index in self.retry_points:
-                tobii_x, tobii_y = coord_utils.get_tobii_pos(
-                    self.win, 
-                    calibration_points[point_index]
-                )
-                
-                # remove points
-                if not self.simulate:
-                    self.calibration.discard_data(tobii_x, tobii_y)
-
-        # Exit calibration mode at end and save
-        if not self.simulate:
-            self.calibration.leave_calibration_mode()
-            success = self.calibration_result.status == tr.CALIBRATION_STATUS_SUCCESS
-            if success and save_calib:
-                self.save_calibration()
-        else:
-            success = True
-
-        return success
+        # Create session, injecting our two dicts from here:
+        session = CalibrationSession(
+            win=self.win,
+            calibration_api=self.calibration,
+            infant_stims=infant_stims,
+            shuffle=shuffle,
+            audio=audio,
+            focus_time=focus_time,
+            anim_type=anim_type,
+            animation_settings=self._animation_settings,
+            numkey_dict=self._numkey_dict
+        )
+        return session.run(calibration_points, save_calib=save_calib)
 
     def show_status(self, decision_key="space"):
         """
