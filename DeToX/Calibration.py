@@ -22,6 +22,20 @@ class CalibrationSession:
       7. Save calibration if requested
     """
 
+    # Map PsychoPy key names to calibration point indices
+    _numkey_dict = {
+        "0": -1, "num_0": -1,
+        "1": 0,  "num_1": 0,
+        "2": 1,  "num_2": 1,
+        "3": 2,  "num_3": 2,
+        "4": 3,  "num_4": 3,
+        "5": 4,  "num_5": 4,
+        "6": 5,  "num_6": 5,
+        "7": 6,  "num_7": 6,
+        "8": 7,  "num_8": 7,
+        "9": 8,  "num_9": 8,
+    }
+
 
     def __init__(
         self,
@@ -162,8 +176,8 @@ class CalibrationSession:
 
         while True:
             for key in event.getKeys():
-                if key in TobiiController._numkey_dict:
-                    point_idx = TobiiController._numkey_dict[key]
+                if key in self._numkey_dict:
+                    point_idx = self._numkey_dict[key]
                     if self.audio:
                         self.audio.play()
                 elif key == 'space' and point_idx in remaining:
@@ -210,8 +224,8 @@ class CalibrationSession:
             result_img.draw()
             instructions.draw()
             for key in event.getKeys():
-                if key in TobiiController._numkey_dict:
-                    idx = TobiiController._numkey_dict[key]
+                if key in self._numkey_dict:
+                    idx = self._numkey_dict[key]
                     if 0 <= idx < cp_num:
                         if idx in retries:
                             retries.remove(idx)
