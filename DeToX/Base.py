@@ -11,7 +11,6 @@ import numpy as np
 import pandas as pd
 import tobii_research as tr
 from psychopy import core, event, visual
-from PIL import Image, ImageDraw
 
 # Local imports
 from . import Coords
@@ -112,7 +111,6 @@ class TobiiController:
 
         self.get_info(moment='connection')
         atexit.register(self.close)
-
 
 
     def get_info(self, moment='connection'):
@@ -257,17 +255,36 @@ class TobiiController:
             )
 
     def _adapt_gaze_data(self, df):
-        """Adapt gaze data format and convert coordinates."""
-        # Convert coordinates more efficiently
-        df['Left_X'], df['Left_Y'] = zip(*[Coords.get_psychopy_pos(self.win, coord) 
-                                        for coord in df['left_gaze_point_on_display_area']])
-        df['Right_X'], df['Right_Y'] = zip(*[Coords.get_psychopy_pos(self.win, coord) 
-                                            for coord in df['right_gaze_point_on_display_area']])
+        """
+        Adapt gaze data format and convert coordinates.
+
+        Parameters
+        ----------
+        df : pandas.DataFrame
+            DataFrame containing raw gaze data.
+
+        Returns
+        -------
+        pandas.DataFrame
+            DataFrame with adapted gaze data, including converted coordinates
+            and renamed columns.
+        """
+        # Convert left eye gaze coordinates from Tobii to PsychoPy
+        df['Left_X'], df['Left_Y'] = zip(*[
+            Coords.get_psychopy_pos(self.win, coord)
+            for coord in df['left_gaze_point_on_display_area']
+        ])
+
+        # Convert right eye gaze coordinates from Tobii to PsychoPy
+        df['Right_X'], df['Right_Y'] = zip(*[
+            Coords.get_psychopy_pos(self.win, coord)
+            for coord in df['right_gaze_point_on_display_area']
+        ])
         
-        # Process timestamps
+        # Process and convert system timestamps to a unified format
         df['TimeStamp'] = self._process_timestamps(df['system_time_stamp'])
         
-        # Rename and convert in one step
+        # Rename columns to a more readable format and convert validity columns to integers
         df = df.rename(columns={
             'left_gaze_point_validity': 'Left_Validity',
             'left_pupil_diameter': 'Left_Pupil',
@@ -282,17 +299,16 @@ class TobiiController:
             'Right_Pupil_Validity': 'int'
         })
 
+        # Return a DataFrame with selected columns in a specific order
         return df[['TimeStamp', 'Left_X', 'Left_Y', 'Left_Validity',
-                'Left_Pupil', 'Left_Pupil_Validity', 
-                'Right_X', 'Right_Y', 'Right_Validity',
-                'Right_Pupil', 'Right_Pupil_Validity']]
+                   'Left_Pupil', 'Left_Pupil_Validity', 
+                   'Right_X', 'Right_Y', 'Right_Validity',
+                   'Right_Pupil', 'Right_Pupil_Validity']]
 
 #%% test
 
     def save_data(self):
         """Save gaze and event data to an HDF5 file with two datasets: 'gaze' and 'events'."""
-        import pandas as pd
-        import time
 
         # Start timing the save process
         start_saving = time.perf_counter()
@@ -382,7 +398,6 @@ class TobiiController:
         self.eyetracker.subscribe_to(tr.EYETRACKER_GAZE_DATA, self._on_gaze_data, as_dictionary=True)
         core.wait(1)
         self.recording = True
-        self.t0 = tr.get_system_time_stamp()
 
 
     def _stop_recording(self):
