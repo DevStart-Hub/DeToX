@@ -67,8 +67,6 @@ class TobiiController:
         'framerate': 120,  # Default to Tobii Pro Spectrum rate
     }
 
-    # Flag indicating whether recording is currently active
-    recording = False
 
     def __init__(self, win, id=0, simulate=False):
         self.eyetracker_id = id
@@ -82,32 +80,20 @@ class TobiiController:
         self.event_data = []
         self.recording = False
 
+        # Configure the environment based on simulation mode
         if self.simulate:
-            from psychopy import event
             self.mouse = event.Mouse(win=self.win)
-
-            # Simulation method bindings
-            self.start_recording = self._start_recording_sim
-            self.stop_recording = self._stop_recording_sim
-            self.record_event = self._record_event_sim
-            self.close = self._close_sim
         else:
             eyetrackers = tr.find_all_eyetrackers()
             if not eyetrackers:
                 raise RuntimeError(
-                                "No Tobii eyetrackers detected.\n"
-                                "Verify the connection and make sure to power on the "
-                                "eyetracker before starting your computer."
-                            )
+                    "No Tobii eyetrackers detected.\n"
+                    "Verify the connection and make sure to power on the "
+                    "eyetracker before starting your computer."
+                )
 
             self.eyetracker = eyetrackers[self.eyetracker_id]
             self.calibration = tr.ScreenBasedCalibration(self.eyetracker)
-
-            # Real method bindings (default names)
-            self.start_recording = self._start_recording
-            self.stop_recording = self._stop_recording
-            self.record_event = self._record_event
-            self.close = self._close
 
         self.get_info(moment='connection')
         atexit.register(self.close)
@@ -370,14 +356,10 @@ class TobiiController:
         print(f"Data saved in {round(time.perf_counter() - start_saving, 3)} seconds.")
 
 
-    def _start_recording(self, filename=None, event_mode='precise'):
+    def start_recording(self, filename=None, event_mode='precise'):
         """
         Start recording gaze data.
-
-        This private method prepares the recording environment, subscribes to 
-        the gaze data stream, and sets the recording flag. It initializes the 
-        start time for timestamps.
-
+        
         Parameters
         ----------
         filename : str, optional
@@ -385,141 +367,82 @@ class TobiiController:
             default name based on the current datetime will be used.
         event_mode : str, optional
             Mode for event recording. Options are 'samplebased' or 'precise'. 
-            Default is 'precise'. In 'precise' mode, events are saved in a 
-            separate file.
-
-        Notes
-        -----
-        This method is called internally and should not be used directly. It 
-        assumes that the eye tracker is already initialized and ready to stream 
-        data.
+            Default is 'precise'.
         """
+        # Common setup for both real and simulation modes
         self._prepare_recording(filename, event_mode)
-        self.eyetracker.subscribe_to(tr.EYETRACKER_GAZE_DATA, self._on_gaze_data, as_dictionary=True)
-        core.wait(1)
-        self.recording = True
+        
+        if self.simulate:
+            # Simulation-specific setup
+            if self._stop_simulation is None:
+                self._stop_simulation = threading.Event()
+            else:
+                self._stop_simulation.clear()
+
+            self._simulation_thread = threading.Thread(target=self._simulate_gaze_data_loop, daemon=True)
+            self.recording = True
+            self.t0 = time.perf_counter() * 1000
+            self._simulation_thread.start()
+        else:
+            # Real eyetracker setup
+            self.eyetracker.subscribe_to(tr.EYETRACKER_GAZE_DATA, self._on_gaze_data, as_dictionary=True)
+            core.wait(1)
+            self.recording = True
 
 
-    def _stop_recording(self):
+    def stop_recording(self):
         """
         Stop recording gaze data and save it to file.
-
-        This method stops the recording, unsubscribes from the gaze data
-        stream, and saves the recorded data to files.
         """
         if not self.recording:
             return
+        
         self.recording = False
-        self.eyetracker.unsubscribe_from(tr.EYETRACKER_GAZE_DATA, self._on_gaze_data)
+        
+        if self.simulate:
+            # Simulation-specific cleanup
+            if self._stop_simulation is not None:
+                self._stop_simulation.set()
+            if self._simulation_thread is not None:
+                self._simulation_thread.join(timeout=1.0)
+        else:
+            # Real eyetracker cleanup
+            self.eyetracker.unsubscribe_from(tr.EYETRACKER_GAZE_DATA, self._on_gaze_data)
+        
+        # Common code for both modes
         self.save_data()
 
 
-    def _record_event(self, label):
+    def record_event(self, label):
         """
         Record an event with a timestamp.
-
-        This method adds an event to the event data buffer. The event is
-        represented as a list with two elements: the first element is the
-        timestamp of the event in milliseconds relative to the start of the
-        recording, and the second element is the event label provided as a
-        string.
-
-        If the recording is not active, a RuntimeWarning is raised.
-
+        
         Parameters
         ----------
         label : str
             The label for the event to record
-        """
-        if not self.recording:
-            raise RuntimeWarning("Not recording now.")
-        self.event_data.append([tr.get_system_time_stamp(), label])
-
-
-    def _close(self):
-        """
-        Stop recording and perform necessary cleanup.
-
-        This private method checks if recording is active. If so, it calls
-        the _stop_recording method to ensure that recording is stopped and
-        any necessary data is saved.
-        """
-        if self.recording:
-            self._stop_recording()
-
-
-    def _start_recording_sim(self, filename=None, event_mode='precise'):
-        """
-        Start recording with simulated gaze data.
-
-        This method starts the recording process when in simulation mode.
-        It sets up a separate thread that simulates gaze data and signals
-        it to start. It also sets the recording flag to `True` and records
-        the current time as the starting time stamp.
-
-        Parameters
-        ----------
-        filename : str, optional
-            The name of the file to save the gaze data to. If not provided, a default filename set in the constructor will be used.
-        event_mode : str, optional
-            Mode for event recording. Options are 'samplebased' or 'precise'. Default is 'precise'. In 'precise' mode, events are saved in a separate file.
-        """
-        self._prepare_recording(filename, event_mode)
-        if self._stop_simulation is None:
-            self._stop_simulation = threading.Event()
-        else:
-            self._stop_simulation.clear()
-
-        self._simulation_thread = threading.Thread(target=self._simulate_gaze_data_loop, daemon=True)
-        self.recording = True
-        self.t0 = time.perf_counter() * 1000
-        self._simulation_thread.start()
-
-
-    def _stop_recording_sim(self):
-        """
-        Stop the simulation recording and save data.
-
-        This method stops the recording process when in simulation mode.
-        It signals the simulation thread to stop, waits for the thread
-        to finish, and saves the recorded data to files.
-        If the recording is not active, the method returns immediately.
-        """
-        if not self.recording:
-            return
-        self.recording = False
-        if self._stop_simulation is not None:
-            self._stop_simulation.set()
-        if self._simulation_thread is not None:
-            self._simulation_thread.join(timeout=1.0)
-        self.save_data()
-
-
-    def _record_event_sim(self, label):
-        """
-        Record an event with a timestamp in simulation mode.
-
-        Parameters
-        ----------
-        label : str
-            The label for the event to record
-
+        
         Raises
         ------
         RuntimeWarning
-            If the recording is not active.
+            If recording is not active
         """
         if not self.recording:
             raise RuntimeWarning("Not recording now.")
-        self.event_data.append([time.perf_counter() * 1000, label])
+        
+        if self.simulate:
+            # Use simulation timestamp
+            self.event_data.append([time.perf_counter() * 1000, label])
+        else:
+            # Use eyetracker timestamp
+            self.event_data.append([tr.get_system_time_stamp(), label])
 
-
-    def _close_sim(self):
-        """Stop recording and save data if recording is active."""
-
+    def close(self):
+        """
+        Stop recording and perform necessary cleanup.
+        """
         if self.recording:
-            self._stop_recording_sim()
-
+            self.stop_recording()
 
     def _prepare_recording(self, filename, event_mode):
         """
@@ -566,7 +489,34 @@ class TobiiController:
                     anim_type='zoom',
                     save_calib=False):
         """
-        Run an infant-friendly calibration procedure…
+        Run an infant-friendly calibration procedure with point selection and
+        animated stimuli. The calibration points are presented in a sequence
+        (either in order or shuffled) and at each point, an animated stimulus
+        is presented (either zooming or trilling). The procedure can optionally
+        play an attention-getting audio during the calibration process. The
+        calibration data can be saved to a file if desired.
+
+        Parameters
+        ----------
+        calibration_points : list of (float, float)
+            PsychoPy-normalized (x, y) coordinates for calibration targets.
+        infant_stims : list of str
+            List of image file paths for calibration stimuli.
+        shuffle : bool, optional
+            Whether to shuffle stimuli order. Default is True.
+        audio : str, optional
+            Path to audio file to play during calibration. Default is None.
+        focus_time : float, optional
+            Time to wait before collecting data. Default is 0.5s
+        anim_type : str, optional
+            Type of animation to use. Options are 'zoom' or 'trill'. Default is 'zoom'.
+        save_calib : bool, optional
+            Whether to save calibration data. Default is False
+
+        Returns
+        -------
+        bool
+            True if calibration successful, False otherwise
         """
         # Create session, injecting our two dicts from here:
         session = CalibrationSession(
