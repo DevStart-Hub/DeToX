@@ -193,62 +193,50 @@ class TobiiController:
 
 
 
-    def print_info(self, moment='connection'):
+    def get_info(self, moment='connection'):
         """
         Print information about the current eyetracker or simulation.
         """
-        console = Console()
-
-        # If simulating, just show simulated info
         if self.simulate:
             if moment == 'connection':
-                multiline_text = (
+                text = (
                     "Simulating eyetracker:\n"
                     f" - Simulated frequency: {self._simulation_settings['framerate']} Hz"
                 )
                 title = "Simulated Eyetracker Info"
-            elif moment == 'recording':
-                multiline_text = (
+            else:  # 'recording'
+                text = (
                     "Recording mouse position:\n"
                     f" - frequency: {self._simulation_settings['framerate']} Hz"
                 )
                 title = "Recording Info"
-
         else:
-            # Retrieve current info from the real eyetracker
-            self.fps = self.eyetracker.get_gaze_output_frequency()
-            self.possible_fps = self.eyetracker.get_all_gaze_output_frequencies()
-            self.illumination = self.eyetracker.get_illumination_mode()
-            self.possible_illumination = self.eyetracker.get_all_illumination_modes()
+            fps = self.eyetracker.get_gaze_output_frequency()
+            freqs = self.eyetracker.get_all_gaze_output_frequencies()
+            illum = self.eyetracker.get_illumination_mode()
+            illums = self.eyetracker.get_all_illumination_modes()
 
             if moment == 'connection':
-                multiline_text = (
+                text = (
                     "Connected to the eyetracker:\n"
                     f" - Model: {self.eyetracker.model}\n"
-                    f" - Current frequency: {self.fps} Hz\n"
-                    f" - Illumination mode: {self.illumination}\n"
+                    f" - Current frequency: {fps} Hz\n"
+                    f" - Illumination mode: {illum}\n"
                     "\nOther options:\n"
-                    f" - Possible frequencies: {self.possible_fps}\n"
-                    f" - Possible illumination modes: {self.possible_illumination}"
+                    f" - Possible frequencies: {freqs}\n"
+                    f" - Possible illumination modes: {illums}"
                 )
                 title = "Eyetracker Info"
-
-            elif moment == 'recording':
-                multiline_text = (
+            else:  # 'recording'
+                text = (
                     "Starting recording with:\n"
                     f" - Model: {self.eyetracker.model}\n"
-                    f" - Current frequency: {self.fps} Hz\n"
-                    f" - Illumination mode: {self.illumination}"
+                    f" - Current frequency: {fps} Hz\n"
+                    f" - Illumination mode: {illum}"
                 )
                 title = "Recording Info"
 
-        panel = Panel(
-            multiline_text,
-            title=title,
-            subtitle="Wrapped by DeToX",
-        )
-        console.print(panel)
-
+        NicePrint(text, title)
 
 
     def save_calibration(self, filename=None):
