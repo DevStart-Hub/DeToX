@@ -1,9 +1,12 @@
+# Standard library imports
+from datetime import datetime
+
+# Third party imports
+import numpy as np
 import tobii_research as tr
 from psychopy import core, event, visual
-from PIL import Image, ImageDraw
-from datetime import datetime
-import numpy as np
 
+# Local imports
 from .Utils import InfantStimuli
 from .Coords import get_tobii_pos
 
