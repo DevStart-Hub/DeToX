@@ -6,94 +6,16 @@ import threading
 from datetime import datetime
 from collections import deque
 
-
-from rich.console import Console
-from rich.panel import Panel
-
 # Third party imports
 import numpy as np
 import pandas as pd
 import tobii_research as tr
 from psychopy import core, event, visual
-from PIL import Image, ImageDraw
 
 # Local imports
-from . import coord_utils
+from . import Coords
 from .Calibration import CalibrationSession
-
-class InfantStimuli:
-    """
-    Stimuli for infant-friendly calibration.
-
-    This class provides a set of animated stimuli for use in infant-friendly
-    calibration procedures. It takes a list of image files and optional
-    keyword arguments for the ImageStim constructor. It can be used to
-    create a sequence of animated stimuli that can be used to calibrate the
-    eye tracker.
-    """
-
-    def __init__(self, win, infant_stims, shuffle=True, *kwargs):
-        """
-        Initialize the InfantStimuli class.
-
-        Parameters
-        ----------
-        win : psychopy.visual.Window
-            The PsychoPy window to render the stimuli in.
-        infant_stims : list of str
-            List of paths to the image files to use for the stimuli.
-        shuffle : bool, optional
-            Whether to shuffle the order of the stimuli. Default is True.
-        *kwargs : dict
-            Additional keyword arguments to be passed to the ImageStim constructor.
-        """
-        self.win = win
-        self.stims = dict((i, visual.ImageStim(self.win, image=stim, *kwargs))
-                          for i, stim in enumerate(infant_stims))
-        self.stim_size = dict((i, image_stim.size) for i, image_stim in self.stims.items())
-        self.present_order = [*self.stims]
-        if shuffle:
-            np.random.shuffle(self.present_order)
-
-    def get_stim(self, idx):
-        """
-        Get the stimulus by presentation order.
-
-        Parameters
-        ----------
-        idx : int
-            The index of the stimulus in the presentation order.
-
-        Returns
-        -------
-        psychopy.visual.ImageStim
-            The stimulus corresponding to the given index.
-        """
-        # Calculate the index using modulo to ensure it wraps around
-        stim_index = self.present_order[idx % len(self.present_order)]
-        
-        # Retrieve and return the stimulus by its calculated index
-        return self.stims[stim_index]
-
-    def get_stim_original_size(self, idx):
-        """
-        Get the original size of the stimulus by presentation order.
-
-        Parameters
-        ----------
-        idx : int
-            The index of the stimulus in the presentation order.
-
-        Returns
-        -------
-        tuple
-            The original size of the stimulus as (width, height).
-        """
-        # Calculate the index using modulo to ensure it wraps around
-        stim_index = self.present_order[idx % len(self.present_order)]
-        
-        # Return the original size of the stimulus
-        return self.stim_size[stim_index]
+from .Utils import NicePrint
 
 
 class TobiiController:
@@ -187,67 +109,54 @@ class TobiiController:
             self.record_event = self._record_event
             self.close = self._close
 
-        self.print_info(moment='connection')
+        self.get_info(moment='connection')
         atexit.register(self.close)
 
 
-
-    def print_info(self, moment='connection'):
+    def get_info(self, moment='connection'):
         """
         Print information about the current eyetracker or simulation.
         """
-        console = Console()
-
-        # If simulating, just show simulated info
         if self.simulate:
             if moment == 'connection':
-                multiline_text = (
+                text = (
                     "Simulating eyetracker:\n"
                     f" - Simulated frequency: {self._simulation_settings['framerate']} Hz"
                 )
                 title = "Simulated Eyetracker Info"
-            elif moment == 'recording':
-                multiline_text = (
+            else:  # 'recording'
+                text = (
                     "Recording mouse position:\n"
                     f" - frequency: {self._simulation_settings['framerate']} Hz"
                 )
                 title = "Recording Info"
-
         else:
-            # Retrieve current info from the real eyetracker
-            self.fps = self.eyetracker.get_gaze_output_frequency()
-            self.possible_fps = self.eyetracker.get_all_gaze_output_frequencies()
-            self.illumination = self.eyetracker.get_illumination_mode()
-            self.possible_illumination = self.eyetracker.get_all_illumination_modes()
+            fps = self.eyetracker.get_gaze_output_frequency()
+            freqs = self.eyetracker.get_all_gaze_output_frequencies()
+            illum = self.eyetracker.get_illumination_mode()
+            illums = self.eyetracker.get_all_illumination_modes()
 
             if moment == 'connection':
-                multiline_text = (
+                text = (
                     "Connected to the eyetracker:\n"
                     f" - Model: {self.eyetracker.model}\n"
-                    f" - Current frequency: {self.fps} Hz\n"
-                    f" - Illumination mode: {self.illumination}\n"
+                    f" - Current frequency: {fps} Hz\n"
+                    f" - Illumination mode: {illum}\n"
                     "\nOther options:\n"
-                    f" - Possible frequencies: {self.possible_fps}\n"
-                    f" - Possible illumination modes: {self.possible_illumination}"
+                    f" - Possible frequencies: {freqs}\n"
+                    f" - Possible illumination modes: {illums}"
                 )
                 title = "Eyetracker Info"
-
-            elif moment == 'recording':
-                multiline_text = (
+            else:  # 'recording'
+                text = (
                     "Starting recording with:\n"
                     f" - Model: {self.eyetracker.model}\n"
-                    f" - Current frequency: {self.fps} Hz\n"
-                    f" - Illumination mode: {self.illumination}"
+                    f" - Current frequency: {fps} Hz\n"
+                    f" - Illumination mode: {illum}"
                 )
                 title = "Recording Info"
 
-        panel = Panel(
-            multiline_text,
-            title=title,
-            subtitle="Wrapped by DeToX",
-        )
-        console.print(panel)
-
+        NicePrint(text, title)
 
 
     def save_calibration(self, filename=None):
@@ -346,17 +255,36 @@ class TobiiController:
             )
 
     def _adapt_gaze_data(self, df):
-        """Adapt gaze data format and convert coordinates."""
-        # Convert coordinates more efficiently
-        df['Left_X'], df['Left_Y'] = zip(*[coord_utils.get_psychopy_pos(self.win, coord) 
-                                        for coord in df['left_gaze_point_on_display_area']])
-        df['Right_X'], df['Right_Y'] = zip(*[coord_utils.get_psychopy_pos(self.win, coord) 
-                                            for coord in df['right_gaze_point_on_display_area']])
+        """
+        Adapt gaze data format and convert coordinates.
+
+        Parameters
+        ----------
+        df : pandas.DataFrame
+            DataFrame containing raw gaze data.
+
+        Returns
+        -------
+        pandas.DataFrame
+            DataFrame with adapted gaze data, including converted coordinates
+            and renamed columns.
+        """
+        # Convert left eye gaze coordinates from Tobii to PsychoPy
+        df['Left_X'], df['Left_Y'] = zip(*[
+            Coords.get_psychopy_pos(self.win, coord)
+            for coord in df['left_gaze_point_on_display_area']
+        ])
+
+        # Convert right eye gaze coordinates from Tobii to PsychoPy
+        df['Right_X'], df['Right_Y'] = zip(*[
+            Coords.get_psychopy_pos(self.win, coord)
+            for coord in df['right_gaze_point_on_display_area']
+        ])
         
-        # Process timestamps
+        # Process and convert system timestamps to a unified format
         df['TimeStamp'] = self._process_timestamps(df['system_time_stamp'])
         
-        # Rename and convert in one step
+        # Rename columns to a more readable format and convert validity columns to integers
         df = df.rename(columns={
             'left_gaze_point_validity': 'Left_Validity',
             'left_pupil_diameter': 'Left_Pupil',
@@ -371,16 +299,16 @@ class TobiiController:
             'Right_Pupil_Validity': 'int'
         })
 
+        # Return a DataFrame with selected columns in a specific order
         return df[['TimeStamp', 'Left_X', 'Left_Y', 'Left_Validity',
-                'Left_Pupil', 'Left_Pupil_Validity', 
-                'Right_X', 'Right_Y', 'Right_Validity',
-                'Right_Pupil', 'Right_Pupil_Validity']]
+                   'Left_Pupil', 'Left_Pupil_Validity', 
+                   'Right_X', 'Right_Y', 'Right_Validity',
+                   'Right_Pupil', 'Right_Pupil_Validity']]
 
+#%% test
 
     def save_data(self):
         """Save gaze and event data to an HDF5 file with two datasets: 'gaze' and 'events'."""
-        import pandas as pd
-        import time
 
         # Start timing the save process
         start_saving = time.perf_counter()
@@ -470,7 +398,6 @@ class TobiiController:
         self.eyetracker.subscribe_to(tr.EYETRACKER_GAZE_DATA, self._on_gaze_data, as_dictionary=True)
         core.wait(1)
         self.recording = True
-        self.t0 = tr.get_system_time_stamp()
 
 
     def _stop_recording(self):
@@ -627,7 +554,7 @@ class TobiiController:
         if self.event_mode == 'precise':
             self.events_filename = f"{self.basename}_events.csv"
 
-        self.print_info(moment="recording")
+        self.get_info(moment="recording")
 
 
     def calibrate(self,
@@ -730,14 +657,14 @@ class TobiiController:
             # Update the left eye position
             if lv:
                 # Convert TBCS coordinates to PsychoPy coordinates
-                lx, ly = coord_utils.get_psychopy_pos_from_trackbox(self.win, [lx, ly], "height")
+                lx, ly = Coords.get_psychopy_pos_from_trackbox(self.win, [lx, ly], "height")
                 leye.setPos((round(lx * 0.25, 4), round(ly * 0.2 + 0.4, 4)))
                 leye.draw()
 
             # Update the right eye position
             if rv:
                 # Convert TBCS coordinates to PsychoPy coordinates
-                rx, ry = coord_utils.get_psychopy_pos_from_trackbox(self.win, [rx, ry], "height")
+                rx, ry = Coords.get_psychopy_pos_from_trackbox(self.win, [rx, ry], "height")
                 reye.setPos((round(rx * 0.25, 4), round(ry * 0.2 + 0.4, 4)))
                 reye.draw()
 
@@ -803,7 +730,7 @@ class TobiiController:
             pos = self.mouse.getPos()
             
             # Convert the mouse position to Tobii ADCS coordinates
-            tobii_pos = coord_utils.get_tobii_pos(self.win, pos)
+            tobii_pos = Coords.get_tobii_pos(self.win, pos)
             
             # Get the current timestamp in milliseconds since the Unix epoch
             timestamp = time.time() * 1000  

@@ -4,8 +4,8 @@ from PIL import Image, ImageDraw
 from datetime import datetime
 import numpy as np
 
-from .Base import InfantStimuli
-from .coord_utils import get_tobii_pos
+from .Utils import InfantStimuli
+from .Coords import get_tobii_pos
 
 
 class CalibrationSession:
