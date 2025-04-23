@@ -1,48 +1,54 @@
 # Third party imports
+import numpy as np
 from psychopy import visual
+
 
 
 def NicePrint(body: str, title: str = "") -> None:
     """Print a message in a box with an optional title.
-
-    :param body: The string to print inside the box.
-    :param title: An optional title to print on the top border of the box.
+    
+    Parameters
+    ----------
+    body : str
+        The string to print inside the box.
+    title : str, optional
+        A title to print on the top border of the box.
     """
-
     # Split the body string into lines
     lines = body.splitlines() or [""]
+    
     # Calculate the maximum width of the lines
     content_w = max(map(len, lines))
-
+    
     # Calculate the panel width
-    panel_w = max(content_w, len(f" {title} " if title else "")) + 2
-
+    title_space = f" {title} " if title else ""
+    panel_w = max(content_w, len(title_space)) + 2
+    
     # Unicode characters for the corners and sides of the box
     tl, tr, bl, br, h, v = "┌", "┐", "└", "┘", "─", "│"
-
+    
     # Construct the top border of the box
     if title:
         # Calculate the left and right margins for the title
-        left = (panel_w - len(f" {title} ")) // 2
-        right = panel_w - len(f" {title} ") - left
-        # Construct the top border
-        top = f"{tl}{h*left}{title} {h*right}{tr}"
+        left = (panel_w - len(title_space)) // 2
+        right = panel_w - len(title_space) - left
+        # Construct the top border with title
+        top = f"{tl}{h * left}{title_space}{h * right}{tr}"
     else:
-        # Construct the top border if there is no title
-        top = f"{tl}{h*panel_w}{tr}"
-
+        # Construct the top border without title
+        top = f"{tl}{h * panel_w}{tr}"
+    
+    # Create the middle lines with content
+    middle_lines = [
+        f"{v}{line}{' ' * (panel_w - len(line))}{v}"
+        for line in lines
+    ]
+    
+    # Create the bottom border
+    bottom = f"{bl}{h * panel_w}{br}"
+    
     # Print the box
-    print(
-        top,
-        *(
-            # Construct each line of the box
-            f"{v}{line}{' '*(panel_w-len(line))}{v}"
-            for line in lines
-        ),
-        # Construct the bottom border
-        f"{bl}{h*panel_w}{br}",
-        sep="\n"
-    )
+    print(top, *middle_lines, bottom, sep="\n")
 
 
 
