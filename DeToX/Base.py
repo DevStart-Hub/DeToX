@@ -120,26 +120,7 @@ class TobiiController:
     The TobiiController class is designed to be easy to use and provides a
     minimal interface for the user to interact with the Tobii Pro SDK.
     """
-    # Dictionary mapping key names to numbers
-    _numkey_dict = {
-        "0": -1, "num_0": -1,
-        "1": 0, "num_1": 0,
-        "2": 1, "num_2": 1,
-        "3": 2, "num_3": 2,
-        "4": 3, "num_4": 3,
-        "5": 4, "num_5": 4,
-        "6": 5, "num_6": 5,
-        "7": 6, "num_7": 6,
-        "8": 7, "num_8": 7,
-        "9": 8, "num_9": 8,
-    }
     
-    # Default animation dictionary
-    _animation_settings = {
-        'animation_speed': 1.0,  # Slower for infants
-        'target_min': 0.2,    # Minimum size for calibration target
-    }
-
     _simulation_settings = {
         'framerate': 120,  # Default to Tobii Pro Spectrum rate
     }
@@ -322,73 +303,6 @@ class TobiiController:
             print(f"Error loading calibration: {e}")
             return False
 
-    def _show_calibration_result(self):
-        """
-        Show calibration results with lines indicating accuracy.
-
-        This function is used to display the results of the calibration process.
-        It takes the calibration result from the Tobii eye tracker and creates
-        an image with green lines for the left eye and red lines for the right
-        eye. Each line connects the point to the corresponding eye's position
-        on the display area.
-
-        Parameters
-        ----------
-        None
-
-        Returns
-        -------
-        SimpleImageStim
-            A Psychopy SimpleImageStim object containing the image.
-        """
-        # Create a new image with the same size as the PsychoPy window
-        img = Image.new("RGBA", tuple(self.win.size))
-        
-        # Create an ImageDraw object to draw on the image
-        img_draw = ImageDraw.Draw(img)
-        
-        # Create a PsychoPy SimpleImageStim object from the image
-        result_img = visual.SimpleImageStim(self.win, img, autoLog=False)
-        
-        # Check if the calibration result is not a failure
-        if self.calibration_result.status != tr.CALIBRATION_STATUS_FAILURE:
-            # Iterate over each calibration point
-            for point in self.calibration_result.calibration_points:
-                p = point.position_on_display_area
-                
-                # Draw a small circle for the calibration point
-                img_draw.ellipse(
-                    ((p[0] * self.win.size[0] - 3, p[1] * self.win.size[1] - 3),
-                     (p[0] * self.win.size[0] + 3, p[1] * self.win.size[1] + 3)),
-                    outline=(0, 0, 0, 255)  # Black outline
-                )
-                
-                # Iterate over each sample in the calibration point
-                for sample in point.calibration_samples:
-                    lp = sample.left_eye.position_on_display_area
-                    rp = sample.right_eye.position_on_display_area
-                    
-                    # Check if the left eye sample is valid
-                    if sample.left_eye.validity == tr.VALIDITY_VALID_AND_USED:
-                        # Draw a line for the left eye if the sample is valid
-                        img_draw.line(
-                            ((p[0] * self.win.size[0], p[1] * self.win.size[1]),
-                             (lp[0] * self.win.size[0], lp[1] * self.win.size[1])),
-                            fill=(0, 255, 0, 255)  # Green line for left eye
-                        )
-                    # Check if the right eye sample is valid
-                    if sample.right_eye.validity == tr.VALIDITY_VALID_AND_USED:
-                        # Draw a line for the right eye if the sample is valid
-                        img_draw.line(
-                            ((p[0] * self.win.size[0], p[1] * self.win.size[1]),
-                             (rp[0] * self.win.size[0], rp[1] * self.win.size[1])),
-                            fill=(255, 0, 0, 255)  # Red line for right eye
-                        )
-                        
-        # Set the image of the PsychoPy SimpleImageStim object to the
-        # created image
-        result_img.setImage(img)
-        return result_img
 
     def _on_gaze_data(self, gaze_data):
         """
@@ -695,52 +609,6 @@ class TobiiController:
 
         self.print_info(moment="recording")
 
-
-    def _animate(self, stim, point_idx, clock, anim_type='zoom', rotation_range=15):
-        """
-        Animate a stimulus with either zoom or rotation effect.
-
-        This function takes a stimulus and animates it with either a zoom or
-        trill (rotational) effect. The animation is updated based on the
-        current time of the provided clock, and the animation style and
-        parameters are determined by the other arguments.
-
-        Parameters
-        ----------
-        stim : visual.ImageStim
-            The PsychoPy stimulus to animate.
-        point_idx : int
-            Index of the calibration point.
-        clock : psychopy.core.Clock
-            Clock for timing the animation.
-        anim_type : str, optional
-            Type of animation ('zoom' or 'trill'). Default is 'zoom'.
-        rotation_range : float, optional
-            Range of rotation in degrees for trill animation. Default is 15.
-
-        Returns
-        -------
-        None
-        """
-        # Get current time and adjust with a shrink speed factor
-        elapsed_time = clock.getTime() * self.animation_settings['animation_speed']
-
-        if anim_type == 'zoom':
-            # Calculate the scale factor for zoom animation
-            orig_size = self.targets.get_stim_original_size(point_idx)
-            scale_factor = np.sin(elapsed_time)**2 + self.animation_settings['target_min']
-            newsize = [scale_factor * size for size in orig_size]
-            # Set the size of the stimulus to the new size
-            stim.setSize(newsize)
-
-        elif anim_type == 'trill':
-            # Calculate the new orientation angle for trill animation
-            new_angle = np.sin(elapsed_time) * rotation_range
-            # Set the orientation of the stimulus to the new angle
-            stim.setOri(new_angle)
-
-        # Draw the stimulus with the updated properties
-        stim.draw()
 
     def run_calibration(self, calibration_points, infant_stims, shuffle=True, 
                     audio=None, focus_time=0.5, anim_type='zoom', save_calib=False):
