@@ -1,0 +1,19 @@
+# TobiiController.show_status { #DeToX.TobiiController.show_status }
+
+```python
+TobiiController.show_status(decision_key='space')
+```
+
+Show participant's gaze position in track box.
+
+This function creates a visualization of the participant's gaze
+position in the track box. The visualization consists of a green
+bar representing the z-position of the user, and circles for the
+left and right eye positions. The visualization is updated in real
+time based on the latest gaze data received from the eye tracker.
+
+## Parameters {.doc-section .doc-section-parameters}
+
+| Name         | Type   | Description                                                     | Default   |
+|--------------|--------|-----------------------------------------------------------------|-----------|
+| decision_key | str    | The key to press to exit the visualization. Default is 'space'. | `'space'` |

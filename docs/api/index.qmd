@@ -1,4 +1,4 @@
-# Function reference
+# Function reference {.doc .doc-index}
 
 ## Core Classes
 
@@ -6,8 +6,9 @@ Main classes for infant eye-tracking research
 
 | | |
 | --- | --- |
-| [InfantStimuli](/api/InfantStimuli.qmd) | Stimuli for infant-friendly calibration. |
-| [TobiiController](/api/TobiiController.qmd) | Tobii controller for infant research. |
+| [TobiiController](TobiiController.qmd#DeToX.TobiiController) | Tobii controller for infant research. |
+| [CalibrationSession](CalibrationSession.qmd#DeToX.CalibrationSession) | Infant-friendly calibration session manager. |
+| [InfantStimuli](InfantStimuli.qmd#DeToX.InfantStimuli) | Stimuli for infant-friendly calibration. |
 
 ## Calibration and Recording Methods
 
@@ -15,15 +16,17 @@ Methods for managing eye-tracking calibration and data recording
 
 | | |
 | --- | --- |
-| [save_calibration](/api/save_calibration.qmd) | Save calibration data to a file. |
-| [load_calibration](/api/load_calibration.qmd) | Load calibration data from a file. |
-| [start_recording](/api/start_recording.qmd) | Start recording gaze data with improved thread handling. |
-| [stop_recording](/api/stop_recording.qmd) | Stop recording with improved thread handling. |
-| [record_event](/api/record_event.qmd) | Record an event with a timestamp. |
-| [save_data](/api/save_data.qmd) | Save gaze and event data to files. |
-| [run_calibration](/api/run_calibration.qmd) | Run an infant-friendly calibration procedure with point selection and |
-| [show_status](/api/show_status.qmd) | Show participant's gaze position in track box. |
-| [close](/api/close.qmd) | Clean up and ensure all data is saved. |
+| [TobiiController.save_calibration](TobiiController.save_calibration.qmd#DeToX.TobiiController.save_calibration) | Save calibration data to a file. |
+| [TobiiController.load_calibration](TobiiController.load_calibration.qmd#DeToX.TobiiController.load_calibration) | Load calibration data from a file. |
+| [TobiiController.start_recording](TobiiController.start_recording.qmd#DeToX.TobiiController.start_recording) | Start recording gaze data. |
+| [TobiiController.stop_recording](TobiiController.stop_recording.qmd#DeToX.TobiiController.stop_recording) | Stop recording gaze data and save it to file. |
+| [TobiiController.record_event](TobiiController.record_event.qmd#DeToX.TobiiController.record_event) | Record an event with a timestamp. |
+| [TobiiController.save_data](TobiiController.save_data.qmd#DeToX.TobiiController.save_data) | Save gaze and event data to an HDF5 file with two datasets: 'gaze' and 'events'. |
+| [TobiiController.calibrate](TobiiController.calibrate.qmd#DeToX.TobiiController.calibrate) | Run an infant-friendly calibration procedure with point selection and |
+| [TobiiController.show_status](TobiiController.show_status.qmd#DeToX.TobiiController.show_status) | Show participant's gaze position in track box. |
+| [TobiiController.gaze_contingent](TobiiController.gaze_contingent.qmd#DeToX.TobiiController.gaze_contingent) | Initialize a rolling buffer to store recent gaze positions. |
+| [TobiiController.get_average_gaze](TobiiController.get_average_gaze.qmd#DeToX.TobiiController.get_average_gaze) | Compute the average gaze position from the most recent gaze samples. |
+| [TobiiController.close](TobiiController.close.qmd#DeToX.TobiiController.close) | Stop recording and perform necessary cleanup. |
 
 ## Coordinate transformation functions
 
@@ -31,8 +34,16 @@ Functions for coordinate transformation
 
 | | |
 | --- | --- |
-| [get_psychopy_pos](/api/get_psychopy_pos.qmd) | Convert Tobii ADCS coordinates to PsychoPy coordinates. |
-| [get_tobii_pos](/api/get_tobii_pos.qmd) | Convert PsychoPy coordinates to Tobii ADCS coordinates. |
-| [pix2tobii](/api/pix2tobii.qmd) | Convert PsychoPy pixel coordinates to Tobii ADCS coordinates. |
-| [tobii2pix](/api/tobii2pix.qmd) | Convert Tobii ADCS coordinates to PsychoPy pixel coordinates. |
-| [get_psychopy_pos_from_trackbox](/api/get_psychopy_pos_from_trackbox.qmd) | Convert Tobii TBCS coordinates to PsychoPy coordinates. |
+| [get_psychopy_pos](get_psychopy_pos.qmd#DeToX.get_psychopy_pos) | Convert Tobii ADCS coordinates to PsychoPy coordinates. |
+| [get_tobii_pos](get_tobii_pos.qmd#DeToX.get_tobii_pos) | Convert PsychoPy coordinates to Tobii ADCS coordinates. |
+| [pix2tobii](pix2tobii.qmd#DeToX.pix2tobii) | Convert PsychoPy pixel coordinates to Tobii ADCS coordinates. |
+| [tobii2pix](tobii2pix.qmd#DeToX.tobii2pix) | Convert Tobii ADCS coordinates to PsychoPy pixel coordinates. |
+| [get_psychopy_pos_from_trackbox](get_psychopy_pos_from_trackbox.qmd#DeToX.get_psychopy_pos_from_trackbox) | Convert Tobii TBCS coordinates to PsychoPy coordinates. |
+
+## Utility Functions
+
+Helper functions and utilities
+
+| | |
+| --- | --- |
+| [NicePrint](NicePrint.qmd#DeToX.NicePrint) | Print a message in a box with an optional title. |

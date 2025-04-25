@@ -1,0 +1,14 @@
+# NicePrint { #DeToX.NicePrint }
+
+```python
+NicePrint(body, title='')
+```
+
+Print a message in a box with an optional title.
+
+## Parameters {.doc-section .doc-section-parameters}
+
+| Name   | Type   | Description                                    | Default    |
+|--------|--------|------------------------------------------------|------------|
+| body   | str    | The string to print inside the box.            | _required_ |
+| title  | str    | A title to print on the top border of the box. | `''`       |
