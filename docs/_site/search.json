@@ -1,57 +1,90 @@
 [
   {
-    "objectID": "index.html",
-    "href": "index.html",
-    "title": "DeToX",
-    "section": "",
-    "text": "This package was created out of the need to run eye-tracking experiments using tobii_researcher. The Tobii SDK provides a powerful way to interact with Tobii eye trackers in Python, offering many advanced features. However, certain aspects of its implementation can be complex and unintuitive.\nSince we often run experiments using PsychoPy, we developed this lightweight wrapper around PsychoPy and tobii_researcher to simplify the process. The goal is to make it easy to run infant-friendly eye-tracking studies while handling the more technical aspects of eye tracker integration.\nThis project didn’t start from scratch—it builds upon two existing packages that we have used in the past:\n\npsychopy_tobii_infant\npsychopy_tobii_controller\n\nWhile these packages already provided great solutions for integrating Tobii eye trackers with PsychoPy, we added a few extra features and improvements that we found useful for running infant-friendly eye-tracking studies. Our goal was to simplify some of the more technical aspects of eye tracker integration while keeping the flexibility needed for research."
-  },
-  {
-    "objectID": "api/tobii2pix.html",
-    "href": "api/tobii2pix.html",
+    "objectID": "api/load_calibration.html",
+    "href": "api/load_calibration.html",
     "title": "DeToX_website",
     "section": "",
-    "text": "tobii2pix(win, p)\nConvert Tobii ADCS coordinates to PsychoPy pixel coordinates.\n\n\n\n\n\n\n\n\n\n\n\nName\nType\nDescription\nDefault\n\n\n\n\nwin\npsychopy.visual.Window\nThe PsychoPy window which provides information about units and size.\nrequired\n\n\np\ntuple\nThe Tobii ADCS coordinates to convert.\nrequired\n\n\n\n\n\n\n\n\n\nType\nDescription\n\n\n\n\ntuple\nThe converted PsychoPy pixel coordinates.\n\n\n\n\n\n\nThe conversion is done by multiplying the ADCS coordinates by the window size and subtracting 0.5 from the x and y coordinates to move the origin to the top-left corner of the screen.",
+    "text": "load_calibration(self, filename)\nLoad calibration data from a file.\n\n\n\n\n\n\n\n\n\n\n\nName\nType\nDescription\nDefault\n\n\n\n\nfilename\nstr\nThe name of the file containing the calibration data.\nrequired\n\n\n\n\n\n\n\n\n\n\n\n\n\nType\nDescription\n\n\n\n\nbool\nTrue if the calibration data was successfully loaded, False otherwise."
+  },
+  {
+    "objectID": "api/load_calibration.html#load_calibration",
+    "href": "api/load_calibration.html#load_calibration",
+    "title": "DeToX_website",
+    "section": "",
+    "text": "load_calibration(self, filename)\nLoad calibration data from a file.\n\n\n\n\n\n\n\n\n\n\n\nName\nType\nDescription\nDefault\n\n\n\n\nfilename\nstr\nThe name of the file containing the calibration data.\nrequired\n\n\n\n\n\n\n\n\n\n\n\n\n\nType\nDescription\n\n\n\n\nbool\nTrue if the calibration data was successfully loaded, False otherwise."
+  },
+  {
+    "objectID": "api/show_status.html",
+    "href": "api/show_status.html",
+    "title": "DeToX_website",
+    "section": "",
+    "text": "show_status(self, decision_key='space')\nShow participant’s gaze position in track box.\nThis function creates a visualization of the participant’s gaze position in the track box. The visualization consists of a green bar representing the z-position of the user, and circles for the left and right eye positions. The visualization is updated in real time based on the latest gaze data received from the eye tracker.\n\n\n\n\n\n\n\n\n\n\n\nName\nType\nDescription\nDefault\n\n\n\n\ndecision_key\nstr, optional\nThe key to press to exit the visualization. Default is ‘space’.\n'space'"
+  },
+  {
+    "objectID": "api/show_status.html#show_status",
+    "href": "api/show_status.html#show_status",
+    "title": "DeToX_website",
+    "section": "",
+    "text": "show_status(self, decision_key='space')\nShow participant’s gaze position in track box.\nThis function creates a visualization of the participant’s gaze position in the track box. The visualization consists of a green bar representing the z-position of the user, and circles for the left and right eye positions. The visualization is updated in real time based on the latest gaze data received from the eye tracker.\n\n\n\n\n\n\n\n\n\n\n\nName\nType\nDescription\nDefault\n\n\n\n\ndecision_key\nstr, optional\nThe key to press to exit the visualization. Default is ‘space’.\n'space'"
+  },
+  {
+    "objectID": "api/get_tobii_pos.html",
+    "href": "api/get_tobii_pos.html",
+    "title": "get_tobii_pos",
+    "section": "",
+    "text": "get_tobii_pos(win, p, units=None)\nConvert PsychoPy coordinates to Tobii ADCS coordinates.\n\n\n\n\n\n\n\n\n\n\n\nName\nType\nDescription\nDefault\n\n\n\n\nwin\npsychopy.visual.Window\nThe PsychoPy window which provides information about units and size.\nrequired\n\n\np\ntuple\nThe PsychoPy coordinates to convert.\nrequired\n\n\nunits\nstr\nThe units for the PsychoPy coordinates. Default is None, which uses the window’s default units.\nNone\n\n\n\n\n\n\n\n\n\nName\nType\nDescription\n\n\n\n\n\ntuple\nThe converted Tobii ADCS coordinates.\n\n\n\n\n\n\n\n\n\nName\nType\nDescription\n\n\n\n\n\nValueError\nIf the provided units are not supported.",
     "crumbs": [
       "Reference",
       "Coordinate transformation functions",
-      "tobii2pix"
+      "get_tobii_pos"
     ]
   },
   {
-    "objectID": "api/tobii2pix.html#tobii2pix",
-    "href": "api/tobii2pix.html#tobii2pix",
-    "title": "DeToX_website",
+    "objectID": "api/get_tobii_pos.html#parameters",
+    "href": "api/get_tobii_pos.html#parameters",
+    "title": "get_tobii_pos",
     "section": "",
-    "text": "tobii2pix(win, p)\nConvert Tobii ADCS coordinates to PsychoPy pixel coordinates.\n\n\n\n\n\n\n\n\n\n\n\nName\nType\nDescription\nDefault\n\n\n\n\nwin\npsychopy.visual.Window\nThe PsychoPy window which provides information about units and size.\nrequired\n\n\np\ntuple\nThe Tobii ADCS coordinates to convert.\nrequired\n\n\n\n\n\n\n\n\n\nType\nDescription\n\n\n\n\ntuple\nThe converted PsychoPy pixel coordinates.\n\n\n\n\n\n\nThe conversion is done by multiplying the ADCS coordinates by the window size and subtracting 0.5 from the x and y coordinates to move the origin to the top-left corner of the screen.",
+    "text": "Name\nType\nDescription\nDefault\n\n\n\n\nwin\npsychopy.visual.Window\nThe PsychoPy window which provides information about units and size.\nrequired\n\n\np\ntuple\nThe PsychoPy coordinates to convert.\nrequired\n\n\nunits\nstr\nThe units for the PsychoPy coordinates. Default is None, which uses the window’s default units.\nNone",
     "crumbs": [
       "Reference",
       "Coordinate transformation functions",
-      "tobii2pix"
+      "get_tobii_pos"
     ]
   },
   {
-    "objectID": "api/start_recording.html",
-    "href": "api/start_recording.html",
-    "title": "DeToX_website",
+    "objectID": "api/get_tobii_pos.html#returns",
+    "href": "api/get_tobii_pos.html#returns",
+    "title": "get_tobii_pos",
     "section": "",
-    "text": "start_recording(self, filename=None, event_mode='precise')\nStart recording gaze data with improved thread handling.\nThis method initializes the recording process for gaze data from either a simulated or real eye tracker. It sets up the necessary threads and events for data collection.\n\n\n\n\n\n\n\n\n\n\n\nName\nType\nDescription\nDefault\n\n\n\n\nfilename\nstr, optional\nThe name of the file to save the gaze data to. If not provided, the default filename set in the constructor will be used.\nNone",
+    "text": "Name\nType\nDescription\n\n\n\n\n\ntuple\nThe converted Tobii ADCS coordinates.",
     "crumbs": [
       "Reference",
-      "Calibration and Recording Methods",
-      "start_recording"
+      "Coordinate transformation functions",
+      "get_tobii_pos"
     ]
   },
   {
-    "objectID": "api/start_recording.html#start_recording",
-    "href": "api/start_recording.html#start_recording",
-    "title": "DeToX_website",
+    "objectID": "api/get_tobii_pos.html#raises",
+    "href": "api/get_tobii_pos.html#raises",
+    "title": "get_tobii_pos",
     "section": "",
-    "text": "start_recording(self, filename=None, event_mode='precise')\nStart recording gaze data with improved thread handling.\nThis method initializes the recording process for gaze data from either a simulated or real eye tracker. It sets up the necessary threads and events for data collection.\n\n\n\n\n\n\n\n\n\n\n\nName\nType\nDescription\nDefault\n\n\n\n\nfilename\nstr, optional\nThe name of the file to save the gaze data to. If not provided, the default filename set in the constructor will be used.\nNone",
+    "text": "Name\nType\nDescription\n\n\n\n\n\nValueError\nIf the provided units are not supported.",
+    "crumbs": [
+      "Reference",
+      "Coordinate transformation functions",
+      "get_tobii_pos"
+    ]
+  },
+  {
+    "objectID": "api/TobiiController.stop_recording.html",
+    "href": "api/TobiiController.stop_recording.html",
+    "title": "TobiiController.stop_recording",
+    "section": "",
+    "text": "TobiiController.stop_recording\nTobiiController.stop_recording()\nStop recording gaze data and save it to file.",
     "crumbs": [
       "Reference",
       "Calibration and Recording Methods",
-      "start_recording"
+      "TobiiController.stop_recording"
     ]
   },
   {
@@ -59,79 +92,69 @@
     "href": "api/save_data.html",
     "title": "DeToX_website",
     "section": "",
-    "text": "save_data(self)\nSave gaze and event data to files.",
-    "crumbs": [
-      "Reference",
-      "Calibration and Recording Methods",
-      "save_data"
-    ]
+    "text": "save_data(self)\nSave gaze and event data to files."
   },
   {
     "objectID": "api/save_data.html#save_data",
     "href": "api/save_data.html#save_data",
     "title": "DeToX_website",
     "section": "",
-    "text": "save_data(self)\nSave gaze and event data to files.",
-    "crumbs": [
-      "Reference",
-      "Calibration and Recording Methods",
-      "save_data"
-    ]
+    "text": "save_data(self)\nSave gaze and event data to files."
   },
   {
-    "objectID": "api/run_calibration.html",
-    "href": "api/run_calibration.html",
-    "title": "DeToX_website",
+    "objectID": "api/tobii2pix.html",
+    "href": "api/tobii2pix.html",
+    "title": "tobii2pix",
     "section": "",
-    "text": "run_calibration(self, calibration_points, infant_stims, shuffle=True, audio=None, focus_time=0.5, anim_type='zoom', save_calib=False)\nRun an infant-friendly calibration procedure with point selection and animated stimuli. The calibration points are presented in a sequence (either in order or shuffled) and at each point, an animated stimulus is presented (either zooming or trilling). The procedure can optionally play an attention-getting audio during the calibration process. The calibration data can be saved to a file if desired.\n\n\n\n\n\n\n\n\n\n\n\nName\nType\nDescription\nDefault\n\n\n\n\ncalibration_points\nlist of tuple\nList of (x, y) coordinates for calibration points\nrequired\n\n\ninfant_stims\nlist of str\nList of image file paths for calibration stimuli\nrequired\n\n\nshuffle\nbool, optional\nWhether to shuffle stimuli order. Default is True\nTrue\n\n\naudio\npsychopy.sound.Sound, optional\nAudio to play during calibration. Default is None\nNone\n\n\nfocus_time\nfloat, optional\nTime to wait before collecting data. Default is 0.5s\n0.5\n\n\nsave_calib\nbool, optional\nWhether to save calibration data. Default is False\nFalse\n\n\n\n\n\n\n\n\n\nType\nDescription\n\n\n\n\nbool\nTrue if calibration successful, False otherwise",
-    "crumbs": [
-      "Reference",
-      "Calibration and Recording Methods",
-      "run_calibration"
-    ]
-  },
-  {
-    "objectID": "api/run_calibration.html#run_calibration",
-    "href": "api/run_calibration.html#run_calibration",
-    "title": "DeToX_website",
-    "section": "",
-    "text": "run_calibration(self, calibration_points, infant_stims, shuffle=True, audio=None, focus_time=0.5, anim_type='zoom', save_calib=False)\nRun an infant-friendly calibration procedure with point selection and animated stimuli. The calibration points are presented in a sequence (either in order or shuffled) and at each point, an animated stimulus is presented (either zooming or trilling). The procedure can optionally play an attention-getting audio during the calibration process. The calibration data can be saved to a file if desired.\n\n\n\n\n\n\n\n\n\n\n\nName\nType\nDescription\nDefault\n\n\n\n\ncalibration_points\nlist of tuple\nList of (x, y) coordinates for calibration points\nrequired\n\n\ninfant_stims\nlist of str\nList of image file paths for calibration stimuli\nrequired\n\n\nshuffle\nbool, optional\nWhether to shuffle stimuli order. Default is True\nTrue\n\n\naudio\npsychopy.sound.Sound, optional\nAudio to play during calibration. Default is None\nNone\n\n\nfocus_time\nfloat, optional\nTime to wait before collecting data. Default is 0.5s\n0.5\n\n\nsave_calib\nbool, optional\nWhether to save calibration data. Default is False\nFalse\n\n\n\n\n\n\n\n\n\nType\nDescription\n\n\n\n\nbool\nTrue if calibration successful, False otherwise",
-    "crumbs": [
-      "Reference",
-      "Calibration and Recording Methods",
-      "run_calibration"
-    ]
-  },
-  {
-    "objectID": "api/pix2tobii.html",
-    "href": "api/pix2tobii.html",
-    "title": "DeToX_website",
-    "section": "",
-    "text": "pix2tobii(win, p)\nConvert PsychoPy pixel coordinates to Tobii ADCS coordinates.\n\n\n\n\n\n\n\n\n\n\n\nName\nType\nDescription\nDefault\n\n\n\n\nwin\npsychopy.visual.Window\nThe PsychoPy window which provides information about units and size.\nrequired\n\n\np\ntuple\nThe PsychoPy pixel coordinates to convert.\nrequired\n\n\n\n\n\n\n\n\n\nType\nDescription\n\n\n\n\ntuple\nThe converted Tobii ADCS coordinates.\n\n\n\n\n\n\nThe conversion is done by dividing the pixel coordinates by the window size and adding 0.5 to the x and y coordinates to center the origin at the middle of the screen.",
+    "text": "tobii2pix(win, p)\nConvert Tobii ADCS coordinates to PsychoPy pixel coordinates.\n\n\n\n\n\n\n\n\n\n\n\nName\nType\nDescription\nDefault\n\n\n\n\nwin\npsychopy.visual.Window\nThe PsychoPy window which provides information about units and size.\nrequired\n\n\np\ntuple\nThe Tobii ADCS coordinates to convert.\nrequired\n\n\n\n\n\n\n\n\n\nName\nType\nDescription\n\n\n\n\n\ntuple\nThe converted PsychoPy pixel coordinates.\n\n\n\n\n\n\nThe conversion is done by multiplying the ADCS coordinates by the window size and subtracting 0.5 from the x and y coordinates to move the origin to the top-left corner of the screen.",
     "crumbs": [
       "Reference",
       "Coordinate transformation functions",
-      "pix2tobii"
+      "tobii2pix"
     ]
   },
   {
-    "objectID": "api/pix2tobii.html#pix2tobii",
-    "href": "api/pix2tobii.html#pix2tobii",
-    "title": "DeToX_website",
+    "objectID": "api/tobii2pix.html#parameters",
+    "href": "api/tobii2pix.html#parameters",
+    "title": "tobii2pix",
     "section": "",
-    "text": "pix2tobii(win, p)\nConvert PsychoPy pixel coordinates to Tobii ADCS coordinates.\n\n\n\n\n\n\n\n\n\n\n\nName\nType\nDescription\nDefault\n\n\n\n\nwin\npsychopy.visual.Window\nThe PsychoPy window which provides information about units and size.\nrequired\n\n\np\ntuple\nThe PsychoPy pixel coordinates to convert.\nrequired\n\n\n\n\n\n\n\n\n\nType\nDescription\n\n\n\n\ntuple\nThe converted Tobii ADCS coordinates.\n\n\n\n\n\n\nThe conversion is done by dividing the pixel coordinates by the window size and adding 0.5 to the x and y coordinates to center the origin at the middle of the screen.",
+    "text": "Name\nType\nDescription\nDefault\n\n\n\n\nwin\npsychopy.visual.Window\nThe PsychoPy window which provides information about units and size.\nrequired\n\n\np\ntuple\nThe Tobii ADCS coordinates to convert.\nrequired",
     "crumbs": [
       "Reference",
       "Coordinate transformation functions",
-      "pix2tobii"
+      "tobii2pix"
+    ]
+  },
+  {
+    "objectID": "api/tobii2pix.html#returns",
+    "href": "api/tobii2pix.html#returns",
+    "title": "tobii2pix",
+    "section": "",
+    "text": "Name\nType\nDescription\n\n\n\n\n\ntuple\nThe converted PsychoPy pixel coordinates.",
+    "crumbs": [
+      "Reference",
+      "Coordinate transformation functions",
+      "tobii2pix"
+    ]
+  },
+  {
+    "objectID": "api/tobii2pix.html#notes",
+    "href": "api/tobii2pix.html#notes",
+    "title": "tobii2pix",
+    "section": "",
+    "text": "The conversion is done by multiplying the ADCS coordinates by the window size and subtracting 0.5 from the x and y coordinates to move the origin to the top-left corner of the screen.",
+    "crumbs": [
+      "Reference",
+      "Coordinate transformation functions",
+      "tobii2pix"
     ]
   },
   {
     "objectID": "api/InfantStimuli.html",
     "href": "api/InfantStimuli.html",
-    "title": "DeToX_website",
+    "title": "InfantStimuli",
     "section": "",
-    "text": "InfantStimuli(self, win, infant_stims, shuffle=True, kwargs)\nStimuli for infant-friendly calibration.\nThis class provides a set of animated stimuli for use in infant-friendly calibration procedures. It takes a list of image files and optional keyword arguments for the ImageStim constructor. It can be used to create a sequence of animated stimuli that can be used to calibrate the eye tracker.",
+    "text": "InfantStimuli(self, win, infant_stims, shuffle=True, *kwargs)\nStimuli for infant-friendly calibration.\nThis class provides a set of animated stimuli for use in infant-friendly calibration procedures. It takes a list of image files and optional keyword arguments for the ImageStim constructor. It can be used to create a sequence of animated stimuli that can be used to calibrate the eye tracker.\n\n\n\n\n\nName\nDescription\n\n\n\n\nget_stim\nGet the stimulus by presentation order.\n\n\nget_stim_original_size\nGet the original size of the stimulus by presentation order.\n\n\n\n\n\nInfantStimuli.get_stim(idx)\nGet the stimulus by presentation order.\n\n\n\n\n\n\n\n\n\n\n\nName\nType\nDescription\nDefault\n\n\n\n\nidx\nint\nThe index of the stimulus in the presentation order.\nrequired\n\n\n\n\n\n\n\n\n\n\n\n\n\n\nName\nType\nDescription\n\n\n\n\n\npsychopy.visual.ImageStim\nThe stimulus corresponding to the given index.\n\n\n\n\n\n\n\nInfantStimuli.get_stim_original_size(idx)\nGet the original size of the stimulus by presentation order.\n\n\n\n\n\n\n\n\n\n\n\nName\nType\nDescription\nDefault\n\n\n\n\nidx\nint\nThe index of the stimulus in the presentation order.\nrequired\n\n\n\n\n\n\n\n\n\n\n\n\n\n\nName\nType\nDescription\n\n\n\n\n\ntuple\nThe original size of the stimulus as (width, height).",
     "crumbs": [
       "Reference",
       "Core Classes",
@@ -139,11 +162,11 @@
     ]
   },
   {
-    "objectID": "api/InfantStimuli.html#InfantStimuli",
-    "href": "api/InfantStimuli.html#InfantStimuli",
-    "title": "DeToX_website",
+    "objectID": "api/InfantStimuli.html#methods",
+    "href": "api/InfantStimuli.html#methods",
+    "title": "InfantStimuli",
     "section": "",
-    "text": "InfantStimuli(self, win, infant_stims, shuffle=True, kwargs)\nStimuli for infant-friendly calibration.\nThis class provides a set of animated stimuli for use in infant-friendly calibration procedures. It takes a list of image files and optional keyword arguments for the ImageStim constructor. It can be used to create a sequence of animated stimuli that can be used to calibrate the eye tracker.",
+    "text": "Name\nDescription\n\n\n\n\nget_stim\nGet the stimulus by presentation order.\n\n\nget_stim_original_size\nGet the original size of the stimulus by presentation order.\n\n\n\n\n\nInfantStimuli.get_stim(idx)\nGet the stimulus by presentation order.\n\n\n\n\n\n\n\n\n\n\n\nName\nType\nDescription\nDefault\n\n\n\n\nidx\nint\nThe index of the stimulus in the presentation order.\nrequired\n\n\n\n\n\n\n\n\n\n\n\n\n\n\nName\nType\nDescription\n\n\n\n\n\npsychopy.visual.ImageStim\nThe stimulus corresponding to the given index.\n\n\n\n\n\n\n\nInfantStimuli.get_stim_original_size(idx)\nGet the original size of the stimulus by presentation order.\n\n\n\n\n\n\n\n\n\n\n\nName\nType\nDescription\nDefault\n\n\n\n\nidx\nint\nThe index of the stimulus in the presentation order.\nrequired\n\n\n\n\n\n\n\n\n\n\n\n\n\n\nName\nType\nDescription\n\n\n\n\n\ntuple\nThe original size of the stimulus as (width, height).",
     "crumbs": [
       "Reference",
       "Core Classes",
@@ -151,121 +174,99 @@
     ]
   },
   {
-    "objectID": "api/get_tobii_pos.html",
-    "href": "api/get_tobii_pos.html",
+    "objectID": "api/record_event.html",
+    "href": "api/record_event.html",
     "title": "DeToX_website",
     "section": "",
-    "text": "get_tobii_pos(win, p, units=None)\nConvert PsychoPy coordinates to Tobii ADCS coordinates.\n\n\n\n\n\n\n\n\n\n\n\nName\nType\nDescription\nDefault\n\n\n\n\nwin\npsychopy.visual.Window\nThe PsychoPy window which provides information about units and size.\nrequired\n\n\np\ntuple\nThe PsychoPy coordinates to convert.\nrequired\n\n\nunits\nstr, optional\nThe units for the PsychoPy coordinates. Default is None, which uses the window’s default units.\nNone\n\n\n\n\n\n\n\n\n\nType\nDescription\n\n\n\n\ntuple\nThe converted Tobii ADCS coordinates.\n\n\n\n\n\n\n\n\n\nType\nDescription\n\n\n\n\nValueError\nIf the provided units are not supported.",
-    "crumbs": [
-      "Reference",
-      "Coordinate transformation functions",
-      "get_tobii_pos"
-    ]
+    "text": "record_event(self, event_label)\nRecord an event with a timestamp.\nThis method adds an event to the event data buffer. The event is represented as a list with two elements: the first element is the timestamp of the event in milliseconds relative to the start of the recording, and the second element is the event label provided as a string.\nThe timestamp is obtained using tr.get_system_time_stamp(), which returns the current time in milliseconds since the system was started.\nIf the recording is not active, a RuntimeWarning is raised.\n\n\n\n\n\n\n\n\n\n\n\nName\nType\nDescription\nDefault\n\n\n\n\nevent_label\nstr\nThe label for the event to record\nrequired"
   },
   {
-    "objectID": "api/get_tobii_pos.html#get_tobii_pos",
-    "href": "api/get_tobii_pos.html#get_tobii_pos",
+    "objectID": "api/record_event.html#record_event",
+    "href": "api/record_event.html#record_event",
     "title": "DeToX_website",
     "section": "",
-    "text": "get_tobii_pos(win, p, units=None)\nConvert PsychoPy coordinates to Tobii ADCS coordinates.\n\n\n\n\n\n\n\n\n\n\n\nName\nType\nDescription\nDefault\n\n\n\n\nwin\npsychopy.visual.Window\nThe PsychoPy window which provides information about units and size.\nrequired\n\n\np\ntuple\nThe PsychoPy coordinates to convert.\nrequired\n\n\nunits\nstr, optional\nThe units for the PsychoPy coordinates. Default is None, which uses the window’s default units.\nNone\n\n\n\n\n\n\n\n\n\nType\nDescription\n\n\n\n\ntuple\nThe converted Tobii ADCS coordinates.\n\n\n\n\n\n\n\n\n\nType\nDescription\n\n\n\n\nValueError\nIf the provided units are not supported.",
-    "crumbs": [
-      "Reference",
-      "Coordinate transformation functions",
-      "get_tobii_pos"
-    ]
+    "text": "record_event(self, event_label)\nRecord an event with a timestamp.\nThis method adds an event to the event data buffer. The event is represented as a list with two elements: the first element is the timestamp of the event in milliseconds relative to the start of the recording, and the second element is the event label provided as a string.\nThe timestamp is obtained using tr.get_system_time_stamp(), which returns the current time in milliseconds since the system was started.\nIf the recording is not active, a RuntimeWarning is raised.\n\n\n\n\n\n\n\n\n\n\n\nName\nType\nDescription\nDefault\n\n\n\n\nevent_label\nstr\nThe label for the event to record\nrequired"
   },
   {
-    "objectID": "api/get_psychopy_pos.html",
-    "href": "api/get_psychopy_pos.html",
-    "title": "DeToX_website",
+    "objectID": "api/TobiiController.load_calibration.html",
+    "href": "api/TobiiController.load_calibration.html",
+    "title": "TobiiController.load_calibration",
     "section": "",
-    "text": "get_psychopy_pos(win, p, units=None)\nConvert Tobii ADCS coordinates to PsychoPy coordinates.\n\n\n\n\n\n\n\n\n\n\n\nName\nType\nDescription\nDefault\n\n\n\n\nwin\npsychopy.visual.Window\nThe PsychoPy window which provides information about units and size.\nrequired\n\n\np\ntuple\nThe Tobii ADCS coordinates to convert.\nrequired\n\n\nunits\nstr, optional\nThe units for the PsychoPy coordinates. Default is None, which uses the window’s default units.\nNone\n\n\n\n\n\n\n\n\n\nType\nDescription\n\n\n\n\ntuple\nThe converted PsychoPy coordinates.\n\n\n\n\n\n\n\n\n\nType\nDescription\n\n\n\n\nValueError\nIf the provided units are not supported.",
-    "crumbs": [
-      "Reference",
-      "Coordinate transformation functions",
-      "get_psychopy_pos"
-    ]
-  },
-  {
-    "objectID": "api/get_psychopy_pos.html#get_psychopy_pos",
-    "href": "api/get_psychopy_pos.html#get_psychopy_pos",
-    "title": "DeToX_website",
-    "section": "",
-    "text": "get_psychopy_pos(win, p, units=None)\nConvert Tobii ADCS coordinates to PsychoPy coordinates.\n\n\n\n\n\n\n\n\n\n\n\nName\nType\nDescription\nDefault\n\n\n\n\nwin\npsychopy.visual.Window\nThe PsychoPy window which provides information about units and size.\nrequired\n\n\np\ntuple\nThe Tobii ADCS coordinates to convert.\nrequired\n\n\nunits\nstr, optional\nThe units for the PsychoPy coordinates. Default is None, which uses the window’s default units.\nNone\n\n\n\n\n\n\n\n\n\nType\nDescription\n\n\n\n\ntuple\nThe converted PsychoPy coordinates.\n\n\n\n\n\n\n\n\n\nType\nDescription\n\n\n\n\nValueError\nIf the provided units are not supported.",
-    "crumbs": [
-      "Reference",
-      "Coordinate transformation functions",
-      "get_psychopy_pos"
-    ]
-  },
-  {
-    "objectID": "api/close.html",
-    "href": "api/close.html",
-    "title": "DeToX_website",
-    "section": "",
-    "text": "close(self)\nClean up and ensure all data is saved.\nThis method is called by atexit and is also available as a public method. It stops recording and saves all data that was not saved before.",
+    "text": "TobiiController.load_calibration(filename)\nLoad calibration data from a file.\n\n\n\n\n\n\n\n\n\n\n\nName\nType\nDescription\nDefault\n\n\n\n\nfilename\nstr\nThe name of the file containing the calibration data.\nrequired\n\n\n\n\n\n\n\n\n\n\n\n\n\n\nName\nType\nDescription\n\n\n\n\n\nbool\nTrue if the calibration data was successfully loaded, False otherwise.",
     "crumbs": [
       "Reference",
       "Calibration and Recording Methods",
-      "close"
+      "TobiiController.load_calibration"
     ]
   },
   {
-    "objectID": "api/close.html#close",
-    "href": "api/close.html#close",
-    "title": "DeToX_website",
+    "objectID": "api/TobiiController.load_calibration.html#parameters",
+    "href": "api/TobiiController.load_calibration.html#parameters",
+    "title": "TobiiController.load_calibration",
     "section": "",
-    "text": "close(self)\nClean up and ensure all data is saved.\nThis method is called by atexit and is also available as a public method. It stops recording and saves all data that was not saved before.",
+    "text": "Name\nType\nDescription\nDefault\n\n\n\n\nfilename\nstr\nThe name of the file containing the calibration data.\nrequired",
     "crumbs": [
       "Reference",
       "Calibration and Recording Methods",
-      "close"
+      "TobiiController.load_calibration"
     ]
   },
   {
-    "objectID": "api/coord_utils.html",
-    "href": "api/coord_utils.html",
-    "title": "DeToX_website",
+    "objectID": "api/TobiiController.load_calibration.html#returns",
+    "href": "api/TobiiController.load_calibration.html#returns",
+    "title": "TobiiController.load_calibration",
     "section": "",
-    "text": "coord_utils"
-  },
-  {
-    "objectID": "api/coord_utils.html#coord_utils",
-    "href": "api/coord_utils.html#coord_utils",
-    "title": "DeToX_website",
-    "section": "",
-    "text": "coord_utils"
-  },
-  {
-    "objectID": "api/get_psychopy_pos_from_trackbox.html",
-    "href": "api/get_psychopy_pos_from_trackbox.html",
-    "title": "DeToX_website",
-    "section": "",
-    "text": "get_psychopy_pos_from_trackbox(win, p, units=None)\nConvert Tobii TBCS coordinates to PsychoPy coordinates.\n\n\n\n\n\n\n\n\n\n\n\nName\nType\nDescription\nDefault\n\n\n\n\nwin\npsychopy.visual.Window\nThe PsychoPy window which provides information about units and size.\nrequired\n\n\np\ntuple\nThe Tobii TBCS coordinates to convert.\nrequired\n\n\nunits\nstr, optional\nThe units for the PsychoPy coordinates. Default is None, which uses the window’s default units.\nNone\n\n\n\n\n\n\n\n\n\nType\nDescription\n\n\n\n\ntuple\nThe converted PsychoPy coordinates.\n\n\n\n\n\n\n\n\n\nType\nDescription\n\n\n\n\nValueError\nIf the provided units are not supported.",
+    "text": "Name\nType\nDescription\n\n\n\n\n\nbool\nTrue if the calibration data was successfully loaded, False otherwise.",
     "crumbs": [
       "Reference",
-      "Coordinate transformation functions",
-      "get_psychopy_pos_from_trackbox"
+      "Calibration and Recording Methods",
+      "TobiiController.load_calibration"
     ]
   },
   {
-    "objectID": "api/get_psychopy_pos_from_trackbox.html#get_psychopy_pos_from_trackbox",
-    "href": "api/get_psychopy_pos_from_trackbox.html#get_psychopy_pos_from_trackbox",
-    "title": "DeToX_website",
+    "objectID": "api/TobiiController.start_recording.html",
+    "href": "api/TobiiController.start_recording.html",
+    "title": "TobiiController.start_recording",
     "section": "",
-    "text": "get_psychopy_pos_from_trackbox(win, p, units=None)\nConvert Tobii TBCS coordinates to PsychoPy coordinates.\n\n\n\n\n\n\n\n\n\n\n\nName\nType\nDescription\nDefault\n\n\n\n\nwin\npsychopy.visual.Window\nThe PsychoPy window which provides information about units and size.\nrequired\n\n\np\ntuple\nThe Tobii TBCS coordinates to convert.\nrequired\n\n\nunits\nstr, optional\nThe units for the PsychoPy coordinates. Default is None, which uses the window’s default units.\nNone\n\n\n\n\n\n\n\n\n\nType\nDescription\n\n\n\n\ntuple\nThe converted PsychoPy coordinates.\n\n\n\n\n\n\n\n\n\nType\nDescription\n\n\n\n\nValueError\nIf the provided units are not supported.",
+    "text": "TobiiController.start_recording(filename=None, event_mode='precise')\nStart recording gaze data.\n\n\n\n\n\n\n\n\n\n\n\nName\nType\nDescription\nDefault\n\n\n\n\nfilename\nstr\nThe name of the file to save the gaze data to. If not provided, a default name based on the current datetime will be used.\nNone\n\n\nevent_mode\nstr\nMode for event recording. Options are ‘samplebased’ or ‘precise’. Default is ‘precise’.\n'precise'",
     "crumbs": [
       "Reference",
-      "Coordinate transformation functions",
-      "get_psychopy_pos_from_trackbox"
+      "Calibration and Recording Methods",
+      "TobiiController.start_recording"
     ]
+  },
+  {
+    "objectID": "api/TobiiController.start_recording.html#parameters",
+    "href": "api/TobiiController.start_recording.html#parameters",
+    "title": "TobiiController.start_recording",
+    "section": "",
+    "text": "Name\nType\nDescription\nDefault\n\n\n\n\nfilename\nstr\nThe name of the file to save the gaze data to. If not provided, a default name based on the current datetime will be used.\nNone\n\n\nevent_mode\nstr\nMode for event recording. Options are ‘samplebased’ or ‘precise’. Default is ‘precise’.\n'precise'",
+    "crumbs": [
+      "Reference",
+      "Calibration and Recording Methods",
+      "TobiiController.start_recording"
+    ]
+  },
+  {
+    "objectID": "api/start_recording.html",
+    "href": "api/start_recording.html",
+    "title": "DeToX_website",
+    "section": "",
+    "text": "start_recording(self, filename=None, event_mode='precise')\nStart recording gaze data with improved thread handling.\nThis method initializes the recording process for gaze data from either a simulated or real eye tracker. It sets up the necessary threads and events for data collection.\n\n\n\n\n\n\n\n\n\n\n\nName\nType\nDescription\nDefault\n\n\n\n\nfilename\nstr, optional\nThe name of the file to save the gaze data to. If not provided, the default filename set in the constructor will be used.\nNone"
+  },
+  {
+    "objectID": "api/start_recording.html#start_recording",
+    "href": "api/start_recording.html#start_recording",
+    "title": "DeToX_website",
+    "section": "",
+    "text": "start_recording(self, filename=None, event_mode='precise')\nStart recording gaze data with improved thread handling.\nThis method initializes the recording process for gaze data from either a simulated or real eye tracker. It sets up the necessary threads and events for data collection.\n\n\n\n\n\n\n\n\n\n\n\nName\nType\nDescription\nDefault\n\n\n\n\nfilename\nstr, optional\nThe name of the file to save the gaze data to. If not provided, the default filename set in the constructor will be used.\nNone"
   },
   {
     "objectID": "api/index.html",
     "href": "api/index.html",
     "title": "Function reference",
     "section": "",
-    "text": "Main classes for infant eye-tracking research\n\n\n\nInfantStimuli\nStimuli for infant-friendly calibration.\n\n\nTobiiController\nTobii controller for infant research.\n\n\n\n\n\n\nMethods for managing eye-tracking calibration and data recording\n\n\n\nsave_calibration\nSave calibration data to a file.\n\n\nload_calibration\nLoad calibration data from a file.\n\n\nstart_recording\nStart recording gaze data with improved thread handling.\n\n\nstop_recording\nStop recording with improved thread handling.\n\n\nrecord_event\nRecord an event with a timestamp.\n\n\nsave_data\nSave gaze and event data to files.\n\n\nrun_calibration\nRun an infant-friendly calibration procedure with point selection and\n\n\nshow_status\nShow participant’s gaze position in track box.\n\n\nclose\nClean up and ensure all data is saved.\n\n\n\n\n\n\nFunctions for coordinate transformation\n\n\n\nget_psychopy_pos\nConvert Tobii ADCS coordinates to PsychoPy coordinates.\n\n\nget_tobii_pos\nConvert PsychoPy coordinates to Tobii ADCS coordinates.\n\n\npix2tobii\nConvert PsychoPy pixel coordinates to Tobii ADCS coordinates.\n\n\ntobii2pix\nConvert Tobii ADCS coordinates to PsychoPy pixel coordinates.\n\n\nget_psychopy_pos_from_trackbox\nConvert Tobii TBCS coordinates to PsychoPy coordinates.",
+    "text": "Main classes for infant eye-tracking research\n\n\n\nTobiiController\nTobii controller for infant research.\n\n\nCalibrationSession\nInfant-friendly calibration session manager.\n\n\nInfantStimuli\nStimuli for infant-friendly calibration.\n\n\n\n\n\n\nMethods for managing eye-tracking calibration and data recording\n\n\n\nTobiiController.save_calibration\nSave calibration data to a file.\n\n\nTobiiController.load_calibration\nLoad calibration data from a file.\n\n\nTobiiController.start_recording\nStart recording gaze data.\n\n\nTobiiController.stop_recording\nStop recording gaze data and save it to file.\n\n\nTobiiController.record_event\nRecord an event with a timestamp.\n\n\nTobiiController.save_data\nSave gaze and event data to an HDF5 file with two datasets: ‘gaze’ and ‘events’.\n\n\nTobiiController.calibrate\nRun an infant-friendly calibration procedure with point selection and\n\n\nTobiiController.show_status\nShow participant’s gaze position in track box.\n\n\nTobiiController.gaze_contingent\nInitialize a rolling buffer to store recent gaze positions.\n\n\nTobiiController.get_average_gaze\nCompute the average gaze position from the most recent gaze samples.\n\n\nTobiiController.close\nStop recording and perform necessary cleanup.\n\n\n\n\n\n\nFunctions for coordinate transformation\n\n\n\nget_psychopy_pos\nConvert Tobii ADCS coordinates to PsychoPy coordinates.\n\n\nget_tobii_pos\nConvert PsychoPy coordinates to Tobii ADCS coordinates.\n\n\npix2tobii\nConvert PsychoPy pixel coordinates to Tobii ADCS coordinates.\n\n\ntobii2pix\nConvert Tobii ADCS coordinates to PsychoPy pixel coordinates.\n\n\nget_psychopy_pos_from_trackbox\nConvert Tobii TBCS coordinates to PsychoPy coordinates.\n\n\n\n\n\n\nHelper functions and utilities\n\n\n\nNicePrint\nPrint a message in a box with an optional title.",
     "crumbs": [
       "Reference",
       "Function reference"
@@ -276,7 +277,7 @@
     "href": "api/index.html#core-classes",
     "title": "Function reference",
     "section": "",
-    "text": "Main classes for infant eye-tracking research\n\n\n\nInfantStimuli\nStimuli for infant-friendly calibration.\n\n\nTobiiController\nTobii controller for infant research.",
+    "text": "Main classes for infant eye-tracking research\n\n\n\nTobiiController\nTobii controller for infant research.\n\n\nCalibrationSession\nInfant-friendly calibration session manager.\n\n\nInfantStimuli\nStimuli for infant-friendly calibration.",
     "crumbs": [
       "Reference",
       "Function reference"
@@ -287,7 +288,7 @@
     "href": "api/index.html#calibration-and-recording-methods",
     "title": "Function reference",
     "section": "",
-    "text": "Methods for managing eye-tracking calibration and data recording\n\n\n\nsave_calibration\nSave calibration data to a file.\n\n\nload_calibration\nLoad calibration data from a file.\n\n\nstart_recording\nStart recording gaze data with improved thread handling.\n\n\nstop_recording\nStop recording with improved thread handling.\n\n\nrecord_event\nRecord an event with a timestamp.\n\n\nsave_data\nSave gaze and event data to files.\n\n\nrun_calibration\nRun an infant-friendly calibration procedure with point selection and\n\n\nshow_status\nShow participant’s gaze position in track box.\n\n\nclose\nClean up and ensure all data is saved.",
+    "text": "Methods for managing eye-tracking calibration and data recording\n\n\n\nTobiiController.save_calibration\nSave calibration data to a file.\n\n\nTobiiController.load_calibration\nLoad calibration data from a file.\n\n\nTobiiController.start_recording\nStart recording gaze data.\n\n\nTobiiController.stop_recording\nStop recording gaze data and save it to file.\n\n\nTobiiController.record_event\nRecord an event with a timestamp.\n\n\nTobiiController.save_data\nSave gaze and event data to an HDF5 file with two datasets: ‘gaze’ and ‘events’.\n\n\nTobiiController.calibrate\nRun an infant-friendly calibration procedure with point selection and\n\n\nTobiiController.show_status\nShow participant’s gaze position in track box.\n\n\nTobiiController.gaze_contingent\nInitialize a rolling buffer to store recent gaze positions.\n\n\nTobiiController.get_average_gaze\nCompute the average gaze position from the most recent gaze samples.\n\n\nTobiiController.close\nStop recording and perform necessary cleanup.",
     "crumbs": [
       "Reference",
       "Function reference"
@@ -305,99 +306,86 @@
     ]
   },
   {
-    "objectID": "api/load_calibration.html",
-    "href": "api/load_calibration.html",
-    "title": "DeToX_website",
+    "objectID": "api/index.html#utility-functions",
+    "href": "api/index.html#utility-functions",
+    "title": "Function reference",
     "section": "",
-    "text": "load_calibration(self, filename)\nLoad calibration data from a file.\n\n\n\n\n\n\n\n\n\n\n\nName\nType\nDescription\nDefault\n\n\n\n\nfilename\nstr\nThe name of the file containing the calibration data.\nrequired\n\n\n\n\n\n\n\n\n\n\n\n\n\nType\nDescription\n\n\n\n\nbool\nTrue if the calibration data was successfully loaded, False otherwise.",
+    "text": "Helper functions and utilities\n\n\n\nNicePrint\nPrint a message in a box with an optional title.",
     "crumbs": [
       "Reference",
-      "Calibration and Recording Methods",
-      "load_calibration"
+      "Function reference"
     ]
   },
   {
-    "objectID": "api/load_calibration.html#load_calibration",
-    "href": "api/load_calibration.html#load_calibration",
-    "title": "DeToX_website",
+    "objectID": "api/NicePrint.html",
+    "href": "api/NicePrint.html",
+    "title": "NicePrint",
     "section": "",
-    "text": "load_calibration(self, filename)\nLoad calibration data from a file.\n\n\n\n\n\n\n\n\n\n\n\nName\nType\nDescription\nDefault\n\n\n\n\nfilename\nstr\nThe name of the file containing the calibration data.\nrequired\n\n\n\n\n\n\n\n\n\n\n\n\n\nType\nDescription\n\n\n\n\nbool\nTrue if the calibration data was successfully loaded, False otherwise.",
+    "text": "NicePrint(body, title='')\nPrint a message in a box with an optional title.\n\n\n\n\n\n\n\n\n\n\n\nName\nType\nDescription\nDefault\n\n\n\n\nbody\nstr\nThe string to print inside the box.\nrequired\n\n\ntitle\nstr\nA title to print on the top border of the box.\n''",
     "crumbs": [
       "Reference",
-      "Calibration and Recording Methods",
-      "load_calibration"
+      "Utility Functions",
+      "NicePrint"
     ]
   },
   {
-    "objectID": "api/record_event.html",
-    "href": "api/record_event.html",
-    "title": "DeToX_website",
+    "objectID": "api/NicePrint.html#parameters",
+    "href": "api/NicePrint.html#parameters",
+    "title": "NicePrint",
     "section": "",
-    "text": "record_event(self, event_label)\nRecord an event with a timestamp.\nThis method adds an event to the event data buffer. The event is represented as a list with two elements: the first element is the timestamp of the event in milliseconds relative to the start of the recording, and the second element is the event label provided as a string.\nThe timestamp is obtained using tr.get_system_time_stamp(), which returns the current time in milliseconds since the system was started.\nIf the recording is not active, a RuntimeWarning is raised.\n\n\n\n\n\n\n\n\n\n\n\nName\nType\nDescription\nDefault\n\n\n\n\nevent_label\nstr\nThe label for the event to record\nrequired",
+    "text": "Name\nType\nDescription\nDefault\n\n\n\n\nbody\nstr\nThe string to print inside the box.\nrequired\n\n\ntitle\nstr\nA title to print on the top border of the box.\n''",
     "crumbs": [
       "Reference",
-      "Calibration and Recording Methods",
-      "record_event"
+      "Utility Functions",
+      "NicePrint"
     ]
   },
   {
-    "objectID": "api/record_event.html#record_event",
-    "href": "api/record_event.html#record_event",
-    "title": "DeToX_website",
+    "objectID": "api/get_psychopy_pos.html",
+    "href": "api/get_psychopy_pos.html",
+    "title": "get_psychopy_pos",
     "section": "",
-    "text": "record_event(self, event_label)\nRecord an event with a timestamp.\nThis method adds an event to the event data buffer. The event is represented as a list with two elements: the first element is the timestamp of the event in milliseconds relative to the start of the recording, and the second element is the event label provided as a string.\nThe timestamp is obtained using tr.get_system_time_stamp(), which returns the current time in milliseconds since the system was started.\nIf the recording is not active, a RuntimeWarning is raised.\n\n\n\n\n\n\n\n\n\n\n\nName\nType\nDescription\nDefault\n\n\n\n\nevent_label\nstr\nThe label for the event to record\nrequired",
+    "text": "get_psychopy_pos(win, p, units=None)\nConvert Tobii ADCS coordinates to PsychoPy coordinates.\n\n\n\n\n\n\n\n\n\n\n\nName\nType\nDescription\nDefault\n\n\n\n\nwin\npsychopy.visual.Window\nThe PsychoPy window which provides information about units and size.\nrequired\n\n\np\ntuple\nThe Tobii ADCS coordinates to convert.\nrequired\n\n\nunits\nstr\nThe units for the PsychoPy coordinates. Default is None, which uses the window’s default units.\nNone\n\n\n\n\n\n\n\n\n\nName\nType\nDescription\n\n\n\n\n\ntuple\nThe converted PsychoPy coordinates.\n\n\n\n\n\n\n\n\n\nName\nType\nDescription\n\n\n\n\n\nValueError\nIf the provided units are not supported.",
     "crumbs": [
       "Reference",
-      "Calibration and Recording Methods",
-      "record_event"
+      "Coordinate transformation functions",
+      "get_psychopy_pos"
     ]
   },
   {
-    "objectID": "api/save_calibration.html",
-    "href": "api/save_calibration.html",
-    "title": "DeToX_website",
+    "objectID": "api/get_psychopy_pos.html#parameters",
+    "href": "api/get_psychopy_pos.html#parameters",
+    "title": "get_psychopy_pos",
     "section": "",
-    "text": "save_calibration(self, filename=None)\nSave calibration data to a file.\nThis method saves the current calibration data of the eye tracker to the specified file. The calibration data is retrieved from the eye tracker using the retrieve_calibration_data() method and then written to the file in binary format.\n\n\n\n\n\n\n\n\n\n\n\nName\nType\nDescription\nDefault\n\n\n\n\nfilename\nstr, optional\nThe name of the file to save the calibration data to. If not provided, a default name based on the basename will be used.\nNone\n\n\n\n\n\n\n\n\n\n\n\n\n\nType\nDescription\n\n\n\n\nbool\nTrue if the calibration data was successfully saved, False otherwise.",
+    "text": "Name\nType\nDescription\nDefault\n\n\n\n\nwin\npsychopy.visual.Window\nThe PsychoPy window which provides information about units and size.\nrequired\n\n\np\ntuple\nThe Tobii ADCS coordinates to convert.\nrequired\n\n\nunits\nstr\nThe units for the PsychoPy coordinates. Default is None, which uses the window’s default units.\nNone",
     "crumbs": [
       "Reference",
-      "Calibration and Recording Methods",
-      "save_calibration"
+      "Coordinate transformation functions",
+      "get_psychopy_pos"
     ]
   },
   {
-    "objectID": "api/save_calibration.html#save_calibration",
-    "href": "api/save_calibration.html#save_calibration",
-    "title": "DeToX_website",
+    "objectID": "api/get_psychopy_pos.html#returns",
+    "href": "api/get_psychopy_pos.html#returns",
+    "title": "get_psychopy_pos",
     "section": "",
-    "text": "save_calibration(self, filename=None)\nSave calibration data to a file.\nThis method saves the current calibration data of the eye tracker to the specified file. The calibration data is retrieved from the eye tracker using the retrieve_calibration_data() method and then written to the file in binary format.\n\n\n\n\n\n\n\n\n\n\n\nName\nType\nDescription\nDefault\n\n\n\n\nfilename\nstr, optional\nThe name of the file to save the calibration data to. If not provided, a default name based on the basename will be used.\nNone\n\n\n\n\n\n\n\n\n\n\n\n\n\nType\nDescription\n\n\n\n\nbool\nTrue if the calibration data was successfully saved, False otherwise.",
+    "text": "Name\nType\nDescription\n\n\n\n\n\ntuple\nThe converted PsychoPy coordinates.",
     "crumbs": [
       "Reference",
-      "Calibration and Recording Methods",
-      "save_calibration"
+      "Coordinate transformation functions",
+      "get_psychopy_pos"
     ]
   },
   {
-    "objectID": "api/show_status.html",
-    "href": "api/show_status.html",
-    "title": "DeToX_website",
+    "objectID": "api/get_psychopy_pos.html#raises",
+    "href": "api/get_psychopy_pos.html#raises",
+    "title": "get_psychopy_pos",
     "section": "",
-    "text": "show_status(self, decision_key='space')\nShow participant’s gaze position in track box.\nThis function creates a visualization of the participant’s gaze position in the track box. The visualization consists of a green bar representing the z-position of the user, and circles for the left and right eye positions. The visualization is updated in real time based on the latest gaze data received from the eye tracker.\n\n\n\n\n\n\n\n\n\n\n\nName\nType\nDescription\nDefault\n\n\n\n\ndecision_key\nstr, optional\nThe key to press to exit the visualization. Default is ‘space’.\n'space'",
+    "text": "Name\nType\nDescription\n\n\n\n\n\nValueError\nIf the provided units are not supported.",
     "crumbs": [
       "Reference",
-      "Calibration and Recording Methods",
-      "show_status"
-    ]
-  },
-  {
-    "objectID": "api/show_status.html#show_status",
-    "href": "api/show_status.html#show_status",
-    "title": "DeToX_website",
-    "section": "",
-    "text": "show_status(self, decision_key='space')\nShow participant’s gaze position in track box.\nThis function creates a visualization of the participant’s gaze position in the track box. The visualization consists of a green bar representing the z-position of the user, and circles for the left and right eye positions. The visualization is updated in real time based on the latest gaze data received from the eye tracker.\n\n\n\n\n\n\n\n\n\n\n\nName\nType\nDescription\nDefault\n\n\n\n\ndecision_key\nstr, optional\nThe key to press to exit the visualization. Default is ‘space’.\n'space'",
-    "crumbs": [
-      "Reference",
-      "Calibration and Recording Methods",
-      "show_status"
+      "Coordinate transformation functions",
+      "get_psychopy_pos"
     ]
   },
   {
@@ -405,31 +393,334 @@
     "href": "api/stop_recording.html",
     "title": "DeToX_website",
     "section": "",
-    "text": "stop_recording(self)\nStop recording with improved thread handling.\nThis method stops the recording, unsubscribes from the gaze data stream if in real mode, and saves the recorded data to files.",
-    "crumbs": [
-      "Reference",
-      "Calibration and Recording Methods",
-      "stop_recording"
-    ]
+    "text": "stop_recording(self)\nStop recording with improved thread handling.\nThis method stops the recording, unsubscribes from the gaze data stream if in real mode, and saves the recorded data to files."
   },
   {
     "objectID": "api/stop_recording.html#stop_recording",
     "href": "api/stop_recording.html#stop_recording",
     "title": "DeToX_website",
     "section": "",
-    "text": "stop_recording(self)\nStop recording with improved thread handling.\nThis method stops the recording, unsubscribes from the gaze data stream if in real mode, and saves the recorded data to files.",
+    "text": "stop_recording(self)\nStop recording with improved thread handling.\nThis method stops the recording, unsubscribes from the gaze data stream if in real mode, and saves the recorded data to files."
+  },
+  {
+    "objectID": "api/run_calibration.html",
+    "href": "api/run_calibration.html",
+    "title": "DeToX_website",
+    "section": "",
+    "text": "run_calibration(self, calibration_points, infant_stims, shuffle=True, audio=None, focus_time=0.5, anim_type='zoom', save_calib=False)\nRun an infant-friendly calibration procedure with point selection and animated stimuli. The calibration points are presented in a sequence (either in order or shuffled) and at each point, an animated stimulus is presented (either zooming or trilling). The procedure can optionally play an attention-getting audio during the calibration process. The calibration data can be saved to a file if desired.\n\n\n\n\n\n\n\n\n\n\n\nName\nType\nDescription\nDefault\n\n\n\n\ncalibration_points\nlist of tuple\nList of (x, y) coordinates for calibration points\nrequired\n\n\ninfant_stims\nlist of str\nList of image file paths for calibration stimuli\nrequired\n\n\nshuffle\nbool, optional\nWhether to shuffle stimuli order. Default is True\nTrue\n\n\naudio\npsychopy.sound.Sound, optional\nAudio to play during calibration. Default is None\nNone\n\n\nfocus_time\nfloat, optional\nTime to wait before collecting data. Default is 0.5s\n0.5\n\n\nsave_calib\nbool, optional\nWhether to save calibration data. Default is False\nFalse\n\n\n\n\n\n\n\n\n\nType\nDescription\n\n\n\n\nbool\nTrue if calibration successful, False otherwise"
+  },
+  {
+    "objectID": "api/run_calibration.html#run_calibration",
+    "href": "api/run_calibration.html#run_calibration",
+    "title": "DeToX_website",
+    "section": "",
+    "text": "run_calibration(self, calibration_points, infant_stims, shuffle=True, audio=None, focus_time=0.5, anim_type='zoom', save_calib=False)\nRun an infant-friendly calibration procedure with point selection and animated stimuli. The calibration points are presented in a sequence (either in order or shuffled) and at each point, an animated stimulus is presented (either zooming or trilling). The procedure can optionally play an attention-getting audio during the calibration process. The calibration data can be saved to a file if desired.\n\n\n\n\n\n\n\n\n\n\n\nName\nType\nDescription\nDefault\n\n\n\n\ncalibration_points\nlist of tuple\nList of (x, y) coordinates for calibration points\nrequired\n\n\ninfant_stims\nlist of str\nList of image file paths for calibration stimuli\nrequired\n\n\nshuffle\nbool, optional\nWhether to shuffle stimuli order. Default is True\nTrue\n\n\naudio\npsychopy.sound.Sound, optional\nAudio to play during calibration. Default is None\nNone\n\n\nfocus_time\nfloat, optional\nTime to wait before collecting data. Default is 0.5s\n0.5\n\n\nsave_calib\nbool, optional\nWhether to save calibration data. Default is False\nFalse\n\n\n\n\n\n\n\n\n\nType\nDescription\n\n\n\n\nbool\nTrue if calibration successful, False otherwise"
+  },
+  {
+    "objectID": "index.html",
+    "href": "index.html",
+    "title": "DeToX",
+    "section": "",
+    "text": "This package was created out of the need to run eye-tracking experiments using tobii_researcher. The Tobii SDK provides a powerful way to interact with Tobii eye trackers in Python, offering many advanced features. However, certain aspects of its implementation can be complex and unintuitive.\nSince we often run experiments using PsychoPy, we developed this lightweight wrapper around PsychoPy and tobii_researcher to simplify the process. The goal is to make it easy to run infant-friendly eye-tracking studies while handling the more technical aspects of eye tracker integration.\nThis project didn’t start from scratch—it builds upon two existing packages that we have used in the past:\n\npsychopy_tobii_infant\npsychopy_tobii_controller\n\nWhile these packages already provided great solutions for integrating Tobii eye trackers with PsychoPy, we added a few extra features and improvements that we found useful for running infant-friendly eye-tracking studies. Our goal was to simplify some of the more technical aspects of eye tracker integration while keeping the flexibility needed for research."
+  },
+  {
+    "objectID": "api/TobiiController.show_status.html",
+    "href": "api/TobiiController.show_status.html",
+    "title": "TobiiController.show_status",
+    "section": "",
+    "text": "TobiiController.show_status(decision_key='space')\nShow participant’s gaze position in track box.\nThis function creates a visualization of the participant’s gaze position in the track box. The visualization consists of a green bar representing the z-position of the user, and circles for the left and right eye positions. The visualization is updated in real time based on the latest gaze data received from the eye tracker.\n\n\n\n\n\n\n\n\n\n\n\nName\nType\nDescription\nDefault\n\n\n\n\ndecision_key\nstr\nThe key to press to exit the visualization. Default is ‘space’.\n'space'",
     "crumbs": [
       "Reference",
       "Calibration and Recording Methods",
-      "stop_recording"
+      "TobiiController.show_status"
     ]
+  },
+  {
+    "objectID": "api/TobiiController.show_status.html#parameters",
+    "href": "api/TobiiController.show_status.html#parameters",
+    "title": "TobiiController.show_status",
+    "section": "",
+    "text": "Name\nType\nDescription\nDefault\n\n\n\n\ndecision_key\nstr\nThe key to press to exit the visualization. Default is ‘space’.\n'space'",
+    "crumbs": [
+      "Reference",
+      "Calibration and Recording Methods",
+      "TobiiController.show_status"
+    ]
+  },
+  {
+    "objectID": "api/TobiiController.get_average_gaze.html",
+    "href": "api/TobiiController.get_average_gaze.html",
+    "title": "TobiiController.get_average_gaze",
+    "section": "",
+    "text": "TobiiController.get_average_gaze(fallback_offscreen=True)\nCompute the average gaze position from the most recent gaze samples.\nThis method averages valid Tobii ADCS coordinates from the rolling gaze buffer initialized via gaze_contingent(). If no valid data is available, it can return a fallback offscreen value to help avoid crashes or unwanted triggers in the experiment.\n\n\n\n\n\n\n\n\n\n\n\nName\nType\nDescription\nDefault\n\n\n\n\nfallback_offscreen\nbool\nWhether to return an offscreen position (win.size * 2) if no valid gaze data is found. Default is True.\nTrue\n\n\n\n\n\n\n\n\n\n\n\n\n\n\nName\nType\nDescription\n\n\n\n\navg_psychopy_pos\ntuple or None\nThe average gaze position as a 2D coordinate in Tobii ADCS units, or offscreen position (tuple) / None if no data is available.\n\n\n\n\n\n\n\n\n\n\n\n\n\n\nName\nType\nDescription\n\n\n\n\n\nWarning\nIf gaze_contingent() was not run before this function.",
+    "crumbs": [
+      "Reference",
+      "Calibration and Recording Methods",
+      "TobiiController.get_average_gaze"
+    ]
+  },
+  {
+    "objectID": "api/TobiiController.get_average_gaze.html#parameters",
+    "href": "api/TobiiController.get_average_gaze.html#parameters",
+    "title": "TobiiController.get_average_gaze",
+    "section": "",
+    "text": "Name\nType\nDescription\nDefault\n\n\n\n\nfallback_offscreen\nbool\nWhether to return an offscreen position (win.size * 2) if no valid gaze data is found. Default is True.\nTrue",
+    "crumbs": [
+      "Reference",
+      "Calibration and Recording Methods",
+      "TobiiController.get_average_gaze"
+    ]
+  },
+  {
+    "objectID": "api/TobiiController.get_average_gaze.html#returns",
+    "href": "api/TobiiController.get_average_gaze.html#returns",
+    "title": "TobiiController.get_average_gaze",
+    "section": "",
+    "text": "Name\nType\nDescription\n\n\n\n\navg_psychopy_pos\ntuple or None\nThe average gaze position as a 2D coordinate in Tobii ADCS units, or offscreen position (tuple) / None if no data is available.",
+    "crumbs": [
+      "Reference",
+      "Calibration and Recording Methods",
+      "TobiiController.get_average_gaze"
+    ]
+  },
+  {
+    "objectID": "api/TobiiController.get_average_gaze.html#raises",
+    "href": "api/TobiiController.get_average_gaze.html#raises",
+    "title": "TobiiController.get_average_gaze",
+    "section": "",
+    "text": "Name\nType\nDescription\n\n\n\n\n\nWarning\nIf gaze_contingent() was not run before this function.",
+    "crumbs": [
+      "Reference",
+      "Calibration and Recording Methods",
+      "TobiiController.get_average_gaze"
+    ]
+  },
+  {
+    "objectID": "api/TobiiController.save_calibration.html",
+    "href": "api/TobiiController.save_calibration.html",
+    "title": "TobiiController.save_calibration",
+    "section": "",
+    "text": "TobiiController.save_calibration(filename=None)\nSave calibration data to a file.\nThis method saves the current calibration data of the eye tracker to the specified file. The calibration data is retrieved from the eye tracker using the retrieve_calibration_data() method and then written to the file in binary format.\n\n\n\n\n\n\n\n\n\n\n\nName\nType\nDescription\nDefault\n\n\n\n\nfilename\nstr\nThe name of the file to save the calibration data to. If not provided, a default name based on the basename will be used.\nNone\n\n\n\n\n\n\n\n\n\n\n\n\n\n\nName\nType\nDescription\n\n\n\n\n\nbool\nTrue if the calibration data was successfully saved, False otherwise.",
+    "crumbs": [
+      "Reference",
+      "Calibration and Recording Methods",
+      "TobiiController.save_calibration"
+    ]
+  },
+  {
+    "objectID": "api/TobiiController.save_calibration.html#parameters",
+    "href": "api/TobiiController.save_calibration.html#parameters",
+    "title": "TobiiController.save_calibration",
+    "section": "",
+    "text": "Name\nType\nDescription\nDefault\n\n\n\n\nfilename\nstr\nThe name of the file to save the calibration data to. If not provided, a default name based on the basename will be used.\nNone",
+    "crumbs": [
+      "Reference",
+      "Calibration and Recording Methods",
+      "TobiiController.save_calibration"
+    ]
+  },
+  {
+    "objectID": "api/TobiiController.save_calibration.html#returns",
+    "href": "api/TobiiController.save_calibration.html#returns",
+    "title": "TobiiController.save_calibration",
+    "section": "",
+    "text": "Name\nType\nDescription\n\n\n\n\n\nbool\nTrue if the calibration data was successfully saved, False otherwise.",
+    "crumbs": [
+      "Reference",
+      "Calibration and Recording Methods",
+      "TobiiController.save_calibration"
+    ]
+  },
+  {
+    "objectID": "api/CalibrationSession.html",
+    "href": "api/CalibrationSession.html",
+    "title": "CalibrationSession",
+    "section": "",
+    "text": "CalibrationSession(\n    self,\n    win,\n    calibration_api,\n    infant_stims,\n    shuffle=True,\n    audio=None,\n    focus_time=0.5,\n    anim_type='zoom',\n    animation_settings=None,\n    numkey_dict=None,\n)\nInfant-friendly calibration session manager.\nEncapsulates the flow of a full calibration procedure: 1. Validate input points 2. Initialize stimuli 3. Collect calibration data at chosen points 4. Compute and display results 5. Allow user to select points for re-calibration 6. Discard data for retried points and loop back 7. Save calibration if requested\n\n\n\n\n\nName\nDescription\n\n\n\n\ncheck_points\nEnsure number of calibration points is within allowed range.\n\n\nrun\nExecute the complete calibration loop.\n\n\n\n\n\nCalibrationSession.check_points(calibration_points)\nEnsure number of calibration points is within allowed range.\n\n\n\nCalibrationSession.run(calibration_points, save_calib=False)\nExecute the complete calibration loop.\n\n\n\n\n\n\n\n\n\n\n\nName\nType\nDescription\nDefault\n\n\n\n\ncalibration_points\nlist of (float, float)\nPsychoPy-normalized (x, y) coordinates for calibration targets.\nrequired\n\n\nsave_calib\nbool\nIf True and calibration succeeds, save binary data to disk.\nFalse\n\n\n\n\n\n\n\n\n\nName\nType\nDescription\n\n\n\n\n\nbool\nTrue if calibration succeeded.",
+    "crumbs": [
+      "Reference",
+      "Core Classes",
+      "CalibrationSession"
+    ]
+  },
+  {
+    "objectID": "api/CalibrationSession.html#methods",
+    "href": "api/CalibrationSession.html#methods",
+    "title": "CalibrationSession",
+    "section": "",
+    "text": "Name\nDescription\n\n\n\n\ncheck_points\nEnsure number of calibration points is within allowed range.\n\n\nrun\nExecute the complete calibration loop.\n\n\n\n\n\nCalibrationSession.check_points(calibration_points)\nEnsure number of calibration points is within allowed range.\n\n\n\nCalibrationSession.run(calibration_points, save_calib=False)\nExecute the complete calibration loop.\n\n\n\n\n\n\n\n\n\n\n\nName\nType\nDescription\nDefault\n\n\n\n\ncalibration_points\nlist of (float, float)\nPsychoPy-normalized (x, y) coordinates for calibration targets.\nrequired\n\n\nsave_calib\nbool\nIf True and calibration succeeds, save binary data to disk.\nFalse\n\n\n\n\n\n\n\n\n\nName\nType\nDescription\n\n\n\n\n\nbool\nTrue if calibration succeeded.",
+    "crumbs": [
+      "Reference",
+      "Core Classes",
+      "CalibrationSession"
+    ]
+  },
+  {
+    "objectID": "api/save_calibration.html",
+    "href": "api/save_calibration.html",
+    "title": "DeToX_website",
+    "section": "",
+    "text": "save_calibration(self, filename=None)\nSave calibration data to a file.\nThis method saves the current calibration data of the eye tracker to the specified file. The calibration data is retrieved from the eye tracker using the retrieve_calibration_data() method and then written to the file in binary format.\n\n\n\n\n\n\n\n\n\n\n\nName\nType\nDescription\nDefault\n\n\n\n\nfilename\nstr, optional\nThe name of the file to save the calibration data to. If not provided, a default name based on the basename will be used.\nNone\n\n\n\n\n\n\n\n\n\n\n\n\n\nType\nDescription\n\n\n\n\nbool\nTrue if the calibration data was successfully saved, False otherwise."
+  },
+  {
+    "objectID": "api/save_calibration.html#save_calibration",
+    "href": "api/save_calibration.html#save_calibration",
+    "title": "DeToX_website",
+    "section": "",
+    "text": "save_calibration(self, filename=None)\nSave calibration data to a file.\nThis method saves the current calibration data of the eye tracker to the specified file. The calibration data is retrieved from the eye tracker using the retrieve_calibration_data() method and then written to the file in binary format.\n\n\n\n\n\n\n\n\n\n\n\nName\nType\nDescription\nDefault\n\n\n\n\nfilename\nstr, optional\nThe name of the file to save the calibration data to. If not provided, a default name based on the basename will be used.\nNone\n\n\n\n\n\n\n\n\n\n\n\n\n\nType\nDescription\n\n\n\n\nbool\nTrue if the calibration data was successfully saved, False otherwise."
+  },
+  {
+    "objectID": "api/TobiiController.save_data.html",
+    "href": "api/TobiiController.save_data.html",
+    "title": "TobiiController.save_data",
+    "section": "",
+    "text": "TobiiController.save_data\nTobiiController.save_data()\nSave gaze and event data to an HDF5 file with two datasets: ‘gaze’ and ‘events’.",
+    "crumbs": [
+      "Reference",
+      "Calibration and Recording Methods",
+      "TobiiController.save_data"
+    ]
+  },
+  {
+    "objectID": "api/get_psychopy_pos_from_trackbox.html",
+    "href": "api/get_psychopy_pos_from_trackbox.html",
+    "title": "get_psychopy_pos_from_trackbox",
+    "section": "",
+    "text": "get_psychopy_pos_from_trackbox(win, p, units=None)\nConvert Tobii TBCS coordinates to PsychoPy coordinates.\n\n\n\n\n\n\n\n\n\n\n\nName\nType\nDescription\nDefault\n\n\n\n\nwin\npsychopy.visual.Window\nThe PsychoPy window which provides information about units and size.\nrequired\n\n\np\ntuple\nThe Tobii TBCS coordinates to convert.\nrequired\n\n\nunits\nstr\nThe units for the PsychoPy coordinates. Default is None, which uses the window’s default units.\nNone\n\n\n\n\n\n\n\n\n\nName\nType\nDescription\n\n\n\n\n\ntuple\nThe converted PsychoPy coordinates.\n\n\n\n\n\n\n\n\n\nName\nType\nDescription\n\n\n\n\n\nValueError\nIf the provided units are not supported.",
+    "crumbs": [
+      "Reference",
+      "Coordinate transformation functions",
+      "get_psychopy_pos_from_trackbox"
+    ]
+  },
+  {
+    "objectID": "api/get_psychopy_pos_from_trackbox.html#parameters",
+    "href": "api/get_psychopy_pos_from_trackbox.html#parameters",
+    "title": "get_psychopy_pos_from_trackbox",
+    "section": "",
+    "text": "Name\nType\nDescription\nDefault\n\n\n\n\nwin\npsychopy.visual.Window\nThe PsychoPy window which provides information about units and size.\nrequired\n\n\np\ntuple\nThe Tobii TBCS coordinates to convert.\nrequired\n\n\nunits\nstr\nThe units for the PsychoPy coordinates. Default is None, which uses the window’s default units.\nNone",
+    "crumbs": [
+      "Reference",
+      "Coordinate transformation functions",
+      "get_psychopy_pos_from_trackbox"
+    ]
+  },
+  {
+    "objectID": "api/get_psychopy_pos_from_trackbox.html#returns",
+    "href": "api/get_psychopy_pos_from_trackbox.html#returns",
+    "title": "get_psychopy_pos_from_trackbox",
+    "section": "",
+    "text": "Name\nType\nDescription\n\n\n\n\n\ntuple\nThe converted PsychoPy coordinates.",
+    "crumbs": [
+      "Reference",
+      "Coordinate transformation functions",
+      "get_psychopy_pos_from_trackbox"
+    ]
+  },
+  {
+    "objectID": "api/get_psychopy_pos_from_trackbox.html#raises",
+    "href": "api/get_psychopy_pos_from_trackbox.html#raises",
+    "title": "get_psychopy_pos_from_trackbox",
+    "section": "",
+    "text": "Name\nType\nDescription\n\n\n\n\n\nValueError\nIf the provided units are not supported.",
+    "crumbs": [
+      "Reference",
+      "Coordinate transformation functions",
+      "get_psychopy_pos_from_trackbox"
+    ]
+  },
+  {
+    "objectID": "api/TobiiController.calibrate.html",
+    "href": "api/TobiiController.calibrate.html",
+    "title": "TobiiController.calibrate",
+    "section": "",
+    "text": "TobiiController.calibrate(\n    calibration_points,\n    infant_stims,\n    shuffle=True,\n    audio=None,\n    focus_time=0.5,\n    anim_type='zoom',\n    save_calib=False,\n)\nRun an infant-friendly calibration procedure with point selection and animated stimuli. The calibration points are presented in a sequence (either in order or shuffled) and at each point, an animated stimulus is presented (either zooming or trilling). The procedure can optionally play an attention-getting audio during the calibration process. The calibration data can be saved to a file if desired.\n\n\n\n\n\n\n\n\n\n\n\nName\nType\nDescription\nDefault\n\n\n\n\ncalibration_points\nlist of (float, float)\nPsychoPy-normalized (x, y) coordinates for calibration targets.\nrequired\n\n\ninfant_stims\nlist of str\nList of image file paths for calibration stimuli.\nrequired\n\n\nshuffle\nbool\nWhether to shuffle stimuli order. Default is True.\nTrue\n\n\naudio\nstr\nPath to audio file to play during calibration. Default is None.\nNone\n\n\nfocus_time\nfloat\nTime to wait before collecting data. Default is 0.5s\n0.5\n\n\nanim_type\nstr\nType of animation to use. Options are ‘zoom’ or ‘trill’. Default is ‘zoom’.\n'zoom'\n\n\nsave_calib\nbool\nWhether to save calibration data. Default is False\nFalse\n\n\n\n\n\n\n\n\n\nName\nType\nDescription\n\n\n\n\n\nbool\nTrue if calibration successful, False otherwise",
+    "crumbs": [
+      "Reference",
+      "Calibration and Recording Methods",
+      "TobiiController.calibrate"
+    ]
+  },
+  {
+    "objectID": "api/TobiiController.calibrate.html#parameters",
+    "href": "api/TobiiController.calibrate.html#parameters",
+    "title": "TobiiController.calibrate",
+    "section": "",
+    "text": "Name\nType\nDescription\nDefault\n\n\n\n\ncalibration_points\nlist of (float, float)\nPsychoPy-normalized (x, y) coordinates for calibration targets.\nrequired\n\n\ninfant_stims\nlist of str\nList of image file paths for calibration stimuli.\nrequired\n\n\nshuffle\nbool\nWhether to shuffle stimuli order. Default is True.\nTrue\n\n\naudio\nstr\nPath to audio file to play during calibration. Default is None.\nNone\n\n\nfocus_time\nfloat\nTime to wait before collecting data. Default is 0.5s\n0.5\n\n\nanim_type\nstr\nType of animation to use. Options are ‘zoom’ or ‘trill’. Default is ‘zoom’.\n'zoom'\n\n\nsave_calib\nbool\nWhether to save calibration data. Default is False\nFalse",
+    "crumbs": [
+      "Reference",
+      "Calibration and Recording Methods",
+      "TobiiController.calibrate"
+    ]
+  },
+  {
+    "objectID": "api/TobiiController.calibrate.html#returns",
+    "href": "api/TobiiController.calibrate.html#returns",
+    "title": "TobiiController.calibrate",
+    "section": "",
+    "text": "Name\nType\nDescription\n\n\n\n\n\nbool\nTrue if calibration successful, False otherwise",
+    "crumbs": [
+      "Reference",
+      "Calibration and Recording Methods",
+      "TobiiController.calibrate"
+    ]
+  },
+  {
+    "objectID": "api/TobiiController.gaze_contingent.html",
+    "href": "api/TobiiController.gaze_contingent.html",
+    "title": "TobiiController.gaze_contingent",
+    "section": "",
+    "text": "TobiiController.gaze_contingent(N=5)\nInitialize a rolling buffer to store recent gaze positions.\nThis method sets up a deque (double-ended queue) to hold the last N gaze samples from both eyes, meaning the buffer can hold up to 2*N samples total. This is useful for real-time gaze contingent logic where you want to compute smooth gaze estimates from recent samples.\n\n\n\n\n\n\n\n\n\n\n\nName\nType\nDescription\nDefault\n\n\n\n\nN\nint\nThe number of recent gaze samples (pairs of left/right eye data) to buffer.\n5\n\n\n\n\n\n\n\n\n\nName\nType\nDescription\n\n\n\n\n\nTypeError\nIf N is not an integer.",
+    "crumbs": [
+      "Reference",
+      "Calibration and Recording Methods",
+      "TobiiController.gaze_contingent"
+    ]
+  },
+  {
+    "objectID": "api/TobiiController.gaze_contingent.html#parameters",
+    "href": "api/TobiiController.gaze_contingent.html#parameters",
+    "title": "TobiiController.gaze_contingent",
+    "section": "",
+    "text": "Name\nType\nDescription\nDefault\n\n\n\n\nN\nint\nThe number of recent gaze samples (pairs of left/right eye data) to buffer.\n5",
+    "crumbs": [
+      "Reference",
+      "Calibration and Recording Methods",
+      "TobiiController.gaze_contingent"
+    ]
+  },
+  {
+    "objectID": "api/TobiiController.gaze_contingent.html#raises",
+    "href": "api/TobiiController.gaze_contingent.html#raises",
+    "title": "TobiiController.gaze_contingent",
+    "section": "",
+    "text": "Name\nType\nDescription\n\n\n\n\n\nTypeError\nIf N is not an integer.",
+    "crumbs": [
+      "Reference",
+      "Calibration and Recording Methods",
+      "TobiiController.gaze_contingent"
+    ]
+  },
+  {
+    "objectID": "api/coord_utils.html",
+    "href": "api/coord_utils.html",
+    "title": "DeToX_website",
+    "section": "",
+    "text": "coord_utils"
+  },
+  {
+    "objectID": "api/coord_utils.html#coord_utils",
+    "href": "api/coord_utils.html#coord_utils",
+    "title": "DeToX_website",
+    "section": "",
+    "text": "coord_utils"
   },
   {
     "objectID": "api/TobiiController.html",
     "href": "api/TobiiController.html",
-    "title": "DeToX_website",
+    "title": "TobiiController",
     "section": "",
-    "text": "TobiiController(self, win, id=0, simulate=False)\nTobii controller for infant research.\nThe TobiiController class is a simple Python wrapper around the Tobii Pro SDK for use in infant research. It provides convenience methods for starting/stopping gaze data recording and saving the data to a file.\nThe TobiiController class is designed to be used with the PsychoPy package, which is a popular Python library for creating psychology experiments. It is compatible with the Tobii Pro SDK version 3.0 or later.\nThe TobiiController class provides the following features:\n- Starting and stopping recording of gaze data\n- Saving the recorded data to a file\n- Running a calibration procedure\n- Loading a calibration from a file\n- Running a recording procedure\n- Stopping the recording procedure\nThe TobiiController class is designed to be easy to use and provides a minimal interface for the user to interact with the Tobii Pro SDK.",
+    "text": "TobiiController(self, win, id=0, simulate=False)\nTobii controller for infant research.\nThe TobiiController class is a simple Python wrapper around the Tobii Pro SDK for use in infant research. It provides convenience methods for starting/stopping gaze data recording and saving the data to a file.\nThe TobiiController class is designed to be used with the PsychoPy package, which is a popular Python library for creating psychology experiments. It is compatible with the Tobii Pro SDK version 3.0 or later.\nThe TobiiController class provides the following features:\n- Starting and stopping recording of gaze data\n- Saving the recorded data to a file\n- Running a calibration procedure\n- Loading a calibration from a file\n- Running a recording procedure\n- Stopping the recording procedure\nThe TobiiController class is designed to be easy to use and provides a minimal interface for the user to interact with the Tobii Pro SDK.\n\n\n\n\n\nName\nDescription\n\n\n\n\ncalibrate\nRun an infant-friendly calibration procedure with point selection and\n\n\nclose\nStop recording and perform necessary cleanup.\n\n\ngaze_contingent\nInitialize a rolling buffer to store recent gaze positions.\n\n\nget_average_gaze\nCompute the average gaze position from the most recent gaze samples.\n\n\nget_info\nPrint information about the current eyetracker or simulation.\n\n\nload_calibration\nLoad calibration data from a file.\n\n\nrecord_event\nRecord an event with a timestamp.\n\n\nsave_calibration\nSave calibration data to a file.\n\n\nsave_data\nSave gaze and event data to an HDF5 file with two datasets: ‘gaze’ and ‘events’.\n\n\nshow_status\nShow participant’s gaze position in track box.\n\n\nstart_recording\nStart recording gaze data.\n\n\nstop_recording\nStop recording gaze data and save it to file.\n\n\n\n\n\nTobiiController.calibrate(\n    calibration_points,\n    infant_stims,\n    shuffle=True,\n    audio=None,\n    focus_time=0.5,\n    anim_type='zoom',\n    save_calib=False,\n)\nRun an infant-friendly calibration procedure with point selection and animated stimuli. The calibration points are presented in a sequence (either in order or shuffled) and at each point, an animated stimulus is presented (either zooming or trilling). The procedure can optionally play an attention-getting audio during the calibration process. The calibration data can be saved to a file if desired.\n\n\n\n\n\n\n\n\n\n\n\nName\nType\nDescription\nDefault\n\n\n\n\ncalibration_points\nlist of (float, float)\nPsychoPy-normalized (x, y) coordinates for calibration targets.\nrequired\n\n\ninfant_stims\nlist of str\nList of image file paths for calibration stimuli.\nrequired\n\n\nshuffle\nbool\nWhether to shuffle stimuli order. Default is True.\nTrue\n\n\naudio\nstr\nPath to audio file to play during calibration. Default is None.\nNone\n\n\nfocus_time\nfloat\nTime to wait before collecting data. Default is 0.5s\n0.5\n\n\nanim_type\nstr\nType of animation to use. Options are ‘zoom’ or ‘trill’. Default is ‘zoom’.\n'zoom'\n\n\nsave_calib\nbool\nWhether to save calibration data. Default is False\nFalse\n\n\n\n\n\n\n\n\n\nName\nType\nDescription\n\n\n\n\n\nbool\nTrue if calibration successful, False otherwise\n\n\n\n\n\n\n\nTobiiController.close()\nStop recording and perform necessary cleanup.\n\n\n\nTobiiController.gaze_contingent(N=5)\nInitialize a rolling buffer to store recent gaze positions.\nThis method sets up a deque (double-ended queue) to hold the last N gaze samples from both eyes, meaning the buffer can hold up to 2*N samples total. This is useful for real-time gaze contingent logic where you want to compute smooth gaze estimates from recent samples.\n\n\n\n\n\n\n\n\n\n\n\nName\nType\nDescription\nDefault\n\n\n\n\nN\nint\nThe number of recent gaze samples (pairs of left/right eye data) to buffer.\n5\n\n\n\n\n\n\n\n\n\nName\nType\nDescription\n\n\n\n\n\nTypeError\nIf N is not an integer.\n\n\n\n\n\n\n\nTobiiController.get_average_gaze(fallback_offscreen=True)\nCompute the average gaze position from the most recent gaze samples.\nThis method averages valid Tobii ADCS coordinates from the rolling gaze buffer initialized via gaze_contingent(). If no valid data is available, it can return a fallback offscreen value to help avoid crashes or unwanted triggers in the experiment.\n\n\n\n\n\n\n\n\n\n\n\nName\nType\nDescription\nDefault\n\n\n\n\nfallback_offscreen\nbool\nWhether to return an offscreen position (win.size * 2) if no valid gaze data is found. Default is True.\nTrue\n\n\n\n\n\n\n\n\n\n\n\n\n\n\nName\nType\nDescription\n\n\n\n\navg_psychopy_pos\ntuple or None\nThe average gaze position as a 2D coordinate in Tobii ADCS units, or offscreen position (tuple) / None if no data is available.\n\n\n\n\n\n\n\n\n\n\n\n\n\n\nName\nType\nDescription\n\n\n\n\n\nWarning\nIf gaze_contingent() was not run before this function.\n\n\n\n\n\n\n\nTobiiController.get_info(moment='connection')\nPrint information about the current eyetracker or simulation.\n\n\n\nTobiiController.load_calibration(filename)\nLoad calibration data from a file.\n\n\n\n\n\n\n\n\n\n\n\nName\nType\nDescription\nDefault\n\n\n\n\nfilename\nstr\nThe name of the file containing the calibration data.\nrequired\n\n\n\n\n\n\n\n\n\n\n\n\n\n\nName\nType\nDescription\n\n\n\n\n\nbool\nTrue if the calibration data was successfully loaded, False otherwise.\n\n\n\n\n\n\n\nTobiiController.record_event(label)\nRecord an event with a timestamp.\n\n\n\n\n\nName\nType\nDescription\nDefault\n\n\n\n\nlabel\nstr\nThe label for the event to record\nrequired\n\n\n\n\n\n\n\n\n\nName\nType\nDescription\n\n\n\n\n\nRuntimeWarning\nIf recording is not active\n\n\n\n\n\n\n\nTobiiController.save_calibration(filename=None)\nSave calibration data to a file.\nThis method saves the current calibration data of the eye tracker to the specified file. The calibration data is retrieved from the eye tracker using the retrieve_calibration_data() method and then written to the file in binary format.\n\n\n\n\n\n\n\n\n\n\n\nName\nType\nDescription\nDefault\n\n\n\n\nfilename\nstr\nThe name of the file to save the calibration data to. If not provided, a default name based on the basename will be used.\nNone\n\n\n\n\n\n\n\n\n\n\n\n\n\n\nName\nType\nDescription\n\n\n\n\n\nbool\nTrue if the calibration data was successfully saved, False otherwise.\n\n\n\n\n\n\n\nTobiiController.save_data()\nSave gaze and event data to an HDF5 file with two datasets: ‘gaze’ and ‘events’.\n\n\n\nTobiiController.show_status(decision_key='space')\nShow participant’s gaze position in track box.\nThis function creates a visualization of the participant’s gaze position in the track box. The visualization consists of a green bar representing the z-position of the user, and circles for the left and right eye positions. The visualization is updated in real time based on the latest gaze data received from the eye tracker.\n\n\n\n\n\n\n\n\n\n\n\nName\nType\nDescription\nDefault\n\n\n\n\ndecision_key\nstr\nThe key to press to exit the visualization. Default is ‘space’.\n'space'\n\n\n\n\n\n\n\nTobiiController.start_recording(filename=None, event_mode='precise')\nStart recording gaze data.\n\n\n\n\n\n\n\n\n\n\n\nName\nType\nDescription\nDefault\n\n\n\n\nfilename\nstr\nThe name of the file to save the gaze data to. If not provided, a default name based on the current datetime will be used.\nNone\n\n\nevent_mode\nstr\nMode for event recording. Options are ‘samplebased’ or ‘precise’. Default is ‘precise’.\n'precise'\n\n\n\n\n\n\n\nTobiiController.stop_recording()\nStop recording gaze data and save it to file.",
     "crumbs": [
       "Reference",
       "Core Classes",
@@ -437,15 +728,153 @@
     ]
   },
   {
-    "objectID": "api/TobiiController.html#TobiiController",
-    "href": "api/TobiiController.html#TobiiController",
-    "title": "DeToX_website",
+    "objectID": "api/TobiiController.html#methods",
+    "href": "api/TobiiController.html#methods",
+    "title": "TobiiController",
     "section": "",
-    "text": "TobiiController(self, win, id=0, simulate=False)\nTobii controller for infant research.\nThe TobiiController class is a simple Python wrapper around the Tobii Pro SDK for use in infant research. It provides convenience methods for starting/stopping gaze data recording and saving the data to a file.\nThe TobiiController class is designed to be used with the PsychoPy package, which is a popular Python library for creating psychology experiments. It is compatible with the Tobii Pro SDK version 3.0 or later.\nThe TobiiController class provides the following features:\n- Starting and stopping recording of gaze data\n- Saving the recorded data to a file\n- Running a calibration procedure\n- Loading a calibration from a file\n- Running a recording procedure\n- Stopping the recording procedure\nThe TobiiController class is designed to be easy to use and provides a minimal interface for the user to interact with the Tobii Pro SDK.",
+    "text": "Name\nDescription\n\n\n\n\ncalibrate\nRun an infant-friendly calibration procedure with point selection and\n\n\nclose\nStop recording and perform necessary cleanup.\n\n\ngaze_contingent\nInitialize a rolling buffer to store recent gaze positions.\n\n\nget_average_gaze\nCompute the average gaze position from the most recent gaze samples.\n\n\nget_info\nPrint information about the current eyetracker or simulation.\n\n\nload_calibration\nLoad calibration data from a file.\n\n\nrecord_event\nRecord an event with a timestamp.\n\n\nsave_calibration\nSave calibration data to a file.\n\n\nsave_data\nSave gaze and event data to an HDF5 file with two datasets: ‘gaze’ and ‘events’.\n\n\nshow_status\nShow participant’s gaze position in track box.\n\n\nstart_recording\nStart recording gaze data.\n\n\nstop_recording\nStop recording gaze data and save it to file.\n\n\n\n\n\nTobiiController.calibrate(\n    calibration_points,\n    infant_stims,\n    shuffle=True,\n    audio=None,\n    focus_time=0.5,\n    anim_type='zoom',\n    save_calib=False,\n)\nRun an infant-friendly calibration procedure with point selection and animated stimuli. The calibration points are presented in a sequence (either in order or shuffled) and at each point, an animated stimulus is presented (either zooming or trilling). The procedure can optionally play an attention-getting audio during the calibration process. The calibration data can be saved to a file if desired.\n\n\n\n\n\n\n\n\n\n\n\nName\nType\nDescription\nDefault\n\n\n\n\ncalibration_points\nlist of (float, float)\nPsychoPy-normalized (x, y) coordinates for calibration targets.\nrequired\n\n\ninfant_stims\nlist of str\nList of image file paths for calibration stimuli.\nrequired\n\n\nshuffle\nbool\nWhether to shuffle stimuli order. Default is True.\nTrue\n\n\naudio\nstr\nPath to audio file to play during calibration. Default is None.\nNone\n\n\nfocus_time\nfloat\nTime to wait before collecting data. Default is 0.5s\n0.5\n\n\nanim_type\nstr\nType of animation to use. Options are ‘zoom’ or ‘trill’. Default is ‘zoom’.\n'zoom'\n\n\nsave_calib\nbool\nWhether to save calibration data. Default is False\nFalse\n\n\n\n\n\n\n\n\n\nName\nType\nDescription\n\n\n\n\n\nbool\nTrue if calibration successful, False otherwise\n\n\n\n\n\n\n\nTobiiController.close()\nStop recording and perform necessary cleanup.\n\n\n\nTobiiController.gaze_contingent(N=5)\nInitialize a rolling buffer to store recent gaze positions.\nThis method sets up a deque (double-ended queue) to hold the last N gaze samples from both eyes, meaning the buffer can hold up to 2*N samples total. This is useful for real-time gaze contingent logic where you want to compute smooth gaze estimates from recent samples.\n\n\n\n\n\n\n\n\n\n\n\nName\nType\nDescription\nDefault\n\n\n\n\nN\nint\nThe number of recent gaze samples (pairs of left/right eye data) to buffer.\n5\n\n\n\n\n\n\n\n\n\nName\nType\nDescription\n\n\n\n\n\nTypeError\nIf N is not an integer.\n\n\n\n\n\n\n\nTobiiController.get_average_gaze(fallback_offscreen=True)\nCompute the average gaze position from the most recent gaze samples.\nThis method averages valid Tobii ADCS coordinates from the rolling gaze buffer initialized via gaze_contingent(). If no valid data is available, it can return a fallback offscreen value to help avoid crashes or unwanted triggers in the experiment.\n\n\n\n\n\n\n\n\n\n\n\nName\nType\nDescription\nDefault\n\n\n\n\nfallback_offscreen\nbool\nWhether to return an offscreen position (win.size * 2) if no valid gaze data is found. Default is True.\nTrue\n\n\n\n\n\n\n\n\n\n\n\n\n\n\nName\nType\nDescription\n\n\n\n\navg_psychopy_pos\ntuple or None\nThe average gaze position as a 2D coordinate in Tobii ADCS units, or offscreen position (tuple) / None if no data is available.\n\n\n\n\n\n\n\n\n\n\n\n\n\n\nName\nType\nDescription\n\n\n\n\n\nWarning\nIf gaze_contingent() was not run before this function.\n\n\n\n\n\n\n\nTobiiController.get_info(moment='connection')\nPrint information about the current eyetracker or simulation.\n\n\n\nTobiiController.load_calibration(filename)\nLoad calibration data from a file.\n\n\n\n\n\n\n\n\n\n\n\nName\nType\nDescription\nDefault\n\n\n\n\nfilename\nstr\nThe name of the file containing the calibration data.\nrequired\n\n\n\n\n\n\n\n\n\n\n\n\n\n\nName\nType\nDescription\n\n\n\n\n\nbool\nTrue if the calibration data was successfully loaded, False otherwise.\n\n\n\n\n\n\n\nTobiiController.record_event(label)\nRecord an event with a timestamp.\n\n\n\n\n\nName\nType\nDescription\nDefault\n\n\n\n\nlabel\nstr\nThe label for the event to record\nrequired\n\n\n\n\n\n\n\n\n\nName\nType\nDescription\n\n\n\n\n\nRuntimeWarning\nIf recording is not active\n\n\n\n\n\n\n\nTobiiController.save_calibration(filename=None)\nSave calibration data to a file.\nThis method saves the current calibration data of the eye tracker to the specified file. The calibration data is retrieved from the eye tracker using the retrieve_calibration_data() method and then written to the file in binary format.\n\n\n\n\n\n\n\n\n\n\n\nName\nType\nDescription\nDefault\n\n\n\n\nfilename\nstr\nThe name of the file to save the calibration data to. If not provided, a default name based on the basename will be used.\nNone\n\n\n\n\n\n\n\n\n\n\n\n\n\n\nName\nType\nDescription\n\n\n\n\n\nbool\nTrue if the calibration data was successfully saved, False otherwise.\n\n\n\n\n\n\n\nTobiiController.save_data()\nSave gaze and event data to an HDF5 file with two datasets: ‘gaze’ and ‘events’.\n\n\n\nTobiiController.show_status(decision_key='space')\nShow participant’s gaze position in track box.\nThis function creates a visualization of the participant’s gaze position in the track box. The visualization consists of a green bar representing the z-position of the user, and circles for the left and right eye positions. The visualization is updated in real time based on the latest gaze data received from the eye tracker.\n\n\n\n\n\n\n\n\n\n\n\nName\nType\nDescription\nDefault\n\n\n\n\ndecision_key\nstr\nThe key to press to exit the visualization. Default is ‘space’.\n'space'\n\n\n\n\n\n\n\nTobiiController.start_recording(filename=None, event_mode='precise')\nStart recording gaze data.\n\n\n\n\n\n\n\n\n\n\n\nName\nType\nDescription\nDefault\n\n\n\n\nfilename\nstr\nThe name of the file to save the gaze data to. If not provided, a default name based on the current datetime will be used.\nNone\n\n\nevent_mode\nstr\nMode for event recording. Options are ‘samplebased’ or ‘precise’. Default is ‘precise’.\n'precise'\n\n\n\n\n\n\n\nTobiiController.stop_recording()\nStop recording gaze data and save it to file.",
     "crumbs": [
       "Reference",
       "Core Classes",
       "TobiiController"
     ]
+  },
+  {
+    "objectID": "api/TobiiController.record_event.html",
+    "href": "api/TobiiController.record_event.html",
+    "title": "TobiiController.record_event",
+    "section": "",
+    "text": "TobiiController.record_event(label)\nRecord an event with a timestamp.\n\n\n\n\n\nName\nType\nDescription\nDefault\n\n\n\n\nlabel\nstr\nThe label for the event to record\nrequired\n\n\n\n\n\n\n\n\n\nName\nType\nDescription\n\n\n\n\n\nRuntimeWarning\nIf recording is not active",
+    "crumbs": [
+      "Reference",
+      "Calibration and Recording Methods",
+      "TobiiController.record_event"
+    ]
+  },
+  {
+    "objectID": "api/TobiiController.record_event.html#parameters",
+    "href": "api/TobiiController.record_event.html#parameters",
+    "title": "TobiiController.record_event",
+    "section": "",
+    "text": "Name\nType\nDescription\nDefault\n\n\n\n\nlabel\nstr\nThe label for the event to record\nrequired",
+    "crumbs": [
+      "Reference",
+      "Calibration and Recording Methods",
+      "TobiiController.record_event"
+    ]
+  },
+  {
+    "objectID": "api/TobiiController.record_event.html#raises",
+    "href": "api/TobiiController.record_event.html#raises",
+    "title": "TobiiController.record_event",
+    "section": "",
+    "text": "Name\nType\nDescription\n\n\n\n\n\nRuntimeWarning\nIf recording is not active",
+    "crumbs": [
+      "Reference",
+      "Calibration and Recording Methods",
+      "TobiiController.record_event"
+    ]
+  },
+  {
+    "objectID": "api/close.html",
+    "href": "api/close.html",
+    "title": "DeToX_website",
+    "section": "",
+    "text": "close(self)\nClean up and ensure all data is saved.\nThis method is called by atexit and is also available as a public method. It stops recording and saves all data that was not saved before."
+  },
+  {
+    "objectID": "api/close.html#close",
+    "href": "api/close.html#close",
+    "title": "DeToX_website",
+    "section": "",
+    "text": "close(self)\nClean up and ensure all data is saved.\nThis method is called by atexit and is also available as a public method. It stops recording and saves all data that was not saved before."
+  },
+  {
+    "objectID": "api/pix2tobii.html",
+    "href": "api/pix2tobii.html",
+    "title": "pix2tobii",
+    "section": "",
+    "text": "pix2tobii(win, p)\nConvert PsychoPy pixel coordinates to Tobii ADCS coordinates.\n\n\n\n\n\n\n\n\n\n\n\nName\nType\nDescription\nDefault\n\n\n\n\nwin\npsychopy.visual.Window\nThe PsychoPy window which provides information about units and size.\nrequired\n\n\np\ntuple\nThe PsychoPy pixel coordinates to convert.\nrequired\n\n\n\n\n\n\n\n\n\nName\nType\nDescription\n\n\n\n\n\ntuple\nThe converted Tobii ADCS coordinates.\n\n\n\n\n\n\nThe conversion is done by dividing the pixel coordinates by the window size and adding 0.5 to the x and y coordinates to center the origin at the middle of the screen.",
+    "crumbs": [
+      "Reference",
+      "Coordinate transformation functions",
+      "pix2tobii"
+    ]
+  },
+  {
+    "objectID": "api/pix2tobii.html#parameters",
+    "href": "api/pix2tobii.html#parameters",
+    "title": "pix2tobii",
+    "section": "",
+    "text": "Name\nType\nDescription\nDefault\n\n\n\n\nwin\npsychopy.visual.Window\nThe PsychoPy window which provides information about units and size.\nrequired\n\n\np\ntuple\nThe PsychoPy pixel coordinates to convert.\nrequired",
+    "crumbs": [
+      "Reference",
+      "Coordinate transformation functions",
+      "pix2tobii"
+    ]
+  },
+  {
+    "objectID": "api/pix2tobii.html#returns",
+    "href": "api/pix2tobii.html#returns",
+    "title": "pix2tobii",
+    "section": "",
+    "text": "Name\nType\nDescription\n\n\n\n\n\ntuple\nThe converted Tobii ADCS coordinates.",
+    "crumbs": [
+      "Reference",
+      "Coordinate transformation functions",
+      "pix2tobii"
+    ]
+  },
+  {
+    "objectID": "api/pix2tobii.html#notes",
+    "href": "api/pix2tobii.html#notes",
+    "title": "pix2tobii",
+    "section": "",
+    "text": "The conversion is done by dividing the pixel coordinates by the window size and adding 0.5 to the x and y coordinates to center the origin at the middle of the screen.",
+    "crumbs": [
+      "Reference",
+      "Coordinate transformation functions",
+      "pix2tobii"
+    ]
+  },
+  {
+    "objectID": "api/TobiiController.close.html",
+    "href": "api/TobiiController.close.html",
+    "title": "TobiiController.close",
+    "section": "",
+    "text": "TobiiController.close\nTobiiController.close()\nStop recording and perform necessary cleanup.",
+    "crumbs": [
+      "Reference",
+      "Calibration and Recording Methods",
+      "TobiiController.close"
+    ]
+  },
+  {
+    "objectID": "GettingStarted.html",
+    "href": "GettingStarted.html",
+    "title": "Getting started",
+    "section": "",
+    "text": "This package was created out of the need to run eye-tracking experiments using tobii_researcher. The Tobii SDK provides a powerful way to interact with Tobii eye trackers in Python, offering many advanced features. However, certain aspects of its implementation can be complex and unintuitive.\nSince we often run experiments using PsychoPy, we developed this lightweight wrapper around PsychoPy and tobii_researcher to simplify the process. The goal is to make it easy to run infant-friendly eye-tracking studies while handling the more technical aspects of eye tracker integration.\nThis project didn’t start from scratch—it builds upon two existing packages that we have used in the past:\n\npsychopy_tobii_infant\npsychopy_tobii_controller\n\nWhile these packages already provided great solutions for integrating Tobii eye trackers with PsychoPy, we added a few extra features and improvements that we found useful for running infant-friendly eye-tracking studies. Our goal was to simplify some of the more technical aspects of eye tracker integration while keeping the flexibility needed for research."
+  },
+  {
+    "objectID": "Calibration.html",
+    "href": "Calibration.html",
+    "title": "Getting started",
+    "section": "",
+    "text": "This package was created out of the need to run eye-tracking experiments using tobii_researcher. The Tobii SDK provides a powerful way to interact with Tobii eye trackers in Python, offering many advanced features. However, certain aspects of its implementation can be complex and unintuitive.\nSince we often run experiments using PsychoPy, we developed this lightweight wrapper around PsychoPy and tobii_researcher to simplify the process. The goal is to make it easy to run infant-friendly eye-tracking studies while handling the more technical aspects of eye tracker integration.\nThis project didn’t start from scratch—it builds upon two existing packages that we have used in the past:\n\npsychopy_tobii_infant\npsychopy_tobii_controller\n\nWhile these packages already provided great solutions for integrating Tobii eye trackers with PsychoPy, we added a few extra features and improvements that we found useful for running infant-friendly eye-tracking studies. Our goal was to simplify some of the more technical aspects of eye tracker integration while keeping the flexibility needed for research."
+  },
+  {
+    "objectID": "GazeContingent.html",
+    "href": "GazeContingent.html",
+    "title": "Getting started",
+    "section": "",
+    "text": "This package was created out of the need to run eye-tracking experiments using tobii_researcher. The Tobii SDK provides a powerful way to interact with Tobii eye trackers in Python, offering many advanced features. However, certain aspects of its implementation can be complex and unintuitive.\nSince we often run experiments using PsychoPy, we developed this lightweight wrapper around PsychoPy and tobii_researcher to simplify the process. The goal is to make it easy to run infant-friendly eye-tracking studies while handling the more technical aspects of eye tracker integration.\nThis project didn’t start from scratch—it builds upon two existing packages that we have used in the past:\n\npsychopy_tobii_infant\npsychopy_tobii_controller\n\nWhile these packages already provided great solutions for integrating Tobii eye trackers with PsychoPy, we added a few extra features and improvements that we found useful for running infant-friendly eye-tracking studies. Our goal was to simplify some of the more technical aspects of eye tracker integration while keeping the flexibility needed for research."
+  },
+  {
+    "objectID": "DataFormats.html",
+    "href": "DataFormats.html",
+    "title": "Getting started",
+    "section": "",
+    "text": "This package was created out of the need to run eye-tracking experiments using tobii_researcher. The Tobii SDK provides a powerful way to interact with Tobii eye trackers in Python, offering many advanced features. However, certain aspects of its implementation can be complex and unintuitive.\nSince we often run experiments using PsychoPy, we developed this lightweight wrapper around PsychoPy and tobii_researcher to simplify the process. The goal is to make it easy to run infant-friendly eye-tracking studies while handling the more technical aspects of eye tracker integration.\nThis project didn’t start from scratch—it builds upon two existing packages that we have used in the past:\n\npsychopy_tobii_infant\npsychopy_tobii_controller\n\nWhile these packages already provided great solutions for integrating Tobii eye trackers with PsychoPy, we added a few extra features and improvements that we found useful for running infant-friendly eye-tracking studies. Our goal was to simplify some of the more technical aspects of eye tracker integration while keeping the flexibility needed for research."
   }
 ]

@@ -1,0 +1,14 @@
+# TobiiController.start_recording { #DeToX.TobiiController.start_recording }
+
+```python
+TobiiController.start_recording(filename=None, event_mode='precise')
+```
+
+Start recording gaze data.
+
+## Parameters {.doc-section .doc-section-parameters}
+
+| Name       | Type   | Description                                                                                                                 | Default     |
+|------------|--------|-----------------------------------------------------------------------------------------------------------------------------|-------------|
+| filename   | str    | The name of the file to save the gaze data to. If not provided, a  default name based on the current datetime will be used. | `None`      |
+| event_mode | str    | Mode for event recording. Options are 'samplebased' or 'precise'.  Default is 'precise'.                                    | `'precise'` |

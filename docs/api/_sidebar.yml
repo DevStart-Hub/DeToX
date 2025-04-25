@@ -1,21 +1,24 @@
 website:
   sidebar:
-    contents:
+  - contents:
     - api/index.qmd
     - contents:
-      - api/InfantStimuli.qmd
       - api/TobiiController.qmd
+      - api/CalibrationSession.qmd
+      - api/InfantStimuli.qmd
       section: Core Classes
     - contents:
-      - api/save_calibration.qmd
-      - api/load_calibration.qmd
-      - api/start_recording.qmd
-      - api/stop_recording.qmd
-      - api/record_event.qmd
-      - api/save_data.qmd
-      - api/run_calibration.qmd
-      - api/show_status.qmd
-      - api/close.qmd
+      - api/TobiiController.save_calibration.qmd
+      - api/TobiiController.load_calibration.qmd
+      - api/TobiiController.start_recording.qmd
+      - api/TobiiController.stop_recording.qmd
+      - api/TobiiController.record_event.qmd
+      - api/TobiiController.save_data.qmd
+      - api/TobiiController.calibrate.qmd
+      - api/TobiiController.show_status.qmd
+      - api/TobiiController.gaze_contingent.qmd
+      - api/TobiiController.get_average_gaze.qmd
+      - api/TobiiController.close.qmd
       section: Calibration and Recording Methods
     - contents:
       - api/get_psychopy_pos.qmd
@@ -24,4 +27,8 @@ website:
       - api/tobii2pix.qmd
       - api/get_psychopy_pos_from_trackbox.qmd
       section: Coordinate transformation functions
+    - contents:
+      - api/NicePrint.qmd
+      section: Utility Functions
     id: api
+  - id: dummy-sidebar

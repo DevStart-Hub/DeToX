@@ -1,0 +1,29 @@
+# TobiiController.get_average_gaze { #DeToX.TobiiController.get_average_gaze }
+
+```python
+TobiiController.get_average_gaze(fallback_offscreen=True)
+```
+
+Compute the average gaze position from the most recent gaze samples.
+
+This method averages valid Tobii ADCS coordinates from the rolling gaze buffer
+initialized via `gaze_contingent()`. If no valid data is available, it can return
+a fallback offscreen value to help avoid crashes or unwanted triggers in the experiment.
+
+## Parameters {.doc-section .doc-section-parameters}
+
+| Name               | Type   | Description                                                                                             | Default   |
+|--------------------|--------|---------------------------------------------------------------------------------------------------------|-----------|
+| fallback_offscreen | bool   | Whether to return an offscreen position (win.size * 2) if no valid gaze data is found. Default is True. | `True`    |
+
+## Returns {.doc-section .doc-section-returns}
+
+| Name             | Type          | Description                                                                                                                     |
+|------------------|---------------|---------------------------------------------------------------------------------------------------------------------------------|
+| avg_psychopy_pos | tuple or None | The average gaze position as a 2D coordinate in Tobii ADCS units, or offscreen position (tuple) / None if no data is available. |
+
+## Raises {.doc-section .doc-section-raises}
+
+| Name   | Type    | Description                                              |
+|--------|---------|----------------------------------------------------------|
+|        | Warning | If `gaze_contingent()` was not run before this function. |

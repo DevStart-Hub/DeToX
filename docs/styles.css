@@ -1,1 +1,28 @@
 /* css styles */
+
+/* Navbar title (brand) much larger than links */
+nav.navbar .navbar-brand {
+    font-size: 2.25rem;      /* e.g. ~32px */
+    font-weight: bold;
+  }
+  
+  nav.navbar .nav-link {
+    font-size: 1.25rem;      /* e.g. ~16px */
+  }
+  
+
+/* enlarge all navbar icons */
+nav.navbar .quarto-navigation-tool > i,
+nav.navbar .quarto-navigation-tool > svg {
+  font-size: 1.2rem;   /* change to taste */
+  line-height: 1;       /* keep them vertically centered */
+}
+
+
+
+.navbar-logo {
+    max-height: 2rem;
+  }
+  
+  
+  

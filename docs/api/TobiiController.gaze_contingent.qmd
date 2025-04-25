@@ -1,0 +1,24 @@
+# TobiiController.gaze_contingent { #DeToX.TobiiController.gaze_contingent }
+
+```python
+TobiiController.gaze_contingent(N=5)
+```
+
+Initialize a rolling buffer to store recent gaze positions.
+
+This method sets up a deque (double-ended queue) to hold the last N gaze samples
+from both eyes, meaning the buffer can hold up to 2*N samples total. This is useful
+for real-time gaze contingent logic where you want to compute smooth gaze estimates
+from recent samples.
+
+## Parameters {.doc-section .doc-section-parameters}
+
+| Name   | Type   | Description                                                                 | Default   |
+|--------|--------|-----------------------------------------------------------------------------|-----------|
+| N      | int    | The number of recent gaze samples (pairs of left/right eye data) to buffer. | `5`       |
+
+## Raises {.doc-section .doc-section-raises}
+
+| Name   | Type      | Description             |
+|--------|-----------|-------------------------|
+|        | TypeError | If N is not an integer. |

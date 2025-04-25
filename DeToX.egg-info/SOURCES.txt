@@ -1,8 +1,10 @@
 README.md
 pyproject.toml
 DeToX/Base.py
+DeToX/Calibration.py
+DeToX/Coords.py
+DeToX/Utils.py
 DeToX/__init__.py
-DeToX/coord_utils.py
 DeToX.egg-info/PKG-INFO
 DeToX.egg-info/SOURCES.txt
 DeToX.egg-info/dependency_links.txt
