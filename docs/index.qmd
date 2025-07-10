@@ -1,6 +1,7 @@
 ---
 title: "DeToX"
-description: "Developmental Tobii eXperiment"
+subtitle: "Developmental Tobii eXperiments"
+description: "A Python wrapper around tobii_researcher and PsychoPy for easily running eye-tracking experiments with infants and toddlers."
 author: Tommaso Ghilardi
 ---
 

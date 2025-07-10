@@ -76,8 +76,8 @@ class TobiiController:
         self._stop_simulation = None
         self._simulation_thread = None
 
-        self.gaze_data = []
-        self.event_data = []
+        self.gaze_data = deque()
+        self.event_data = deque()
         self.recording = False
 
         # Configure the environment based on simulation mode
@@ -270,6 +270,9 @@ class TobiiController:
         # Process and convert system timestamps to a unified format
         df['TimeStamp'] = self._process_timestamps(df['system_time_stamp'])
         
+        # Create Events column
+        df['Events'] = ''
+
         # Rename columns to a more readable format and convert validity columns to integers
         df = df.rename(columns={
             'left_gaze_point_validity': 'Left_Validity',
@@ -289,9 +292,9 @@ class TobiiController:
         return df[['TimeStamp', 'Left_X', 'Left_Y', 'Left_Validity',
                    'Left_Pupil', 'Left_Pupil_Validity', 
                    'Right_X', 'Right_Y', 'Right_Validity',
-                   'Right_Pupil', 'Right_Pupil_Validity']]
+                   'Right_Pupil', 'Right_Pupil_Validity', 'Events']]
 
-#%% test
+
 
     def save_data(self):
         """Save gaze and event data to an HDF5 file with two datasets: 'gaze' and 'events'."""
@@ -305,10 +308,8 @@ class TobiiController:
             return
 
         # Copy and clear buffers to prevent data loss
-        gaze_data_copy = self.gaze_data[:]
-        event_data_copy = self.event_data[:]
-        self.gaze_data.clear()
-        self.event_data.clear()
+        gaze_data_copy = list(self.gaze_data)
+        event_data_copy = list(self.event_data)
 
         # Convert gaze data to a DataFrame and adapt its format
         gaze_df = pd.DataFrame(gaze_data_copy) 
@@ -316,33 +317,30 @@ class TobiiController:
 
         # Convert event data to a DataFrame if it exists
         if event_data_copy:
-            events_df = pd.DataFrame(event_data_copy, columns=["TimeStamp", "Event"])
+            events_df = pd.DataFrame(event_data_copy)
 
-            # Sort DataFrames to prepare for merging
+            # Sort DataFrames to prepare for merging ()
             gaze_df.sort_values("TimeStamp", inplace=True)
             events_df.sort_values("TimeStamp", inplace=True)
 
-            # Merge events with gaze data based on closest previous timestamp
-            merged_df = pd.merge_asof(
-                gaze_df,
-                events_df[["TimeStamp", "Event"]],
-                on="TimeStamp",
-                direction="nearest",  # Match to the closest previous event
-                tolerance=(1 / self._simulation_settings["framerate"]) / 2
-            )
-        else:
-            # If no event data, create an empty 'Event' column in gaze data
-            merged_df = gaze_df
-            merged_df["Event"] = ""
+            #### Merge events with gaze data based on closest timestamp
+
+            # Find where each event is in the dataframe
+            idx = np.searchsorted(gaze_df['system_time_stamp'].values,
+                events_df['system_time_stamp'].values,
+                side='left')
+
+            #Add events
+            gaze_df.loc[idx, 'Events'] = events_df['label'].values
 
         # Save the merged data and raw event data to an HDF5 file
         with pd.HDFStore(self.filename, mode="a") as store:
             # Append gaze data with an 'auto' appending format
-            store.append("gaze", merged_df, format="table", append=True)
+            store.append("gaze", gaze_df, format="table", append=True)
 
             # Append raw events data if they exist
             if event_data_copy:
-                store.append("events", events_df[["TimeStamp", "Event"]], format="table", append=True)
+                store.append("events", events_df, format="table", append=True)
 
             # Add metadata attributes if not already present
             attrs = store.get_storer("gaze").attrs
@@ -351,9 +349,20 @@ class TobiiController:
                 attrs.screen_size = tuple(self.win.size)
                 attrs.framerate = self._simulation_settings["framerate"]
                 attrs.notes = "Auto metadata added"
+        
 
-        # Print time taken to save data
+        #### Pop out the samples 
+        # Data
+        for _ in gaze_data_copy:
+            self.gaze_data.popleft()
+        # Event
+        for _ in event_data_copy:
+            self.event_data.popleft()
+
+
+        #### Print time taken to save data
         print(f"Data saved in {round(time.perf_counter() - start_saving, 3)} seconds.")
+
 
 
     def start_recording(self, filename=None, event_mode='precise'):
@@ -390,6 +399,7 @@ class TobiiController:
             self.recording = True
 
 
+
     def stop_recording(self):
         """
         Stop recording gaze data and save it to file.
@@ -413,6 +423,7 @@ class TobiiController:
         self.save_data()
 
 
+
     def record_event(self, label):
         """
         Record an event with a timestamp.
@@ -432,10 +443,11 @@ class TobiiController:
         
         if self.simulate:
             # Use simulation timestamp
-            self.event_data.append([time.perf_counter() * 1000, label])
+            self.event_data.append({'system_time_stamp':  time.perf_counter() * 1000 , 'label': label })
         else:
             # Use eyetracker timestamp
-            self.event_data.append([tr.get_system_time_stamp(), label])
+            self.event_data.append({'system_time_stamp':  tr.get_system_time_stamp(), 'label': label})
+
 
     def close(self):
         """
@@ -443,6 +455,7 @@ class TobiiController:
         """
         if self.recording:
             self.stop_recording()
+
 
     def _prepare_recording(self, filename, event_mode):
         """
@@ -478,6 +491,7 @@ class TobiiController:
             self.events_filename = f"{self.basename}_events.csv"
 
         self.get_info(moment="recording")
+
 
 
     def calibrate(self,
@@ -531,6 +545,7 @@ class TobiiController:
             numkey_dict=self._numkey_dict
         )
         return session.run(calibration_points, save_calib=save_calib)
+
 
     def show_status(self, decision_key="space"):
         """
@@ -737,6 +752,7 @@ class TobiiController:
             )
         # Store up to N samples, each consisting of two [x, y] points (left and right eye)
         self.recent_gaze_positions = deque(maxlen=N * 2)
+
 
 
     def get_average_gaze(self, fallback_offscreen=True):

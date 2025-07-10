@@ -1,5 +1,6 @@
 # Standard library imports
 from datetime import datetime
+from PIL import Image, ImageDraw
 
 # Third party imports
 import numpy as np
@@ -70,6 +71,8 @@ class CalibrationSession:
         # pulled in from Base.TobiiController
         self._animation_settings = animation_settings
         self._numkey_dict = numkey_dict
+
+
 
     def run(self, calibration_points, save_calib=False):
         """
