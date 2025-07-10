@@ -99,6 +99,7 @@ class TobiiController:
         atexit.register(self.close)
 
 
+
     def get_info(self, moment='connection'):
         """
         Print information about the current eyetracker or simulation.
@@ -145,6 +146,7 @@ class TobiiController:
         NicePrint(text, title)
 
 
+
     def save_calibration(self, filename=None):
         """
         Save calibration data to a file.
@@ -189,6 +191,7 @@ class TobiiController:
             # Handle any exceptions that occur during the saving process
             print(f"Error saving calibration: {e}")
             return False
+
 
     def load_calibration(self, filename):
         """
@@ -239,6 +242,8 @@ class TobiiController:
                 [gaze_data.get('left_gaze_point_on_display_area'),
                 gaze_data.get('right_gaze_point_on_display_area')]
             )
+
+
 
     def _adapt_gaze_data(self, df):
         """
@@ -449,12 +454,14 @@ class TobiiController:
             self.event_data.append({'system_time_stamp':  tr.get_system_time_stamp(), 'label': label})
 
 
+
     def close(self):
         """
         Stop recording and perform necessary cleanup.
         """
         if self.recording:
             self.stop_recording()
+
 
 
     def _prepare_recording(self, filename, event_mode):
@@ -545,6 +552,7 @@ class TobiiController:
             numkey_dict=self._numkey_dict
         )
         return session.run(calibration_points, save_calib=save_calib)
+
 
 
     def show_status(self, decision_key="space"):
@@ -679,6 +687,7 @@ class TobiiController:
             print(f"Simulation error: {e}")
             # Stop the simulation loop
             self._stop_simulation.set()
+
 
 
     def _simulate_gaze_data(self):
