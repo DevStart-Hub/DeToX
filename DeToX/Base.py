@@ -1,4 +1,3 @@
-# Standard library imports
 import os
 import time
 import atexit
@@ -14,9 +13,9 @@ from psychopy import core, event, visual
 
 # Local imports
 from . import Coords
-from .Calibration import CalibrationSession
+# Remove the old import and import both calibration classes
+from .Calibration import CalibrationSession, SimpleCalibrationSession
 from .Utils import NicePrint
-
 
 class TobiiController:
     """
@@ -548,15 +547,14 @@ class TobiiController:
                     audio=None,
                     focus_time=0.5,
                     anim_type='zoom',
-                    save_calib=False):
+                    save_calib=False,
+                    num_samples=5):
         """
-        Run an infant-friendly calibration procedure with point selection and
-        animated stimuli. The calibration points are presented in a sequence
-        (either in order or shuffled) and at each point, an animated stimulus
-        is presented (either zooming or trilling). The procedure can optionally
-        play an attention-getting audio during the calibration process. The
-        calibration data can be saved to a file if desired.
-
+        Run calibration procedure.
+        
+        Automatically selects between Tobii calibration (real mode) and 
+        mouse-based calibration (simulation mode).
+        
         Parameters
         ----------
         calibration_points : list of (float, float)
@@ -565,34 +563,60 @@ class TobiiController:
             List of image file paths for calibration stimuli.
         shuffle : bool, optional
             Whether to shuffle stimuli order. Default is True.
-        audio : str, optional
-            Path to audio file to play during calibration. Default is None.
+        audio : psychopy.sound.Sound, optional
+            Audio object to play during calibration. Default is None.
         focus_time : float, optional
             Time to wait before collecting data. Default is 0.5s
         anim_type : str, optional
             Type of animation to use. Options are 'zoom' or 'trill'. Default is 'zoom'.
         save_calib : bool, optional
             Whether to save calibration data. Default is False
+        num_samples : int, optional
+            Number of samples to collect per point (simulation mode only). Default is 5.
 
         Returns
         -------
         bool
             True if calibration successful, False otherwise
         """
-        # Create session, injecting our two dicts from here:
-        session = CalibrationSession(
-            win=self.win,
-            calibration_api=self.calibration,
-            infant_stims=infant_stims,
-            shuffle=shuffle,
-            audio=audio,
-            focus_time=focus_time,
-            anim_type=anim_type,
-            animation_settings=self._animation_settings,
-            numkey_dict=self._numkey_dict
-        )
-        return session.run(calibration_points, save_calib=save_calib)
+        if self.simulate:
+            # Use mouse-based calibration for simulation
+            from .Calibration import SimpleCalibrationSession
+            
+            session = SimpleCalibrationSession(
+                win=self.win,
+                infant_stims=infant_stims,
+                mouse=self.mouse,
+                shuffle=shuffle,
+                audio=audio,
+                focus_time=focus_time,
+                anim_type=anim_type,
+                animation_settings=self._animation_settings,
+                numkey_dict=self._numkey_dict
+            )
+            
+            success = session.run(calibration_points, num_samples=num_samples)
 
+            
+            return success
+        
+        else:
+            # Use real Tobii calibration
+            from .Calibration import CalibrationSession
+            
+            session = CalibrationSession(
+                win=self.win,
+                calibration_api=self.calibration,
+                infant_stims=infant_stims,
+                shuffle=shuffle,
+                audio=audio,
+                focus_time=focus_time,
+                anim_type=anim_type,
+                animation_settings=self._animation_settings,
+                numkey_dict=self._numkey_dict
+            )
+            
+            return session.run(calibration_points, save_calib=save_calib)
 
 
     def show_status(self, decision_key="space"):

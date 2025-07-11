@@ -4,8 +4,8 @@ from psychopy import visual
 
 
 
-def NicePrint(body: str, title: str = "") -> None:
-    """Print a message in a box with an optional title.
+def NicePrint(body: str, title: str = "") -> str:
+    """Print and retunr message in a box with an optional title.
     
     Parameters
     ----------
@@ -47,8 +47,14 @@ def NicePrint(body: str, title: str = "") -> None:
     # Create the bottom border
     bottom = f"{bl}{h * panel_w}{br}"
     
+    # Combine the top, middle, and bottom lines into the full text
+    full_text = "\n".join([top] + middle_lines + [bottom])
+
     # Print the box
-    print(top, *middle_lines, bottom, sep="\n")
+    print(full_text)        # console output
+
+    # Return the full text for further use
+    return full_text        # return for subsequent use
 
 
 
