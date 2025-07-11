@@ -248,12 +248,12 @@ class TobiiController:
     def _adapt_gaze_data(self, df):
         """
         Adapt gaze data format and convert coordinates.
-
+        
         Parameters
         ----------
         df : pandas.DataFrame
             DataFrame containing raw gaze data.
-
+            
         Returns
         -------
         pandas.DataFrame
@@ -272,13 +272,11 @@ class TobiiController:
             for coord in df['right_gaze_point_on_display_area']
         ])
         
-        # Process and convert system timestamps to a unified format
-        df['TimeStamp'] = self._process_timestamps(df['system_time_stamp'])
-        
-        # Create Events column
-        df['Events'] = ''
+        # Convert microseconds to milliseconds (absolute timestamps)
+        df['TimeStamp'] = (df['system_time_stamp'] / 1000.0).astype(int)
 
-        # Rename columns to a more readable format and convert validity columns to integers
+
+        # Rename columns and convert validity columns to integers
         df = df.rename(columns={
             'left_gaze_point_validity': 'Left_Validity',
             'left_pupil_diameter': 'Left_Pupil',
@@ -293,11 +291,11 @@ class TobiiController:
             'Right_Pupil_Validity': 'int'
         })
 
-        # Return a DataFrame with selected columns in a specific order
+        # Return DataFrame with selected columns
         return df[['TimeStamp', 'Left_X', 'Left_Y', 'Left_Validity',
-                   'Left_Pupil', 'Left_Pupil_Validity', 
-                   'Right_X', 'Right_Y', 'Right_Validity',
-                   'Right_Pupil', 'Right_Pupil_Validity', 'Events']]
+                'Left_Pupil', 'Left_Pupil_Validity', 
+                'Right_X', 'Right_Y', 'Right_Validity',
+                'Right_Pupil', 'Right_Pupil_Validity', 'Events']]
 
 
 
@@ -318,15 +316,16 @@ class TobiiController:
 
         # Convert gaze data to a DataFrame and adapt its format
         gaze_df = pd.DataFrame(gaze_data_copy) 
-        gaze_df = self._adapt_gaze_data(gaze_df)
+        # Create an empty 'Events' column
+        gaze_df['Events'] = ''
 
         # Convert event data to a DataFrame if it exists
         if event_data_copy:
             events_df = pd.DataFrame(event_data_copy)
 
-            # Sort DataFrames to prepare for merging ()
-            gaze_df.sort_values("TimeStamp", inplace=True)
-            events_df.sort_values("TimeStamp", inplace=True)
+            # Just make sure the DataFrames are sorted by timestamp
+            gaze_df.sort_values("system_time_stamp", inplace=True)
+            events_df.sort_values("system_time_stamp", inplace=True)
 
             #### Merge events with gaze data based on closest timestamp
 
@@ -338,6 +337,8 @@ class TobiiController:
             #Add events
             gaze_df.loc[idx, 'Events'] = events_df['label'].values
 
+        #### Adapt gaze data format
+        gaze_df = self._adapt_gaze_data(gaze_df)
 
         #### Save data based on format
         if self.file_format == 'csv':
@@ -429,7 +430,7 @@ class TobiiController:
 
             self._simulation_thread = threading.Thread(target=self._simulate_gaze_data_loop, daemon=True)
             self.recording = True
-            self.t0 = time.perf_counter() * 1000
+            self.t0 = time.perf_counter() * 1_000_000 
             self._simulation_thread.start()
         else:
             # Real eyetracker setup
@@ -482,7 +483,7 @@ class TobiiController:
         
         if self.simulate:
             # Use simulation timestamp
-            self.event_data.append({'system_time_stamp':  time.perf_counter() * 1000 , 'label': label })
+            self.event_data.append({'system_time_stamp':  time.perf_counter() * 1_000_000, 'label': label })
         else:
             # Use eyetracker timestamp
             self.event_data.append({'system_time_stamp':  tr.get_system_time_stamp(), 'label': label})
@@ -746,7 +747,7 @@ class TobiiController:
             tobii_pos = Coords.get_tobii_pos(self.win, pos)
             
             # Get the current timestamp in milliseconds since the Unix epoch
-            timestamp = time.time() * 1000  
+            timestamp = time.time() * 1_000_000  
             
             # Create a sample gaze data dictionary
             gaze_data = {
