@@ -338,23 +338,13 @@ class TobiiController:
             #Add events
             gaze_df.loc[idx, 'Events'] = events_df['label'].values
 
-        # Save the merged data and raw event data to an HDF5 file
-        with pd.HDFStore(self.filename, mode="a") as store:
-            # Append gaze data with an 'auto' appending format
-            store.append("gaze", gaze_df, format="table", append=True)
 
-            # Append raw events data if they exist
-            if event_data_copy:
-                store.append("events", events_df, format="table", append=True)
-
-            # Add metadata attributes if not already present
-            attrs = store.get_storer("gaze").attrs
-            if not hasattr(attrs, "subject_id"):
-                attrs.subject_id = getattr(self, "subject_id", "unknown")
-                attrs.screen_size = tuple(self.win.size)
-                attrs.framerate = self._simulation_settings["framerate"]
-                attrs.notes = "Auto metadata added"
-        
+        #### Save data based on format
+        if self.file_format == 'csv':
+            self._save_csv_data(gaze_df)
+        elif self.file_format == 'hdf5':   
+            self._save_hdf5_data(gaze_df, events_df if event_data_copy else None)
+                
 
         #### Pop out the samples 
         # Data
@@ -369,8 +359,55 @@ class TobiiController:
         print(f"Data saved in {round(time.perf_counter() - start_saving, 3)} seconds.")
 
 
+    def _save_csv_data(self, gaze_df):
+        """
+        Save data in CSV format with append mode.
+        
+        Parameters
+        ----------
+        gaze_df : pandas.DataFrame
+            DataFrame containing gaze data with events merged in Events column.
+        events_df : pandas.DataFrame or None
+            DataFrame containing raw event data (not used for CSV).
+        """
+        # Check if file exists to determine if we should write header
+        write_header = not os.path.exists(self.filename)
+        
+        # Always append to file, write header only if file doesn't exist
+        gaze_df.to_csv(self.filename, index=False, mode='a', header=write_header)
 
-    def start_recording(self, filename=None, event_mode='precise'):
+
+    def _save_hdf5_data(self, gaze_df, events_df):
+        """
+        Save data in HDF5 format with append mode.
+        
+        Parameters
+        ----------
+        gaze_df : pandas.DataFrame
+            DataFrame containing gaze data with events merged in Events column.
+        events_df : pandas.DataFrame or None
+            DataFrame containing raw event data (saved as separate dataset).
+        """
+        # Always append to HDF5 file (HDF5 handles headers automatically)
+        with pd.HDFStore(self.filename, mode="a") as store:
+            # Append gaze data
+            store.append("gaze", gaze_df, format="table", append=True)
+
+            # Always append raw events data if they exist
+            if events_df is not None:
+                store.append("events", events_df, format="table", append=True)
+
+            # Add metadata attributes if not already present (only on first write)
+            if "gaze" in store and not hasattr(store.get_storer("gaze").attrs, "subject_id"):
+                attrs = store.get_storer("gaze").attrs
+                attrs.subject_id = getattr(self, "subject_id", "unknown")
+                attrs.screen_size = tuple(self.win.size)
+                attrs.framerate = self._simulation_settings["framerate"]
+                attrs.notes = "Auto metadata added"
+
+
+
+    def start_recording(self, filename=None):
         """
         Start recording gaze data.
         
@@ -379,12 +416,9 @@ class TobiiController:
         filename : str, optional
             The name of the file to save the gaze data to. If not provided, a 
             default name based on the current datetime will be used.
-        event_mode : str, optional
-            Mode for event recording. Options are 'samplebased' or 'precise'. 
-            Default is 'precise'.
         """
         # Common setup for both real and simulation modes
-        self._prepare_recording(filename, event_mode)
+        self._prepare_recording(filename)
         
         if self.simulate:
             # Simulation-specific setup
@@ -464,38 +498,43 @@ class TobiiController:
 
 
 
-    def _prepare_recording(self, filename, event_mode):
+    def _prepare_recording(self, filename):
         """
-        Prepare recording by setting filename, event mode and checking for file existence.
+        Prepare recording by setting filename and format.
 
         Parameters
         ----------
         filename : str, optional
-            The base name of the file to save the gaze data. If not provided, a default name based on the current datetime will be used.
-        event_mode : str, optional
-            Mode for event recording. Options are 'samplebased' or 'precise'. Default is 'precise'. In 'precise' mode, events are saved in a separate file.
+            The name of the file to save the gaze data. Can include extension (.csv, .hdf5, .h5).
+            If not provided, a default name based on the current datetime will be used.
 
         Raises
         ------
-        Warning
-            If the given filename contains an extension.
-        FileExistsError
-            If the file already exists.
+        ValueError
+            If the provided file extension is not supported.
         """
-        self.event_mode = event_mode
         if filename is None:
-            self.filename = f"{datetime.now().strftime('%Y-%m-%d_%H-%M-%S')}.csv"
-            self.basename = self.filename[:-4]
+            # Default to HDF5 format
+            self.filename = f"{datetime.now().strftime('%Y-%m-%d_%H-%M-%S')}.h5"
+            self.basename = self.filename[:-3]
+            self.file_format = 'hdf5'
         else:
             self.basename, ext = os.path.splitext(filename)
+            
             if ext:
-                raise Warning(f"Please do not include extensions in filename: {filename}")
-            self.filename = f"{self.basename}.csv"
-            if os.path.exists(self.filename):
-                raise FileExistsError(f"File '{self.filename}' already exists.")
-
-        if self.event_mode == 'precise':
-            self.events_filename = f"{self.basename}_events.csv"
+                # Check if extension is supported
+                if ext.lower() in ['.csv']:
+                    self.file_format = 'csv'
+                    self.filename = filename
+                elif ext.lower() in ['.h5', '.hdf5']:
+                    self.file_format = 'hdf5'
+                    self.filename = filename
+                else:
+                    raise ValueError(f"Unsupported file extension: {ext}. Use .csv, .h5, or .hdf5")
+            else:
+                # No extension provided, default to HDF5
+                self.file_format = 'hdf5'
+                self.filename = f"{self.basename}.h5"
 
         self.get_info(moment="recording")
 
