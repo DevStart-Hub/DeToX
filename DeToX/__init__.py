@@ -6,7 +6,8 @@ from .Coords import (
     get_tobii_pos, 
     pix2tobii, 
     tobii2pix, 
-    get_psychopy_pos_from_trackbox
+    get_psychopy_pos_from_trackbox,
+    psychopy_to_pixels  # Add this line
 )
 from .Calibration import CalibrationSession
 
@@ -23,5 +24,18 @@ __all__ = [
     'get_tobii_pos',
     'pix2tobii',
     'tobii2pix',
-    'get_psychopy_pos_from_trackbox'
+    'get_psychopy_pos_from_trackbox',
+    'psychopy_to_pixels'  # Add this line
 ]
+
+
+# In DeToX/__init__.py, add to the imports:
+from .Coords import (
+    get_psychopy_pos, 
+    get_tobii_pos, 
+    pix2tobii, 
+    tobii2pix, 
+    get_psychopy_pos_from_trackbox,
+    psychopy_to_pixels  # Add this line
+)
+

@@ -53,6 +53,46 @@ def get_psychopy_pos(win, p, units=None):
         raise ValueError(f"unit ({units}) is not supported.")
 
 
+def psychopy_to_pixels(win, pos):
+    """
+    Convert PsychoPy coordinates to pixel coordinates.
+    
+    Parameters
+    ----------
+    win : psychopy.visual.Window
+        The PsychoPy window which provides information about units and size.
+    pos : tuple
+        The PsychoPy coordinates to convert (x, y).
+    
+    Returns
+    -------
+    tuple
+        The converted pixel coordinates as (int, int).
+    
+    Notes
+    -----
+    This function handles the main PsychoPy coordinate systems:
+    - 'height': Screen height = 1, width adjusted by aspect ratio
+    - 'norm': Screen ranges from -1 to 1 in both dimensions
+    - Other units: Assumes coordinates are already close to pixel values
+    """
+    if win.units == 'height':
+        # Convert height units to pixels
+        x_pix = (pos[0] * win.size[1] + win.size[0]/2)
+        y_pix = (-pos[1] * win.size[1] + win.size[1]/2)
+    elif win.units == 'norm':
+        # Convert normalized units to pixels
+        x_pix = (pos[0] + 1) * win.size[0] / 2
+        y_pix = (1 - pos[1]) * win.size[1] / 2
+    else:
+        # Handle other units - assume they're already close to pixels
+        x_pix = pos[0] + win.size[0]/2
+        y_pix = -pos[1] + win.size[1]/2
+    
+    return (int(x_pix), int(y_pix))
+
+
+
 def get_tobii_pos(win, p, units=None):
     """
     Convert PsychoPy coordinates to Tobii ADCS coordinates.
