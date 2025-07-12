@@ -9,6 +9,7 @@ import tobii_research as tr
 from psychopy import core, event, visual
 
 # Local imports
+from . import calibration_config as cfg
 from .Utils import InfantStimuli, NicePrint
 from .Coords import get_tobii_pos, psychopy_to_pixels
 
@@ -17,68 +18,13 @@ class BaseCalibrationSession:
     """
     Base class with common functionality for both calibration types.
     """
-    
-    # Default size dictionaries for different PsychoPy units
-    _default_highlight_size = {
-        "norm": 0.08,        # Normalized units (-1 to 1)
-        "height": 0.04,      # Height units (screen height = 1)
-        "pix": 40.0,         # Pixel units
-        "degFlatPos": 1.0,   # Degrees (flat screen)
-        "deg": 1.0,          # Degrees
-        "degFlat": 1.0,      # Degrees (flat)
-        "cm": 1.0,           # Centimeters
-    }
-    
-    _default_marker_size = {
-        "norm": 0.02,        # Smaller markers for selection
-        "height": 0.01,
-        "pix": 10.0,
-        "degFlatPos": 0.25,
-        "deg": 0.25,
-        "degFlat": 0.25,
-        "cm": 0.25,
-    }
-    
-    _default_line_width = {
-        "norm": 4,
-        "height": 3,
-        "pix": 6,
-        "degFlatPos": 2,
-        "deg": 2,
-        "degFlat": 2,
-        "cm": 2,
-    }
-    
-    _default_border_thickness = {
-        "norm": 0.01,
-        "height": 0.005,
-        "pix": 3.0,
-        "degFlatPos": 0.1,
-        "deg": 0.1,
-        "degFlat": 0.1,
-        "cm": 0.1,
-    }
-    
-    _default_text_height = {
-        "norm": 0.05,        # 5% in normalized units
-        "height": 0.025,     # 2.5% of screen height
-        "pix": 20.0,         # 20 pixels
-        "degFlatPos": 0.5,   # 0.5 degrees
-        "deg": 0.5,
-        "degFlat": 0.5,
-        "cm": 0.5,           # 0.5 cm
-    }
-    
     def __init__(
         self,
         win,
         infant_stims,
         shuffle=True,
         audio=None,
-        focus_time=0.5,
         anim_type='zoom',
-        animation_settings=None,
-        numkey_dict=None
     ):
         """
         Common initialization for both calibration types.
@@ -93,59 +39,18 @@ class BaseCalibrationSession:
             Whether to randomize stimulus order each run. Default True.
         audio : psychopy.sound.Sound, optional
             Sound to play when user selects a point. Default None.
-        focus_time : float, optional
-            Delay (seconds) before collecting data at a point. Default 0.5.
         anim_type : str, optional
             Animation style: 'zoom' or 'trill'. Default 'zoom'.
-        animation_settings : dict
-            {'animation_speed':…, 'target_min':…} passed from controller.
-        numkey_dict : dict
-            Mapping of key strings to point indices passed from controller.
         """
         self.win = win
         self.infant_stims = infant_stims
         self.shuffle = shuffle
         self.audio = audio
-        self.focus_time = focus_time
+        self.focus_time = cfg.ANIMATION_SETTINGS['focus_time']
         self.anim_type = anim_type
-
-        # Default settings
-        self._animation_settings = animation_settings or {
-            'animation_speed': 1.0,
-            'target_min': 0.2
-        }
-        
-        self._numkey_dict = numkey_dict or {
-            "0": -1, "num_0": -1,
-            "1": 0,  "num_1": 0,
-            "2": 1,  "num_2": 1,
-            "3": 2,  "num_3": 2,
-            "4": 3,  "num_4": 3,
-            "5": 4,  "num_5": 4,
-            "6": 5,  "num_6": 5,
-            "7": 6,  "num_7": 6,
-            "8": 7,  "num_8": 7,
-            "9": 8,  "num_9": 8,
-        }
-        
-        # Set sizes based on window units
-        self.highlight_size = self._default_highlight_size.get(
-            self.win.units, self._default_highlight_size["height"]
-        )
-        self.marker_size = self._default_marker_size.get(
-            self.win.units, self._default_marker_size["height"]
-        )
-        self.line_width = self._default_line_width.get(
-            self.win.units, self._default_line_width["height"]
-        )
-        self.border_thickness = self._default_border_thickness.get(
-            self.win.units, self._default_border_thickness["height"]
-        )
-        self.text_height = self._default_text_height.get(
-            self.win.units, self._default_text_height["height"]
-        )
         
         self.targets = None
+        self.remaining_points = []  # Track which points still need calibration
         
         # Create calibration border (red thin border)
         self._create_calibration_border()
@@ -173,8 +78,8 @@ class BaseCalibrationSession:
         self.border_top = visual.Rect(
             self.win,
             width=border_width,
-            height=self.border_thickness,
-            pos=(0, border_height/2 - self.border_thickness/2),
+            height=cfg.DEFAULT_BORDER_THICKNESS[self.win.units],
+            pos=(0, border_height/2 - cfg.DEFAULT_BORDER_THICKNESS[self.win.units]/2),
             fillColor='red',
             lineColor=None,
             units=self.win.units  # Use same units as window
@@ -183,8 +88,8 @@ class BaseCalibrationSession:
         self.border_bottom = visual.Rect(
             self.win,
             width=border_width,
-            height=self.border_thickness,
-            pos=(0, -border_height/2 + self.border_thickness/2),
+            height=cfg.DEFAULT_BORDER_THICKNESS[self.win.units],
+            pos=(0, -border_height/2 + cfg.DEFAULT_BORDER_THICKNESS[self.win.units]/2),
             fillColor='red',
             lineColor=None,
             units=self.win.units
@@ -192,9 +97,9 @@ class BaseCalibrationSession:
         
         self.border_left = visual.Rect(
             self.win,
-            width=self.border_thickness,
+            width=cfg.DEFAULT_BORDER_THICKNESS[self.win.units],
             height=border_height,
-            pos=(-border_width/2 + self.border_thickness/2, 0),
+            pos=(-border_width/2 + cfg.DEFAULT_BORDER_THICKNESS[self.win.units]/2, 0),
             fillColor='red',
             lineColor=None,
             units=self.win.units
@@ -202,9 +107,9 @@ class BaseCalibrationSession:
         
         self.border_right = visual.Rect(
             self.win,
-            width=self.border_thickness,
+            width=cfg.DEFAULT_BORDER_THICKNESS[self.win.units],
             height=border_height,
-            pos=(border_width/2 - self.border_thickness/2, 0),
+            pos=(border_width/2 - cfg.DEFAULT_BORDER_THICKNESS[self.win.units]/2, 0),
             fillColor='red',
             lineColor=None,
             units=self.win.units
@@ -219,7 +124,7 @@ class BaseCalibrationSession:
         self.border_right.draw()
     
     
-    def _create_message_visual(self, formatted_text, pos=(0, -0.15)):
+    def _create_message_visual(self, formatted_text, pos=(0, -0.15), font_type="instruction_text"):
         """
         Create a visual text stimulus from pre-formatted text.
         
@@ -229,19 +134,24 @@ class BaseCalibrationSession:
             Pre-formatted text (e.g., from NicePrint)
         pos : tuple, optional
             Position of the text box (default slightly below center)
+        font_type : str, optional
+            Type of font to use from _font_size_multipliers keys
             
         Returns
         -------
         visual.TextStim
             PsychoPy text stimulus
         """
+        # Get font and size
+        size_multiplier = cfg.FONT_SIZE_MULTIPLIERS[font_type]
+
+        
         return visual.TextStim(
             self.win,
             text=formatted_text,
             pos=pos,
             color='white',
-            height=self._get_text_height(1.2),  # Smaller text for the box
-            font='Courier New',  # Monospace font for proper box alignment
+            height=self._get_text_height(size_multiplier),
             alignText='center',
             anchorHoriz='center',
             anchorVert='center',
@@ -265,7 +175,7 @@ class BaseCalibrationSession:
             Text height in window units.
         """
         # Scale by the size percentage
-        return self.text_height * (size_percentage / 2.0)
+        return cfg.DEFAULT_TEXT_HEIGHT[self.win.units] * (size_percentage / 2.0)
     
     
     def show_message_and_wait(self, body, title="", pos=(0, -0.15)):
@@ -311,24 +221,26 @@ class BaseCalibrationSession:
     
     def _prepare_session(self, calibration_points):
         """
-        Initialize stimuli sequence.
+        Initialize stimuli sequence and remaining points list.
         """
         self.targets = InfantStimuli(
             self.win,
             self.infant_stims,
             shuffle=self.shuffle
         )
+        # Initialize remaining points to all points
+        self.remaining_points = list(range(len(calibration_points)))
     
     
     def _animate(self, stim, point_idx, clock, rotation_range=15):
         """
         Animate a stimulus with zoom or rotation ('trill').
         """
-        elapsed_time = clock.getTime() * self._animation_settings['animation_speed']
+        elapsed_time = clock.getTime() * cfg.ANIMATION_SETTINGS['animation_speed']
 
         if self.anim_type == 'zoom':
             orig_size = self.targets.get_stim_original_size(point_idx)
-            scale_factor = np.sin(elapsed_time)**2 + self._animation_settings['target_min']
+            scale_factor = np.sin(elapsed_time)**2 + cfg.ANIMATION_SETTINGS['target_min']
             newsize = [scale_factor * s for s in orig_size]
             stim.setSize(newsize)
         elif self.anim_type == 'trill':
@@ -373,7 +285,6 @@ Make your choice now:"""
             pos=(0, -0.25),
             color='white',
             height=self._get_text_height(1.2),
-            font='Courier New',
             alignText='center',
             anchorHoriz='center',
             anchorVert='center',
@@ -392,11 +303,11 @@ Make your choice now:"""
                     # Create highlight circle with proper scaling
                     highlight = visual.Circle(
                         self.win,
-                        radius=self.highlight_size,           # Unit-aware size
+                        radius=cfg.DEFAULT_HIGHLIGHT_SIZE[self.win.units],           # Unit-aware size
                         pos=calibration_points[retry_idx],
-                        lineColor='yellow',                   # Yellow for both types
+                        lineColor=cfg.CALIBRATION_COLORS['highlight'],
                         fillColor=None,                       # No fill for consistency
-                        lineWidth=self.line_width,            # Unit-aware line width
+                        lineWidth=cfg.DEFAULT_LINE_WIDTH[self.win.units],            # Unit-aware line width
                         edges=128,                            # smooth circle
                         units=self.win.units                  # Explicit units
                     )
@@ -405,8 +316,8 @@ Make your choice now:"""
             self.win.flip()
             
             for key in event.getKeys():
-                if key in self._numkey_dict:
-                    idx = self._numkey_dict[key]
+                if key in cfg.NUMKEY_DICT:
+                    idx = cfg.NUMKEY_DICT[key]
                     if 0 <= idx < len(calibration_points):
                         if idx in retries:
                             retries.remove(idx)
@@ -416,10 +327,14 @@ Make your choice now:"""
                 elif key == 'space':
                     return list(retries)  # Accept calibration (with or without retries)
                     
+                elif key == 'escape':
+                    return None  # Restart all calibration
+                    
     def _collection_phase(self, calibration_points, **kwargs):
         """
         Unified collection phase for both calibration types.
         Uses callback methods for type-specific data collection.
+        Only allows interaction with points in remaining_points list.
         
         Parameters
         ----------
@@ -443,16 +358,19 @@ Make your choice now:"""
             
             # Handle keyboard input
             for key in event.getKeys():
-                if key in self._numkey_dict:
+                if key in cfg.NUMKEY_DICT:
                     # Select point; play audio if available
-                    point_idx = self._numkey_dict[key]
-                    if 0 <= point_idx < len(calibration_points):
+                    candidate_idx = cfg.NUMKEY_DICT[key]
+                    # Only allow selection of points that are still remaining
+                    if candidate_idx in self.remaining_points:
+                        point_idx = candidate_idx
                         if self.audio:
                             self.audio.play()
                     else:
+                        # Ignore key press for points not in remaining list
                         point_idx = -1
                         
-                elif key == 'space' and 0 <= point_idx < len(calibration_points):
+                elif key == 'space' and point_idx in self.remaining_points:
                     # Collect data using subclass-specific method
                     success = self._collect_data_at_point(
                         calibration_points[point_idx], 
@@ -462,6 +380,8 @@ Make your choice now:"""
                     if success:
                         if self.audio:
                             self.audio.pause()
+                        # Remove from remaining points after successful collection
+                        self.remaining_points.remove(point_idx)
                         point_idx = -1
                         
                 elif key == 'return':
@@ -474,8 +394,8 @@ Make your choice now:"""
                     self._clear_collected_data()
                     return False
             
-            # Show stimulus at selected point
-            if 0 <= point_idx < len(calibration_points):
+            # Show stimulus at selected point (only if it's in remaining points)
+            if point_idx in self.remaining_points:
                 stim = self.targets.get_stim(point_idx)
                 stim.setPos(calibration_points[point_idx])
                 self._animate(stim, point_idx, clock)
@@ -486,62 +406,81 @@ Make your choice now:"""
             self.win.flip()
     
     
-    def _collect_data_at_point(self, target_pos, point_idx, **kwargs):
+    def _draw_collection_ui(self, calibration_points, current_point_idx):
         """
-        Abstract method for collecting data at a point.
-        Must be implemented by subclasses.
+        Draw UI elements during collection phase.
+        Override in subclasses for specific visualizations.
         
         Parameters
         ----------
-        target_pos : tuple
-            Target position (x, y)
-        point_idx : int
-            Index of the calibration point
-        **kwargs : dict
-            Additional arguments for collection
+        calibration_points : list of (float, float)
+            List of calibration point coordinates
+        current_point_idx : int
+            Index of currently selected point (-1 if none)
+        """
+        # Base implementation: show small markers for already collected points
+        total_points = len(calibration_points)
+        all_points = set(range(total_points))
+        collected_points = all_points - set(self.remaining_points)
+        
+        for point_idx in collected_points:
+            if point_idx < len(calibration_points):
+                marker = visual.Circle(
+                    self.win,
+                    radius=cfg.DEFAULT_MARKER_SIZE[self.win.units],
+                    pos=calibration_points[point_idx],
+                    lineColor='green',
+                    fillColor='green',
+                    lineWidth=1,
+                    units=self.win.units
+                )
+                marker.draw()
+    
+    
+    def _create_calibration_result_image(self, calibration_points, sample_data):
+        """
+        Common function to create calibration result visualization.
+        
+        Parameters
+        ----------
+        calibration_points : list of (float, float)
+            List of calibration point coordinates
+        sample_data : dict
+            Dictionary with structure: {point_idx: [(target_pos, sample_pos, color), ...]}
+            where color is (R, G, B, A) tuple for the line
             
         Returns
         -------
-        bool
-            True if data was collected successfully
+        visual.SimpleImageStim
+            PsychoPy stimulus containing the result image
         """
-        raise NotImplementedError("Subclasses must implement _collect_data_at_point")
-    
-    
-    def _has_collected_data(self):
-        """
-        Abstract method to check if any data has been collected.
-        Must be implemented by subclasses.
+        # Create blank RGBA image matching window size (transparent background like Tobii)
+        img = Image.new("RGBA", tuple(self.win.size))
+        img_draw = ImageDraw.Draw(img)
         
-        Returns
-        -------
-        bool
-            True if any data has been collected
-        """
-        raise NotImplementedError("Subclasses must implement _has_collected_data")
-    
-    
-    def _clear_collected_data(self):
-        """
-        Abstract method to clear collected data.
-        Must be implemented by subclasses.
-        """
-        raise NotImplementedError("Subclasses must implement _clear_collected_data")
-    
-    
-    def _draw_collection_ui(self, calibration_points, current_point_idx):
-        """
-        Draw additional UI elements during collection.
-        Base implementation does nothing - subclasses can override.
+        # Draw calibration data
+        for point_idx, samples in sample_data.items():
+            if point_idx < len(calibration_points):
+                target_pos = calibration_points[point_idx]
+                target_pix = psychopy_to_pixels(self.win, target_pos)
+                
+                # Draw small target circle (like Tobii style)
+                img_draw.ellipse(
+                    (target_pix[0]-3, target_pix[1]-3, target_pix[0]+3, target_pix[1]+3),
+                    outline=cfg.CALIBRATION_COLORS['target_outline']
+                )
+                
+                # Draw lines from target to samples
+                for _, sample_pos, line_color in samples:
+                    sample_pix = psychopy_to_pixels(self.win, sample_pos)
+                    img_draw.line(
+                        (target_pix[0], target_pix[1], sample_pix[0], sample_pix[1]),
+                        fill=line_color,
+                        width=cfg.DEFAULT_PLOT_LINE_WIDTH[self.win.units]
+                    )
         
-        Parameters
-        ----------
-        calibration_points : list
-            List of calibration points
-        current_point_idx : int
-            Currently selected point index (-1 if none)
-        """
-        pass  # Base implementation does nothing
+        # Wrap in SimpleImageStim and return
+        return visual.SimpleImageStim(self.win, img, autoLog=False)
 
 
 class CalibrationSession(BaseCalibrationSession):
@@ -558,10 +497,7 @@ class CalibrationSession(BaseCalibrationSession):
         infant_stims,
         shuffle=True,
         audio=None,
-        focus_time=0.5,
         anim_type='zoom',
-        animation_settings=None,
-        numkey_dict=None
     ):
         """
         Initialize Tobii calibration session.
@@ -572,84 +508,91 @@ class CalibrationSession(BaseCalibrationSession):
             Tobii's calibration interface.
         """
         super().__init__(
-            win, infant_stims, shuffle, audio, focus_time, 
-            anim_type, animation_settings, numkey_dict
+            win, infant_stims, shuffle, audio, anim_type
         )
         self.calibration = calibration_api
 
     def run(self, calibration_points, save_calib=False):
         """
-        Execute the complete Tobii calibration loop.
+        Main routine to run the full Tobii calibration workflow.
+
+        This function presents each calibration target, collects gaze data
+        via the eye tracker, shows the results, and allows the user to retry
+        any subset of points until satisfied. Optionally saves the calibration.
 
         Parameters
         ----------
         calibration_points : list of (float, float)
-            PsychoPy-normalized (x, y) coordinates for calibration targets.
-        save_calib : bool, optional
-            If True and calibration succeeds, save binary data to disk.
+            List of PsychoPy (x, y) positions for calibration targets.
+        save_calib : bool
+            If True, saves the resulting calibration data to disk upon success.
 
         Returns
         -------
         bool
-            True if calibration succeeded.
+            True if calibration was successful, False if aborted or failed.
         """
-        # Show initial instructions
+
+        # --- 1. Show instructions before anything happens ---
         instructions_text = """Tobii Eye Tracker Calibration Setup:
 
-• Press number keys (1-9) to select calibration points
-• Look at the animated stimulus when it appears
-• Press SPACE to collect eye tracking data
-• Press ENTER to finish collecting and see results
-• Press ESCAPE to exit calibration
+    • Press number keys (1-9) to select calibration points
+    • Look at the animated stimulus when it appears
+    • Press SPACE to collect eye tracking data
+    • Press ENTER to finish collecting and see results
+    • Press ESCAPE to exit calibration
 
-Any key will start calibration immediately!"""
-        
+    Any key will start calibration immediately!"""
+
         self.show_message_and_wait(instructions_text, "Eye Tracker Calibration")
 
-        # 1. Verify and prepare
+        # --- 2. Initial verification and preparation ---
         self.check_points(calibration_points)
         self._prepare_session(calibration_points)
 
-        # Enter calibration mode
+        # --- 3. Enter Tobii calibration mode ---
         self.calibration.enter_calibration_mode()
 
-        # Retry loop
+        # --- 4. Main calibration-retry loop ---
         while True:
-            # 2. Collection phase
+            # --- 4a. Data collection phase ---
             success = self._collection_phase(calibration_points)
             if not success:
-                # User pressed escape during calibration - exit
                 self.calibration.leave_calibration_mode()
                 return False
 
-            # 3. Compute & show
+            # --- 4b. Compute and show calibration results ---
             self.calibration_result = self.calibration.compute_and_apply()
-            result_img = self._show_calibration_result()
+            result_img = self._show_calibration_result(calibration_points)
 
-            # 4. Selection phase
+            # --- 4c. Let user select points to retry ---
             retries = self._selection_phase(calibration_points, result_img)
             if retries is None:
-                # User pressed escape in results - restart calibration
+                # Restart all: reset remaining points and clear collected data
+                self.remaining_points = list(range(len(calibration_points)))
+                self._clear_collected_data()
                 continue
             elif not retries:
-                # User accepted calibration
+                # Accept: finished!
                 break
             else:
-                # 5. Discard phase - retry selected points
+                # Retry specific points: update remaining points and discard data
+                self.remaining_points = retries.copy()
                 self._discard_phase(calibration_points, retries)
 
-        # Leave calibration mode
+        # --- 5. Exit calibration mode ---
         self.calibration.leave_calibration_mode()
 
-        # Return success status
+        # --- 6. Optionally save calibration data ---
         success = (self.calibration_result.status == tr.CALIBRATION_STATUS_SUCCESS)
         if success and save_calib:
             data = self.calibration.retrieve_calibration_data()
             fname = f"{datetime.now():%Y-%m-%d_%H-%M-%S}_calibration.dat"
             with open(fname, 'wb') as f:
                 f.write(data)
-        
+
         return success
+
 
     def _collect_data_at_point(self, target_pos, point_idx, **kwargs):
         """
@@ -669,17 +612,10 @@ Any key will start calibration immediately!"""
         bool
             True if data was collected successfully
         """
-        # Check if this point is still in remaining points
-        if point_idx not in self.remaining_points:
-            return False
-            
         # Wait focus time then collect
         core.wait(self.focus_time)
         x, y = get_tobii_pos(self.win, target_pos)
         self.calibration.collect_data(x, y)
-        
-        # Remove from remaining points
-        self.remaining_points.remove(point_idx)
         return True
     
     
@@ -692,17 +628,17 @@ Any key will start calibration immediately!"""
         bool
             True if any points have been collected
         """
-        total_points = len(self.remaining_points) + len([p for p in range(9) if p not in self.remaining_points])
-        return len(self.remaining_points) < total_points
+        # If remaining points is smaller than total points, we've collected some data
+        return len(self.remaining_points) < len(range(9))  # Assuming max 9 points
     
     
     def _clear_collected_data(self):
         """
         Clear Tobii calibration data.
-        For Tobii, we reset the remaining points list.
+        For Tobii, this is handled by the API when we restart calibration mode.
         """
-        # Reset remaining points to all points
-        self.remaining_points = list(range(len(self.calibration_points)))
+        # Tobii handles clearing internally
+        pass
 
     def _discard_phase(self, calibration_points, retries):
         """
@@ -712,66 +648,48 @@ Any key will start calibration immediately!"""
             x, y = get_tobii_pos(self.win, calibration_points[idx])
             self.calibration.discard_data(x, y)
 
-    def _show_calibration_result(self):
+    def _show_calibration_result(self, calibration_points):
         """
-        Show calibration results with lines indicating accuracy.
+        Show Tobii calibration results using the common plotting function.
+        Only shows results for ALL collected points, not just remaining ones.
 
-        Draws markers at each point and lines from each sample:
-        green = left eye, red = right eye.
+        Parameters
+        ----------
+        calibration_points : list of (float, float)
+            List of calibration point coordinates
 
         Returns
         -------
         SimpleImageStim
             PsychoPy stimulus containing the result image.
         """
-        # Create blank RGBA image matching window size
-        img = Image.new("RGBA", tuple(self.win.size))
-        img_draw = ImageDraw.Draw(img)
-        # Wrap in SimpleImageStim to avoid resizing later
-        result_img = visual.SimpleImageStim(self.win, img, autoLog=False)
-
-        # Only draw if not a full failure
+        # Prepare sample data in common format
+        sample_data = {}
+        
+        # Only process if not a full failure
         if self.calibration_result.status != tr.CALIBRATION_STATUS_FAILURE:
-            for point in self.calibration_result.calibration_points:
-                p = point.position_on_display_area
-                # Draw small circle at target
-                img_draw.ellipse(
-                    ((p[0]*self.win.size[0]-3, p[1]*self.win.size[1]-3),
-                     (p[0]*self.win.size[0]+3, p[1]*self.win.size[1]+3)),
-                    outline=(0, 0, 0, 255)
-                )
-                # Draw lines for each calibration sample
+            for point_idx, point in enumerate(self.calibration_result.calibration_points):
+                samples = []
+                
+                # Process each calibration sample
                 for sample in point.calibration_samples:
-                    lp = sample.left_eye.position_on_display_area
-                    rp = sample.right_eye.position_on_display_area
-                    # Left eye
+                    target_pos = point.position_on_display_area
+                    
+                    # Left eye sample (green)
                     if sample.left_eye.validity == tr.VALIDITY_VALID_AND_USED:
-                        img_draw.line(
-                            ((p[0]*self.win.size[0], p[1]*self.win.size[1]),
-                             (lp[0]*self.win.size[0], lp[1]*self.win.size[1])),
-                            fill=(0,255,0,255)
-                        )
-                    # Right eye
+                        left_pos = sample.left_eye.position_on_display_area
+                        samples.append((target_pos, left_pos, cfg.CALIBRATION_COLORS['left_eye']))
+                    
+                    # Right eye sample (red)
                     if sample.right_eye.validity == tr.VALIDITY_VALID_AND_USED:
-                        img_draw.line(
-                            ((p[0]*self.win.size[0], p[1]*self.win.size[1]),
-                             (rp[0]*self.win.size[0], rp[1]*self.win.size[1])),
-                            fill=(255,0,0,255)
-                        )
-
-        # Display simple results message in console (no accuracy calculation)
-        results_text = f"""Eye Tracker Calibration Results:
-
-Calibration Status: {self.calibration_result.status}
-Points Calibrated: {len(self.calibration_result.calibration_points)}
-
-Review the visual results above to assess calibration quality."""
-
-        NicePrint(results_text, "Calibration Results")
-
-        # Update stim's image and return
-        result_img.setImage(img)
-        return result_img
+                        right_pos = sample.right_eye.position_on_display_area
+                        samples.append((target_pos, right_pos, cfg.CALIBRATION_COLORS['right_eye']))
+                
+                if samples:
+                    sample_data[point_idx] = samples
+        
+        # Use common plotting function
+        return self._create_calibration_result_image(calibration_points, sample_data)
 
 
 class SimpleCalibrationSession(BaseCalibrationSession):
@@ -789,10 +707,7 @@ class SimpleCalibrationSession(BaseCalibrationSession):
         mouse,
         shuffle=True,
         audio=None,
-        focus_time=0.5,
         anim_type='zoom',
-        animation_settings=None,
-        numkey_dict=None
     ):
         """
         Initialize mouse-based calibration session.
@@ -803,8 +718,7 @@ class SimpleCalibrationSession(BaseCalibrationSession):
             Mouse object for getting positions.
         """
         super().__init__(
-            win, infant_stims, shuffle, audio, focus_time,
-            anim_type, animation_settings, numkey_dict
+            win, infant_stims, shuffle, audio, anim_type
         )
         self.mouse = mouse
         self.calibration_data = {}  # point_idx -> list of (target_pos, sample_pos, timestamp)
@@ -812,193 +726,162 @@ class SimpleCalibrationSession(BaseCalibrationSession):
     
     def run(self, calibration_points, num_samples=5):
         """
-        Run the mouse-based calibration procedure.
-        
+        Main function to run the mouse-based calibration routine.
+
         Parameters
         ----------
         calibration_points : list of (float, float)
-            Target positions in PsychoPy coordinates
+            List of target positions in PsychoPy coordinates.
         num_samples : int
-            Number of samples to collect per point
-            
+            How many mouse position samples to collect at each calibration point.
+
         Returns
         -------
         bool
-            True if calibration completed successfully
+            True if calibration finished successfully, False if the user exits early.
         """
-        # Show initial instructions
+
+        # --- 1. Show the instructions screen ---
         instructions_text = """Mouse-Based Calibration Setup:
 
-• Press number keys (1-9) to select calibration points
-• Move your mouse to the animated stimulus
-• Press SPACE to collect samples at the selected point
-• Press ENTER to finish collecting and see results
-• Press ESCAPE to exit calibration
+    • Press number keys (1-9) to select calibration points
+    • Move your mouse to the animated stimulus
+    • Press SPACE to collect samples at the selected point
+    • Press ENTER to finish collecting and see results
+    • Press ESCAPE to exit calibration
 
-Any key will start calibration immediately!"""
+    Any key will start calibration immediately!"""
         
         self.show_message_and_wait(instructions_text, "Calibration Setup")
         
-        # Verify and prepare
+        # --- 2. Sanity check and prepare stimuli ---
         self.check_points(calibration_points)
         self._prepare_session(calibration_points)
         
-        # Main calibration loop
+        # --- 3. Main calibration loop ---
         while True:
-            # Collection phase
+            # --- 3a. Collect calibration data at each point ---
             success = self._collection_phase(calibration_points, num_samples=num_samples)
             if not success:
-                # User pressed escape during calibration - exit completely
                 return False
                 
-            # Show results
+            # --- 3b. Show results of current calibration ---
             result_img = self._show_results(calibration_points)
             
-            # Allow user to retry points or accept
+            # --- 3c. Let user review and pick points to retry ---
             retries = self._selection_phase(calibration_points, result_img)
             
             if retries is None:
-                # User pressed escape in results - restart calibration
+                # Restart all: reset remaining points and clear data
+                self.remaining_points = list(range(len(calibration_points)))
                 self.calibration_data.clear()
                 continue
             elif not retries:
-                # User accepted calibration
+                # Accept: we're done!
                 return True
             else:
-                # Remove data for retry points and continue
+                # Retry specific points: update remaining points and remove their data
+                self.remaining_points = retries.copy()
                 for idx in retries:
                     if idx in self.calibration_data:
                         del self.calibration_data[idx]
+
     
     
     def _collect_data_at_point(self, target_pos, point_idx, **kwargs):
         """
-        Collect mouse samples at a calibration point.
-        
+        Collect mouse samples at a single calibration target.
+
         Parameters
         ----------
         target_pos : tuple
-            Target position (x, y)
+            The (x, y) coordinates of the current calibration target (in PsychoPy units).
         point_idx : int
-            Index of the calibration point
+            The index of this calibration point in the full list.
         **kwargs : dict
-            Must contain 'num_samples' for mouse calibration
-            
+            Must contain 'num_samples': how many mouse samples to take.
+
         Returns
         -------
         bool
-            True if samples were collected
+            True if samples were collected.
         """
+
+        # How many mouse samples to take at this point? (Default: 5)
         num_samples = kwargs.get('num_samples', 5)
-        
-        # Wait focus time
+
+        # --- Wait a moment before sampling ---
         core.wait(self.focus_time)
-        
-        # Collect samples over a short period
+
+        # --- Setup: collect all samples in this list ---
         samples = []
-        sample_duration = 1.0  # Collect over 1 second
-        sample_interval = sample_duration / num_samples
-        
+        sample_duration = 1.0  # Total time (seconds) over which to collect samples
+        sample_interval = sample_duration / num_samples  # Time between samples
+
+        # --- 1. Collect mouse samples over a brief period ---
         for i in range(num_samples):
-            mouse_pos = self.mouse.getPos()
-            timestamp = time.time()
+            mouse_pos = self.mouse.getPos()      # Get current mouse position (x, y)
+            timestamp = time.time()              # Record current time
             samples.append((target_pos, mouse_pos, timestamp))
-            
-            if i < num_samples - 1:  # Don't wait after last sample
+
+            # Don't wait after the final sample
+            if i < num_samples - 1:
                 core.wait(sample_interval)
-        
-        # Store samples
+
+        # --- 2. Store the collected samples ---
         if point_idx not in self.calibration_data:
             self.calibration_data[point_idx] = []
         self.calibration_data[point_idx].extend(samples)
-        
+
+        # --- 3. Done! Return True to indicate success ---
         return True
-    
-    
+
+        
+        
     def _has_collected_data(self):
         """
-        Check if any mouse calibration data has been collected.
-        
+        Check if any mouse calibration data has been collected yet.
+
         Returns
         -------
         bool
-            True if any data has been collected
+            True if there is any calibration data in the storage,
+            False if none has been collected yet.
         """
         return bool(self.calibration_data)
-    
-    
+
+
     def _clear_collected_data(self):
         """
-        Clear mouse calibration data.
+        Remove all previously collected mouse calibration data.
         """
         self.calibration_data.clear()
-    
-    
-    def _draw_collection_ui(self, calibration_points, current_point_idx):
-        """
-        Draw additional UI elements during collection.
-        Override to remove the green markers for collected points.
-        
-        Parameters
-        ----------
-        calibration_points : list
-            List of calibration points
-        current_point_idx : int
-            Currently selected point index (-1 if none)
-        """
-        pass  # Don't draw any markers - clean interface
-    
-    
+
+
     def _show_results(self, calibration_points):
         """
-        Create result visualization without accuracy computation.
+        Visualize and return a summary image of the collected mouse calibration data.
+
+        Parameters
+        ----------
+        calibration_points : list of (float, float)
+            The (x, y) positions of all calibration targets.
 
         Returns
         -------
         visual.SimpleImageStim
-            Image showing calibration results
+            A PsychoPy image stimulus with the plotted calibration results.
         """
-        # Create result image
-        img = Image.new("RGBA", tuple(self.win.size), (128, 128, 128, 255))
-        draw = ImageDraw.Draw(img)
+        # --- Prepare data for plotting ---
+        sample_data = {}
 
-        # Draw targets and sample lines (no error calculation)
         for point_idx, samples in self.calibration_data.items():
-            target_pos = calibration_points[point_idx]
-            target_pix = psychopy_to_pixels(self.win, target_pos)
+            formatted_samples = []
+            for target_pos, sample_pos, _ in samples:
+                # Draw a line from the target to each sample; use orange color for mouse samples
+                formatted_samples.append((target_pos, sample_pos, cfg.CALIBRATION_COLORS['mouse']))
+            if formatted_samples:
+                sample_data[point_idx] = formatted_samples
 
-            # Draw the target point
-            draw.ellipse(
-                (target_pix[0]-5, target_pix[1]-5, target_pix[0]+5, target_pix[1]+5),
-                outline=(0, 0, 0, 255),
-                fill=(255, 255, 255, 255)
-            )
-
-            for _, sample_pos, _ in samples:
-                sample_pix = psychopy_to_pixels(self.win, sample_pos)
-
-                # Draw line from target to sample
-                draw.line(
-                    (target_pix[0], target_pix[1], sample_pix[0], sample_pix[1]),
-                    fill=(255, 0, 0, 200),
-                    width=1
-                )
-                # Draw the sample point
-                draw.ellipse(
-                    (sample_pix[0]-2, sample_pix[1]-2, sample_pix[0]+2, sample_pix[1]+2),
-                    fill=(0, 255, 0, 255)
-                )
-
-        # Simple results text without accuracy metrics
-        total_samples = sum(len(samples) for samples in self.calibration_data.values())
-        results_text = f"""Calibration Results:
-
-Total samples collected: {total_samples}
-Points calibrated: {len(self.calibration_data)}
-
-Review the visual results above to assess calibration quality."""
-        
-        NicePrint(results_text, "Calibration Results")
-
-        # Wrap the PIL image in a PsychoPy stimulus and return
-        return visual.SimpleImageStim(self.win, img, autoLog=False)
+        # --- Use the shared plotting function ---
+        return self._create_calibration_result_image(calibration_points, sample_data)

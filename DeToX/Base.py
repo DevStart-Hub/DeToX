@@ -545,7 +545,6 @@ class TobiiController:
                     infant_stims,
                     shuffle=True,
                     audio=None,
-                    focus_time=0.5,
                     anim_type='zoom',
                     save_calib=False,
                     num_samples=5):
@@ -589,10 +588,7 @@ class TobiiController:
                 mouse=self.mouse,
                 shuffle=shuffle,
                 audio=audio,
-                focus_time=focus_time,
-                anim_type=anim_type,
-                animation_settings=self._animation_settings,
-                numkey_dict=self._numkey_dict
+                anim_type=anim_type
             )
             
             success = session.run(calibration_points, num_samples=num_samples)
@@ -610,10 +606,7 @@ class TobiiController:
                 infant_stims=infant_stims,
                 shuffle=shuffle,
                 audio=audio,
-                focus_time=focus_time,
-                anim_type=anim_type,
-                animation_settings=self._animation_settings,
-                numkey_dict=self._numkey_dict
+                anim_type=anim_type
             )
             
             return session.run(calibration_points, save_calib=save_calib)
