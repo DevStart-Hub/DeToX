@@ -14,7 +14,7 @@ from psychopy import core, event, visual
 # Local imports
 from . import Coords
 # Remove the old import and import both calibration classes
-from .Calibration import CalibrationSession, SimpleCalibrationSession
+from .Calibration import TobiiCalibrationSession, MouseCalibrationSession
 from .Utils import NicePrint
 
 class TobiiController:
@@ -146,30 +146,76 @@ class TobiiController:
 
 
 
-    def save_calibration(self, filename=None):
+    def save_calibration(self, filename=None, use_gui=False):
         """
         Save calibration data to a file.
-
+        
         This method saves the current calibration data of the eye tracker to
         the specified file. The calibration data is retrieved from the eye
         tracker using the retrieve_calibration_data() method and then written
         to the file in binary format.
-
+        
         Parameters
         ----------
         filename : str, optional
-            The name of the file to save the calibration data to. If not provided,
-            a default name based on the basename will be used.
-
+            The name of the file to save the calibration data to. If not provided
+            and use_gui=False, a default name based on timestamp will be used.
+            If use_gui=True, this serves as the default filename in the dialog.
+        use_gui : bool, optional
+            If True, opens a file save dialog to select the save location.
+            Default is False.
+            
         Returns
         -------
         bool
             True if the calibration data was successfully saved, False otherwise.
+            
+        Raises
+        ------
+        RuntimeError
+            If called in simulation mode.
         """
-        # Determine the filename to use for saving calibration data
-        calibration_name = filename or f"{self.basename}_calibration.dat"
-
+        # Check if in simulation mode first
+        if self.simulate:
+            raise RuntimeError(
+                "Cannot save calibration in simulation mode. "
+                "Calibration saving requires a real Tobii eye tracker."
+            )
+        
         try:
+            # Determine the filename to save to
+            if use_gui:
+                from psychopy import gui
+                from datetime import datetime
+                
+                # Create default filename if none provided
+                if filename is None:
+                    default_name = f"{datetime.now().strftime('%Y-%m-%d_%H-%M-%S')}_calibration.dat"
+                else:
+                    default_name = filename
+                
+                # Open save dialog for calibration files
+                save_path = gui.fileSaveDlg(
+                    prompt='Save calibration data as…',
+                    allowed='*.dat;*.calib',  # Common calibration file extensions
+                    initFilePath=default_name
+                )
+                
+                if not save_path:
+                    print("Save dialog cancelled")
+                    return False
+                    
+                calibration_name = save_path
+                print(f"Saving calibration to: {calibration_name}")
+                
+            else:
+                # Use provided filename or create default
+                if filename is None:
+                    from datetime import datetime
+                    calibration_name = f"{datetime.now().strftime('%Y-%m-%d_%H-%M-%S')}_calibration.dat"
+                else:
+                    calibration_name = filename
+            
             # Retrieve calibration data from the eyetracker
             calib_data = self.eyetracker.retrieve_calibration_data()
             
@@ -177,7 +223,7 @@ class TobiiController:
             if not calib_data:
                 print("No calibration data available")
                 return False
-
+            
             # Open the file in binary write mode and save the calibration data
             with open(calibration_name, 'wb') as f:
                 f.write(calib_data)
@@ -185,38 +231,78 @@ class TobiiController:
             # Inform the user that the data has been successfully saved
             print(f"Calibration data saved to {calibration_name}")
             return True
-
+            
         except Exception as e:
             # Handle any exceptions that occur during the saving process
             print(f"Error saving calibration: {e}")
             return False
 
-
-    def load_calibration(self, filename):
+    def load_calibration(self, filename=None, use_gui=False):
         """
         Load calibration data from a file.
-
+        
         Parameters
         ----------
-        filename : str
+        filename : str, optional
             The name of the file containing the calibration data.
-
+            If None and use_gui=True, will open a file dialog.
+            If None and use_gui=False, will raise an error.
+        use_gui : bool, optional
+            If True, opens a file dialog to select the calibration file.
+            Default is False.
+            
         Returns
         -------
         bool
             True if the calibration data was successfully loaded, False otherwise.
+            
+        Raises
+        ------
+        RuntimeError
+            If called in simulation mode.
+        ValueError
+            If no filename provided and use_gui=False.
         """
+        # Check if in simulation mode first
+        if self.simulate:
+            raise RuntimeError(
+                "Cannot load calibration in simulation mode. "
+                "Calibration loading requires a real Tobii eye tracker."
+            )
+        
         try:
-            # Open the file in binary read mode
+            # Determine the filename to load
+            if use_gui or filename is None:
+                from psychopy import gui
+                
+                # Open file dialog for calibration files
+                file_list = gui.fileOpenDlg(
+                    prompt='Select calibration file to load…',
+                    allowed='*.dat;*.calib',  # Common calibration file extensions
+                    tryFilePath='.'  # Start in current directory
+                )
+                
+                if not file_list:
+                    print("File dialog cancelled")
+                    return False
+                    
+                # Take the first selected file
+                filename = file_list[0]
+                print(f"Selected calibration file: {filename}")
+            
+            elif filename is None:
+                raise ValueError("No filename provided and use_gui=False")
+            
+            # Load the calibration file
             with open(filename, 'rb') as f:
-                # Read the calibration data from the file
                 calib_data = f.read()
+                
             # Apply the calibration data to the eye tracker
             self.eyetracker.apply_calibration_data(calib_data)
             print(f"Calibration loaded from {filename}")
             return True
+                
         except Exception as e:
-            # Handle any exceptions that occur during the loading process
             print(f"Error loading calibration: {e}")
             return False
 
@@ -237,7 +323,7 @@ class TobiiController:
         self.gaze_data.append(gaze_data)
 
         if self.recent_gaze_positions:
-            self.recent_gaze_positions.extend(
+            self.recent_gaze_positions.append(
                 [gaze_data.get('left_gaze_point_on_display_area'),
                 gaze_data.get('right_gaze_point_on_display_area')]
             )
@@ -271,9 +357,12 @@ class TobiiController:
             for coord in df['right_gaze_point_on_display_area']
         ])
         
-        # Convert microseconds to milliseconds (absolute timestamps)
-        df['TimeStamp'] = (df['system_time_stamp'] / 1000.0).astype(int)
+        # Remove inital timestamp
+        if self.first_timestamp is None:
+            self.first_timestamp = df.iloc[0]['system_time_stamp']
 
+        # Convert microseconds to milliseconds (absolute timestamps)
+        df['TimeStamp'] = ((df['system_time_stamp'] - self.first_timestamp) / 1000.0).astype(int)
 
         # Rename columns and convert validity columns to integers
         df = df.rename(columns={
@@ -312,7 +401,7 @@ class TobiiController:
         # Copy and clear buffers to prevent data loss
         gaze_data_copy = list(self.gaze_data)
         event_data_copy = list(self.event_data)
-
+    
         # Convert gaze data to a DataFrame and adapt its format
         gaze_df = pd.DataFrame(gaze_data_copy) 
         # Create an empty 'Events' column
@@ -419,7 +508,10 @@ class TobiiController:
         """
         # Common setup for both real and simulation modes
         self._prepare_recording(filename)
-        
+
+        # Initiate stat time to be none
+        self.first_timestamp = None
+
         if self.simulate:
             # Simulation-specific setup
             if self._stop_simulation is None:
@@ -579,10 +671,8 @@ class TobiiController:
             True if calibration successful, False otherwise
         """
         if self.simulate:
-            # Use mouse-based calibration for simulation
-            from .Calibration import SimpleCalibrationSession
             
-            session = SimpleCalibrationSession(
+            session = MouseCalibrationSession(
                 win=self.win,
                 infant_stims=infant_stims,
                 mouse=self.mouse,
@@ -597,10 +687,8 @@ class TobiiController:
             return success
         
         else:
-            # Use real Tobii calibration
-            from .Calibration import CalibrationSession
             
-            session = CalibrationSession(
+            session = TobiiCalibrationSession(
                 win=self.win,
                 calibration_api=self.calibration,
                 infant_stims=infant_stims,
