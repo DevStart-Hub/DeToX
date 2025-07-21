@@ -3,9 +3,12 @@
 # Centralized configuration for all default settings and dictionaries
 # for calibration sessions (Tobii and simulation).
 #
+# All sizes are specified in height units (% of screen height) and automatically
+# converted to other units as needed. This makes configuration much simpler!
+#
 # Edit these here, or override in your main script:
 #   import calibration_config
-#   calibration_config.DEFAULT_HIGHLIGHT_SIZE["pix"] = 60.0
+#   calibration_config.ANIMATION_SETTINGS['max_zoom_size_height'] = 0.20
 
 # ---------------------------------------------------------
 # 1. Key mapping: which key selects which calibration point
@@ -26,13 +29,27 @@ NUMKEY_DICT = {
 
 # ---------------------------------------------------------
 # 2. Animation settings for calibration stimuli
-#    (Controls how calibration targets animate, and timing of focus collection.)
+#    All sizes in height units (% of screen height) - automatically converted to other units
 ANIMATION_SETTINGS = {
-    'animation_speed': 1.0,
-    'target_min': 0.2,
-    'focus_time': 0.5,
+    # Focus time
+    'focus_time': 0.5,                   # Wait time before collecting data in s
+
+    # Zoom
+    'zoom_speed': 6.0,                   # Speed of zoom animation
+    'max_zoom_size': 0.11,               # 15% of screen height (zoom animation max)
+    'min_zoom_size': 0.05,              # 2.5% of screen height (zoom animation min)
+
+    # Trill - Real rapid back-and-forth oscillations
+    'trill_size': 0.075,                 # 7.5% of screen height (trill fixed size)
+    'trill_rotation_range': 20,          # Maximum rotation angle in degrees for trill
+    'trill_cycle_duration': 1.5,         # Total cycle time: 1s trill + 0.5s stop = 1.5s
+    'trill_active_duration': 1.1,        # Trill for 1 second, then stop for 0.5 second
+    'trill_frequency': 3.0,              # How many back-and-forth oscillations per second
 }
-# Example: calibration_config.ANIMATION_SETTINGS['animation_speed'] = 2.0
+
+# Examples:
+# calibration_config.ANIMATION_SETTINGS['max_zoom_size_height'] = 0.20  # Bigger stimuli
+# calibration_config.ANIMATION_SETTINGS['trill_speed'] = 6.0            # Slower trill
 
 # ---------------------------------------------------------
 # 3. Colors for all visual elements (lines, dots, highlights, etc.)
@@ -40,98 +57,48 @@ CALIBRATION_COLORS = {
     "left_eye":      (0, 255, 0, 255),       # Green (Tobii left eye)
     "right_eye":     (255, 0, 0, 255),       # Red   (Tobii right eye)
     "mouse":         (255, 128, 0, 255),     # Orange (simulated mouse sample)
-    "target_outline": (0, 0, 0, 255),        # Black outline for calibration targets
+    "target_outline": (24, 24, 24, 255),        # Black outline for calibration targets
     "highlight":     (255, 255, 0, 255),     # Yellow highlight for selected points
-    # Add more (e.g. "background", "text") if needed!
 }
-# Example: calibration_config.CALIBRATION_COLORS["highlight"] = (0,255,255,255)
+# Example: calibration_config.CALIBRATION_COLORS["highlight"] = (0,255,255,255)  # Cyan
 
 # ---------------------------------------------------------
-# 4. Size of highlight circles (for retry/selection)
-DEFAULT_HIGHLIGHT_SIZE = {
-    "norm": 0.08,
-    "height": 0.04,
-    "pix": 40.0,
-    "degFlatPos": 1.0,
-    "deg": 1.0,
-    "degFlat": 1.0,
-    "cm": 1.0,
-}
-# Example: calibration_config.DEFAULT_HIGHLIGHT_SIZE["pix"] = 60.0
+# 4. UI element sizes in height units (% of screen height)
+#    These are automatically converted to the appropriate units for each window
+DEFAULT_HIGHLIGHT_SIZE_HEIGHT = 0.04      # 4% of screen height (retry selection circles)
+DEFAULT_LINE_WIDTH_HEIGHT = 0.003         # 0.3% of screen height (line thickness)
+DEFAULT_MARKER_SIZE_HEIGHT = 0.02         # 1% of screen height (collection markers)
+DEFAULT_BORDER_THICKNESS_HEIGHT = 0.005   # 0.5% of screen height (calibration border)
+DEFAULT_PLOT_LINE_WIDTH_HEIGHT = 0.002    # 0.2% of screen height (result plot lines)
+DEFAULT_TEXT_HEIGHT_HEIGHT = 0.025        # 2.5% of screen height (base text size)
+DEFAULT_TARGET_CIRCLE_SIZE_HEIGHT = 0.012 # 1.2% of screen height (target circles in results)
+DEFAULT_TARGET_CIRCLE_WIDTH_HEIGHT = 0.006 #0.8% of screen height (target circle line width)
+
+# Examples:
+# calibration_config.DEFAULT_HIGHLIGHT_SIZE_HEIGHT = 0.06    # Bigger highlight circles
+# calibration_config.DEFAULT_TEXT_HEIGHT_HEIGHT = 0.035     # Bigger text
 
 # ---------------------------------------------------------
-# 5. Width of lines (highlight, marker, etc)
-DEFAULT_LINE_WIDTH = {
-    "norm": 4,
-    "height": 3,
-    "pix": 6,
-    "degFlatPos": 2,
-    "deg": 2,
-    "degFlat": 2,
-    "cm": 2,
-}
-# Example: calibration_config.DEFAULT_LINE_WIDTH["pix"] = 12
-
-# ---------------------------------------------------------
-# 6. Size of small marker circles (for already-collected points)
-DEFAULT_MARKER_SIZE = {
-    "norm": 0.02,
-    "height": 0.01,
-    "pix": 10.0,
-    "degFlatPos": 0.25,
-    "deg": 0.25,
-    "degFlat": 0.25,
-    "cm": 0.25,
-}
-# Example: calibration_config.DEFAULT_MARKER_SIZE["height"] = 0.02
-
-# ---------------------------------------------------------
-# 7. Thickness of the border shown during calibration mode (red frame)
-DEFAULT_BORDER_THICKNESS = {
-    "norm": 0.01,
-    "height": 0.005,
-    "pix": 3.0,
-    "degFlatPos": 0.1,
-    "deg": 0.1,
-    "degFlat": 0.1,
-    "cm": 0.1,
-}
-# Example: calibration_config.DEFAULT_BORDER_THICKNESS["norm"] = 0.02
-
-# ---------------------------------------------------------
-# 8. Width of lines in calibration result plots (accuracy lines)
-DEFAULT_PLOT_LINE_WIDTH = {
-    "norm": 2,
-    "height": 2,
-    "pix": 3,
-    "degFlatPos": 1,
-    "deg": 1,
-    "degFlat": 1,
-    "cm": 1,
-}
-# Example: calibration_config.DEFAULT_PLOT_LINE_WIDTH["pix"] = 6
-
-# ---------------------------------------------------------
-# 9. Base text height (controls all text scaling, by units)
-DEFAULT_TEXT_HEIGHT = {
-    "norm": 0.05,
-    "height": 0.025,
-    "pix": 20.0,
-    "degFlatPos": 0.5,
-    "deg": 0.5,
-    "degFlat": 0.5,
-    "cm": 0.5,
-}
-# Example: calibration_config.DEFAULT_TEXT_HEIGHT["deg"] = 1.0
-
-# ---------------------------------------------------------
-# 10. Font size multipliers (relative to DEFAULT_TEXT_HEIGHT)
+# 5. Font size multipliers (relative to DEFAULT_TEXT_HEIGHT_HEIGHT)
 FONT_SIZE_MULTIPLIERS = {
-    "instruction_text": 1.5,
-    "message_text": 1.3,
-    "title_text": 1.4,
+    "instruction_text": 1.5,      # 150% of base text size
+    "message_text": 1.3,          # 130% of base text size
+    "title_text": 1.4,            # 140% of base text size
 }
-# Example: calibration_config.FONT_SIZE_MULTIPLIERS["instruction_text"] = 2.0
+# Example: calibration_config.FONT_SIZE_MULTIPLIERS["instruction_text"] = 2.0  # Even bigger
 
+# ===== SUMMARY =====
+# Now you only need to edit these simple height values:
+#
+# Animation sizes:
+#   - ANIMATION_SETTINGS['max_zoom_size_height'] = 0.15    (15% of screen height)
+#   - ANIMATION_SETTINGS['min_zoom_size_height'] = 0.025   (2.5% of screen height)
+#   - ANIMATION_SETTINGS['trill_size_height'] = 0.075      (7.5% of screen height)
+#
+# UI element sizes:
+#   - DEFAULT_HIGHLIGHT_SIZE_HEIGHT = 0.04                 (4% of screen height)
+#   - DEFAULT_TEXT_HEIGHT_HEIGHT = 0.025                   (2.5% of screen height)
+#   - etc.
+#
+# Everything else is automatically converted to the correct units!
 # ===== END OF CONFIG =====
-# Edit values here, or override them in your main experiment script!

@@ -11,7 +11,7 @@ from psychopy import core, event, visual
 # Local imports
 from . import calibration_config as cfg
 from .Utils import InfantStimuli, NicePrint
-from .Coords import get_tobii_pos, psychopy_to_pixels
+from .Coords import get_tobii_pos, psychopy_to_pixels, convert_height_to_units
 
 
 class BaseCalibrationSession:
@@ -62,6 +62,9 @@ class BaseCalibrationSession:
         win_width = self.win.size[0]
         win_height = self.win.size[1]
         
+        # Convert border thickness from height units to current units
+        border_thickness = convert_height_to_units(self.win, cfg.DEFAULT_BORDER_THICKNESS_HEIGHT)
+        
         # Convert to appropriate units for consistent sizing
         if self.win.units == 'height':
             # In height units, width is adjusted by aspect ratio
@@ -78,8 +81,8 @@ class BaseCalibrationSession:
         self.border_top = visual.Rect(
             self.win,
             width=border_width,
-            height=cfg.DEFAULT_BORDER_THICKNESS[self.win.units],
-            pos=(0, border_height/2 - cfg.DEFAULT_BORDER_THICKNESS[self.win.units]/2),
+            height=border_thickness,
+            pos=(0, border_height/2 - border_thickness/2),
             fillColor='red',
             lineColor=None,
             units=self.win.units  # Use same units as window
@@ -88,8 +91,8 @@ class BaseCalibrationSession:
         self.border_bottom = visual.Rect(
             self.win,
             width=border_width,
-            height=cfg.DEFAULT_BORDER_THICKNESS[self.win.units],
-            pos=(0, -border_height/2 + cfg.DEFAULT_BORDER_THICKNESS[self.win.units]/2),
+            height=border_thickness,
+            pos=(0, -border_height/2 + border_thickness/2),
             fillColor='red',
             lineColor=None,
             units=self.win.units
@@ -97,9 +100,9 @@ class BaseCalibrationSession:
         
         self.border_left = visual.Rect(
             self.win,
-            width=cfg.DEFAULT_BORDER_THICKNESS[self.win.units],
+            width=border_thickness,
             height=border_height,
-            pos=(-border_width/2 + cfg.DEFAULT_BORDER_THICKNESS[self.win.units]/2, 0),
+            pos=(-border_width/2 + border_thickness/2, 0),
             fillColor='red',
             lineColor=None,
             units=self.win.units
@@ -107,9 +110,9 @@ class BaseCalibrationSession:
         
         self.border_right = visual.Rect(
             self.win,
-            width=cfg.DEFAULT_BORDER_THICKNESS[self.win.units],
+            width=border_thickness,
             height=border_height,
-            pos=(border_width/2 - cfg.DEFAULT_BORDER_THICKNESS[self.win.units]/2, 0),
+            pos=(border_width/2 - border_thickness/2, 0),
             fillColor='red',
             lineColor=None,
             units=self.win.units
@@ -145,7 +148,6 @@ class BaseCalibrationSession:
         # Get font and size
         size_multiplier = cfg.FONT_SIZE_MULTIPLIERS[font_type]
 
-        
         return visual.TextStim(
             self.win,
             text=formatted_text,
@@ -155,14 +157,15 @@ class BaseCalibrationSession:
             alignText='center',
             anchorHoriz='center',
             anchorVert='center',
-            units=self.win.units  # Use same units as window
+            units=self.win.units,  # Use same units as window
+            font='Consolas',  # Monospace font that supports Unicode box characters
+            languageStyle='LTR'  # Left-to-right text
         )
     
     
     def _get_text_height(self, size_percentage=2.0):
         """
-        Calculate text height as a percentage of the base text height.
-        Unit-aware text sizing.
+        Calculate text height based on height units and size multiplier.
         
         Parameters
         ----------
@@ -174,13 +177,15 @@ class BaseCalibrationSession:
         float
             Text height in window units.
         """
+        # Get base text height from config and convert to current units
+        base_height = convert_height_to_units(self.win, cfg.DEFAULT_TEXT_HEIGHT_HEIGHT)
         # Scale by the size percentage
-        return cfg.DEFAULT_TEXT_HEIGHT[self.win.units] * (size_percentage / 2.0)
+        return base_height * (size_percentage / 2.0)
     
     
     def show_message_and_wait(self, body, title="", pos=(0, -0.15)):
         """
-        Unified function to display a message on screen and in console, then wait for keypress.
+        Display a message on screen and in console, then wait for keypress.
         
         Parameters
         ----------
@@ -195,7 +200,7 @@ class BaseCalibrationSession:
         -------
         None
         """
-        # Use NicePrint to both print to console AND get formatted text
+        # Use NicePrint to print to console AND get formatted text
         formatted_text = NicePrint(body, title)
         
         # Create on-screen message using the formatted text
@@ -203,7 +208,6 @@ class BaseCalibrationSession:
         
         # Show message on screen
         self.win.clearBuffer()
-        self._draw_calibration_border()
         message_visual.draw()
         self.win.flip()
         
@@ -232,28 +236,89 @@ class BaseCalibrationSession:
         self.remaining_points = list(range(len(calibration_points)))
     
     
-    def _animate(self, stim, point_idx, clock, rotation_range=15):
+    def _animate(self, stim, clock):
         """
-        Animate a stimulus with zoom or rotation ('trill').
+        Animate a stimulus with zoom or rotation ('trill') effects.
+        
+        Uses height-based settings that are automatically converted to current window units
+        for consistent visual appearance across different screen configurations.
+        
+        Parameters
+        ----------
+        stim : psychopy.visual stimulus
+            The stimulus object to animate
+        point_idx : int
+            Index of the calibration point (for compatibility)
+        clock : psychopy.core.Clock
+            Clock object for timing animations
+            
+        Notes
+        -----
+        Animation timing is controlled by cfg.ANIMATION_SETTINGS.
+        Size settings are defined in height units and automatically converted to window units.
+        Supported animation types: 'zoom' (cosine oscillation), 'trill' (discrete rotation pulses).
         """
-        elapsed_time = clock.getTime() * cfg.ANIMATION_SETTINGS['animation_speed']
-
+        
         if self.anim_type == 'zoom':
-            orig_size = self.targets.get_stim_original_size(point_idx)
-            scale_factor = np.sin(elapsed_time)**2 + cfg.ANIMATION_SETTINGS['target_min']
-            newsize = [scale_factor * s for s in orig_size]
-            stim.setSize(newsize)
+            # Calculate elapsed time with zoom-specific speed multiplier
+            elapsed_time = clock.getTime() * cfg.ANIMATION_SETTINGS['zoom_speed']
+            
+            # Retrieve and convert size settings from height units to current window units
+            min_size_height = cfg.ANIMATION_SETTINGS['min_zoom_size']
+            max_size_height = cfg.ANIMATION_SETTINGS['max_zoom_size']
+            
+            min_size = convert_height_to_units(self.win, min_size_height)
+            max_size = convert_height_to_units(self.win, max_size_height)
+            
+            # Calculate smooth oscillation between min and max sizes using cosine
+            # Cosine provides smooth acceleration/deceleration at size extremes
+            size_range = max_size - min_size
+            normalized_oscillation = (np.cos(elapsed_time) + 1) / 2.0  # Normalize to 0-1 range
+            current_size = min_size + (normalized_oscillation * size_range)
+            
+            # Apply calculated size to stimulus (square aspect ratio)
+            stim.setSize([current_size, current_size])
+            
         elif self.anim_type == 'trill':
-            angle = np.sin(elapsed_time) * rotation_range
-            stim.setOri(angle)
-
+            # Set fixed size for trill animation from configuration
+            trill_size_height = cfg.ANIMATION_SETTINGS['trill_size']
+            trill_size = convert_height_to_units(self.win, trill_size_height)
+            stim.setSize([trill_size, trill_size])
+            
+            # Create rapid trill and stop pattern
+            elapsed_time = clock.getTime()
+            trill_cycle_duration = cfg.ANIMATION_SETTINGS['trill_cycle_duration']  # 1.5s total
+            trill_active_duration = cfg.ANIMATION_SETTINGS['trill_active_duration']  # 1.0s active
+            
+            # Determine position in the cycle
+            cycle_position = elapsed_time % trill_cycle_duration
+            
+            if cycle_position < trill_active_duration:
+                # TRILL PHASE: Rapid back-and-forth oscillations
+                
+                # Create rapid oscillations using high-frequency sine wave
+                trill_frequency = cfg.ANIMATION_SETTINGS['trill_frequency']  # Oscillations per second
+                trill_time = cycle_position * trill_frequency * 2 * np.pi
+                
+                # Create sharp, rapid back-and-forth movement
+                rotation_base = np.sin(trill_time)
+                
+                # Apply rotation range
+                rotation_angle = rotation_base * cfg.ANIMATION_SETTINGS['trill_rotation_range']
+                stim.setOri(rotation_angle)
+                
+            else:
+                # STOP PHASE: No rotation
+                stim.setOri(0)
+        
+        # Render the animated stimulus
         stim.draw()
     
-    
+
     def _selection_phase(self, calibration_points, result_img):
         """
         Show results and allow user to select points for retry.
-        Uses unit-aware sizing for highlight circles.
+        Uses height-based sizing for highlight circles.
         
         Parameters
         ----------
@@ -288,7 +353,9 @@ Make your choice now:"""
             alignText='center',
             anchorHoriz='center',
             anchorVert='center',
-            units=self.win.units
+            units=self.win.units,
+            font='Consolas',  # Monospace font for Unicode support
+            languageStyle='LTR'
         )
         
         while True:
@@ -297,17 +364,23 @@ Make your choice now:"""
             self._draw_calibration_border()
             result_instructions_visual.draw()
             
-            # Highlight retry points with proper unit-aware sizing
+            # Highlight retry points with height-based sizing
             for retry_idx in retries:
                 if retry_idx < len(calibration_points):
+                    # Convert highlight size and line width from height units
+                    highlight_radius = convert_height_to_units(self.win, cfg.DEFAULT_HIGHLIGHT_SIZE_HEIGHT)
+                    line_width_height = cfg.DEFAULT_LINE_WIDTH_HEIGHT
+                    # Convert line width to pixels for consistency (PsychoPy expects pixel values for lineWidth)
+                    line_width_pixels = line_width_height * self.win.size[1]
+                    
                     # Create highlight circle with proper scaling
                     highlight = visual.Circle(
                         self.win,
-                        radius=cfg.DEFAULT_HIGHLIGHT_SIZE[self.win.units],           # Unit-aware size
+                        radius=highlight_radius,
                         pos=calibration_points[retry_idx],
                         lineColor=cfg.CALIBRATION_COLORS['highlight'],
                         fillColor=None,                       # No fill for consistency
-                        lineWidth=cfg.DEFAULT_LINE_WIDTH[self.win.units],            # Unit-aware line width
+                        lineWidth=max(1, int(line_width_pixels)),  # Ensure minimum 1 pixel width
                         edges=128,                            # smooth circle
                         units=self.win.units                  # Explicit units
                     )
@@ -380,8 +453,7 @@ Make your choice now:"""
                     if success:
                         if self.audio:
                             self.audio.pause()
-                        # Remove from remaining points after successful collection
-                        self.remaining_points.remove(point_idx)
+                        # DON'T remove from remaining points - allow re-doing same point
                         point_idx = -1
                         
                 elif key == 'return':
@@ -398,65 +470,25 @@ Make your choice now:"""
             if point_idx in self.remaining_points:
                 stim = self.targets.get_stim(point_idx)
                 stim.setPos(calibration_points[point_idx])
-                self._animate(stim, point_idx, clock)
-            
-            # Draw any additional UI elements (e.g., collected markers for mouse)
-            self._draw_collection_ui(calibration_points, point_idx)
+                self._animate(stim, clock)
             
             self.win.flip()
-    
-    
-    def _draw_collection_ui(self, calibration_points, current_point_idx):
-        """
-        Draw UI elements during collection phase.
-        Override in subclasses for specific visualizations.
-        
-        Parameters
-        ----------
-        calibration_points : list of (float, float)
-            List of calibration point coordinates
-        current_point_idx : int
-            Index of currently selected point (-1 if none)
-        """
-        # Base implementation: show small markers for already collected points
-        total_points = len(calibration_points)
-        all_points = set(range(total_points))
-        collected_points = all_points - set(self.remaining_points)
-        
-        for point_idx in collected_points:
-            if point_idx < len(calibration_points):
-                marker = visual.Circle(
-                    self.win,
-                    radius=cfg.DEFAULT_MARKER_SIZE[self.win.units],
-                    pos=calibration_points[point_idx],
-                    lineColor='green',
-                    fillColor='green',
-                    lineWidth=1,
-                    units=self.win.units
-                )
-                marker.draw()
     
     
     def _create_calibration_result_image(self, calibration_points, sample_data):
         """
         Common function to create calibration result visualization.
-        
-        Parameters
-        ----------
-        calibration_points : list of (float, float)
-            List of calibration point coordinates
-        sample_data : dict
-            Dictionary with structure: {point_idx: [(target_pos, sample_pos, color), ...]}
-            where color is (R, G, B, A) tuple for the line
-            
-        Returns
-        -------
-        visual.SimpleImageStim
-            PsychoPy stimulus containing the result image
         """
         # Create blank RGBA image matching window size (transparent background like Tobii)
         img = Image.new("RGBA", tuple(self.win.size))
         img_draw = ImageDraw.Draw(img)
+        
+        # Convert plot line width from height units to pixels
+        line_width_pixels = cfg.DEFAULT_PLOT_LINE_WIDTH_HEIGHT * self.win.size[1]
+        
+        # Convert target circle size and line width from height units to pixels
+        target_circle_radius_pixels = cfg.DEFAULT_TARGET_CIRCLE_SIZE_HEIGHT * self.win.size[1]
+        target_circle_width_pixels = cfg.DEFAULT_TARGET_CIRCLE_WIDTH_HEIGHT * self.win.size[1]
         
         # Draw calibration data
         for point_idx, samples in sample_data.items():
@@ -464,10 +496,14 @@ Make your choice now:"""
                 target_pos = calibration_points[point_idx]
                 target_pix = psychopy_to_pixels(self.win, target_pos)
                 
-                # Draw small target circle (like Tobii style)
+                # Draw target circle with configurable size and line width
                 img_draw.ellipse(
-                    (target_pix[0]-3, target_pix[1]-3, target_pix[0]+3, target_pix[1]+3),
-                    outline=cfg.CALIBRATION_COLORS['target_outline']
+                    (target_pix[0] - target_circle_radius_pixels, 
+                    target_pix[1] - target_circle_radius_pixels,
+                    target_pix[0] + target_circle_radius_pixels, 
+                    target_pix[1] + target_circle_radius_pixels),
+                    outline=cfg.CALIBRATION_COLORS['target_outline'],
+                    width=max(1, int(target_circle_width_pixels))  # Ensure minimum 1 pixel width
                 )
                 
                 # Draw lines from target to samples
@@ -476,14 +512,14 @@ Make your choice now:"""
                     img_draw.line(
                         (target_pix[0], target_pix[1], sample_pix[0], sample_pix[1]),
                         fill=line_color,
-                        width=cfg.DEFAULT_PLOT_LINE_WIDTH[self.win.units]
+                        width=max(1, int(line_width_pixels))  # Ensure minimum 1 pixel width
                     )
         
         # Wrap in SimpleImageStim and return
         return visual.SimpleImageStim(self.win, img, autoLog=False)
 
 
-class CalibrationSession(BaseCalibrationSession):
+class TobiiCalibrationSession(BaseCalibrationSession):
     """
     Tobii-based calibration session for real eye tracking.
     
@@ -612,11 +648,16 @@ class CalibrationSession(BaseCalibrationSession):
         bool
             True if data was collected successfully
         """
-        # Wait focus time then collect
-        core.wait(self.focus_time)
         x, y = get_tobii_pos(self.win, target_pos)
+        
+        # Clear any existing data at this point first
+        self.calibration.discard_data(x, y)
+        
+        # Wait focus time then collect NEW data
+        core.wait(self.focus_time)
         self.calibration.collect_data(x, y)
         return True
+
     
     
     def _has_collected_data(self):
@@ -692,7 +733,7 @@ class CalibrationSession(BaseCalibrationSession):
         return self._create_calibration_result_image(calibration_points, sample_data)
 
 
-class SimpleCalibrationSession(BaseCalibrationSession):
+class MouseCalibrationSession(BaseCalibrationSession):
     """
     Mouse-based calibration session for simulation mode.
     
@@ -806,6 +847,10 @@ class SimpleCalibrationSession(BaseCalibrationSession):
         bool
             True if samples were collected.
         """
+
+        # Clear existing data for this point first (Option 2: Replace)
+        if point_idx in self.calibration_data:
+            del self.calibration_data[point_idx]
 
         # How many mouse samples to take at this point? (Default: 5)
         num_samples = kwargs.get('num_samples', 5)

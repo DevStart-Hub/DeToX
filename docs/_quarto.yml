@@ -2,6 +2,7 @@ project:
   type: website
 metadata-files:
   - api/_sidebar.yml
+  
 website:
   title: "DeToX"
   navbar:

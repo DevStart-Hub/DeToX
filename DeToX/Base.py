@@ -1,6 +1,8 @@
 import os
 import time
 import atexit
+import tables
+import warnings
 import threading
 from datetime import datetime
 from collections import deque
@@ -17,7 +19,7 @@ from . import Coords
 from .Calibration import TobiiCalibrationSession, MouseCalibrationSession
 from .Utils import NicePrint
 
-class TobiiController:
+class ETracker:
     """
     Tobii controller for infant research.
 
@@ -42,25 +44,7 @@ class TobiiController:
     The TobiiController class is designed to be easy to use and provides a
     minimal interface for the user to interact with the Tobii Pro SDK.
     """
-    
-    _numkey_dict = {
-        "0": -1, "num_0": -1,
-        "1": 0,  "num_1": 0,
-        "2": 1,  "num_2": 1,
-        "3": 2,  "num_3": 2,
-        "4": 3,  "num_4": 3,
-        "5": 4,  "num_5": 4,
-        "6": 5,  "num_6": 5,
-        "7": 6,  "num_7": 6,
-        "8": 7,  "num_8": 7,
-        "9": 8,  "num_9": 8,
-    }
- 
-    # Animation defaults: speed multiplier and min zoom
-    _animation_settings = {
-        'animation_speed': 1.0,
-        'target_min': 0.2,
-    }
+
 
     _simulation_settings = {
         'framerate': 120,  # Default to Tobii Pro Spectrum rate
@@ -68,16 +52,26 @@ class TobiiController:
 
 
     def __init__(self, win, id=0, simulate=False):
+
+        self.experiment_clock = core.Clock()
+
         self.eyetracker_id = id
         self.win = win
         self.simulate = simulate
 
         self._stop_simulation = None
         self._simulation_thread = None
+        self.fps = None
 
         self.gaze_data = deque()
         self.event_data = deque()
         self.recording = False
+
+        # Initial timestamp
+        self.first_timestamp = None
+
+        # Gaze contingent deque
+        self.gaze_contingent_buffer = None
 
         # Configure the environment based on simulation mode
         if self.simulate:
@@ -104,41 +98,46 @@ class TobiiController:
         Print information about the current eyetracker or simulation.
         """
         if self.simulate:
+            if self.fps is None:
+                self.fps = self._simulation_settings['framerate']
+
             if moment == 'connection':
                 text = (
                     "Simulating eyetracker:\n"
-                    f" - Simulated frequency: {self._simulation_settings['framerate']} Hz"
+                    f" - Simulated frequency: {self.fps} Hz"
                 )
                 title = "Simulated Eyetracker Info"
             else:  # 'recording'
                 text = (
                     "Recording mouse position:\n"
-                    f" - frequency: {self._simulation_settings['framerate']} Hz"
+                    f" - frequency: {self.fps} Hz"
                 )
                 title = "Recording Info"
         else:
-            fps = self.eyetracker.get_gaze_output_frequency()
-            freqs = self.eyetracker.get_all_gaze_output_frequencies()
-            illum = self.eyetracker.get_illumination_mode()
-            illums = self.eyetracker.get_all_illumination_modes()
+            # Cache eyetracker info on first call
+            if self.fps is None:
+                self.fps = self.eyetracker.get_gaze_output_frequency()
+                self.freqs = self.eyetracker.get_all_gaze_output_frequencies()
+                self.illum = self.eyetracker.get_illumination_mode()
+                self.illums = self.eyetracker.get_all_illumination_modes()
 
             if moment == 'connection':
                 text = (
                     "Connected to the eyetracker:\n"
                     f" - Model: {self.eyetracker.model}\n"
-                    f" - Current frequency: {fps} Hz\n"
-                    f" - Illumination mode: {illum}\n"
+                    f" - Current frequency: {self.fps} Hz\n"
+                    f" - Illumination mode: {self.illum}\n"
                     "\nOther options:\n"
-                    f" - Possible frequencies: {freqs}\n"
-                    f" - Possible illumination modes: {illums}"
+                    f" - Possible frequencies: {self.freqs}\n"
+                    f" - Possible illumination modes: {self.illums}"
                 )
                 title = "Eyetracker Info"
             else:  # 'recording'
                 text = (
                     "Starting recording with:\n"
                     f" - Model: {self.eyetracker.model}\n"
-                    f" - Current frequency: {fps} Hz\n"
-                    f" - Illumination mode: {illum}"
+                    f" - Current frequency: {self.fps} Hz\n"
+                    f" - Illumination mode: {self.illum}"
                 )
                 title = "Recording Info"
 
@@ -183,22 +182,21 @@ class TobiiController:
             )
         
         try:
+            # Prepare name
+            if filename is None:   
+                calibration_name = f"{datetime.now().strftime('%Y-%m-%d_%H-%M-%S')}_calibration.dat"
+            else:
+                calibration_name = filename
+
             # Determine the filename to save to
             if use_gui:
                 from psychopy import gui
-                from datetime import datetime
-                
-                # Create default filename if none provided
-                if filename is None:
-                    default_name = f"{datetime.now().strftime('%Y-%m-%d_%H-%M-%S')}_calibration.dat"
-                else:
-                    default_name = filename
                 
                 # Open save dialog for calibration files
                 save_path = gui.fileSaveDlg(
                     prompt='Save calibration data as…',
-                    allowed='*.dat;*.calib',  # Common calibration file extensions
-                    initFilePath=default_name
+                    allowed='*.dat',  # Common calibration file extensions
+                    initFilePath=calibration_name
                 )
                 
                 if not save_path:
@@ -207,14 +205,6 @@ class TobiiController:
                     
                 calibration_name = save_path
                 print(f"Saving calibration to: {calibration_name}")
-                
-            else:
-                # Use provided filename or create default
-                if filename is None:
-                    from datetime import datetime
-                    calibration_name = f"{datetime.now().strftime('%Y-%m-%d_%H-%M-%S')}_calibration.dat"
-                else:
-                    calibration_name = filename
             
             # Retrieve calibration data from the eyetracker
             calib_data = self.eyetracker.retrieve_calibration_data()
@@ -236,6 +226,7 @@ class TobiiController:
             # Handle any exceptions that occur during the saving process
             print(f"Error saving calibration: {e}")
             return False
+
 
     def load_calibration(self, filename=None, use_gui=False):
         """
@@ -278,17 +269,13 @@ class TobiiController:
                 # Open file dialog for calibration files
                 file_list = gui.fileOpenDlg(
                     prompt='Select calibration file to load…',
-                    allowed='*.dat;*.calib',  # Common calibration file extensions
+                    allowed='*.dat',  # Common calibration file extensions
                     tryFilePath='.'  # Start in current directory
                 )
-                
-                if not file_list:
-                    print("File dialog cancelled")
-                    return False
                     
                 # Take the first selected file
                 filename = file_list[0]
-                print(f"Selected calibration file: {filename}")
+                print(f"|-- Selected calibration file: {filename} --|")
             
             elif filename is None:
                 raise ValueError("No filename provided and use_gui=False")
@@ -299,7 +286,7 @@ class TobiiController:
                 
             # Apply the calibration data to the eye tracker
             self.eyetracker.apply_calibration_data(calib_data)
-            print(f"Calibration loaded from {filename}")
+            print(f"|-- Calibration loaded from {filename} --|")
             return True
                 
         except Exception as e:
@@ -322,15 +309,15 @@ class TobiiController:
         # Append the latest gaze data to the list for later processing
         self.gaze_data.append(gaze_data)
 
-        if self.recent_gaze_positions:
-            self.recent_gaze_positions.append(
+        if self.gaze_contingent_buffer is not None:
+            self.gaze_contingent_buffer.append(
                 [gaze_data.get('left_gaze_point_on_display_area'),
                 gaze_data.get('right_gaze_point_on_display_area')]
             )
 
 
 
-    def _adapt_gaze_data(self, df):
+    def _adapt_gaze_data(self, df, df_ev):
         """
         Adapt gaze data format and convert coordinates.
         
@@ -345,17 +332,17 @@ class TobiiController:
             DataFrame with adapted gaze data, including converted coordinates
             and renamed columns.
         """
-        # Convert left eye gaze coordinates from Tobii to PsychoPy
-        df['Left_X'], df['Left_Y'] = zip(*[
-            Coords.get_psychopy_pos(self.win, coord)
-            for coord in df['left_gaze_point_on_display_area']
-        ])
-
-        # Convert right eye gaze coordinates from Tobii to PsychoPy
-        df['Right_X'], df['Right_Y'] = zip(*[
-            Coords.get_psychopy_pos(self.win, coord)
-            for coord in df['right_gaze_point_on_display_area']
-        ])
+        left_coords = np.array(df['left_gaze_point_on_display_area'].tolist())
+        right_coords = np.array(df['right_gaze_point_on_display_area'].tolist())
+        
+        # Convert coordinates in batch (much faster than row-by-row)
+        left_psychopy = np.array([Coords.get_psychopy_pos(self.win, coord) for coord in left_coords])
+        right_psychopy = np.array([Coords.get_psychopy_pos(self.win, coord) for coord in right_coords])
+        
+        df['Left_X'] = left_psychopy[:, 0]
+        df['Left_Y'] = left_psychopy[:, 1]
+        df['Right_X'] = right_psychopy[:, 0]
+        df['Right_Y'] = right_psychopy[:, 1]
         
         # Remove inital timestamp
         if self.first_timestamp is None:
@@ -364,7 +351,7 @@ class TobiiController:
         # Convert microseconds to milliseconds (absolute timestamps)
         df['TimeStamp'] = ((df['system_time_stamp'] - self.first_timestamp) / 1000.0).astype(int)
 
-        # Rename columns and convert validity columns to integers
+        # Rename columns and convert validity columns to int8
         df = df.rename(columns={
             'left_gaze_point_validity': 'Left_Validity',
             'left_pupil_diameter': 'Left_Pupil',
@@ -373,47 +360,50 @@ class TobiiController:
             'right_pupil_diameter': 'Right_Pupil',
             'right_pupil_validity': 'Right_Pupil_Validity'
         }).astype({
-            'Left_Validity': 'int',
-            'Left_Pupil_Validity': 'int', 
-            'Right_Validity': 'int',
-            'Right_Pupil_Validity': 'int'
+            'Left_Validity': 'int8',
+            'Left_Pupil_Validity': 'int8',
+            'Right_Validity': 'int8',
+            'Right_Pupil_Validity': 'int8'
         })
 
-        # Return DataFrame with selected columns
-        return df[['TimeStamp', 'Left_X', 'Left_Y', 'Left_Validity',
-                'Left_Pupil', 'Left_Pupil_Validity', 
-                'Right_X', 'Right_Y', 'Right_Validity',
-                'Right_Pupil', 'Right_Pupil_Validity', 'Events']]
+        # Convert validity columns in batch
+        validity_cols = ['Left_Validity', 'Left_Pupil_Validity', 'Right_Validity', 'Right_Pupil_Validity']
+        df[validity_cols] = df[validity_cols].astype(np.int8)  # int8 is smaller and faster
+        
+        if df_ev is not None:
+            df_ev['TimeStamp'] = ((df_ev['system_time_stamp'] - self.first_timestamp) / 1000.0).astype(int)
+            df_ev = df_ev[['TimeStamp', 'label']].rename(columns={'label': 'Event'})
 
+        # Return DataFrame with selected columns
+        return (df[['TimeStamp', 'Left_X', 'Left_Y', 'Left_Validity',
+               'Left_Pupil', 'Left_Pupil_Validity',
+               'Right_X', 'Right_Y', 'Right_Validity',
+               'Right_Pupil', 'Right_Pupil_Validity', 'Events']],
+            df_ev)
 
 
     def save_data(self):
         """Save gaze and event data to an HDF5 file with two datasets: 'gaze' and 'events'."""
 
         # Start timing the save process
-        start_saving = time.perf_counter()
+        start_saving = core.getTime()
+
+        # wait 2 sample to ensure the events have their correspective sample in data
+        core.wait(2/self.fps)
 
         # Check if there is gaze data to save
         if not self.gaze_data:
-            print("No gaze data to save.")
+            print("|-- No new gaze data to save --|")
             return
 
-        # Copy and clear buffers to prevent data loss
-        gaze_data_copy = list(self.gaze_data)
-        event_data_copy = list(self.event_data)
-    
         # Convert gaze data to a DataFrame and adapt its format
-        gaze_df = pd.DataFrame(gaze_data_copy) 
-        # Create an empty 'Events' column
-        gaze_df['Events'] = ''
+        gaze_df = pd.DataFrame(list(self.gaze_data))
+        gaze_df['Events'] = pd.array([''] * len(gaze_df), dtype='string')
+
 
         # Convert event data to a DataFrame if it exists
-        if event_data_copy:
-            events_df = pd.DataFrame(event_data_copy)
-
-            # Just make sure the DataFrames are sorted by timestamp
-            gaze_df.sort_values("system_time_stamp", inplace=True)
-            events_df.sort_values("system_time_stamp", inplace=True)
+        if len(self.event_data)>0:
+            events_df = pd.DataFrame(list(self.event_data))
 
             #### Merge events with gaze data based on closest timestamp
 
@@ -422,30 +412,33 @@ class TobiiController:
                 events_df['system_time_stamp'].values,
                 side='left')
 
-            #Add events
-            gaze_df.loc[idx, 'Events'] = events_df['label'].values
+            # Add events
+            gaze_df.iloc[idx, gaze_df.columns.get_loc('Events')] = events_df['label'].values
+        else:
+            events_df = None
 
-        #### Adapt gaze data format
-        gaze_df = self._adapt_gaze_data(gaze_df)
+        #### Adapt data formats
+        gaze_df, events_df = self._adapt_gaze_data(gaze_df, events_df)
 
         #### Save data based on format
         if self.file_format == 'csv':
             self._save_csv_data(gaze_df)
         elif self.file_format == 'hdf5':   
-            self._save_hdf5_data(gaze_df, events_df if event_data_copy else None)
+            self._save_hdf5_data(gaze_df, events_df)
                 
 
         #### Pop out the samples 
         # Data
-        for _ in gaze_data_copy:
+        for _ in range(len(gaze_df)):
             self.gaze_data.popleft()
         # Event
-        for _ in event_data_copy:
-            self.event_data.popleft()
+        if events_df is not None:
+            for _ in range(len(events_df)):
+                self.event_data.popleft()
 
 
         #### Print time taken to save data
-        print(f"Data saved in {round(time.perf_counter() - start_saving, 3)} seconds.")
+        print(f"|-- Data saved in {round(core.getTime() - start_saving, 3)} seconds --|")
 
 
     def _save_csv_data(self, gaze_df):
@@ -467,33 +460,29 @@ class TobiiController:
 
 
     def _save_hdf5_data(self, gaze_df, events_df):
-        """
-        Save data in HDF5 format with append mode.
-        
-        Parameters
-        ----------
-        gaze_df : pandas.DataFrame
-            DataFrame containing gaze data with events merged in Events column.
-        events_df : pandas.DataFrame or None
-            DataFrame containing raw event data (saved as separate dataset).
-        """
-        # Always append to HDF5 file (HDF5 handles headers automatically)
+        """Optimized HDF5 saving without compression."""
         with pd.HDFStore(self.filename, mode="a") as store:
-            # Append gaze data
-            store.append("gaze", gaze_df, format="table", append=True)
-
-            # Always append raw events data if they exist
+            
+            # No compression for maximum speed
+            store.append(
+                "gaze", 
+                gaze_df, 
+                format="table", 
+                append=True,
+                min_itemsize={'Events': 50},  # Pre-allocate string size
+                index=False  # Don't store row indices
+                # No complib/complevel = no compression
+            )
+            
             if events_df is not None:
-                store.append("events", events_df, format="table", append=True)
-
-            # Add metadata attributes if not already present (only on first write)
+                store.append("events", events_df, format="table", append=True, index=False)
+            
+            # Add metadata only once
             if "gaze" in store and not hasattr(store.get_storer("gaze").attrs, "subject_id"):
                 attrs = store.get_storer("gaze").attrs
                 attrs.subject_id = getattr(self, "subject_id", "unknown")
                 attrs.screen_size = tuple(self.win.size)
-                attrs.framerate = self._simulation_settings["framerate"]
-                attrs.notes = "Auto metadata added"
-
+                attrs.framerate = self.fps
 
 
     def start_recording(self, filename=None):
@@ -505,23 +494,34 @@ class TobiiController:
         filename : str, optional
             The name of the file to save the gaze data to. If not provided, a 
             default name based on the current datetime will be used.
+        event_mode : str, optional
+            Mode for event recording. Options are 'samplebased' or 'precise'. 
+            Default is 'precise'.
         """
+        if self.gaze_data and not self.recording:
+            self.gaze_data.clear()
+        elif self.recording:
+            warnings.warn(
+                "Recording is already in progress – start_recording() call ignored",
+                UserWarning
+            )
+            return
+
+        self.experiment_clock.reset() 
+
         # Common setup for both real and simulation modes
         self._prepare_recording(filename)
-
-        # Initiate stat time to be none
-        self.first_timestamp = None
-
+        
         if self.simulate:
-            # Simulation-specific setup
-            if self._stop_simulation is None:
-                self._stop_simulation = threading.Event()
-            else:
-                self._stop_simulation.clear()
+            self._stop_simulation = threading.Event()
 
-            self._simulation_thread = threading.Thread(target=self._simulate_gaze_data_loop, daemon=True)
+            # Use the flexible simulation loop for gaze data
+            self._simulation_thread = threading.Thread(
+                target=self._simulate_data_loop, 
+                args=('gaze',),  # Pass 'gaze' as data type
+                daemon=True
+            )
             self.recording = True
-            self.t0 = time.perf_counter() * 1_000_000 
             self._simulation_thread.start()
         else:
             # Real eyetracker setup
@@ -533,9 +533,55 @@ class TobiiController:
 
     def stop_recording(self):
         """
-        Stop recording gaze data and save it to file.
+        Stop recording gaze data and save all collected data to file.
+        
+        This method performs a complete shutdown of the recording session:
+        1. Sets recording flag to False to stop data collection
+        2. Cleans up simulation threads (simulation mode) or unsubscribes from 
+        Tobii data streams (real eyetracker mode)
+        3. Saves all buffered gaze and event data to the specified file
+        4. Displays a summary of the recording session including duration 
+        and file location
+        
+        The method will issue a warning if called when recording is not active.
+        
+        Warns
+        -----
+        UserWarning
+            If recording is not currently active when this method is called.
+        
+        Notes
+        -----
+        - In simulation mode: Stops the simulation thread and cleans up resources
+        - In real mode: Unsubscribes from Tobii gaze data stream
+        - All pending data in buffers (gaze_data and event_data) is automatically
+        saved before the method completes
+        - Recording duration is measured using the experiment clock from when
+        start_recording() was called
+        
+        Examples
+        --------
+        tracker = ETracker(win)
+        tracker.start_recording("experiment_data.h5")
+        # ... run experiment ...
+        tracker.stop_recording()
+        # Output: Data collection lasted approximately 45.23 seconds
+        #         Data has been saved to experiment_data.h5
+        
+        tracker.stop_recording()  # Called again
+        # Warning: Recording is not currently active - stop_recording() call ignored
+        
+        See Also
+        --------
+        start_recording : Start recording gaze data
+        save_data : Save current buffer contents without stopping recording
+        record_event : Record timestamped events during recording
         """
         if not self.recording:
+            warnings.warn(
+                "Recording is not currently active - stop_recording() call ignored",
+                UserWarning
+            )
             return
         
         self.recording = False
@@ -552,7 +598,15 @@ class TobiiController:
         
         # Common code for both modes
         self.save_data()
-
+        
+        # Get recording duration and format nicely
+        duration_seconds = self.experiment_clock.getTime()
+        
+        NicePrint(
+            f'Data collection lasted approximately {duration_seconds:.2f} seconds\n'
+            f'Data has been saved to {self.filename}',
+            title="Recording Complete"
+        )
 
 
     def record_event(self, label):
@@ -573,11 +627,11 @@ class TobiiController:
             raise RuntimeWarning("Not recording now.")
         
         if self.simulate:
-            # Use simulation timestamp
-            self.event_data.append({'system_time_stamp':  time.perf_counter() * 1_000_000, 'label': label })
+            # Use simulation timestamp (milliseconds, consistent with _simulate_gaze_data)
+            self.event_data.append({'system_time_stamp': self.experiment_clock.getTime() * 1_000_000, 'label': label})
         else:
-            # Use eyetracker timestamp
-            self.event_data.append({'system_time_stamp':  tr.get_system_time_stamp(), 'label': label})
+            # Use eyetracker timestamp (microseconds from Tobii SDK)
+            self.event_data.append({'system_time_stamp': tr.get_system_time_stamp(), 'label': label})
 
 
 
@@ -590,9 +644,10 @@ class TobiiController:
 
 
 
-    def _prepare_recording(self, filename):
+    def _prepare_recording(self, filename=None):
         """
-        Prepare recording by setting filename and format.
+        Prepare recording by setting filename and format, using PyTables to create
+        empty HDF5 tables without dummy data.
 
         Parameters
         ----------
@@ -604,31 +659,89 @@ class TobiiController:
         ------
         ValueError
             If the provided file extension is not supported.
+        FileExistsError
+            If the specified file already exists.
         """
+        # Determine filename and format
         if filename is None:
-            # Default to HDF5 format
-            self.filename = f"{datetime.now().strftime('%Y-%m-%d_%H-%M-%S')}.h5"
-            self.basename = self.filename[:-3]
+            from datetime import datetime
+
+            self.filename   = f"{datetime.now().strftime('%Y-%m-%d_%H-%M-%S')}.h5"
             self.file_format = 'hdf5'
         else:
-            self.basename, ext = os.path.splitext(filename)
-            
-            if ext:
-                # Check if extension is supported
-                if ext.lower() in ['.csv']:
-                    self.file_format = 'csv'
-                    self.filename = filename
-                elif ext.lower() in ['.h5', '.hdf5']:
-                    self.file_format = 'hdf5'
-                    self.filename = filename
-                else:
-                    raise ValueError(f"Unsupported file extension: {ext}. Use .csv, .h5, or .hdf5")
-            else:
-                # No extension provided, default to HDF5
+            base, ext = os.path.splitext(filename)
+            if not ext:
+                ext = '.h5'
+                filename = base + ext
+            if ext.lower() in ('.h5', '.hdf5'):
                 self.file_format = 'hdf5'
-                self.filename = f"{self.basename}.h5"
+                self.filename   = filename
+            elif ext.lower() == '.csv':
+                self.file_format = 'csv'
+                self.filename   = filename
+            else:
+                raise ValueError(f"Unsupported extension {ext}. Use .csv, .h5, or .hdf5")
 
+        # Prevent overwriting
+        if os.path.exists(self.filename):
+            raise FileExistsError(f"File '{self.filename}' already exists.")
+
+        # Create file structure
+        if self.file_format == 'hdf5':
+                    # Define PyTables table descriptions inside the function
+            class GazeDesc(tables.IsDescription):
+                TimeStamp            = tables.Int64Col()
+                Left_X               = tables.Float64Col()
+                Left_Y               = tables.Float64Col()
+                Left_Validity        = tables.Int8Col()
+                Left_Pupil           = tables.Float64Col()
+                Left_Pupil_Validity  = tables.Int8Col()
+                Right_X              = tables.Float64Col()
+                Right_Y              = tables.Float64Col()
+                Right_Validity       = tables.Int8Col()
+                Right_Pupil          = tables.Float64Col()
+                Right_Pupil_Validity = tables.Int8Col()
+                Events               = tables.StringCol(50)
+
+            class EventDesc(tables.IsDescription):
+                system_time_stamp    = tables.Int64Col()
+                label                = tables.StringCol(50)     
+
+
+            with tables.open_file(self.filename, mode='w') as h5file:
+                grp = h5file.create_group('/', 'data', 'Recording data')
+                gaze_tbl = h5file.create_table(
+                    where=grp,
+                    name='gaze',
+                    description=GazeDesc,
+                    title='Gaze Data',
+                    filters=tables.Filters(complevel=5, complib='blosc')
+                )
+                events_tbl = h5file.create_table(
+                    where=grp,
+                    name='events',
+                    description=EventDesc,
+                    title='Events',
+                    filters=tables.Filters(complevel=5, complib='blosc')
+                )
+                # Attach metadata to gaze table
+                gaze_tbl.attrs.subject_id  = getattr(self, 'subject_id', 'unknown')
+                gaze_tbl.attrs.screen_size = tuple(self.win.size)
+                gaze_tbl.attrs.framerate   = self.fps or self._simulation_settings.get('framerate')
+                gaze_tbl.attrs.notes       = "Pre-created structure for optimal performance"
+
+        else:  # CSV fallback
+            cols = [
+                'TimeStamp', 'Left_X', 'Left_Y', 'Left_Validity',
+                'Left_Pupil', 'Left_Pupil_Validity',
+                'Right_X', 'Right_Y', 'Right_Validity',
+                'Right_Pupil', 'Right_Pupil_Validity', 'Events'
+            ]
+            pd.DataFrame(columns=cols).to_csv(self.filename, index=False)
+
+        # Notify readiness
         self.get_info(moment="recording")
+
 
 
 
@@ -700,6 +813,7 @@ class TobiiController:
             return session.run(calibration_points, save_calib=save_calib)
 
 
+
     def show_status(self, decision_key="space"):
         """
         Show participant's gaze position in track box.
@@ -740,11 +854,26 @@ class TobiiController:
         zpos = visual.Rect(self.win, pos=(0, 0.28), width=0.005, height=0.03,
                         lineColor="black", fillColor="black", units="height")
 
-        # Check that the eye tracker is present
-        if self.eyetracker is None and not self.simulate:  # Add check for simulation mode
+        # Check that the eye tracker is present or we're in simulation mode
+        if not self.simulate and self.eyetracker is None:
             raise ValueError("Eyetracker not found")
 
-        # Subscribe to user position guide events
+        # Initialize simulation Z-position if in simulation mode
+        if self.simulate:
+            self.sim_z_position = 0.6  # Start at optimal distance
+            print("Simulation mode: Use scroll wheel to adjust Z-position (distance from screen)")
+            
+            # Start continuous simulation loop for user position data
+            self._stop_simulation = threading.Event()
+            self._simulation_thread = threading.Thread(
+                target=self._simulate_data_loop, 
+                args=('user_position',),
+                daemon=True
+            )
+            self.recording = True  # Required for simulation loop to run
+            self._simulation_thread.start()
+
+        # Subscribe to user position guide events (real eyetracker only)
         if not self.simulate:
             self.eyetracker.subscribe_to(tr.EYETRACKER_USER_POSITION_GUIDE,
                                         self._on_gaze_data,
@@ -765,36 +894,48 @@ class TobiiController:
             zbar.draw()
             zc.draw()
 
-            # Get the latest gaze data
-            gaze_data = self.gaze_data[-1]
-            lv = gaze_data["left_user_position_validity"]
-            rv = gaze_data["right_user_position_validity"]
-            lx, ly, lz = gaze_data["left_user_position"]
-            rx, ry, rz = gaze_data["right_user_position"]
+            if self.simulate:
+                # Get the latest simulated data from buffer (generated by loop)
+                if self.gaze_data:
+                    gaze_data = self.gaze_data[-1]
+                else:
+                    gaze_data = None
+            else:
+                # Get the latest gaze data from real eyetracker
+                if self.gaze_data:
+                    gaze_data = self.gaze_data[-1]
+                else:
+                    gaze_data = None
 
-            # Update the left eye position
-            if lv:
-                # Convert TBCS coordinates to PsychoPy coordinates
-                lx, ly = Coords.get_psychopy_pos_from_trackbox(self.win, [lx, ly], "height")
-                leye.setPos((round(lx * 0.25, 4), round(ly * 0.2 + 0.4, 4)))
-                leye.draw()
+            if gaze_data:
+                lv = gaze_data["left_user_position_validity"]
+                rv = gaze_data["right_user_position_validity"]
+                lx, ly, lz = gaze_data["left_user_position"]
+                rx, ry, rz = gaze_data["right_user_position"]
 
-            # Update the right eye position
-            if rv:
-                # Convert TBCS coordinates to PsychoPy coordinates
-                rx, ry = Coords.get_psychopy_pos_from_trackbox(self.win, [rx, ry], "height")
-                reye.setPos((round(rx * 0.25, 4), round(ry * 0.2 + 0.4, 4)))
-                reye.draw()
+                # Update the left eye position
+                if lv:
+                    # Convert TBCS coordinates to PsychoPy coordinates
+                    lx_conv, ly_conv = Coords.get_psychopy_pos_from_trackbox(self.win, [lx, ly], "height")
+                    leye.setPos((round(lx_conv * 0.25, 4), round(ly_conv * 0.2 + 0.4, 4)))
+                    leye.draw()
 
-            # Update the z-position indicator
-            if lv or rv:
-                # Calculate the z-position as a weighted average of left and right eye z-positions
-                zpos.setPos((
-                    round((((lz * int(lv) + rz * int(rv)) /
-                            (int(lv) + int(rv))) - 0.5) * 0.125, 4),
-                    0.28,
-                ))
-                zpos.draw()
+                # Update the right eye position
+                if rv:
+                    # Convert TBCS coordinates to PsychoPy coordinates
+                    rx_conv, ry_conv = Coords.get_psychopy_pos_from_trackbox(self.win, [rx, ry], "height")
+                    reye.setPos((round(rx_conv * 0.25, 4), round(ry_conv * 0.2 + 0.4, 4)))
+                    reye.draw()
+
+                # Update the z-position indicator
+                if lv or rv:
+                    # Calculate the z-position as a weighted average of left and right eye z-positions
+                    zpos.setPos((
+                        round((((lz * int(lv) + rz * int(rv)) /
+                                (int(lv) + int(rv))) - 0.5) * 0.125, 4),
+                        0.28,
+                    ))
+                    zpos.draw()
 
             # Check for the exit key
             for key in event.getKeys():
@@ -805,26 +946,51 @@ class TobiiController:
             # Update the display
             self.win.flip()
 
-        # Unsubscribe from user position guide events
-        self.eyetracker.unsubscribe_from(tr.EYETRACKER_USER_POSITION_GUIDE,
-                                        self._on_gaze_data)
+        # Clean the display
+        self.win.flip()
+
+        # Stop simulation loop and unsubscribe from events
+        if self.simulate:
+            # Stop the simulation loop
+            self.recording = False
+            self._stop_simulation.set()
+            if self._simulation_thread.is_alive():
+                self._simulation_thread.join(timeout=1.0)
+        else:
+            # Unsubscribe from user position guide events
+            self.eyetracker.unsubscribe_from(tr.EYETRACKER_USER_POSITION_GUIDE,
+                                            self._on_gaze_data)
+
+        core.wait(0.5)
 
 
-
-    def _simulate_gaze_data_loop(self):
+    def _simulate_data_loop(self, data_type='gaze'):
         """
-        Simulate gaze data using mouse position at a fixed framerate.
+        Simulate eye tracking data using mouse position at a fixed framerate.
 
-        This method is used for simulating gaze data using the mouse position at a
-        fixed framerate. It uses time.sleep() to control the simulation rate and
+        This method simulates either gaze data or user position data based on the
+        data_type parameter. It uses time.sleep() to control the simulation rate and
         stops when either the recording is stopped or an exception occurs.
+        
+        Parameters
+        ----------
+        data_type : str
+            Type of data to simulate. Options are:
+            - 'gaze': Simulate gaze data (for recording)
+            - 'user_position': Simulate user position guide data (for show_status)
         """
         interval = 1.0 / self._simulation_settings['framerate']
         try:
             # Loop until the recording is stopped or an exception occurs
             while self.recording and not self._stop_simulation.is_set():
-                # Simulate a single gaze data point
-                self._simulate_gaze_data()
+                # Call the appropriate simulation method based on data type
+                if data_type == 'gaze':
+                    self._simulate_gaze_data()
+                elif data_type == 'user_position':
+                    self._simulate_user_position_guide()
+                else:
+                    raise ValueError(f"Unknown data_type: {data_type}")
+                
                 # Sleep for the specified interval
                 time.sleep(interval)
         except Exception as e:
@@ -834,8 +1000,9 @@ class TobiiController:
             self._stop_simulation.set()
 
 
-
     def _simulate_gaze_data(self):
+
+        # FIIIIIIIIIIIIIIIIIIIIIIIX TIME
         """
         Simulate a single gaze data point using current mouse position.
         
@@ -851,6 +1018,9 @@ class TobiiController:
             # Convert the mouse position to Tobii ADCS coordinates
             tobii_pos = Coords.get_tobii_pos(self.win, pos)
             
+            # Use the interactive Z position if available, otherwise default
+            tbcs_z = getattr(self, 'sim_z_position', 0.6)
+            
             # Get the current timestamp in milliseconds since the Unix epoch
             timestamp = time.time() * 1_000_000  
             
@@ -865,8 +1035,8 @@ class TobiiController:
                 'right_pupil_diameter': 3.0,  # mm
                 'left_pupil_validity': 1,  # 0 or 1 indicating validity
                 'right_pupil_validity': 1,  # 0 or 1 indicating validity
-                'left_user_position': (0.0, 0.0, 0.6),  # Tobii ADCS coordinates
-                'right_user_position': (0.0, 0.0, 0.6),  # Tobii ADCS coordinates
+                'left_user_position': (tobii_pos[0], tobii_pos[1], tbcs_z),  # Use same pos as gaze
+                'right_user_position': (tobii_pos[0], tobii_pos[1], tbcs_z),  # Use same pos as gaze
                 'left_user_position_validity': 1,  # 0 or 1 indicating validity
                 'right_user_position_validity': 1  # 0 or 1 indicating validity
             }
@@ -877,6 +1047,63 @@ class TobiiController:
         except Exception as e:
             print(f"Simulated gaze error: {e}")
 
+
+    def _simulate_user_position_guide(self):
+        """
+        Simulate user position guide data using current mouse position.
+    
+        This method creates simulated user position data that mimics what the
+        Tobii EYETRACKER_USER_POSITION_GUIDE would provide. It uses the mouse
+        position to simulate where the user's eyes would be positioned in the
+        track box coordinate system (TBCS). The Z-position can be controlled
+        with the scroll wheel.
+    
+        The data is appended to the gaze_data buffer, similar to _simulate_gaze_data().
+        """
+        try:
+            # Handle scroll wheel for Z-position control
+            scroll = self.mouse.getWheelRel()
+            if scroll[1] != 0:  # Vertical scroll
+                # Adjust Z-position based on scroll direction
+                current_z = getattr(self, 'sim_z_position', 0.6)
+                self.sim_z_position = current_z + scroll[1] * 0.05  # 0.05 units per scroll step
+                # Clamp Z-position to reasonable range (0.2 to 1.0)
+                self.sim_z_position = max(0.2, min(1.0, self.sim_z_position))
+        
+            # Get the current mouse position in PsychoPy coordinates
+            pos = self.mouse.getPos()
+        
+            # Convert the mouse position to Tobii coordinates (ADCS)
+            # We'll use this as TBCS coordinates for simulation purposes
+            center_tobii_pos = Coords.get_tobii_pos(self.win, pos)
+        
+            # Add realistic eye separation (typical interpupillary distance ~6-7cm)
+            # At 65cm distance, this translates to roughly 0.03-0.04 in TBCS coordinates
+            eye_offset = 0.035  # Horizontal offset between eyes
+            
+            left_tobii_pos = (center_tobii_pos[0] - eye_offset, center_tobii_pos[1])
+            right_tobii_pos = (center_tobii_pos[0] + eye_offset, center_tobii_pos[1])
+        
+            # Use the interactive Z position controlled by scroll wheel
+            tbcs_z = getattr(self, 'sim_z_position', 0.6)
+        
+            # Get current timestamp (consistent with _simulate_gaze_data)
+            timestamp = time.time() * 1_000_000
+        
+            # Create simulated user position guide data with separated eyes
+            gaze_data = {
+                'system_time_stamp': timestamp,
+                'left_user_position': (left_tobii_pos[0], left_tobii_pos[1], tbcs_z),
+                'right_user_position': (right_tobii_pos[0], right_tobii_pos[1], tbcs_z),
+                'left_user_position_validity': 1,
+                'right_user_position_validity': 1
+            }
+        
+            # Append the sample data to the buffer
+            self.gaze_data.append(gaze_data)
+        
+        except Exception as e:
+            print(f"Simulated user position error: {e}")
 
 
     def gaze_contingent(self, N=5):
@@ -905,7 +1132,7 @@ class TobiiController:
                 f"Received type: {type(N).__name__} (value: {N})\n"
             )
         # Store up to N samples, each consisting of two [x, y] points (left and right eye)
-        self.recent_gaze_positions = deque(maxlen=N * 2)
+        self.gaze_contingent_buffer = deque(maxlen=N )
 
 
 
@@ -934,7 +1161,7 @@ class TobiiController:
         Warning
             If `gaze_contingent()` was not run before this function.
         """
-        if not self.recent_gaze_positions:
+        if self.gaze_contingent_buffer is None:
             raise RuntimeError(
                 "\n[ERROR] Gaze buffer not initialized.\n"
                 "You must call `gaze_contingent(N)` before using `get_average_gaze()`.\n"
@@ -942,7 +1169,7 @@ class TobiiController:
             )
 
         # Keep only [x, y] gaze points; skip empty or malformed entries
-        valid_points = [p for p in self.recent_gaze_positions if len(p) == 2]
+        valid_points = [p for p in self.gaze_contingent_buffer if len(p) == 2]
 
         if not valid_points:
             # Return a dummy position far outside the screen if nothing valid is available

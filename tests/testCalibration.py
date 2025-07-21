@@ -2,8 +2,8 @@ from psychopy import visual, sound
 from DeToX import TobiiController
 
 # Create window
-win = visual.Window(size=[1920, 1080], units='height', fullscr=False, allowGUI=False)
-
+win = visual.Window(size=[1920, 1080], units='height', fullscr=False, allowGUI=False ,)
+win.setMouseVisible(True)
 # Create controller in simulation mode
 controller = TobiiController(win, simulate=True)
 
@@ -23,8 +23,7 @@ success = controller.calibrate(
     calibration_points=cal_points,
     infant_stims=stims,
     shuffle=True,
-    focus_time=0.5,
-    anim_type='zoom',
+    anim_type='trill',
     save_calib=True,
     num_samples=5  # Collect 5 samples per point
 )
@@ -37,3 +36,5 @@ else:
 # Clean up
 controller.close()
 win.close()
+
+

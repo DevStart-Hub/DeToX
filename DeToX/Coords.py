@@ -3,6 +3,50 @@ import numpy as np
 from psychopy.tools.monitorunittools import cm2pix, deg2pix, pix2cm, pix2deg
 
 
+def convert_height_to_units(win, height_value):
+    """
+    Convert a size from height units to the current window units.
+    Uses the same conversion logic as the existing coordinate conversion functions.
+    
+    Parameters
+    ----------
+    win : psychopy.visual.Window
+        The PsychoPy window which provides information about units and size.
+    height_value : float
+        Size in height units (fraction of screen height)
+        
+    Returns
+    -------
+    float
+        Size converted to current window units
+    """
+    current_units = win.units
+    
+    if current_units == "height":
+        return height_value
+    elif current_units == "norm":
+        # In norm units, need to account for aspect ratio
+        # Height of 1.0 in height units = height of 2.0 in norm units
+        # But we want the same visual size, so scale by aspect ratio
+        return height_value * 2.0
+    elif current_units == "pix":
+        # Direct conversion: height fraction * screen height in pixels
+        return height_value * win.size[1]
+    elif current_units in ["cm", "deg", "degFlat", "degFlatPos"]:
+        # Convert to pixels first, then use PsychoPy's conversion tools
+        height_pixels = height_value * win.size[1]
+        
+        if current_units == "cm":
+            return pix2cm(height_pixels, win.monitor)
+        elif current_units == "deg":
+            return pix2deg(height_pixels, win.monitor)
+        else:  # degFlat, degFlatPos
+            return pix2deg(np.array([height_pixels]), win.monitor, correctFlat=True)[0]
+    else:
+        # Fallback - return as height units
+        return height_value
+
+
 def get_psychopy_pos(win, p, units=None):
     """
     Convert Tobii ADCS coordinates to PsychoPy coordinates.
@@ -90,7 +134,6 @@ def psychopy_to_pixels(win, pos):
         y_pix = -pos[1] + win.size[1]/2
     
     return (int(x_pix), int(y_pix))
-
 
 
 def get_tobii_pos(win, p, units=None):
