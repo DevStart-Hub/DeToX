@@ -1,27 +1,36 @@
-# Import main classes and functions for direct access
-from .Base import TobiiController
+# DeToX/__init__.py
+
+# Import main classes for direct access
+from .Base import ETracker
+from .Calibration import TobiiCalibrationSession, MouseCalibrationSession
 from .Utils import InfantStimuli, NicePrint
+from . import calibration_config
 from .Coords import (
-    get_psychopy_pos, 
-    get_tobii_pos, 
-    pix2tobii, 
-    tobii2pix, 
-    get_psychopy_pos_from_trackbox
+    get_psychopy_pos,
+    get_tobii_pos,
+    pix2tobii,
+    tobii2pix,
+    get_psychopy_pos_from_trackbox,
+    psychopy_to_pixels,
+    convert_height_to_units
 )
-from .Calibration import CalibrationSession
 
 # Define the version
 __version__ = '0.1.0'
 
-# Define what gets exported with "from package import *"
+# Define what gets exported with "from DeToX import *"
 __all__ = [
-    'TobiiController',
+    'ETracker',
+    'TobiiCalibrationSession',
+    'MouseCalibrationSession',
     'InfantStimuli',
     'NicePrint',
-    'CalibrationSession',
+    'calibration_config',
     'get_psychopy_pos',
     'get_tobii_pos',
     'pix2tobii',
     'tobii2pix',
-    'get_psychopy_pos_from_trackbox'
+    'get_psychopy_pos_from_trackbox',
+    'psychopy_to_pixels',
+    'convert_height_to_units'
 ]
