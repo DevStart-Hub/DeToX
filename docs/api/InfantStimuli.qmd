@@ -1,6 +1,8 @@
-## InfantStimuli { #InfantStimuli }
+# InfantStimuli { #DeToX.InfantStimuli }
 
-`InfantStimuli(self, win, infant_stims, shuffle=True, kwargs)`
+```python
+InfantStimuli(self, win, infant_stims, shuffle=True, *kwargs)
+```
 
 Stimuli for infant-friendly calibration.
 
@@ -9,3 +11,50 @@ calibration procedures. It takes a list of image files and optional
 keyword arguments for the ImageStim constructor. It can be used to
 create a sequence of animated stimuli that can be used to calibrate the
 eye tracker.
+
+## Methods
+
+| Name | Description |
+| --- | --- |
+| [get_stim](#DeToX.InfantStimuli.get_stim) | Get the stimulus by presentation order. |
+| [get_stim_original_size](#DeToX.InfantStimuli.get_stim_original_size) | Get the original size of the stimulus by presentation order. |
+
+### get_stim { #DeToX.InfantStimuli.get_stim }
+
+```python
+InfantStimuli.get_stim(idx)
+```
+
+Get the stimulus by presentation order.
+
+#### Parameters {.doc-section .doc-section-parameters}
+
+| Name   | Type   | Description                                          | Default    |
+|--------|--------|------------------------------------------------------|------------|
+| idx    | int    | The index of the stimulus in the presentation order. | _required_ |
+
+#### Returns {.doc-section .doc-section-returns}
+
+| Name   | Type                      | Description                                    |
+|--------|---------------------------|------------------------------------------------|
+|        | psychopy.visual.ImageStim | The stimulus corresponding to the given index. |
+
+### get_stim_original_size { #DeToX.InfantStimuli.get_stim_original_size }
+
+```python
+InfantStimuli.get_stim_original_size(idx)
+```
+
+Get the original size of the stimulus by presentation order.
+
+#### Parameters {.doc-section .doc-section-parameters}
+
+| Name   | Type   | Description                                          | Default    |
+|--------|--------|------------------------------------------------------|------------|
+| idx    | int    | The index of the stimulus in the presentation order. | _required_ |
+
+#### Returns {.doc-section .doc-section-returns}
+
+| Name   | Type   | Description                                           |
+|--------|--------|-------------------------------------------------------|
+|        | tuple  | The original size of the stimulus as (width, height). |

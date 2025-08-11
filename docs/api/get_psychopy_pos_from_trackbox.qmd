@@ -1,25 +1,27 @@
-## get_psychopy_pos_from_trackbox { #get_psychopy_pos_from_trackbox }
+# get_psychopy_pos_from_trackbox { #DeToX.get_psychopy_pos_from_trackbox }
 
-`get_psychopy_pos_from_trackbox(win, p, units=None)`
+```python
+get_psychopy_pos_from_trackbox(win, p, units=None)
+```
 
 Convert Tobii TBCS coordinates to PsychoPy coordinates.
 
-### Parameters
+## Parameters {.doc-section .doc-section-parameters}
 
-| Name    | Type                   | Description                                                                                     | Default   |
-|---------|------------------------|-------------------------------------------------------------------------------------------------|-----------|
-| `win`   | psychopy.visual.Window | The PsychoPy window which provides information about units and size.                            | required  |
-| `p`     | tuple                  | The Tobii TBCS coordinates to convert.                                                          | required  |
-| `units` | str, optional          | The units for the PsychoPy coordinates. Default is None, which uses the window's default units. | `None`    |
+| Name   | Type                   | Description                                                                                     | Default    |
+|--------|------------------------|-------------------------------------------------------------------------------------------------|------------|
+| win    | psychopy.visual.Window | The PsychoPy window which provides information about units and size.                            | _required_ |
+| p      | tuple                  | The Tobii TBCS coordinates to convert.                                                          | _required_ |
+| units  | str                    | The units for the PsychoPy coordinates. Default is None, which uses the window's default units. | `None`     |
 
-### Returns
+## Returns {.doc-section .doc-section-returns}
 
-| Type   | Description                         |
-|--------|-------------------------------------|
-| tuple  | The converted PsychoPy coordinates. |
+| Name   | Type   | Description                         |
+|--------|--------|-------------------------------------|
+|        | tuple  | The converted PsychoPy coordinates. |
 
-### Raises
+## Raises {.doc-section .doc-section-raises}
 
-| Type       | Description                              |
-|------------|------------------------------------------|
-| ValueError | If the provided units are not supported. |
+| Name   | Type       | Description                              |
+|--------|------------|------------------------------------------|
+|        | ValueError | If the provided units are not supported. |

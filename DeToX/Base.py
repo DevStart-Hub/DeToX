@@ -145,6 +145,7 @@ class ETracker:
         if self.recording:
             self.stop_recording()
 
+
     def get_info(self, moment='connection'):
         """
         Displays information about the connected eye tracker or simulation settings.
@@ -1277,6 +1278,8 @@ class ETracker:
             self._stop_simulation.set()
 
     def _simulate_gaze_data(self):
+
+        # FIIIIIIIIIIIIIIIIIIIIIIIX TIME
         """
         Generate single gaze sample from current mouse position.
         

@@ -1,0 +1,7 @@
+# TobiiController.save_data { #DeToX.TobiiController.save_data }
+
+```python
+TobiiController.save_data()
+```
+
+Save gaze and event data to an HDF5 file with two datasets: 'gaze' and 'events'.

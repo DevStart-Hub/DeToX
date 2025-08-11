@@ -1,0 +1,19 @@
+# TobiiController.record_event { #DeToX.TobiiController.record_event }
+
+```python
+TobiiController.record_event(label)
+```
+
+Record an event with a timestamp.
+
+## Parameters {.doc-section .doc-section-parameters}
+
+| Name   | Type   | Description                       | Default    |
+|--------|--------|-----------------------------------|------------|
+| label  | str    | The label for the event to record | _required_ |
+
+## Raises {.doc-section .doc-section-raises}
+
+| Name   | Type           | Description                |
+|--------|----------------|----------------------------|
+|        | RuntimeWarning | If recording is not active |

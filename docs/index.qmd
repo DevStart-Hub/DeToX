@@ -1,8 +1,11 @@
 ---
 title: "DeToX"
+subtitle: "Developmental Tobii eXperiments"
 description: "A Python wrapper around tobii_researcher and PsychoPy for easily running eye-tracking experiments with infants and toddlers."
 author: Tommaso Ghilardi
 ---
+
+![](logo.png){fig-align="right" width="100"}
 
 This package was created out of the need to run eye-tracking experiments using `tobii_researcher`. The **Tobii SDK** provides a powerful way to interact with Tobii eye trackers in Python, offering many advanced features. However, certain aspects of its implementation can be complex and unintuitive.
 

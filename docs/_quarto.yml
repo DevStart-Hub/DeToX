@@ -1,26 +1,51 @@
 project:
   type: website
-
 metadata-files:
   - api/_sidebar.yml
-
+  
 website:
-  title: "DeToX_website"
+  title: "DeToX"
   navbar:
-    background: dark
+    logo: logo.png
+    background: primary
     left:
-      - href: index.qmd
-        text: Home
+      - href: GettingStarted.qmd
+        text: Getting Started
+      - text: "Vignettes"
+        menu:
+          - text: "Calibration Guide"
+            href: Calibration.qmd
+          - text: "Gaze Contingent Experiments"
+            href: GazeContingent.qmd
+          - text: Undertanding data formats
+            href: DataFormats.qmd
+    right:
       - href: api/index.qmd
         text: Reference
+        
+    tools:
+      - icon: twitter
+        href: https://twitter.com
+      - icon: github
+        menu:
+          - text: Source Code
+            href:  https://code.com
+          - text: Report a Bug
+            href:  https://bugs.com
 
 format:
   html:
-    theme: litera
+    theme: pulse
     css:
       - api/_styles-quartodoc.css
       - styles.css
     toc: true
+
+    grid:
+      sidebar-width: 300px
+      body-width: 1100px
+      margin-width: 300px
+      gutter-width: 1.5rem
 
 quartodoc:
   style: pkgdown
@@ -31,27 +56,31 @@ quartodoc:
     - title: Core Classes
       desc: Main classes for infant eye-tracking research
       contents:
-        - InfantStimuli
         - TobiiController
-
+        - InfantStimuli
     - title: Calibration and Recording Methods
       desc: Methods for managing eye-tracking calibration and data recording
       contents:
-        - Base.TobiiController.save_calibration
-        - Base.TobiiController.load_calibration
-        - Base.TobiiController.start_recording
-        - Base.TobiiController.stop_recording
-        - Base.TobiiController.record_event
-        - Base.TobiiController.save_data
-        - Base.TobiiController.run_calibration
-        - Base.TobiiController.show_status
-        - Base.TobiiController.close
-
+        - TobiiController.save_calibration
+        - TobiiController.load_calibration
+        - TobiiController.start_recording
+        - TobiiController.stop_recording
+        - TobiiController.record_event
+        - TobiiController.save_data
+        - TobiiController.calibrate
+        - TobiiController.show_status
+        - TobiiController.gaze_contingent
+        - TobiiController.get_average_gaze
+        - TobiiController.close
     - title: Coordinate transformation functions
       desc: Functions for coordinate transformation
       contents:
-        - coord_utils.get_psychopy_pos
-        - coord_utils.get_tobii_pos
-        - coord_utils.pix2tobii
-        - coord_utils.tobii2pix
-        - coord_utils.get_psychopy_pos_from_trackbox
+        - get_psychopy_pos
+        - get_tobii_pos
+        - pix2tobii
+        - tobii2pix
+        - get_psychopy_pos_from_trackbox
+    - title: Utility Functions
+      desc: Helper functions and utilities
+      contents:
+        - NicePrint

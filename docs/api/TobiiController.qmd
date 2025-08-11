@@ -1,6 +1,8 @@
-## TobiiController { #TobiiController }
+# TobiiController { #DeToX.TobiiController }
 
-`TobiiController(self, win, id=0, simulate=False)`
+```python
+TobiiController(self, win, id=0, simulate=False)
+```
 
 Tobii controller for infant research.
 
@@ -24,3 +26,246 @@ The TobiiController class provides the following features:
 
 The TobiiController class is designed to be easy to use and provides a
 minimal interface for the user to interact with the Tobii Pro SDK.
+
+## Methods
+
+| Name | Description |
+| --- | --- |
+| [calibrate](#DeToX.TobiiController.calibrate) | Run an infant-friendly calibration procedure with point selection and |
+| [close](#DeToX.TobiiController.close) | Stop recording and perform necessary cleanup. |
+| [gaze_contingent](#DeToX.TobiiController.gaze_contingent) | Initialize a rolling buffer to store recent gaze positions. |
+| [get_average_gaze](#DeToX.TobiiController.get_average_gaze) | Compute the average gaze position from the most recent gaze samples. |
+| [get_info](#DeToX.TobiiController.get_info) | Print information about the current eyetracker or simulation. |
+| [load_calibration](#DeToX.TobiiController.load_calibration) | Load calibration data from a file. |
+| [record_event](#DeToX.TobiiController.record_event) | Record an event with a timestamp. |
+| [save_calibration](#DeToX.TobiiController.save_calibration) | Save calibration data to a file. |
+| [save_data](#DeToX.TobiiController.save_data) | Save gaze and event data to an HDF5 file with two datasets: 'gaze' and 'events'. |
+| [show_status](#DeToX.TobiiController.show_status) | Show participant's gaze position in track box. |
+| [start_recording](#DeToX.TobiiController.start_recording) | Start recording gaze data. |
+| [stop_recording](#DeToX.TobiiController.stop_recording) | Stop recording gaze data and save it to file. |
+
+### calibrate { #DeToX.TobiiController.calibrate }
+
+```python
+TobiiController.calibrate(
+    calibration_points,
+    infant_stims,
+    shuffle=True,
+    audio=None,
+    focus_time=0.5,
+    anim_type='zoom',
+    save_calib=False,
+)
+```
+
+Run an infant-friendly calibration procedure with point selection and
+animated stimuli. The calibration points are presented in a sequence
+(either in order or shuffled) and at each point, an animated stimulus
+is presented (either zooming or trilling). The procedure can optionally
+play an attention-getting audio during the calibration process. The
+calibration data can be saved to a file if desired.
+
+#### Parameters {.doc-section .doc-section-parameters}
+
+| Name               | Type                   | Description                                                                 | Default    |
+|--------------------|------------------------|-----------------------------------------------------------------------------|------------|
+| calibration_points | list of (float, float) | PsychoPy-normalized (x, y) coordinates for calibration targets.             | _required_ |
+| infant_stims       | list of str            | List of image file paths for calibration stimuli.                           | _required_ |
+| shuffle            | bool                   | Whether to shuffle stimuli order. Default is True.                          | `True`     |
+| audio              | str                    | Path to audio file to play during calibration. Default is None.             | `None`     |
+| focus_time         | float                  | Time to wait before collecting data. Default is 0.5s                        | `0.5`      |
+| anim_type          | str                    | Type of animation to use. Options are 'zoom' or 'trill'. Default is 'zoom'. | `'zoom'`   |
+| save_calib         | bool                   | Whether to save calibration data. Default is False                          | `False`    |
+
+#### Returns {.doc-section .doc-section-returns}
+
+| Name   | Type   | Description                                     |
+|--------|--------|-------------------------------------------------|
+|        | bool   | True if calibration successful, False otherwise |
+
+### close { #DeToX.TobiiController.close }
+
+```python
+TobiiController.close()
+```
+
+Stop recording and perform necessary cleanup.
+
+### gaze_contingent { #DeToX.TobiiController.gaze_contingent }
+
+```python
+TobiiController.gaze_contingent(N=5)
+```
+
+Initialize a rolling buffer to store recent gaze positions.
+
+This method sets up a deque (double-ended queue) to hold the last N gaze samples
+from both eyes, meaning the buffer can hold up to 2*N samples total. This is useful
+for real-time gaze contingent logic where you want to compute smooth gaze estimates
+from recent samples.
+
+#### Parameters {.doc-section .doc-section-parameters}
+
+| Name   | Type   | Description                                                                 | Default   |
+|--------|--------|-----------------------------------------------------------------------------|-----------|
+| N      | int    | The number of recent gaze samples (pairs of left/right eye data) to buffer. | `5`       |
+
+#### Raises {.doc-section .doc-section-raises}
+
+| Name   | Type      | Description             |
+|--------|-----------|-------------------------|
+|        | TypeError | If N is not an integer. |
+
+### get_average_gaze { #DeToX.TobiiController.get_average_gaze }
+
+```python
+TobiiController.get_average_gaze(fallback_offscreen=True)
+```
+
+Compute the average gaze position from the most recent gaze samples.
+
+This method averages valid Tobii ADCS coordinates from the rolling gaze buffer
+initialized via `gaze_contingent()`. If no valid data is available, it can return
+a fallback offscreen value to help avoid crashes or unwanted triggers in the experiment.
+
+#### Parameters {.doc-section .doc-section-parameters}
+
+| Name               | Type   | Description                                                                                             | Default   |
+|--------------------|--------|---------------------------------------------------------------------------------------------------------|-----------|
+| fallback_offscreen | bool   | Whether to return an offscreen position (win.size * 2) if no valid gaze data is found. Default is True. | `True`    |
+
+#### Returns {.doc-section .doc-section-returns}
+
+| Name             | Type          | Description                                                                                                                     |
+|------------------|---------------|---------------------------------------------------------------------------------------------------------------------------------|
+| avg_psychopy_pos | tuple or None | The average gaze position as a 2D coordinate in Tobii ADCS units, or offscreen position (tuple) / None if no data is available. |
+
+#### Raises {.doc-section .doc-section-raises}
+
+| Name   | Type    | Description                                              |
+|--------|---------|----------------------------------------------------------|
+|        | Warning | If `gaze_contingent()` was not run before this function. |
+
+### get_info { #DeToX.TobiiController.get_info }
+
+```python
+TobiiController.get_info(moment='connection')
+```
+
+Print information about the current eyetracker or simulation.
+
+### load_calibration { #DeToX.TobiiController.load_calibration }
+
+```python
+TobiiController.load_calibration(filename)
+```
+
+Load calibration data from a file.
+
+#### Parameters {.doc-section .doc-section-parameters}
+
+| Name     | Type   | Description                                           | Default    |
+|----------|--------|-------------------------------------------------------|------------|
+| filename | str    | The name of the file containing the calibration data. | _required_ |
+
+#### Returns {.doc-section .doc-section-returns}
+
+| Name   | Type   | Description                                                            |
+|--------|--------|------------------------------------------------------------------------|
+|        | bool   | True if the calibration data was successfully loaded, False otherwise. |
+
+### record_event { #DeToX.TobiiController.record_event }
+
+```python
+TobiiController.record_event(label)
+```
+
+Record an event with a timestamp.
+
+#### Parameters {.doc-section .doc-section-parameters}
+
+| Name   | Type   | Description                       | Default    |
+|--------|--------|-----------------------------------|------------|
+| label  | str    | The label for the event to record | _required_ |
+
+#### Raises {.doc-section .doc-section-raises}
+
+| Name   | Type           | Description                |
+|--------|----------------|----------------------------|
+|        | RuntimeWarning | If recording is not active |
+
+### save_calibration { #DeToX.TobiiController.save_calibration }
+
+```python
+TobiiController.save_calibration(filename=None)
+```
+
+Save calibration data to a file.
+
+This method saves the current calibration data of the eye tracker to
+the specified file. The calibration data is retrieved from the eye
+tracker using the retrieve_calibration_data() method and then written
+to the file in binary format.
+
+#### Parameters {.doc-section .doc-section-parameters}
+
+| Name     | Type   | Description                                                                                                               | Default   |
+|----------|--------|---------------------------------------------------------------------------------------------------------------------------|-----------|
+| filename | str    | The name of the file to save the calibration data to. If not provided, a default name based on the basename will be used. | `None`    |
+
+#### Returns {.doc-section .doc-section-returns}
+
+| Name   | Type   | Description                                                           |
+|--------|--------|-----------------------------------------------------------------------|
+|        | bool   | True if the calibration data was successfully saved, False otherwise. |
+
+### save_data { #DeToX.TobiiController.save_data }
+
+```python
+TobiiController.save_data()
+```
+
+Save gaze and event data to an HDF5 file with two datasets: 'gaze' and 'events'.
+
+### show_status { #DeToX.TobiiController.show_status }
+
+```python
+TobiiController.show_status(decision_key='space')
+```
+
+Show participant's gaze position in track box.
+
+This function creates a visualization of the participant's gaze
+position in the track box. The visualization consists of a green
+bar representing the z-position of the user, and circles for the
+left and right eye positions. The visualization is updated in real
+time based on the latest gaze data received from the eye tracker.
+
+#### Parameters {.doc-section .doc-section-parameters}
+
+| Name         | Type   | Description                                                     | Default   |
+|--------------|--------|-----------------------------------------------------------------|-----------|
+| decision_key | str    | The key to press to exit the visualization. Default is 'space'. | `'space'` |
+
+### start_recording { #DeToX.TobiiController.start_recording }
+
+```python
+TobiiController.start_recording(filename=None, event_mode='precise')
+```
+
+Start recording gaze data.
+
+#### Parameters {.doc-section .doc-section-parameters}
+
+| Name       | Type   | Description                                                                                                                 | Default     |
+|------------|--------|-----------------------------------------------------------------------------------------------------------------------------|-------------|
+| filename   | str    | The name of the file to save the gaze data to. If not provided, a  default name based on the current datetime will be used. | `None`      |
+| event_mode | str    | Mode for event recording. Options are 'samplebased' or 'precise'.  Default is 'precise'.                                    | `'precise'` |
+
+### stop_recording { #DeToX.TobiiController.stop_recording }
+
+```python
+TobiiController.stop_recording()
+```
+
+Stop recording gaze data and save it to file.
