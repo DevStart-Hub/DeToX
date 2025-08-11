@@ -6,6 +6,11 @@ author: Tommaso Ghilardi
 
 This package was created out of the need to run eye-tracking experiments using `tobii_researcher`. The **Tobii SDK** provides a powerful way to interact with Tobii eye trackers in Python, offering many advanced features. However, certain aspects of its implementation can be complex and unintuitive.
 
+<<<<<<< HEAD
+
+
+=======
+>>>>>>> 6672c1084872b41526f22b2c1208bc800d14d248
 Since we often run experiments using **PsychoPy**, we developed this lightweight wrapper around **PsychoPy** and **`tobii_researcher`** to simplify the process. The goal is to make it easy to run **infant-friendly eye-tracking studies** while handling the more technical aspects of eye tracker integration.
 
 This project didn’t start from scratch—it builds upon two existing packages that we have used in the past:

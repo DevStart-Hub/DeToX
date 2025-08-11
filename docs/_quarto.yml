@@ -2,11 +2,18 @@ project:
   type: website
 metadata-files:
   - api/_sidebar.yml
+<<<<<<< HEAD
+website:
+  title: "DeToX"
+  navbar:
+    logo: resources/logo/full_logo.png
+=======
   
 website:
   title: "DeToX"
   navbar:
     logo: logo.png
+>>>>>>> 6672c1084872b41526f22b2c1208bc800d14d248
     background: primary
     left:
       - href: GettingStarted.qmd

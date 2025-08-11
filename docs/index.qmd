@@ -1,5 +1,34 @@
 ---
 title: "DeToX"
+<<<<<<< HEAD
+description: "Developmental Tobii eXperiment"
+author: Tommaso Ghilardi
+---
+
+```{=html}
+<img 
+  src="resources/logo/full_logo.png" 
+  alt="Logo" 
+  style="float: right; width: 200px; margin: 0 1em 1em 0;" 
+/>
+```
+
+<br/> This package was created out of the need to run eye-tracking experiments using `tobii_research`. The [Tobii SDK](https://developer.tobiipro.com/python/python-getting-started.html) provides a powerful way to interact with Tobii eye trackers in Python, offering many advanced features. However, certain aspects of its implementation can be complex and unintuitive for routine research tasks. Since we often run experiments using PsychoPy, we developed this lightweight wrapper around PsychoPy and `tobii_research` to simplify the process. The goal is to make it easy to run infant-friendly eye-tracking studies while handling the more technical aspects of eye tracker integration behind the scenes. This project didn't start from scratch—it builds upon an existing repository that we have used in the past: [**psychopy_tobii_infant**](https://github.com/yh-luo/psychopy_tobii_infant)
+
+While this repository provided solid solutions for integrating Tobii eye trackers with PsychoPy, we added features and improvements that we found useful for running **infant-friendly eye-tracking studies**. Our goal was to simplify some of the more technical aspects while keeping the flexibility needed for research.
+
+# Why to use DeToX
+
+## Simplicity
+
+The eye-tracking ecosystem is rich with options. Beyond the two repositories mentioned above, [PsychoPy](https://psychopy.org/hardware/eyeTracking.html) offers built-in Tobii integration, and there's the comprehensive [Titta ](https://github.com/marcus-nystrom/Titta)package, among others. Is DeToX better than these alternatives? Honestly, no—and that's not the point.
+
+DeToX was designed to prioritize simplicity. Rather than offering dozens of configuration options and advanced features, we provide a streamlined approach that covers the essential functionality most researchers actually need. This deliberate simplicity creates flexibility in a different way—when the codebase is straightforward, it becomes much easier to understand, modify, and adapt to your specific experimental requirements.
+
+## Documentation
+
+We believe that good software is only as valuable as its documentation. Too often, researchers encounter powerful packages that are frustrating to use because of unclear or incomplete documentation. When you're left wondering what a function does or how to modify basic settings, the package becomes more of a hindrance than a help. A package should empower users, not confuse them. That's why we've prioritized creating clear, comprehensive documentation with practical examples and step-by-step tutorials. Our goal is documentation that helps you understand not just what to do, but why—so you can confidently adapt the code to your specific experimental needs.
+=======
 subtitle: "Developmental Tobii eXperiments"
 description: "A Python wrapper around tobii_researcher and PsychoPy for easily running eye-tracking experiments with infants and toddlers."
 author: Tommaso Ghilardi
@@ -18,3 +47,4 @@ This project didn’t start from scratch—it builds upon two existing packages 
 -   [**psychopy_tobii_controller**](https://github.com/hsogo/psychopy_tobii_controller)
 
 While these packages already provided great solutions for integrating Tobii eye trackers with **PsychoPy**, we added a few extra features and improvements that we found useful for running **infant-friendly eye-tracking studies**. Our goal was to simplify some of the more technical aspects of eye tracker integration while keeping the flexibility needed for research.
+>>>>>>> 6672c1084872b41526f22b2c1208bc800d14d248
