@@ -3,6 +3,7 @@ import time
 import atexit
 import warnings
 import threading
+from pathlib import Path
 from datetime import datetime
 from collections import deque
 
@@ -17,6 +18,7 @@ from . import Coords
 # Remove the old import and import both calibration classes
 from .Calibration import TobiiCalibrationSession, MouseCalibrationSession
 from .Utils import NicePrint
+
 
 class ETracker:
     """
@@ -366,56 +368,58 @@ class ETracker:
         
         core.wait(0.5)  # Brief pause before return
 
+
     def calibrate(self,
-                  calibration_points,
-                  infant_stims,
-                  shuffle=True,
-                  audio=None,
-                  anim_type='zoom',
-                  save_calib=False,
-                  num_samples=5):
+                calibration_points,
+                infant_stims,
+                shuffle=True,
+                audio=None,
+                anim_type='zoom',
+                save_calib=False,
+                num_samples=5):
         """
-        Execute infant-friendly calibration procedure.
-        
-        Automatically selects appropriate calibration method based on operating
-        mode (real eye tracker vs. simulation). Uses animated stimuli and optional
-        audio to engage infant participants during calibration.
-        
+        Run the infant-friendly calibration procedure.
+
+        Automatically selects the calibration method based on operating mode
+        (real eye tracker vs. simulation). Uses animated stimuli and optional
+        audio to engage infants during calibration.
+
         Parameters
         ----------
-        calibration_points : list of (float, float)
+        calibration_points : list[tuple[float, float]]
             Target locations in PsychoPy coordinates (e.g., height units).
-            Typically 5-9 points distributed across the screen.
-        infant_stims : list of str
+            Typically 5–9 points distributed across the screen.
+        infant_stims : list[str]
             Paths to engaging image files for calibration targets
             (e.g., animated characters, colorful objects).
         shuffle : bool, optional
             Whether to randomize stimulus presentation order. Default True.
-        audio : psychopy.sound.Sound, optional
+        audio : psychopy.sound.Sound | None, optional
             Attention-getting sound to play during calibration. Default None.
-        anim_type : str, optional
-            Animation style: 'zoom' (size changes) or 'trill' (rotation).
-            Default 'zoom'.
-        save_calib : bool, optional
-            Whether to save calibration data to file (real mode only). Default False.
+        anim_type : {'zoom', 'trill'}, optional
+            Animation style for the stimuli. Default 'zoom'.
+        save_calib : bool | str, optional
+            Controls saving of calibration after a successful run:
+            - False: do not save (default)
+            - True: save using default naming (timestamped)
+            - str: save to this filename; if it has no extension, '.dat' is added.
         num_samples : int, optional
-            Data samples per point in simulation mode. Default 5.
-            
+            Samples per point in simulation mode. Default 5.
+
         Returns
         -------
         bool
             True if calibration completed successfully, False otherwise.
-            
+
         Notes
         -----
-        Real mode uses Tobii's built-in calibration with result visualization.
-        Simulation mode uses mouse position to approximate calibration process.
+        - Real mode uses Tobii's calibration with result visualization.
+        - Simulation mode uses mouse position to approximate the process.
+        - If in simulation mode, any save request is safely skipped with a warning.
         """
         # --- Mode-specific calibration setup ---
-        # Select appropriate calibration class based on hardware/simulation mode
         if self.simulate:
-            # --- Simulation calibration ---
-            # Create mouse-based calibration session for testing/development
+            # Simulation calibration (mouse-based)
             session = MouseCalibrationSession(
                 win=self.win,
                 infant_stims=infant_stims,
@@ -424,13 +428,9 @@ class ETracker:
                 audio=audio,
                 anim_type=anim_type
             )
-            
-            # Execute simulation calibration with specified sample count
             success = session.run(calibration_points, num_samples=num_samples)
-            
         else:
-            # --- Real eye tracker calibration ---
-            # Create Tobii-based calibration session for actual data collection
+            # Real eye tracker calibration (Tobii)
             session = TobiiCalibrationSession(
                 win=self.win,
                 calibration_api=self.calibration,
@@ -439,103 +439,99 @@ class ETracker:
                 audio=audio,
                 anim_type=anim_type
             )
-            
-            # Execute real calibration with optional data saving
-            success = session.run(calibration_points, save_calib=save_calib)
-        
-        # --- Return calibration result ---
+            success = session.run(calibration_points)
+
+        # --- Save calibration data if requested and calibration succeeded ---
+        if success and save_calib:
+            if isinstance(save_calib, str):
+                # Pass the provided filename (extension handled in save_calibration)
+                self.save_calibration(filename=save_calib)
+            else:
+                # True -> no-arg save with default naming
+                self.save_calibration()
+
         return success
+
 
     def save_calibration(self, filename=None, use_gui=False):
         """
-        Saves the current calibration data to a file.
-        
-        This method retrieves the active calibration data from the connected Tobii
-        eye tracker and saves it as a binary file. This allows the calibration
-        to be loaded in future sessions using `load_calibration()`, saving time
-        for participants. This operation is only available when connected to a
-        physical eye tracker and will fail in simulation mode.
+        Save the current calibration data to a file.
+
+        Retrieves the active calibration data from the connected Tobii eye tracker
+        and saves it as a binary file. This can be reloaded later with
+        `load_calibration()` to avoid re-calibrating the same participant.
+
         Parameters
         ----------
-        filename : str, optional
-            The desired path and name for the output file (e.g., "subject_01_calib.dat").
-            If `None` and `use_gui` is `False`, a timestamped default filename is
-            generated. If `use_gui` is `True`, this value is used as the default
-            suggestion in the file dialog.
+        filename : str | None, optional
+            Desired output path. If None and `use_gui` is False, a timestamped default
+            name is used (e.g., 'YYYY-mm-dd_HH-MM-SS_calibration.dat').
+            If provided without an extension, '.dat' is appended.
+            If an extension is already present, it is left unchanged.
         use_gui : bool, optional
-            If `True`, a graphical file-save dialog is displayed, allowing the
-            user to interactively choose the save location and filename.
-            Defaults to `False`.
-            
+            If True, opens a file-save dialog (Psychopy) where the user chooses the path.
+            The suggested name respects the logic above. Default False.
+
         Returns
         -------
         bool
-            Returns `True` if the calibration data was successfully saved, and
-            `False` otherwise (e.g., user cancelled the dialog, no calibration
-            data was available, or a file error occurred).
-            
-        Raises
-        ------
-        RuntimeError
-            If the method is called while the ETracker is in simulation mode.
-        """
-        # --- Pre-condition Check: Ensure not in simulation mode ---
-        # Calibration data can only be retrieved from a physical eye tracker.
-        if self.simulate:
-            raise RuntimeError(
-                "Cannot save calibration in simulation mode. "
-                "Calibration saving requires a real Tobii eye tracker."
-            )
-        
-        try:
-            # --- Determine the output filename ---
-            # Set a default timestamped filename if none is provided.
-            if filename is None:
-                calibration_name = f"{datetime.now().strftime('%Y-%m-%d_%H-%M-%S')}_calibration.dat"
-            else:
-                calibration_name = filename
+            True if saved successfully; False if cancelled, no data available, in
+            simulation mode, or on error.
 
-            # If requested, open a GUI dialog for the user to select the save path.
+        Notes
+        -----
+        - In simulation mode, saving is skipped and a warning is issued.
+        - If `use_gui` is True and the dialog is cancelled, returns False.
+        """
+        # --- Simulation guard ---
+        if self.simulate:
+            warnings.warn(
+                "Skipping calibration save: running in simulation mode. "
+                "Saving requires a real Tobii eye tracker."
+            )
+            return False
+
+        try:
+            # --- Build a default or normalized filename ---
+            if filename is None:
+                # Default timestamped base name
+                base = f"{datetime.now().strftime('%Y-%m-%d_%H-%M-%S')}_calibration"
+                path = Path(base).with_suffix(".dat")
+            else:
+                p = Path(filename)
+                # If no suffix, add .dat; otherwise, respect the existing extension
+                path = p if p.suffix else p.with_suffix(".dat")
+
             if use_gui:
                 from psychopy import gui
-                
-                # The `gui.fileSaveDlg` prompts the user and returns the chosen path.
+                # Use the computed name as the suggested default
                 save_path = gui.fileSaveDlg(
                     prompt='Save calibration data as…',
-                    allowed='*.dat',  # Suggest a common extension for calibration data.
-                    initFilePath=calibration_name  # Use the determined name as a default.
+                    # Psychopy expects a string path; supply our suggested default
+                    initFilePath=str(path),
+                    allowed='*.dat'
                 )
-                
-                # If the user cancels the dialog, `save_path` will be None.
                 if not save_path:
                     print("|-- Save calibration cancelled by user. --|")
                     return False
-                    
-                # Update the filename to the user's choice.
-                calibration_name = save_path
+                # Normalize selection: ensure .dat if user omitted extension
+                sp = Path(save_path)
+                path = sp if sp.suffix else sp.with_suffix(".dat")
 
-            # --- Retrieve and Validate Calibration Data ---
-            # Query the eye tracker for the current calibration data blob.
+            # --- Retrieve calibration data ---
             calib_data = self.eyetracker.retrieve_calibration_data()
-            
-            # The tracker returns `None` if no valid calibration is active.
             if not calib_data:
                 warnings.warn("No calibration data available to save.")
                 return False
-            
-            # --- Write Data to File ---
-            # Open the file in binary write mode ('wb') to save the raw data.
-            with open(calibration_name, 'wb') as f:
+
+            # --- Write to disk ---
+            with open(path, 'wb') as f:
                 f.write(calib_data)
-            
-            # --- Final Confirmation ---
-            # Inform the user of the successful save operation.
-            NicePrint(f"Calibration data saved to:\n{calibration_name}",
-                      title="Calibration Saved")
+
+            NicePrint(f"Calibration data saved to:\n{path}", title="Calibration Saved")
             return True
-            
+
         except Exception as e:
-            # Catch any unexpected errors during file I/O or SDK interaction.
             warnings.warn(f"Failed to save calibration data: {e}")
             return False
 
