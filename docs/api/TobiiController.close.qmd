@@ -1,7 +1,0 @@
-# TobiiController.close { #DeToX.TobiiController.close }
-
-```python
-TobiiController.close()
-```
-
-Stop recording and perform necessary cleanup.

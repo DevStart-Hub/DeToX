@@ -1,0 +1,11 @@
+# ETracker.save_data { #DeToX.ETracker.save_data }
+
+```python
+ETracker.save_data()
+```
+
+Save buffered gaze and event data to file with optimized processing.
+
+Uses thread-safe buffer swapping to minimize lock time, then processes
+and saves data in CSV or HDF5 format. Events are merged with gaze data
+based on timestamp proximity.

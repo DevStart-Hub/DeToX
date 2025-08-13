@@ -6,21 +6,29 @@ tobii2pix(win, p)
 
 Convert Tobii ADCS coordinates to PsychoPy pixel coordinates.
 
+Low-level conversion function that transforms Tobii's normalized ADCS
+coordinates to PsychoPy pixel coordinates. This is the inverse of pix2tobii()
+and is essential for displaying gaze data in PsychoPy windows.
+
 ## Parameters {.doc-section .doc-section-parameters}
 
-| Name   | Type                   | Description                                                          | Default    |
-|--------|------------------------|----------------------------------------------------------------------|------------|
-| win    | psychopy.visual.Window | The PsychoPy window which provides information about units and size. | _required_ |
-| p      | tuple                  | The Tobii ADCS coordinates to convert.                               | _required_ |
+| Name   | Type                   | Description                                                                                                                       | Default    |
+|--------|------------------------|-----------------------------------------------------------------------------------------------------------------------------------|------------|
+| win    | psychopy.visual.Window | The PsychoPy window which provides screen dimensions for scaling.                                                                 | _required_ |
+| p      | tuple                  | The Tobii ADCS coordinates to convert as (x, y) in range [0, 1]. Origin is top-left, x increases rightward, y increases downward. | _required_ |
 
 ## Returns {.doc-section .doc-section-returns}
 
-| Name   | Type   | Description                               |
-|--------|--------|-------------------------------------------|
-|        | tuple  | The converted PsychoPy pixel coordinates. |
+| Name   | Type   | Description                                                                                                                                 |
+|--------|--------|---------------------------------------------------------------------------------------------------------------------------------------------|
+|        | tuple  | The converted PsychoPy pixel coordinates as (x, y) with origin at screen center. Values are rounded to nearest integer for pixel alignment. |
 
 ## Notes {.doc-section .doc-section-notes}
 
-The conversion is done by multiplying the ADCS coordinates by the window
-size and subtracting 0.5 from the x and y coordinates to move the origin
-to the top-left corner of the screen.
+The conversion involves:
+1. Shifting origin from top-left to center (-0.5 offset)
+2. Scaling by screen dimensions to get pixel values
+3. Inverting the Y-axis to match PsychoPy's bottom-up convention
+
+Output coordinates follow PsychoPy's pixel convention where (0, 0)
+is at screen center.

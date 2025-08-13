@@ -1,16 +1,36 @@
 # InfantStimuli { #DeToX.InfantStimuli }
 
 ```python
-InfantStimuli(self, win, infant_stims, shuffle=True, *kwargs)
+InfantStimuli(win, infant_stims, shuffle=True, **kwargs)
 ```
 
-Stimuli for infant-friendly calibration.
+Stimuli manager for infant-friendly calibration procedures.
 
-This class provides a set of animated stimuli for use in infant-friendly
-calibration procedures. It takes a list of image files and optional
-keyword arguments for the ImageStim constructor. It can be used to
-create a sequence of animated stimuli that can be used to calibrate the
-eye tracker.
+This class provides a sophisticated stimulus presentation system designed
+specifically for infant eye tracking calibration. It manages a collection
+of engaging visual stimuli (typically colorful, animated images) and handles
+their sequential presentation during calibration procedures.
+
+The class maintains the original size information for each stimulus and
+supports randomized presentation order to prevent habituation. It's designed
+to work seamlessly with both Tobii hardware calibration and mouse-based
+simulation modes.
+
+Key features include:
+- Automatic stimulus loading from image files
+- Configurable presentation order (sequential or randomized)
+- Size preservation for animation calculations
+- Modulo indexing for circular stimulus access
+- Integration with PsychoPy's visual system
+
+## Attributes {.doc-section .doc-section-attributes}
+
+| Name          | Type                   | Description                                            |
+|---------------|------------------------|--------------------------------------------------------|
+| win           | psychopy.visual.Window | The PsychoPy window used for rendering.                |
+| stims         | dict                   | Dictionary mapping indices to ImageStim objects.       |
+| stim_size     | dict                   | Dictionary mapping indices to original stimulus sizes. |
+| present_order | list                   | List defining the presentation sequence of stimuli.    |
 
 ## Methods
 
@@ -27,17 +47,29 @@ InfantStimuli.get_stim(idx)
 
 Get the stimulus by presentation order.
 
+Retrieves a stimulus based on its position in the presentation sequence.
+Uses modulo arithmetic to wrap around when the index exceeds the number
+of available stimuli, enabling circular access patterns.
+
 #### Parameters {.doc-section .doc-section-parameters}
 
-| Name   | Type   | Description                                          | Default    |
-|--------|--------|------------------------------------------------------|------------|
-| idx    | int    | The index of the stimulus in the presentation order. | _required_ |
+| Name   | Type   | Description                                                                                                                                                     | Default    |
+|--------|--------|-----------------------------------------------------------------------------------------------------------------------------------------------------------------|------------|
+| idx    | int    | The index of the stimulus in the presentation order. Can be any non-negative integer; values beyond the stimulus count will wrap around using modulo operation. | _required_ |
 
 #### Returns {.doc-section .doc-section-returns}
 
-| Name   | Type                      | Description                                    |
-|--------|---------------------------|------------------------------------------------|
-|        | psychopy.visual.ImageStim | The stimulus corresponding to the given index. |
+| Name   | Type                      | Description                                                                                                                                                 |
+|--------|---------------------------|-------------------------------------------------------------------------------------------------------------------------------------------------------------|
+|        | psychopy.visual.ImageStim | The stimulus corresponding to the given index in the presentation order. The returned stimulus is ready for positioning, animation, and drawing operations. |
+
+#### Examples {.doc-section .doc-section-examples}
+
+```python
+>>> stim_manager = InfantStimuli(win, ['img1.png', 'img2.png'])
+>>> stim = stim_manager.get_stim(0)  # Get first stimulus
+>>> stim = stim_manager.get_stim(5)  # Wraps around if only 2 stimuli
+```
 
 ### get_stim_original_size { #DeToX.InfantStimuli.get_stim_original_size }
 
@@ -47,14 +79,24 @@ InfantStimuli.get_stim_original_size(idx)
 
 Get the original size of the stimulus by presentation order.
 
+Returns the original dimensions of a stimulus as loaded from the image
+file. This is useful for animation calculations where you need to know
+the base size before applying scaling transformations.
+
 #### Parameters {.doc-section .doc-section-parameters}
 
-| Name   | Type   | Description                                          | Default    |
-|--------|--------|------------------------------------------------------|------------|
-| idx    | int    | The index of the stimulus in the presentation order. | _required_ |
+| Name   | Type   | Description                                                                                                                                                     | Default    |
+|--------|--------|-----------------------------------------------------------------------------------------------------------------------------------------------------------------|------------|
+| idx    | int    | The index of the stimulus in the presentation order. Can be any non-negative integer; values beyond the stimulus count will wrap around using modulo operation. | _required_ |
 
 #### Returns {.doc-section .doc-section-returns}
 
-| Name   | Type   | Description                                           |
-|--------|--------|-------------------------------------------------------|
-|        | tuple  | The original size of the stimulus as (width, height). |
+| Name   | Type   | Description                                                                                                                                                                                   |
+|--------|--------|-----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------|
+|        | tuple  | The original size of the stimulus as (width, height) in the units specified during stimulus creation. These values represent the stimulus dimensions before any scaling or animation effects. |
+
+#### Notes {.doc-section .doc-section-notes}
+
+The original size is preserved at initialization and remains constant
+throughout the session, regardless of any size modifications made to
+the stimulus during animation.

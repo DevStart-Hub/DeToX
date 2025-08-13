@@ -1,0 +1,37 @@
+# psychopy_to_pixels { #DeToX.psychopy_to_pixels }
+
+```python
+psychopy_to_pixels(win, pos)
+```
+
+Convert PsychoPy coordinates to pixel coordinates.
+
+Transforms coordinates from any PsychoPy coordinate system to pixel coordinates
+suitable for image drawing operations. This function is essential for creating
+calibration result visualizations and other pixel-based graphics.
+
+The conversion accounts for PsychoPy's centered coordinate system and transforms
+to a top-left origin system used by image libraries like PIL.
+
+## Parameters {.doc-section .doc-section-parameters}
+
+| Name   | Type                   | Description                                                                                                                       | Default    |
+|--------|------------------------|-----------------------------------------------------------------------------------------------------------------------------------|------------|
+| win    | psychopy.visual.Window | The PsychoPy window which provides information about units and size. Window units and dimensions determine the conversion method. | _required_ |
+| pos    | tuple                  | The PsychoPy coordinates to convert as (x, y) in current window units.                                                            | _required_ |
+
+## Returns {.doc-section .doc-section-returns}
+
+| Name   | Type   | Description                                                                                                                       |
+|--------|--------|-----------------------------------------------------------------------------------------------------------------------------------|
+|        | tuple  | The converted pixel coordinates as (int, int) with origin at top-left. Values are rounded to nearest integer for pixel alignment. |
+
+## Notes {.doc-section .doc-section-notes}
+
+This function handles the main PsychoPy coordinate systems:
+- 'height': Screen height = 1, width adjusted by aspect ratio, centered origin
+- 'norm': Screen ranges from -1 to 1 in both dimensions, centered origin
+- Other units: Assumes coordinates are already close to pixel values
+
+The output uses standard image coordinates where (0,0) is top-left and
+y increases downward, suitable for PIL and similar libraries.

@@ -1,7 +1,0 @@
-# TobiiController.stop_recording { #DeToX.TobiiController.stop_recording }
-
-```python
-TobiiController.stop_recording()
-```
-
-Stop recording gaze data and save it to file.

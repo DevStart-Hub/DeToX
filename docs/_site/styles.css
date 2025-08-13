@@ -1,4 +1,73 @@
-/* css styles */
+<<<<<<< HEAD
+/* ==========================================================================
+   Navbar Typography
+   ========================================================================== */
+
+/* Brand (title) */
+nav.navbar .navbar-brand {
+  font-size: 2.25rem;   /* ~36px */
+  font-weight: bold;
+}
+
+/* Navigation links */
+nav.navbar .nav-link {
+  font-size: 1.25rem;   /* ~20px */
+}
+
+/* ========================================================================== 
+   Navbar Icons
+   ========================================================================== */
+
+/* Adjust icon size and vertical centering */
+nav.navbar .quarto-navigation-tool > i,
+nav.navbar .quarto-navigation-tool > svg {
+  font-size: 1.2rem;    /* tweak as needed */
+  line-height: 1;       /* keep icons centered */
+}
+
+/* ========================================================================== 
+   Logo Sizing
+   ========================================================================== */
+
+/* Constrain logo height */
+.navbar-logo {
+  max-height: 4rem;     /* ~64px */
+  height: auto;         /* maintain aspect ratio */
+}
+
+/* ==========================================================================
+   Navbar Layout & Colors
+   ========================================================================== */
+
+/* Reduce vertical padding */
+nav.navbar {
+  padding: 0.25rem 0 !important;      /* top/bottom 4px, no left/right */
+  background-color: #249498 !important;
+}
+
+/* Ensure text contrasts on the new background */
+nav.navbar .navbar-brand,
+nav.navbar .nav-link {
+  color: #fff !important;
+}
+
+/* Link hover state */
+nav.navbar .nav-link:hover {
+  color: #f0ba62 !important;
+}
+
+
+/* ==========================================================================
+   Content Text
+   ========================================================================== */
+
+/* Justify paragraph text throughout the page */
+p {
+  text-align: justify;
+  text-justify: inter-word;  /* enhance justification in some browsers */
+}
+=======
+// styles.scss
 
 /* Navbar title (brand) much larger than links */
 nav.navbar .navbar-brand {
@@ -26,3 +95,4 @@ nav.navbar .quarto-navigation-tool > svg {
   
   
   
+>>>>>>> 6672c1084872b41526f22b2c1208bc800d14d248

@@ -1,0 +1,55 @@
+# MouseCalibrationSession { #DeToX.MouseCalibrationSession }
+
+```python
+MouseCalibrationSession(
+    win,
+    infant_stims,
+    mouse,
+    shuffle=True,
+    audio=None,
+    anim_type='zoom',
+)
+```
+
+Mouse-based calibration session for simulation mode.
+
+This class provides a calibration interface for testing and development when
+no physical eye tracker is available. It simulates the calibration process
+using mouse position as a proxy for gaze, allowing experimenters to test
+calibration procedures and develop experiments without hardware.
+
+The mouse calibration follows the same interaction pattern as Tobii calibration,
+collecting position samples at each calibration target and visualizing the
+results. This ensures consistent user experience between simulation and real
+data collection modes.
+
+## Methods
+
+| Name | Description |
+| --- | --- |
+| [run](#DeToX.MouseCalibrationSession.run) | Main function to run the mouse-based calibration routine. |
+
+### run { #DeToX.MouseCalibrationSession.run }
+
+```python
+MouseCalibrationSession.run(calibration_points, num_samples=5)
+```
+
+Main function to run the mouse-based calibration routine.
+
+Executes the complete calibration workflow using mouse position as a
+proxy for gaze data. Follows the same interaction pattern as Tobii
+calibration to ensure consistency across modes.
+
+#### Parameters {.doc-section .doc-section-parameters}
+
+| Name               | Type                   | Description                                                                                                               | Default    |
+|--------------------|------------------------|---------------------------------------------------------------------------------------------------------------------------|------------|
+| calibration_points | list of (float, float) | List of target positions in PsychoPy coordinates. Typically 5-9 points distributed across the screen.                     | _required_ |
+| num_samples        | int                    | How many mouse position samples to collect at each calibration point. More samples provide smoother averaging. Default 5. | `5`        |
+
+#### Returns {.doc-section .doc-section-returns}
+
+| Name   | Type   | Description                                                                                                       |
+|--------|--------|-------------------------------------------------------------------------------------------------------------------|
+|        | bool   | True if calibration finished successfully and was accepted by user, False if the user exits early via escape key. |

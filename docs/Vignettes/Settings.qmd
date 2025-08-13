@@ -1,0 +1,257 @@
+---
+title: "Detox settings"
+author: Tommaso Ghilardi
+---
+
+DeToX provides some customization options to adapt eye-tracking calibration. While the default settings work well for most cases, you can fine-tune the behavior to better suit your specific needs.
+
+::: callout-important
+You probably do not have to change these settings as they are not going to influence your study. We report the for completeness and transparency.
+:::
+
+## Settings file
+
+To make our life easier we put all these settings in a file called `EtSettings.py`. Here we have multiple variables and dictionaries that we use to set the default values of our study. To change these settings to something different you can import such file and change the variables you want to change. For example, if we want to change the speed that the stimuli during the calibration zoom in and out we can do it like this:
+
+```{python}
+#| eval: false
+#| label: Settings1
+from DeToX import EtSettings
+
+# Change the zoom speed
+EtSettings.zoom_speed = 8.0  # Faster animation
+
+# Print the new value
+print(EtSettings.zoom_speed)
+```
+
+Easy peasy right??
+
+## Available settings
+
+Now that we have seen how to change the settings, let's see what settings we can access and what they do.
+
+### Calibration keys
+
+These control which keyboard keys select which calibration point during the calibration procedure. The experimenter presses number keys to select points, then SPACE to collect data.
+
+```{python}
+#| eval: false
+#| label: Settings2
+#### Calibration points
+# ---------------------------------------------------------
+#    Key mapping: which key selects which calibration point
+#    (Makes it easy to use different keyboards, or change which key triggers each point.)
+
+NUMKEY_DICT = {
+    "0": -1, "num_0": -1,
+    "1": 0,  "num_1": 0,
+    "2": 1,  "num_2": 1,
+    "3": 2,  "num_3": 2,
+    "4": 3,  "num_4": 3,
+    "5": 4,  "num_5": 4,
+    "6": 5,  "num_6": 5,
+    "7": 6,  "num_7": 6,
+    "8": 7,  "num_8": 7,
+    "9": 8,  "num_9": 8,
+}
+```
+
+### Animation settings
+
+These control how the calibration stimuli move and appear to attract the participant's attention. All sizes are in height units (% of screen height) and are automatically converted to other units.
+
+```{python}
+#| eval: false
+#| label: Settings3
+# ---------------------------------------------------------
+#    Animation settings for calibration stimuli
+#    All sizes in height units (% of screen height) - automatically converted to other units
+ANIMATION_SETTINGS = {
+    # Focus time
+    'focus_time': 0.5,                   # Wait time before collecting data in s
+
+    # Zoom
+    'zoom_speed': 6.0,                   # Speed of zoom animation
+    'max_zoom_size': 0.11,               # 15% of screen height (zoom animation max)
+    'min_zoom_size': 0.05,              # 2.5% of screen height (zoom animation min)
+
+    # Trill - Real rapid back-and-forth oscillations
+    'trill_size': 0.075,                 # 7.5% of screen height (trill fixed size)
+    'trill_rotation_range': 20,          # Maximum rotation angle in degrees for trill
+    'trill_cycle_duration': 1.5,         # Total cycle time: 1s trill + 0.5s stop = 1.5s
+    'trill_active_duration': 1.1,        # Trill for 1 second, then stop for 0.5 second
+    'trill_frequency': 3.0,              # How many back-and-forth oscillations per second
+}
+```
+
+**What each setting does:**
+
+-   **focus_time**: How long to wait after pressing SPACE before collecting calibration data. Gives participants time to look at the target.
+
+-   **zoom_speed**: How fast stimuli grow and shrink. Higher values = more attention-grabbing but potentially overwhelming.
+
+-   **max_zoom_size**: Largest size stimuli reach during zoom. Bigger = easier to see but more distracting.
+
+-   **min_zoom_size**: Smallest size during zoom. Should be 2-3x smaller than max for good contrast.
+
+-   **trill_size**: Fixed size for rotating stimuli (alternative to zoom animation).
+
+-   **trill_rotation_range**: How far stimuli rotate (±degrees). Larger = more movement.
+
+-   **trill_frequency**: Speed of rotation. Higher = faster wiggling.
+
+Example:
+
+```{python}
+#| eval: false
+#| label: Example1
+settings = EtSettings()
+settings.max_zoom_size = 0.20  # Bigger stimuli (20% of screen height)
+settings.zoom_speed = 4.0      # Slower, gentler animation
+```
+
+### Calibration colors
+
+These control the colors used in calibration result displays and visualizations. Colors are specified as RGBA values (Red, Green, Blue, Alpha) with values 0-255.
+
+```{python}
+#| eval: false
+#| label: Settings4
+# ---------------------------------------------------------
+#  Colors for all visual elements (lines, dots, highlights, etc.)
+CALIBRATION_COLORS = {
+    "left_eye":      (0, 255, 0, 255),       # Green (Tobii left eye)
+    "right_eye":     (255, 0, 0, 255),       # Red   (Tobii right eye)
+    "mouse":         (255, 128, 0, 255),     # Orange (simulated mouse sample)
+    "target_outline": (24, 24, 24, 255),     # Black outline for calibration targets
+    "highlight":     (255, 255, 0, 255),     # Yellow highlight for selected points
+}
+```
+
+**What each color is used for:**
+
+-   **left_eye**: Color of lines/dots showing left eye gaze in calibration results
+
+-   **right_eye**: Color of lines/dots showing right eye gaze in calibration results
+
+-   **mouse**: Color used when simulating eye tracking with mouse position
+
+-   **target_outline**: Color of circles drawn around calibration points
+
+-   **highlight**: Color of circles around points selected for retry
+
+Example:
+
+```{python}
+#| eval: false
+#| label: Example2
+ETSettings.CALIBRATION_COLORS["highlight"] = (0,255,255,255)  # Cyan
+```
+
+### UI element sizes
+
+These control the size of various user interface elements in the calibration display. All sizes are in height units (% of screen height).
+
+```{python}
+#| eval: false
+#| label: Settings5
+# ---------------------------------------------------------
+#  UI element sizes in height units (% of screen height)
+UI_ELEMENT_SIZES = {
+    'highlight': 0.04,       # 4% of screen height (retry selection circles)
+    'line_width': 0.003,      # 0.3% of screen height (line thickness)
+    'marker': 0.02,           # 1% of screen height (collection markers)
+    'border': 0.005,          # 0.5% of screen height (calibration border)
+    'plot_line': 0.002,       # 0.2% of screen height (result plot lines)
+    'text': 0.025,            # 2.5% of screen height (base text size)
+    'target_circle': 0.012,   # 1.2% of screen height (target circles in results)
+    'target_circle_width': 0.006  # 0.8% of screen height (target circle line width)
+}
+```
+
+**What each size controls:**
+
+-   **highlight_size**: Size of yellow circles around points selected for retry
+
+-   **line_width**: Thickness of lines in calibration accuracy displays
+
+-   **marker_size**: Size of circles marking calibration points in results
+
+-   **text_size**: Size of instruction text during calibration
+
+Example:
+
+```{python}
+#| eval: false
+#| label: Example3
+ETSettings.UI_ELEMENT_SIZES['highlight'] = 0.06    # Bigger highlight circles
+ETSettings.UI_ELEMENT_SIZES['text'] = 0.035         # Bigger text
+```
+
+### Font size multipliers
+
+These control the relative sizes of different types of text displayed during calibration. All multipliers are relative to the base text size.
+
+```{python}
+#| eval: false
+#| label: Settings6
+# ---------------------------------------------------------
+#  Font size multipliers (relative to DEFAULT_TEXT_HEIGHT_HEIGHT)
+FONT_SIZE_MULTIPLIERS = {
+    "instruction_text": 1.5,      # 150% of base text size
+    "message_text": 1.3,          # 130% of base text size
+    "title_text": 1.4,            # 140% of base text size
+}
+```
+
+**What each multiplier controls:**
+
+-   **instruction_text**: Size of main instruction text (e.g., "Press SPACE to collect data")
+
+-   **message_text**: Size of status messages (e.g., "Calibration successful")
+
+-   **title_text**: Size of title text and headers in calibration displays
+
+If your base text size is 0.025 (2.5% of screen height), then:
+
+-   Instruction text = 0.025 × 1.5 = 0.0375 (3.75% of screen height)
+
+-   Message text = 0.025 × 1.3 = 0.0325 (3.25% of screen height)
+
+-   Title text = 0.025 × 1.4 = 0.035 (3.5% of screen height)
+
+Example:
+
+```{python}
+#| eval: false
+#| label: Example4
+EtSettings.FONT_SIZE_MULTIPLIERS[instruction_text] = 1.8  # Larger instructio font
+```
+
+### Simulation settings
+
+The simulation settings control how DeToX behaves when running in simulation mode (testing without real eye-tracking hardware). In simulation mode, mouse position is used to generate fake gaze data.
+
+```{python}
+#| eval: false
+#| label: Settings7
+# ---------------------------------------------------------
+# Calibration session settings
+simulation_settings = {
+    'framerate': 120
+}
+```
+
+**What framerate does:**
+
+The framerate determines how often fake gaze data is generated when using `simulate=True`. This should match your real eye tracker's sampling rate for realistic testing
+
+Example:
+
+```{python}
+#| eval: false
+#| label: Example5
+settings = EtSettings()
+settings.simulation_framerate = 60  # Match a 60 Hz eye tracker for testing
+```

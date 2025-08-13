@@ -1,0 +1,29 @@
+# ETracker.save_calibration { #DeToX.ETracker.save_calibration }
+
+```python
+ETracker.save_calibration(filename=None, use_gui=False)
+```
+
+Save the current calibration data to a file.
+
+Retrieves the active calibration data from the connected Tobii eye tracker
+and saves it as a binary file. This can be reloaded later with
+`load_calibration()` to avoid re-calibrating the same participant.
+
+## Parameters {.doc-section .doc-section-parameters}
+
+| Name     | Type        | Description                                                                                                                                                                                                                                            | Default   |
+|----------|-------------|--------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------|-----------|
+| filename | str \| None | Desired output path. If None and `use_gui` is False, a timestamped default name is used (e.g., 'YYYY-mm-dd_HH-MM-SS_calibration.dat'). If provided without an extension, '.dat' is appended. If an extension is already present, it is left unchanged. | `None`    |
+| use_gui  | bool        | If True, opens a file-save dialog (Psychopy) where the user chooses the path. The suggested name respects the logic above. Default False.                                                                                                              | `False`   |
+
+## Returns {.doc-section .doc-section-returns}
+
+| Name   | Type   | Description                                                                                         |
+|--------|--------|-----------------------------------------------------------------------------------------------------|
+|        | bool   | True if saved successfully; False if cancelled, no data available, in simulation mode, or on error. |
+
+## Notes {.doc-section .doc-section-notes}
+
+- In simulation mode, saving is skipped and a warning is issued.
+- If `use_gui` is True and the dialog is cancelled, returns False.

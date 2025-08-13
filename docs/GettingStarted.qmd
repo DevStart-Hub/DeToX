@@ -1,17 +1,141 @@
 ---
 title: "Getting started"
-description: "A Python wrapper around tobii_researcher and PsychoPy for easily running eye-tracking experiments with infants and toddlers."
+description: "Starting using DeToX"
 author: Tommaso Ghilardi
 ---
 
-This package was created out of the need to run eye-tracking experiments using `tobii_researcher`. The **Tobii SDK** provides a powerful way to interact with Tobii eye trackers in Python, offering many advanced features. However, certain aspects of its implementation can be complex and unintuitive.
+# Getting Started with DeToX
 
-Since we often run experiments using **PsychoPy**, we developed this lightweight wrapper around **PsychoPy** and **`tobii_researcher`** to simplify the process. The goal is to make it easy to run **infant-friendly eye-tracking studies** while handling the more technical aspects of eye tracker integration.
+Alright, you've got DeToX installed - now let's dive into the fun stuff! This tutorial will get you up and running quickly. Think of it as your friendly introduction to the world of eye-tracking with infants. Don't worry, we've got plenty more detailed tutorials coming your way!
 
-This project didn’t start from scratch—it builds upon two existing packages that we have used in the past:
+::: callout-note
+## Before we begin
 
--   [**psychopy_tobii_infant**](https://github.com/yh-luo/psychopy_tobii_infant)
+This tutorial walks you through the essential steps for running an eye-tracking experiment with DeToX. We've designed it to be as straightforward as possible, though you'll need some basic familiarity with PsychoPy - specifically how to create windows and display stimuli. If you're new to PsychoPy or need a refresher, their [official tutorial](https://www.psychopy.org/coder/tutorial1.html) is an excellent starting point.
 
--   [**psychopy_tobii_controller**](https://github.com/hsogo/psychopy_tobii_controller)
+Don't worry if you're not a PsychoPy expert! The concepts we'll use are fundamental and easy to pick up.
+:::
 
-While these packages already provided great solutions for integrating Tobii eye trackers with **PsychoPy**, we added a few extra features and improvements that we found useful for running **infant-friendly eye-tracking studies**. Our goal was to simplify some of the more technical aspects of eye tracker integration while keeping the flexibility needed for research.
+## ETracker
+
+`ETracker` is the main class you'll work with for your experiments - keeping things streamlined and straightforward. This class handles all the complexities of eye-tracker communication, data collection, and infant-friendly calibration procedures behind the scenes, so you can focus on your research questions rather than technical implementation details.
+
+### Parameters
+
+**`win`** - Your PsychoPy window\
+Pass in the PsychoPy window object you've created for displaying stimuli and collecting data.
+
+**`etracker_id`** - Eye-tracker identifier (default: **0**),\
+Specifies which eye-tracker to use when multiple devices are available. For single eye-tracker setups, the default value works perfectly.
+
+**`simulate`** - Testing mode (default: **False**)\
+A practical feature for development and testing. When set to `True`, the system uses mouse position data instead of requiring a physical eye-tracker connection. All methods function identically, making it ideal for script development and remote work. Note that when simulation mode is enabled, the `etracker_id`{style="font-weight: var(--fontWeightRegular);"} parameter is ignored since no physical device connection is needed.
+
+## Let's try
+
+Now let's see how to initialize and use the ETracker class in practice.
+
+We begin by importing the necessary PsychoPy modules and the ETracker from DeToX:
+
+```{python}
+#| label: GettingStarted1
+#| eval: false
+from psychopy import visual
+from DeToX import ETracker
+
+# Initialize your window
+win = visual.Window(fullscr=True, units='height')
+
+# Create the eye-tracker controller
+ET = ETracker(win=win, simulate=True)  # Set to True for testing
+```
+
+Here we define a window (where we'll draw our stimuli) and then pass it to the ETracker class. We also set `simulate=True` since we're assuming you're testing this tutorial without an eye-tracker available. If you have access to a Tobii eye-tracker, simply set this to `False`.
+
+Once connected (or simulating), you'll see a informative message in the console confirming the connection and displaying relevant eye-tracker specifications.
+
+### Recording data
+
+Great! You're now connected to the eye-tracker (or simulating it). However, we're not actually collecting any data yet - let's fix that.
+
+To begin data collection, call the `start_recording` method on your ETracker instance:
+
+```{python}
+#| label: GettingStarted2
+#| eval: false
+# Start recording data
+ET.start_recording(filename="testing.hdf5")
+```
+
+The `start_recording` method accepts a `filename` parameter for naming your data file. If you don't specify one, DeToX automatically generates a timestamp-based filename. Note that you should provide just the basename - DeToX will add the appropriate `.hdf5` extension.
+
+Your eye-tracking data is now being collected continuously and will be later saved in a HDF5 format, which is ideal for storing large datasets efficiently. For details on the data structure and how to analyze your files, see our [DataFormats](DataFormats.qmd) guide.
+
+## Run the experiment
+
+Once data collection is active, you can run your experiment as usual - eye-tracking data will be collected automatically in the background. Let's create a simple example using a dot stimulus (admittedly basic, but perfect for demonstrating the workflow!).
+
+```{python}
+#| label: GettingStarted3
+#| eval: false
+# Create a dot (circle) in the center
+dot = visual.Circle(win, 
+                   radius=10,        # size in pixels
+                   pos=(0, 0),       # center position
+                   fillColor='white', # dot color
+                   lineColor=None)   # no outline
+```
+
+Now we can display our dot stimulus using PsychoPy's standard drawing pipeline:
+
+```{python}
+#| label: GettingStarted4
+#| eval: false
+# Show the dot stimulus
+dot.draw()  # Draw the dot on the window
+win.flip()  # Update the window to display the dot
+```
+
+### Marking Events in Your Data
+
+Great! But how will you know exactly when this dot appeared when analyzing your eye-tracking data? This is where event markers become essential. Use the `record_event()` method to timestamp important moments in your experiment:
+
+```{python}
+#| label: GettingStarted5
+#| eval: false
+# Record the event
+dot.draw()  # Draw the dot on the window
+win.flip()  # Update the window to display the dot
+ET.record_event("dot_presented")  # Record the event with a label
+```
+
+The `record_event()` method logs a timestamped event with your custom label ("dot_presented"). This creates precise synchronization between your experimental timeline and the eye-tracking data stream, making it straightforward to analyze gaze patterns relative to stimulus presentation during data analysis.
+
+### Save data
+
+While your eye-tracker is now collecting data, it's being stored in memory rather than immediately written to disk. So now you have two options for saving:
+
+**Option 1: Save at experiment end**\
+Call `stop_recording()` when finished - this automatically saves all collected data.
+
+**Option 2: Save periodically (recommended)**\
+Call `save_data()` at regular intervals throughout your experiment:
+
+#### Why Save Periodically?
+
+We recommend the periodic saving approach for several practical reasons:
+
+-   **Crash protection** - If your experiment encounters an error, you'll only lose data since the last save point
+
+-   **Memory management** - Prevents excessive memory usage during long experiments
+
+The `save_data()` method appends new data to your file, so you can call it multiple times without overwriting previous data. We typically call this method at the end of each trial during inter-stimulus intervals, when timing precision is less critical.
+
+```{python}
+#| label: GettingStarted6
+#| eval: false
+# Save data
+ET.save_data()
+```
+
+The save_data will also return the time it took to save the data, which can be useful to understand how long the saving process takes and how it affects the experiment timing. So you can take the measure to decide where to call it in your experiment.

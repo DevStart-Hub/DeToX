@@ -17,33 +17,25 @@ from psychopy import core, event, visual
 from . import Coords
 # Remove the old import and import both calibration classes
 from .Calibration import TobiiCalibrationSession, MouseCalibrationSession
+from . import ETSettings as cfg
 from .Utils import NicePrint
 
 
 class ETracker:
     """
-    Tobii controller for infant research.
+    A high-level controller for running eye-tracking experiments with Tobii Pro and PsychoPy.
 
-    The TobiiController class is a simple Python wrapper around the Tobii
-    Pro SDK for use in infant research. It provides convenience methods for
-    starting/stopping gaze data recording and saving the data to a file.
+    The **ETracker** class is a simplified Python interface designed to streamline the process of running infant eye-tracking experiments. It acts as a bridge between the **Tobii Pro SDK** (version 3.0 or later) and the popular experiment-building framework, **PsychoPy**.
 
-    The TobiiController class is designed to be used with the PsychoPy
-    package, which is a popular Python library for creating psychology
-    experiments. It is compatible with the Tobii Pro SDK version 3.0 or
-    later.
+    This class is the central hub for your eye-tracking experiment. Instead of managing low-level SDK functions, the TobiiController provides a clean, unified workflow for key experimental tasks. It is designed to "detoxify" the process, abstracting away complex boilerplate code so you can focus on your research.
 
-    The TobiiController class provides the following features:
+    Key features include:
+    - **Experiment Control**: Start, stop, and manage eye-tracking recordings with simple method calls.
+    - **Data Management**: Automatically save recorded gaze data to a specified file format.
+    - **Calibration**: Easily run a calibration procedure or load an existing calibration file to prepare the eye-tracker.
+    - **Seamless Integration**: Built specifically to integrate with PsychoPy's experimental loop, making it a natural fit for your existing research designs.
 
-        - Starting and stopping recording of gaze data
-        - Saving the recorded data to a file
-        - Running a calibration procedure
-        - Loading a calibration from a file
-        - Running a recording procedure
-        - Stopping the recording procedure
-
-    The TobiiController class is designed to be easy to use and provides a
-    minimal interface for the user to interact with the Tobii Pro SDK.
+    This class is intended to be the first object you instantiate in your experiment script. It provides a minimal yet powerful set of methods that are essential for conducting a reliable and reproducible eye-tracking study.
     """
 
     _simulation_settings = {
@@ -52,7 +44,7 @@ class ETracker:
 
     # --- Core Lifecycle Methods ---
 
-    def __init__(self, win, id=0, simulate=False):
+    def __init__(self, win, etracker_id=0, simulate=False):
         """
         Initializes the ETracker controller.
 
@@ -83,7 +75,7 @@ class ETracker:
         # Store essential configuration parameters provided at initialization.
         self.win = win
         self.simulate = simulate
-        self.eyetracker_id = id
+        self.eyetracker_id = etracker_id
 
         # --- State Management ---
         # Flags and variables to track the current state of the controller.
@@ -115,6 +107,7 @@ class ETracker:
         if self.simulate:
             # In simulation mode, use the mouse as the input device.
             self.mouse = event.Mouse(win=self.win)
+            self._simulation_settings = cfg._simulation_settings['framerate']
         else:
             # In real mode, find and connect to a Tobii eyetracker.
             eyetrackers = tr.find_all_eyetrackers()
@@ -131,9 +124,9 @@ class ETracker:
         # --- Finalization ---
         # Display connection info and register the cleanup function to run on exit.
         self.get_info(moment='connection')
-        atexit.register(self.close)
+        atexit.register(self._close)
 
-    def close(self):
+    def _close(self):
         """
         Clean shutdown of ETracker instance.
         
@@ -166,24 +159,6 @@ class ETracker:
             - 'recording': Shows a concise summary of the settings being used
               for the current recording session.
             Default is 'connection'.
-
-        Examples
-        --------
-        # After connecting to the tracker
-        tracker.get_info(moment='connection')
-        # >> Eyetracker Info
-        # >> Connected to the eyetracker:
-        # >>  - Model: Tobii Pro Spectrum
-        # >>  - Current frequency: 120.0 Hz
-        # >>  ...
-
-        # Just before starting to record data
-        tracker.get_info(moment='recording')
-        # >> Recording Info
-        # >> Starting recording with:
-        # >>  - Model: Tobii Pro Spectrum
-        # >>  - Current frequency: 120.0 Hz
-        # >>  ...
         """
         # --- Handle Simulation Mode ---
         if self.simulate:
@@ -652,7 +627,7 @@ class ETracker:
             name. File extension determines format (.h5/.hdf5 for HDF5,
             .csv for CSV, defaults to .h5).
             
-        Warns
+        Raises
         -----
         UserWarning
             If recording is already in progress.
@@ -718,7 +693,7 @@ class ETracker:
         saves all buffered data, and reports session summary. Handles both
         simulation and real eye tracker modes appropriately.
         
-        Warns
+        Raises
         -----
         UserWarning
             If recording is not currently active.

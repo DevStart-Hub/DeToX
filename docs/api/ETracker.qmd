@@ -1,0 +1,340 @@
+# ETracker { #DeToX.ETracker }
+
+```python
+ETracker(win, etracker_id=0, simulate=False)
+```
+
+A high-level controller for running eye-tracking experiments with Tobii Pro and PsychoPy.
+
+The **ETracker** class is a simplified Python interface designed to streamline the process of running infant eye-tracking experiments. It acts as a bridge between the **Tobii Pro SDK** (version 3.0 or later) and the popular experiment-building framework, **PsychoPy**.
+
+This class is the central hub for your eye-tracking experiment. Instead of managing low-level SDK functions, the TobiiController provides a clean, unified workflow for key experimental tasks. It is designed to "detoxify" the process, abstracting away complex boilerplate code so you can focus on your research.
+
+Key features include:
+- **Experiment Control**: Start, stop, and manage eye-tracking recordings with simple method calls.
+- **Data Management**: Automatically save recorded gaze data to a specified file format.
+- **Calibration**: Easily run a calibration procedure or load an existing calibration file to prepare the eye-tracker.
+- **Seamless Integration**: Built specifically to integrate with PsychoPy's experimental loop, making it a natural fit for your existing research designs.
+
+This class is intended to be the first object you instantiate in your experiment script. It provides a minimal yet powerful set of methods that are essential for conducting a reliable and reproducible eye-tracking study.
+
+## Methods
+
+| Name | Description |
+| --- | --- |
+| [calibrate](#DeToX.ETracker.calibrate) | Run the infant-friendly calibration procedure. |
+| [gaze_contingent](#DeToX.ETracker.gaze_contingent) | Initialize real-time gaze buffer for contingent applications. |
+| [get_average_gaze](#DeToX.ETracker.get_average_gaze) | Compute smoothed gaze position from recent samples. |
+| [get_info](#DeToX.ETracker.get_info) | Displays information about the connected eye tracker or simulation settings. |
+| [load_calibration](#DeToX.ETracker.load_calibration) | Loads calibration data from a file and applies it to the eye tracker. |
+| [record_event](#DeToX.ETracker.record_event) | Record timestamped experimental event during data collection. |
+| [save_calibration](#DeToX.ETracker.save_calibration) | Save the current calibration data to a file. |
+| [save_data](#DeToX.ETracker.save_data) | Save buffered gaze and event data to file with optimized processing. |
+| [show_status](#DeToX.ETracker.show_status) | Real-time visualization of participant's eye position in track box. |
+| [start_recording](#DeToX.ETracker.start_recording) | Begin gaze data recording session. |
+| [stop_recording](#DeToX.ETracker.stop_recording) | Stop gaze data recording and finalize session. |
+
+### calibrate { #DeToX.ETracker.calibrate }
+
+```python
+ETracker.calibrate(
+    calibration_points,
+    infant_stims,
+    shuffle=True,
+    audio=None,
+    anim_type='zoom',
+    save_calib=False,
+    num_samples=5,
+)
+```
+
+Run the infant-friendly calibration procedure.
+
+Automatically selects the calibration method based on operating mode
+(real eye tracker vs. simulation). Uses animated stimuli and optional
+audio to engage infants during calibration.
+
+#### Parameters {.doc-section .doc-section-parameters}
+
+| Name               | Type                          | Description                                                                                                                                                                                                  | Default    |
+|--------------------|-------------------------------|--------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------|------------|
+| calibration_points | list\[tuple\[float, float\]\] | Target locations in PsychoPy coordinates (e.g., height units). Typically 5–9 points distributed across the screen.                                                                                           | _required_ |
+| infant_stims       | list\[str\]                   | Paths to engaging image files for calibration targets (e.g., animated characters, colorful objects).                                                                                                         | _required_ |
+| shuffle            | bool                          | Whether to randomize stimulus presentation order. Default True.                                                                                                                                              | `True`     |
+| audio              | psychopy.sound.Sound \| None  | Attention-getting sound to play during calibration. Default None.                                                                                                                                            | `None`     |
+| anim_type          | (zoom, trill)                 | Animation style for the stimuli. Default 'zoom'.                                                                                                                                                             | `'zoom'`   |
+| save_calib         | bool \| str                   | Controls saving of calibration after a successful run: - False: do not save (default) - True: save using default naming (timestamped) - str: save to this filename; if it has no extension, '.dat' is added. | `False`    |
+| num_samples        | int                           | Samples per point in simulation mode. Default 5.                                                                                                                                                             | `5`        |
+
+#### Returns {.doc-section .doc-section-returns}
+
+| Name   | Type   | Description                                                  |
+|--------|--------|--------------------------------------------------------------|
+|        | bool   | True if calibration completed successfully, False otherwise. |
+
+#### Notes {.doc-section .doc-section-notes}
+
+- Real mode uses Tobii's calibration with result visualization.
+- Simulation mode uses mouse position to approximate the process.
+- If in simulation mode, any save request is safely skipped with a warning.
+
+### gaze_contingent { #DeToX.ETracker.gaze_contingent }
+
+```python
+ETracker.gaze_contingent(N=5)
+```
+
+Initialize real-time gaze buffer for contingent applications.
+
+Sets up rolling buffer to store recent gaze coordinates for
+immediate processing during experiments. Enables smooth gaze
+estimation and real-time gaze-contingent paradigms.
+
+#### Parameters {.doc-section .doc-section-parameters}
+
+| Name   | Type   | Description                                                                            | Default   |
+|--------|--------|----------------------------------------------------------------------------------------|-----------|
+| N      | int    | Number of recent gaze samples to buffer. Buffer holds coordinate pairs from both eyes. | `5`       |
+
+#### Raises {.doc-section .doc-section-raises}
+
+| Name   | Type      | Description             |
+|--------|-----------|-------------------------|
+|        | TypeError | If N is not an integer. |
+
+#### Examples {.doc-section .doc-section-examples}
+
+tracker.gaze_contingent(10)  # Buffer last 10 samples
+pos = tracker.get_average_gaze()  # Get smoothed position
+
+### get_average_gaze { #DeToX.ETracker.get_average_gaze }
+
+```python
+ETracker.get_average_gaze(fallback_offscreen=True)
+```
+
+Compute smoothed gaze position from recent samples.
+
+Averages valid gaze coordinates from rolling buffer to provide
+stable gaze estimates for real-time applications. Handles missing
+or invalid data gracefully.
+
+#### Parameters {.doc-section .doc-section-parameters}
+
+| Name               | Type   | Description                                                                                                      | Default   |
+|--------------------|--------|------------------------------------------------------------------------------------------------------------------|-----------|
+| fallback_offscreen | bool   | Return offscreen position if no valid data available. Default True (returns position far outside screen bounds). | `True`    |
+
+#### Returns {.doc-section .doc-section-returns}
+
+| Name   | Type          | Description                                                                                                           |
+|--------|---------------|-----------------------------------------------------------------------------------------------------------------------|
+|        | tuple or None | Average gaze position (x, y) in Tobii ADCS coordinates, offscreen position, or None if no data and fallback disabled. |
+
+#### Raises {.doc-section .doc-section-raises}
+
+| Name   | Type         | Description                                                     |
+|--------|--------------|-----------------------------------------------------------------|
+|        | RuntimeError | If gaze_contingent() was not called first to initialize buffer. |
+
+#### Examples {.doc-section .doc-section-examples}
+
+pos = tracker.get_average_gaze()
+if pos is not None:
+    psychopy_pos = Coords.get_psychopy_pos(win, pos)
+
+### get_info { #DeToX.ETracker.get_info }
+
+```python
+ETracker.get_info(moment='connection')
+```
+
+Displays information about the connected eye tracker or simulation settings.
+
+This method prints a formatted summary of the hardware or simulation
+configuration. It can be called at different moments (e.g., at connection
+or before recording) to show relevant information. The information is
+retrieved from the eye tracker or simulation settings and cached on the
+first call to avoid repeated hardware queries.
+
+#### Parameters {.doc-section .doc-section-parameters}
+
+| Name   | Type   | Description                                                                                                                                                                                                                                                                                                                                                   | Default        |
+|--------|--------|---------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------|----------------|
+| moment | str    | Specifies the context of the information display. - 'connection': Shows detailed information, including all available   options (e.g., frequencies, illumination modes). This is typically   used right after initialization. - 'recording': Shows a concise summary of the settings being used   for the current recording session. Default is 'connection'. | `'connection'` |
+
+### load_calibration { #DeToX.ETracker.load_calibration }
+
+```python
+ETracker.load_calibration(filename=None, use_gui=False)
+```
+
+Loads calibration data from a file and applies it to the eye tracker.
+
+This method allows reusing a previously saved calibration, which can save
+significant time for participants, especially in multi-session studies.
+The calibration data must be a binary file generated by a Tobii eye tracker,
+typically via the `save_calibration()` method. This operation is only
+available when connected to a physical eye tracker.
+
+#### Parameters {.doc-section .doc-section-parameters}
+
+| Name     | Type   | Description                                                                                                                                                                                                        | Default   |
+|----------|--------|--------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------|-----------|
+| filename | str    | The path to the calibration data file (e.g., "subject_01_calib.dat"). If `use_gui` is `True`, this path is used as the default suggestion in the file dialog. If `use_gui` is `False`, this parameter is required. | `None`    |
+| use_gui  | bool   | If `True`, a graphical file-open dialog is displayed for the user to select the calibration file. Defaults to `False`.                                                                                             | `False`   |
+
+#### Returns {.doc-section .doc-section-returns}
+
+| Name   | Type   | Description                                                                                                                                                          |
+|--------|--------|----------------------------------------------------------------------------------------------------------------------------------------------------------------------|
+|        | bool   | Returns `True` if the calibration was successfully loaded and applied, and `False` otherwise (e.g., user cancelled the dialog, file not found, or data was invalid). |
+
+#### Raises {.doc-section .doc-section-raises}
+
+| Name   | Type         | Description                                                       |
+|--------|--------------|-------------------------------------------------------------------|
+|        | RuntimeError | If the method is called while the ETracker is in simulation mode. |
+|        | ValueError   | If `use_gui` is `False` and `filename` is not provided.           |
+
+### record_event { #DeToX.ETracker.record_event }
+
+```python
+ETracker.record_event(label)
+```
+
+Record timestamped experimental event during data collection.
+
+Events are merged with gaze data based on timestamp proximity
+during save operations. Uses appropriate timing source for
+simulation vs. real eye tracker modes.
+
+#### Parameters {.doc-section .doc-section-parameters}
+
+| Name   | Type   | Description                                                              | Default    |
+|--------|--------|--------------------------------------------------------------------------|------------|
+| label  | str    | Descriptive label for the event (e.g., 'trial_start', 'stimulus_onset'). | _required_ |
+
+#### Raises {.doc-section .doc-section-raises}
+
+| Name   | Type           | Description                             |
+|--------|----------------|-----------------------------------------|
+|        | RuntimeWarning | If called when recording is not active. |
+
+#### Examples {.doc-section .doc-section-examples}
+
+tracker.record_event('trial_1_start')
+# ... present stimulus ...
+tracker.record_event('stimulus_offset')
+
+### save_calibration { #DeToX.ETracker.save_calibration }
+
+```python
+ETracker.save_calibration(filename=None, use_gui=False)
+```
+
+Save the current calibration data to a file.
+
+Retrieves the active calibration data from the connected Tobii eye tracker
+and saves it as a binary file. This can be reloaded later with
+`load_calibration()` to avoid re-calibrating the same participant.
+
+#### Parameters {.doc-section .doc-section-parameters}
+
+| Name     | Type        | Description                                                                                                                                                                                                                                            | Default   |
+|----------|-------------|--------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------|-----------|
+| filename | str \| None | Desired output path. If None and `use_gui` is False, a timestamped default name is used (e.g., 'YYYY-mm-dd_HH-MM-SS_calibration.dat'). If provided without an extension, '.dat' is appended. If an extension is already present, it is left unchanged. | `None`    |
+| use_gui  | bool        | If True, opens a file-save dialog (Psychopy) where the user chooses the path. The suggested name respects the logic above. Default False.                                                                                                              | `False`   |
+
+#### Returns {.doc-section .doc-section-returns}
+
+| Name   | Type   | Description                                                                                         |
+|--------|--------|-----------------------------------------------------------------------------------------------------|
+|        | bool   | True if saved successfully; False if cancelled, no data available, in simulation mode, or on error. |
+
+#### Notes {.doc-section .doc-section-notes}
+
+- In simulation mode, saving is skipped and a warning is issued.
+- If `use_gui` is True and the dialog is cancelled, returns False.
+
+### save_data { #DeToX.ETracker.save_data }
+
+```python
+ETracker.save_data()
+```
+
+Save buffered gaze and event data to file with optimized processing.
+
+Uses thread-safe buffer swapping to minimize lock time, then processes
+and saves data in CSV or HDF5 format. Events are merged with gaze data
+based on timestamp proximity.
+
+### show_status { #DeToX.ETracker.show_status }
+
+```python
+ETracker.show_status(decision_key='space')
+```
+
+Real-time visualization of participant's eye position in track box.
+
+Creates interactive display showing left/right eye positions and distance
+from screen. Useful for positioning participants before data collection.
+Updates continuously until exit key is pressed.
+
+#### Parameters {.doc-section .doc-section-parameters}
+
+| Name         | Type   | Description                                          | Default   |
+|--------------|--------|------------------------------------------------------|-----------|
+| decision_key | str    | Key to press to exit visualization. Default 'space'. | `'space'` |
+
+#### Notes {.doc-section .doc-section-notes}
+
+In simulation mode, use scroll wheel to adjust simulated distance.
+Eye positions shown as green (left) and red (right) circles.
+
+### start_recording { #DeToX.ETracker.start_recording }
+
+```python
+ETracker.start_recording(filename=None)
+```
+
+Begin gaze data recording session.
+
+Initializes file structure, clears any existing buffers, and starts
+data collection from either the eye tracker or simulation mode.
+Creates HDF5 or CSV files based on filename extension.
+
+#### Parameters {.doc-section .doc-section-parameters}
+
+| Name     | Type   | Description                                                                                                                                                   | Default   |
+|----------|--------|---------------------------------------------------------------------------------------------------------------------------------------------------------------|-----------|
+| filename | str    | Output filename for gaze data. If None, generates timestamp-based name. File extension determines format (.h5/.hdf5 for HDF5, .csv for CSV, defaults to .h5). | `None`    |
+
+#### Raises {.doc-section .doc-section-raises}
+
+| Name   | Type        | Description                          |
+|--------|-------------|--------------------------------------|
+|        | UserWarning | If recording is already in progress. |
+
+### stop_recording { #DeToX.ETracker.stop_recording }
+
+```python
+ETracker.stop_recording()
+```
+
+Stop gaze data recording and finalize session.
+
+Performs complete shutdown: stops data collection, cleans up resources,
+saves all buffered data, and reports session summary. Handles both
+simulation and real eye tracker modes appropriately.
+
+#### Raises {.doc-section .doc-section-raises}
+
+| Name   | Type        | Description                           |
+|--------|-------------|---------------------------------------|
+|        | UserWarning | If recording is not currently active. |
+
+#### Notes {.doc-section .doc-section-notes}
+
+All pending data in buffers is automatically saved before completion.
+Recording duration is measured from start_recording() call.
