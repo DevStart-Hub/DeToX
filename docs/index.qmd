@@ -29,8 +29,8 @@ While the eye-tracking landscape offers many excellent tools—from [PsychoPy](h
 
 We believe that good software is only as valuable as its documentation. Too often, researchers encounter powerful packages that become frustrating to use due to unclear or incomplete documentation. When you're left wondering what a function does or how to modify basic settings, the package becomes more of a hindrance than a help. A package should empower users, not confuse them. That's why we've prioritized creating clear, comprehensive documentation with practical examples and step-by-step tutorials. Our goal is documentation that helps you understand not just **what** to do, but **why**—so you can confidently adapt the code to your specific experimental needs.
 
-### Vignettes
 
+### Vignettes
 Our vignettes offer hands-on explanations of DeToX's settings and features through practical examples. Each vignette focuses on specific functionality, walking you through the implementation details and configuration options you'll need to effectively integrate these features into your research workflow.
 
 ### Tutorial
