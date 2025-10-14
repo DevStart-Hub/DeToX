@@ -1,5 +1,8 @@
 project:
   type: website
+execute:
+  kernel: tester
+
 metadata-files:
   - api/_sidebar.yml
 <<<<<<< HEAD
@@ -11,22 +14,44 @@ website:
   
 website:
   title: "DeToX"
+
+  cookie-consent:
+    type: implied
+    style: simple 
+    palette: dark
+
+
   navbar:
-    logo: logo.png
->>>>>>> 6672c1084872b41526f22b2c1208bc800d14d248
-    background: primary
-    left:
+    logo: resources/logo/full_logo.png
+
+    # background: primary
+    right:
       - href: GettingStarted.qmd
         text: Getting Started
       - text: "Vignettes"
         menu:
+          - text: "Installation"
+            href: Vignettes/Installation.qmd
           - text: "Calibration Guide"
-            href: Calibration.qmd
+            href: Vignettes/Calibration.qmd
           - text: "Gaze Contingent Experiments"
-            href: GazeContingent.qmd
+            href: Vignettes/GazeContingent.qmd
           - text: Undertanding data formats
-            href: DataFormats.qmd
-    right:
+            href: Vignettes/DataFormats.qmd
+          - text: Accessing DeToX settings
+            href: Vignettes/Settings.qmd
+            
+      - text: "Tutorial"
+        menu:
+          - text: "1) Experiment"
+            href: Tutorial/Tutorial1.qmd
+          - text: "2) Use the Eye Tracker"
+            href: Tutorial/Tutorial2.qmd
+          - text: "3) Calibration"
+            href: Tutorial/Tutorial3.qmd
+          - text: "4) Gaze Contingent"
+            href: Tutorial/Tutorial4.qmd
+
       - href: api/index.qmd
         text: Reference
         
@@ -40,14 +65,47 @@ website:
           - text: Report a Bug
             href:  https://bugs.com
 
+  # Utilities
+  back-to-top-navigation: true
+  page-navigation: true
+  reader-mode: false
+
+    ## Footer
+  page-footer:
+    center:  
+      - href: https://github.com/TommasoGhilardi/DevStart
+        icon: github
+        aria-label: GitHub
+      - href: https://x.com/DevSciStart
+        icon: twitter
+        aria-label: Twitter
+
+
 format:
   html:
-    theme: pulse
-    css:
-      - api/_styles-quartodoc.css
-      - styles.css
+    theme:
+      - pulse
+      - styles.scss  # your custom SCSS file
     toc: true
+    toc-expand: 4   
 
+    # Font
+    mainfont: 'Arial'
+
+    # Code variables
+    code-fold: false
+    code-copy: true
+    code-link: true
+    code-overflow: scroll
+    code-tools:
+      source: true
+      toggle: true
+      caption: none
+    highlight-style: zenburn
+    code-block-background: true
+    code-block-border-left: "#00B3B3"
+
+    # Pagination
     grid:
       sidebar-width: 300px
       body-width: 1100px
@@ -56,38 +114,80 @@ format:
 
 quartodoc:
   style: pkgdown
+  title: Reference
   package: DeToX
   dir: api
   sidebar: api/_sidebar.yml
+
   sections:
-    - title: Core Classes
-      desc: Main classes for infant eye-tracking research
+    - title: Main Eye-tracker Class
+      desc: >
+        The central class of the DeToX package, responsible for connecting to 
+        and managing the Tobii eye tracker. This class must be instantiated 
+        before any other functionality can be used. It provides access to 
+        calibration, recording control, and gaze-contingent presentation methods.
+        Below are the main methods and properties of this class:
       contents:
-        - TobiiController
-        - InfantStimuli
-    - title: Calibration and Recording Methods
-      desc: Methods for managing eye-tracking calibration and data recording
+        - ETracker
+
+    - subtitle: Control the Recording
+      desc: >
+        Functions for starting, stopping, and managing the capture of eye-tracking 
+        data. These methods allow you to initiate and terminate recordings, 
+        mark events of interest, and save collected data to disk.
       contents:
-        - TobiiController.save_calibration
-        - TobiiController.load_calibration
-        - TobiiController.start_recording
-        - TobiiController.stop_recording
-        - TobiiController.record_event
-        - TobiiController.save_data
-        - TobiiController.calibrate
-        - TobiiController.show_status
-        - TobiiController.gaze_contingent
-        - TobiiController.get_average_gaze
-        - TobiiController.close
-    - title: Coordinate transformation functions
-      desc: Functions for coordinate transformation
+        - ETracker.start_recording
+        - ETracker.stop_recording
+        - ETracker.record_event
+        - ETracker.save_data
+
+    - subtitle: Calibration
+      desc: >
+        Methods for running and managing eye tracker calibration. These include 
+        displaying calibration status, initiating calibration routines, and 
+        saving or loading calibration settings to ensure accurate gaze data.
       contents:
+        - ETracker.show_status
+        - ETracker.calibrate
+        - ETracker.save_calibration
+        - ETracker.load_calibration
+
+    - subtitle: Gaze Contingent
+      desc: >
+        Tools for running gaze-contingent experiments, where visual presentation 
+        adapts dynamically to a participant’s gaze position. Includes functionality 
+        for live gaze-contingent control and methods to compute average gaze 
+        positions for experimental logic.
+      contents:
+        - ETracker.gaze_contingent
+        - ETracker.get_average_gaze
+
+    - title: Internal Calibration 
+      desc: >
+        Classes for running eye-tracker calibration. These get called internally by the ETracker class, and are reported here only for completeness.
+        They are comprise of a base calibration class that set the common interface, and the specific implementations for Tobii and Mouse calibration.
+      contents:
+        - BaseCalibrationSession
+        - TobiiCalibrationSession
+        - MouseCalibrationSession
+
+    - title: Coordinate Conversion
+      desc: >
+        A collection of utility functions designed to help the conversion of the data from different formats.
+        These are called internally by the ETracker class, but can be used independently if needed.
+      contents:
+        - convert_height_to_units
         - get_psychopy_pos
+        - psychopy_to_pixels
         - get_tobii_pos
         - pix2tobii
         - tobii2pix
         - get_psychopy_pos_from_trackbox
-    - title: Utility Functions
-      desc: Helper functions and utilities
+
+    - title: Utilities
+      desc: >
+        A set of utility classes and functions for presenting stimuli
+        and formatted text. These are called internally by the ETracker class.
       contents:
         - NicePrint
+        - InfantStimuli

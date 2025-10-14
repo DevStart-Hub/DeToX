@@ -1,0 +1,41 @@
+# convert_height_to_units { #DeToX.convert_height_to_units }
+
+```python
+convert_height_to_units(win, height_value)
+```
+
+Convert a size from height units to the current window units.
+
+Provides unit-agnostic size conversion for consistent visual appearance across
+different PsychoPy coordinate systems. This function is essential for maintaining
+proper stimulus sizing when the window units differ from the standard height units
+used in configuration files.
+
+The conversion maintains the visual size of objects regardless of the coordinate
+system in use, ensuring that calibration targets, borders, and other visual
+elements appear at the intended size on screen.
+
+## Parameters {.doc-section .doc-section-parameters}
+
+| Name         | Type                   | Description                                                                                                                             | Default    |
+|--------------|------------------------|-----------------------------------------------------------------------------------------------------------------------------------------|------------|
+| win          | psychopy.visual.Window | The PsychoPy window which provides information about units and size. The window's current unit system determines the conversion method. | _required_ |
+| height_value | float                  | Size in height units (fraction of screen height). For example, 0.1 represents 10% of the screen height.                                 | _required_ |
+
+## Returns {.doc-section .doc-section-returns}
+
+| Name   | Type   | Description                                                                                                                               |
+|--------|--------|-------------------------------------------------------------------------------------------------------------------------------------------|
+|        | float  | Size converted to current window units. The returned value maintains the same visual size on screen as the original height specification. |
+
+## Notes {.doc-section .doc-section-notes}
+
+Height units are PsychoPy's recommended unit system for maintaining consistent
+appearance across different screen sizes and aspect ratios. This function
+enables that consistency when working with other unit systems.
+
+Supported unit conversions:
+- height: No conversion needed (identity transform)
+- norm: Scales by 2.0 to match normalized coordinate range
+- pix: Multiplies by screen height in pixels
+- cm/deg: Converts through pixels using monitor calibration

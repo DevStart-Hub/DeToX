@@ -3,32 +3,41 @@ website:
   - contents:
     - api/index.qmd
     - contents:
-      - api/TobiiController.qmd
-      - api/CalibrationSession.qmd
-      - api/InfantStimuli.qmd
-      section: Core Classes
+      - api/ETracker.qmd
+      - contents:
+        - api/ETracker.start_recording.qmd
+        - api/ETracker.stop_recording.qmd
+        - api/ETracker.record_event.qmd
+        - api/ETracker.save_data.qmd
+        section: Control the Recording
+      - contents:
+        - api/ETracker.show_status.qmd
+        - api/ETracker.calibrate.qmd
+        - api/ETracker.save_calibration.qmd
+        - api/ETracker.load_calibration.qmd
+        section: Calibration
+      - contents:
+        - api/ETracker.gaze_contingent.qmd
+        - api/ETracker.get_average_gaze.qmd
+        section: Gaze Contingent
+      section: Main Eye-tracker Class
     - contents:
-      - api/TobiiController.save_calibration.qmd
-      - api/TobiiController.load_calibration.qmd
-      - api/TobiiController.start_recording.qmd
-      - api/TobiiController.stop_recording.qmd
-      - api/TobiiController.record_event.qmd
-      - api/TobiiController.save_data.qmd
-      - api/TobiiController.calibrate.qmd
-      - api/TobiiController.show_status.qmd
-      - api/TobiiController.gaze_contingent.qmd
-      - api/TobiiController.get_average_gaze.qmd
-      - api/TobiiController.close.qmd
-      section: Calibration and Recording Methods
+      - api/BaseCalibrationSession.qmd
+      - api/TobiiCalibrationSession.qmd
+      - api/MouseCalibrationSession.qmd
+      section: Internal Calibration
     - contents:
+      - api/convert_height_to_units.qmd
       - api/get_psychopy_pos.qmd
+      - api/psychopy_to_pixels.qmd
       - api/get_tobii_pos.qmd
       - api/pix2tobii.qmd
       - api/tobii2pix.qmd
       - api/get_psychopy_pos_from_trackbox.qmd
-      section: Coordinate transformation functions
+      section: Coordinate Conversion
     - contents:
       - api/NicePrint.qmd
-      section: Utility Functions
+      - api/InfantStimuli.qmd
+      section: Utilities
     id: api
   - id: dummy-sidebar

@@ -1,0 +1,23 @@
+# ETracker.start_recording { #DeToX.ETracker.start_recording }
+
+```python
+ETracker.start_recording(filename=None)
+```
+
+Begin gaze data recording session.
+
+Initializes file structure, clears any existing buffers, and starts
+data collection from either the eye tracker or simulation mode.
+Creates HDF5 or CSV files based on filename extension.
+
+## Parameters {.doc-section .doc-section-parameters}
+
+| Name     | Type   | Description                                                                                                                                                   | Default   |
+|----------|--------|---------------------------------------------------------------------------------------------------------------------------------------------------------------|-----------|
+| filename | str    | Output filename for gaze data. If None, generates timestamp-based name. File extension determines format (.h5/.hdf5 for HDF5, .csv for CSV, defaults to .h5). | `None`    |
+
+## Raises {.doc-section .doc-section-raises}
+
+| Name   | Type        | Description                          |
+|--------|-------------|--------------------------------------|
+|        | UserWarning | If recording is already in progress. |

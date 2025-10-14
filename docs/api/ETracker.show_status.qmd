@@ -1,0 +1,22 @@
+# ETracker.show_status { #DeToX.ETracker.show_status }
+
+```python
+ETracker.show_status(decision_key='space')
+```
+
+Real-time visualization of participant's eye position in track box.
+
+Creates interactive display showing left/right eye positions and distance
+from screen. Useful for positioning participants before data collection.
+Updates continuously until exit key is pressed.
+
+## Parameters {.doc-section .doc-section-parameters}
+
+| Name         | Type   | Description                                          | Default   |
+|--------------|--------|------------------------------------------------------|-----------|
+| decision_key | str    | Key to press to exit visualization. Default 'space'. | `'space'` |
+
+## Notes {.doc-section .doc-section-notes}
+
+In simulation mode, use scroll wheel to adjust simulated distance.
+Eye positions shown as green (left) and red (right) circles.

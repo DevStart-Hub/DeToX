@@ -1,49 +1,80 @@
-# Function reference {.doc .doc-index}
+# Reference {.doc .doc-index}
 
-## Core Classes
+## Main Eye-tracker Class
 
-Main classes for infant eye-tracking research
+The central class of the DeToX package, responsible for connecting to  and managing the Tobii eye tracker. This class must be instantiated  before any other functionality can be used. It provides access to  calibration, recording control, and gaze-contingent presentation methods. Below are the main methods and properties of this class:
 
-| | |
-| --- | --- |
-| [TobiiController](TobiiController.qmd#DeToX.TobiiController) | Tobii controller for infant research. |
-| [CalibrationSession](CalibrationSession.qmd#DeToX.CalibrationSession) | Infant-friendly calibration session manager. |
-| [InfantStimuli](InfantStimuli.qmd#DeToX.InfantStimuli) | Stimuli for infant-friendly calibration. |
-
-## Calibration and Recording Methods
-
-Methods for managing eye-tracking calibration and data recording
 
 | | |
 | --- | --- |
-| [TobiiController.save_calibration](TobiiController.save_calibration.qmd#DeToX.TobiiController.save_calibration) | Save calibration data to a file. |
-| [TobiiController.load_calibration](TobiiController.load_calibration.qmd#DeToX.TobiiController.load_calibration) | Load calibration data from a file. |
-| [TobiiController.start_recording](TobiiController.start_recording.qmd#DeToX.TobiiController.start_recording) | Start recording gaze data. |
-| [TobiiController.stop_recording](TobiiController.stop_recording.qmd#DeToX.TobiiController.stop_recording) | Stop recording gaze data and save it to file. |
-| [TobiiController.record_event](TobiiController.record_event.qmd#DeToX.TobiiController.record_event) | Record an event with a timestamp. |
-| [TobiiController.save_data](TobiiController.save_data.qmd#DeToX.TobiiController.save_data) | Save gaze and event data to an HDF5 file with two datasets: 'gaze' and 'events'. |
-| [TobiiController.calibrate](TobiiController.calibrate.qmd#DeToX.TobiiController.calibrate) | Run an infant-friendly calibration procedure with point selection and |
-| [TobiiController.show_status](TobiiController.show_status.qmd#DeToX.TobiiController.show_status) | Show participant's gaze position in track box. |
-| [TobiiController.gaze_contingent](TobiiController.gaze_contingent.qmd#DeToX.TobiiController.gaze_contingent) | Initialize a rolling buffer to store recent gaze positions. |
-| [TobiiController.get_average_gaze](TobiiController.get_average_gaze.qmd#DeToX.TobiiController.get_average_gaze) | Compute the average gaze position from the most recent gaze samples. |
-| [TobiiController.close](TobiiController.close.qmd#DeToX.TobiiController.close) | Stop recording and perform necessary cleanup. |
+| [ETracker](ETracker.qmd#DeToX.ETracker) | A high-level controller for running eye-tracking experiments with Tobii Pro and PsychoPy. |
 
-## Coordinate transformation functions
+### Control the Recording
 
-Functions for coordinate transformation
+Functions for starting, stopping, and managing the capture of eye-tracking  data. These methods allow you to initiate and terminate recordings,  mark events of interest, and save collected data to disk.
+
 
 | | |
 | --- | --- |
+| [ETracker.start_recording](ETracker.start_recording.qmd#DeToX.ETracker.start_recording) | Begin gaze data recording session. |
+| [ETracker.stop_recording](ETracker.stop_recording.qmd#DeToX.ETracker.stop_recording) | Stop gaze data recording and finalize session. |
+| [ETracker.record_event](ETracker.record_event.qmd#DeToX.ETracker.record_event) | Record timestamped experimental event during data collection. |
+| [ETracker.save_data](ETracker.save_data.qmd#DeToX.ETracker.save_data) | Save buffered gaze and event data to file with optimized processing. |
+
+### Calibration
+
+Methods for running and managing eye tracker calibration. These include  displaying calibration status, initiating calibration routines, and  saving or loading calibration settings to ensure accurate gaze data.
+
+
+| | |
+| --- | --- |
+| [ETracker.show_status](ETracker.show_status.qmd#DeToX.ETracker.show_status) | Real-time visualization of participant's eye position in track box. |
+| [ETracker.calibrate](ETracker.calibrate.qmd#DeToX.ETracker.calibrate) | Run the infant-friendly calibration procedure. |
+| [ETracker.save_calibration](ETracker.save_calibration.qmd#DeToX.ETracker.save_calibration) | Save the current calibration data to a file. |
+| [ETracker.load_calibration](ETracker.load_calibration.qmd#DeToX.ETracker.load_calibration) | Loads calibration data from a file and applies it to the eye tracker. |
+
+### Gaze Contingent
+
+Tools for running gaze-contingent experiments, where visual presentation  adapts dynamically to a participant’s gaze position. Includes functionality  for live gaze-contingent control and methods to compute average gaze  positions for experimental logic.
+
+
+| | |
+| --- | --- |
+| [ETracker.gaze_contingent](ETracker.gaze_contingent.qmd#DeToX.ETracker.gaze_contingent) | Initialize real-time gaze buffer for contingent applications. |
+| [ETracker.get_average_gaze](ETracker.get_average_gaze.qmd#DeToX.ETracker.get_average_gaze) | Compute smoothed gaze position from recent samples. |
+
+## Internal Calibration
+
+Classes for running eye-tracker calibration. These get called internally by the ETracker class, and are reported here only for completeness. They are comprise of a base calibration class that set the common interface, and the specific implementations for Tobii and Mouse calibration.
+
+
+| | |
+| --- | --- |
+| [BaseCalibrationSession](BaseCalibrationSession.qmd#DeToX.BaseCalibrationSession) | Base class with common functionality for both calibration types. |
+| [TobiiCalibrationSession](TobiiCalibrationSession.qmd#DeToX.TobiiCalibrationSession) | Tobii-based calibration session for real eye tracking. |
+| [MouseCalibrationSession](MouseCalibrationSession.qmd#DeToX.MouseCalibrationSession) | Mouse-based calibration session for simulation mode. |
+
+## Coordinate Conversion
+
+A collection of utility functions designed to help the conversion of the data from different formats. These are called internally by the ETracker class, but can be used independently if needed.
+
+
+| | |
+| --- | --- |
+| [convert_height_to_units](convert_height_to_units.qmd#DeToX.convert_height_to_units) | Convert a size from height units to the current window units. |
 | [get_psychopy_pos](get_psychopy_pos.qmd#DeToX.get_psychopy_pos) | Convert Tobii ADCS coordinates to PsychoPy coordinates. |
+| [psychopy_to_pixels](psychopy_to_pixels.qmd#DeToX.psychopy_to_pixels) | Convert PsychoPy coordinates to pixel coordinates. |
 | [get_tobii_pos](get_tobii_pos.qmd#DeToX.get_tobii_pos) | Convert PsychoPy coordinates to Tobii ADCS coordinates. |
 | [pix2tobii](pix2tobii.qmd#DeToX.pix2tobii) | Convert PsychoPy pixel coordinates to Tobii ADCS coordinates. |
 | [tobii2pix](tobii2pix.qmd#DeToX.tobii2pix) | Convert Tobii ADCS coordinates to PsychoPy pixel coordinates. |
 | [get_psychopy_pos_from_trackbox](get_psychopy_pos_from_trackbox.qmd#DeToX.get_psychopy_pos_from_trackbox) | Convert Tobii TBCS coordinates to PsychoPy coordinates. |
 
-## Utility Functions
+## Utilities
 
-Helper functions and utilities
+A set of utility classes and functions for presenting stimuli and formatted text. These are called internally by the ETracker class.
+
 
 | | |
 | --- | --- |
-| [NicePrint](NicePrint.qmd#DeToX.NicePrint) | Print a message in a box with an optional title. |
+| [NicePrint](NicePrint.qmd#DeToX.NicePrint) | Print a message in a box with an optional title AND return the formatted text. |
+| [InfantStimuli](InfantStimuli.qmd#DeToX.InfantStimuli) | Stimuli manager for infant-friendly calibration procedures. |

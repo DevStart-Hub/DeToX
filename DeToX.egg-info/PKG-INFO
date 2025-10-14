@@ -2,14 +2,11 @@ Metadata-Version: 2.4
 Name: DeToX
 Version: 0.1.0
 Summary: Lightweight Python wrapper around tobii-researcher
-Author-email: Tommaso Ghilardi <tommaso.ghilardi93@gmail.com>, Francesco Poli <coauthor@example.com>
-Requires-Python: >=3.6
+Author-email: Tommaso Ghilardi <tommaso.ghilardi93@gmail.com>
+Requires-Python: >=3.10
 Description-Content-Type: text/markdown
-Requires-Dist: numpy
-Requires-Dist: pandas
 Requires-Dist: tobii-research
 Requires-Dist: psychopy
-Requires-Dist: pillow
 
 # DeToX
 

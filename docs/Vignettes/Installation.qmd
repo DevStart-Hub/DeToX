@@ -1,0 +1,91 @@
+---
+title: "Installation"
+author: Tommaso Ghilardi
+---
+
+So you're interested in using DeToX? Great! Let's get you set up quickly.
+
+DeToX is designed as a lightweight wrapper around PsychoPy and tobii_research. This means that if you install PsychoPy first, all of DeToX's dependencies will be installed automatically.
+
+::: callout-tip
+**Always install PsychoPy first, then DeToX.** This ensures all dependencies are properly configured and avoids potential conflicts.
+:::
+
+## Command Line Installation
+
+This method is ideal if you prefer working in an IDE (like Positron, VS Code, PyCharm, or Spyder) and want full control over your Python environment.
+
+### Step 1: Create a Virtual Environment
+
+We like to use miniforge to handle our environments and Python installations. Any other method would work as well, but for simplicity we'll show you how we prefer to do it.
+
+*We recommend using Python 3.10 for the best compatibility:*
+
+``` bash
+mamba create -n detox_env python=3.10
+```
+
+You will probably need to confirm by pressing `y`, and after a few seconds you'll have your environment with Python 3.10! Great!
+
+### Step 2: Activate Environment and Install PsychoPy
+
+Now let's activate the environment (making sure we're using it) and then install PsychoPy:
+
+``` bash
+mamba activate detox_env
+pip install psychopy
+```
+
+::: callout-caution
+While we're using miniforge and could use conda-forge to install PsychoPy, it's actually not supported anymore. However, we can simply use pip (the recommended method mentioned on Psychopy website).
+:::
+
+### Step 3: Install DeToX
+
+Now let's install DeToX as well:
+
+``` bash
+pip install detox
+```
+
+Again, confirm if needed and you're done! Amazing!
+
+## Standard installation
+
+## Standalone Installation
+
+PsychoPy is a large package with many dependencies, and sometimes (depending on your operating system) installing it can be quite tricky! For this reason, the PsychoPy website suggests using the standalone installation method. This is like installing regular software on your computer - it will install PsychoPy and all its dependencies in one go.
+
+### Step 1: Install PsychoPy Standalone
+
+1.  Go to the [PsychoPy download page](https://www.psychopy.org/download.html)
+
+2.  Download the standalone installer for your operating system
+
+3.  Run the installer and follow the setup instructions
+
+### Step 2: Install DeToX through PsychoPy
+
+Once PsychoPy is installed, you can install DeToX this way:
+
+1.  **Open PsychoPy**
+
+2.  **Go to Coder View** (the interface with the code editor)
+
+3.  **Open the Tools menu**
+
+4.  **Select "Plugins/package manager..."**
+
+5.  **Click on "Packages"** in the top tabs
+
+6.  **Click the "Open PIP terminal" button**
+
+7.  **Type the following command:** `pip install detox --user`
+
+That's it! You now have both PsychoPy and DeToX installed and ready to use.
+
+::: callout-warning
+## Important: DeToX requires coding
+
+DeToX is a code-based library that works with PsychoPy's Coder interface. If you typically use PsychoPy's Builder (the drag-and-drop visual interface), you'll need to switch to the Coder interface to use DeToX. Don't worry - we provide plenty of code examples to get you started!
+:::

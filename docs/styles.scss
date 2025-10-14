@@ -1,0 +1,99 @@
+/*-- scss:defaults --*/
+
+/* ----------------------------------------
+    Bootstrap variable overrides (must come before Bootstrap loads)
+----------------------------------------- */
+
+/* Primary brand color */
+$primary: #269a9eff; // new color
+$navbar-bg: $primary; // navbar background
+$navbar-fg: #ffffff; // navbar text color
+
+/*-- scss:rules --*/
+
+/* Change the color of all links on the page */
+a {
+  color: #17649eff;
+}
+
+/* Change the color of all links on hover */
+a:hover {
+  color: #0d3656bc;
+}
+
+
+
+/* Navbar title (brand) much larger than links */
+nav.navbar .navbar-brand {
+  font-size: 2.25rem;
+  font-weight: bold;
+}
+
+/* Navbar link size */
+nav.navbar .nav-link {
+  font-size: 1.25rem;
+}
+
+/* Enlarge all navbar icons */
+nav.navbar .quarto-navigation-tool > i,
+nav.navbar .quarto-navigation-tool > svg {
+  font-size: 1.2rem;
+  line-height: 1;
+}
+
+/* Navbar logo size */
+.navbar-logo {
+  max-height: 2rem;
+}
+
+
+
+/*------------------------------------*/
+/* 🚫 Hide Keywords Section           */
+/*------------------------------------*/
+
+body main > header div.keywords {
+    display: none;
+}
+
+
+
+/*------------------------------------*/
+/* 💻 Code Block and Output Styling   */
+/*------------------------------------*/
+
+// Inline Code Styling
+p code:not(.sourceCode), 
+li code:not(.sourceCode), 
+td code:not(.sourceCode) {
+    background-color: var(--bs-code-bg);
+    color: var(--bs-code-color);
+    padding: .2em;
+    border-radius: 3px;
+}
+
+// Code Output Block Styling
+.cell-output.cell-output-stdout {
+    background-color: #f0f2f4;
+    color: #2d2d2d;
+    padding: 1px 4px;
+    margin-bottom: 5px;
+    border-left: 2px solid #A9C3C6;
+    border-radius: 1px;
+    overflow: auto;
+}
+
+
+// Preformatted Text Styling
+pre {
+    border: none;
+    background: transparent;
+    padding: 0;
+}
+
+pre code {
+    border: none;
+    background: transparent;
+    padding: 0;
+    color: inherit;
+}

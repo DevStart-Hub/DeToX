@@ -1,10 +1,9 @@
 # DeToX/__init__.py
-
 # Import main classes for direct access
 from .Base import ETracker
-from .Calibration import TobiiCalibrationSession, MouseCalibrationSession
+from .Calibration import BaseCalibrationSession, TobiiCalibrationSession, MouseCalibrationSession
 from .Utils import InfantStimuli, NicePrint
-from . import calibration_config
+from . import ETSettings 
 from .Coords import (
     get_psychopy_pos,
     get_tobii_pos,
@@ -21,11 +20,12 @@ __version__ = '0.1.0'
 # Define what gets exported with "from DeToX import *"
 __all__ = [
     'ETracker',
+    'BaseCalibrationSession',
     'TobiiCalibrationSession',
     'MouseCalibrationSession',
     'InfantStimuli',
     'NicePrint',
-    'calibration_config',
+    'ETSettings', 
     'get_psychopy_pos',
     'get_tobii_pos',
     'pix2tobii',

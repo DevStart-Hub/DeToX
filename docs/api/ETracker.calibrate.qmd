@@ -1,0 +1,43 @@
+# ETracker.calibrate { #DeToX.ETracker.calibrate }
+
+```python
+ETracker.calibrate(
+    calibration_points,
+    infant_stims,
+    shuffle=True,
+    audio=None,
+    anim_type='zoom',
+    save_calib=False,
+    num_samples=5,
+)
+```
+
+Run the infant-friendly calibration procedure.
+
+Automatically selects the calibration method based on operating mode
+(real eye tracker vs. simulation). Uses animated stimuli and optional
+audio to engage infants during calibration.
+
+## Parameters {.doc-section .doc-section-parameters}
+
+| Name               | Type                          | Description                                                                                                                                                                                                  | Default    |
+|--------------------|-------------------------------|--------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------|------------|
+| calibration_points | list\[tuple\[float, float\]\] | Target locations in PsychoPy coordinates (e.g., height units). Typically 5–9 points distributed across the screen.                                                                                           | _required_ |
+| infant_stims       | list\[str\]                   | Paths to engaging image files for calibration targets (e.g., animated characters, colorful objects).                                                                                                         | _required_ |
+| shuffle            | bool                          | Whether to randomize stimulus presentation order. Default True.                                                                                                                                              | `True`     |
+| audio              | psychopy.sound.Sound \| None  | Attention-getting sound to play during calibration. Default None.                                                                                                                                            | `None`     |
+| anim_type          | (zoom, trill)                 | Animation style for the stimuli. Default 'zoom'.                                                                                                                                                             | `'zoom'`   |
+| save_calib         | bool \| str                   | Controls saving of calibration after a successful run: - False: do not save (default) - True: save using default naming (timestamped) - str: save to this filename; if it has no extension, '.dat' is added. | `False`    |
+| num_samples        | int                           | Samples per point in simulation mode. Default 5.                                                                                                                                                             | `5`        |
+
+## Returns {.doc-section .doc-section-returns}
+
+| Name   | Type   | Description                                                  |
+|--------|--------|--------------------------------------------------------------|
+|        | bool   | True if calibration completed successfully, False otherwise. |
+
+## Notes {.doc-section .doc-section-notes}
+
+- Real mode uses Tobii's calibration with result visualization.
+- Simulation mode uses mouse position to approximate the process.
+- If in simulation mode, any save request is safely skipped with a warning.

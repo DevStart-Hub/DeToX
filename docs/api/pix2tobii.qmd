@@ -6,21 +6,30 @@ pix2tobii(win, p)
 
 Convert PsychoPy pixel coordinates to Tobii ADCS coordinates.
 
+Low-level conversion function that transforms pixel coordinates with a
+centered origin (PsychoPy convention) to Tobii's normalized ADCS coordinates
+with top-left origin. This is a fundamental building block for other
+coordinate conversion functions.
+
 ## Parameters {.doc-section .doc-section-parameters}
 
-| Name   | Type                   | Description                                                          | Default    |
-|--------|------------------------|----------------------------------------------------------------------|------------|
-| win    | psychopy.visual.Window | The PsychoPy window which provides information about units and size. | _required_ |
-| p      | tuple                  | The PsychoPy pixel coordinates to convert.                           | _required_ |
+| Name   | Type                   | Description                                                                                                                 | Default    |
+|--------|------------------------|-----------------------------------------------------------------------------------------------------------------------------|------------|
+| win    | psychopy.visual.Window | The PsychoPy window which provides screen dimensions for normalization.                                                     | _required_ |
+| p      | tuple                  | The PsychoPy pixel coordinates to convert as (x, y). Origin is at screen center, x increases rightward, y increases upward. | _required_ |
 
 ## Returns {.doc-section .doc-section-returns}
 
-| Name   | Type   | Description                           |
-|--------|--------|---------------------------------------|
-|        | tuple  | The converted Tobii ADCS coordinates. |
+| Name   | Type   | Description                                                                                                                      |
+|--------|--------|----------------------------------------------------------------------------------------------------------------------------------|
+|        | tuple  | The converted Tobii ADCS coordinates as (x, y) in range [0, 1]. Origin is top-left, x increases rightward, y increases downward. |
 
 ## Notes {.doc-section .doc-section-notes}
 
-The conversion is done by dividing the pixel coordinates by the window size
-and adding 0.5 to the x and y coordinates to center the origin at the
-middle of the screen.
+The conversion involves:
+1. Translating the origin from center to top-left (+0.5 offset)
+2. Normalizing by screen dimensions to get [0, 1] range
+3. Inverting the Y-axis to match Tobii's top-down convention
+
+This function assumes PsychoPy's pixel coordinate convention where
+(0, 0) is at screen center.

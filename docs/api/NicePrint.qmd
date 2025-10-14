@@ -4,11 +4,27 @@
 NicePrint(body, title='')
 ```
 
-Print a message in a box with an optional title.
+Print a message in a box with an optional title AND return the formatted text.
+
+Creates a visually appealing text box using Unicode box-drawing characters that
+displays both in the console and can be used in PsychoPy visual stimuli. This
+function is particularly useful for presenting instructions, status messages,
+and calibration information in a consistent, professional format.
+
+The box automatically adjusts its width to accommodate the longest line of text
+and centers the title if provided. The formatted output uses Unicode characters
+for smooth, connected borders that render well in both terminal and graphical
+environments.
 
 ## Parameters {.doc-section .doc-section-parameters}
 
-| Name   | Type   | Description                                    | Default    |
-|--------|--------|------------------------------------------------|------------|
-| body   | str    | The string to print inside the box.            | _required_ |
-| title  | str    | A title to print on the top border of the box. | `''`       |
+| Name   | Type   | Description                                                                                                                                                                           | Default    |
+|--------|--------|---------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------|------------|
+| body   | str    | The string to print inside the box. Can contain multiple lines separated by newline characters. Each line will be padded to align within the box.                                     | _required_ |
+| title  | str    | A title to print on the top border of the box. The title will be centered within the top border. If empty string or not provided, the top border will be solid. Default empty string. | `''`       |
+
+## Returns {.doc-section .doc-section-returns}
+
+| Name   | Type   | Description                                                                                                                                                         |
+|--------|--------|---------------------------------------------------------------------------------------------------------------------------------------------------------------------|
+|        | str    | The formatted text with box characters, ready for display in console or use with PsychoPy TextStim objects. Includes all box-drawing characters and proper spacing. |
