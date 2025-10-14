@@ -5,7 +5,13 @@ execute:
 
 metadata-files:
   - api/_sidebar.yml
-
+<<<<<<< HEAD
+website:
+  title: "DeToX"
+  navbar:
+    logo: resources/logo/full_logo.png
+=======
+  
 website:
   title: "DeToX"
 
