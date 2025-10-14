@@ -38,10 +38,6 @@ class ETracker:
     This class is intended to be the first object you instantiate in your experiment script. It provides a minimal yet powerful set of methods that are essential for conducting a reliable and reproducible eye-tracking study.
     """
 
-    _simulation_settings = {
-        'framerate': 120,  # Default to Tobii Pro Spectrum rate
-    }
-
     # --- Core Lifecycle Methods ---
 
     def __init__(self, win, etracker_id=0, simulate=False):
@@ -107,7 +103,6 @@ class ETracker:
         if self.simulate:
             # In simulation mode, use the mouse as the input device.
             self.mouse = event.Mouse(win=self.win)
-            self._simulation_settings = cfg._simulation_settings['framerate']
         else:
             # In real mode, find and connect to a Tobii eyetracker.
             eyetrackers = tr.find_all_eyetrackers()
@@ -164,7 +159,7 @@ class ETracker:
         if self.simulate:
             # Set the simulated frames per second (fps) if not already set.
             if self.fps is None:
-                self.fps = self._simulation_settings['framerate']
+                self.fps = cfg.simulation_framerate
 
             # Display information specific to the simulation context.
             if moment == 'connection':
@@ -1052,7 +1047,7 @@ class ETracker:
                 gaze_attrs = store.get_storer('gaze').attrs
                 gaze_attrs.subject_id = getattr(self, 'subject_id', 'unknown')
                 gaze_attrs.screen_size = tuple(self.win.size)
-                gaze_attrs.framerate = self.fps or self._simulation_settings.get('framerate')
+                gaze_attrs.framerate = self.fps or cfg.simulation_framerate
                 
         else:  # self.file_format == 'csv'
             # --- CSV header creation ---
