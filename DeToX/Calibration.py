@@ -99,7 +99,7 @@ class BaseCalibrationSession:
         
         # --- Border Scaling ---
         # Convert border thickness from height units to current units
-        border_thickness = convert_height_to_units(self.win, cfg.DEFAULT_BORDER_THICKNESS_HEIGHT)
+        border_thickness = convert_height_to_units(self.win, cfg.ui_sizes.border)
         
         # --- Unit-Specific Dimension Conversion ---
         # Convert to appropriate units for consistent sizing

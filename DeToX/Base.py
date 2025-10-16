@@ -1226,7 +1226,7 @@ class ETracker:
             'user_position' (for show_status).
         """
         # --- Timing setup ---
-        interval = 1.0 / self._simulation_settings['framerate']
+        interval = 1.0 / cfg.simulation_framerate
         
         try:
             # --- Main simulation loop ---
