@@ -607,10 +607,10 @@ class ETracker:
 
     # --- Recording Methods ---
 
-    def start_recording(self, filename=None):
+    def start_recording(self, filename=None, raw_format=False):
         """
         Begin gaze data recording session.
-        
+
         Initializes file structure, clears any existing buffers, and starts
         data collection from either the eye tracker or simulation mode.
         Creates HDF5 or CSV files based on filename extension.
@@ -621,11 +621,18 @@ class ETracker:
             Output filename for gaze data. If None, generates timestamp-based
             name. File extension determines format (.h5/.hdf5 for HDF5,
             .csv for CSV, defaults to .h5).
+        raw_format : bool, optional
+            If True, preserves all original Tobii SDK column names and data.
+            If False (default), uses simplified column names and subset of columns.
+            Raw format is useful for advanced analysis requiring full metadata.
             
-        Raises
-        -----
-        UserWarning
-            If recording is already in progress.
+        Examples
+        --------
+        # Standard format (simplified columns)
+        tracker.start_recording('data.h5')
+        
+        # Raw format (all Tobii SDK columns preserved)
+        tracker.start_recording('data_raw.h5', raw_format=True)
         """
         # --- State validation ---
         # Check current recording status and handle conflicts
@@ -636,6 +643,9 @@ class ETracker:
             )
             return
         
+        # --- Format flag --- 
+        self.raw_format = raw_format
+
         # --- Buffer initialization ---
         # Clear any residual data from previous sessions
         if self.gaze_data and not self.recording:
@@ -864,26 +874,6 @@ class ETracker:
     def gaze_contingent(self, N=5):
         """
         Initialize real-time gaze buffer for contingent applications.
-        
-        Sets up rolling buffer to store recent gaze coordinates for
-        immediate processing during experiments. Enables smooth gaze
-        estimation and real-time gaze-contingent paradigms.
-        
-        Parameters
-        ----------
-        N : int
-            Number of recent gaze samples to buffer. Buffer holds
-            coordinate pairs from both eyes.
-            
-        Raises
-        ------
-        TypeError
-            If N is not an integer.
-            
-        Examples
-        --------
-        tracker.gaze_contingent(10)  # Buffer last 10 samples
-        pos = tracker.get_average_gaze()  # Get smoothed position
         """
         # --- Input validation ---
         if not isinstance(N, int):
@@ -891,41 +881,66 @@ class ETracker:
                 f"Invalid buffer size for gaze_contingent(): expected int, got {type(N).__name__}. "
                 f"Received value: {N}"
             )
-        
-        # --- Buffer initialization ---
-        # Store coordinate pairs [left_gaze, right_gaze] for averaging
+
+        # --- Check if buffer already exists ---
+        if self.gaze_contingent_buffer is not None:
+            warnings.warn(
+                "gaze_contingent_buffer already exists — initialization skipped.",
+                UserWarning,
+                stacklevel=2
+            )
+            return  # <-- exit without overwriting the existing buffer
+
+        # --- Buffer initialization (only if not already present) ---
         self.gaze_contingent_buffer = deque(maxlen=N)
 
-    def get_average_gaze(self, fallback_offscreen=True):
+
+    def get_gaze_position(self, fallback_offscreen=True, method="median"):
         """
-        Compute smoothed gaze position from recent samples.
+        Get current gaze position from rolling buffer.
         
-        Averages valid gaze coordinates from rolling buffer to provide
-        stable gaze estimates for real-time applications. Handles missing
-        or invalid data gracefully.
+        Aggregates recent gaze samples from both eyes to provide a stable,
+        real-time gaze estimate. Handles missing or invalid data gracefully.
         
         Parameters
         ----------
         fallback_offscreen : bool, optional
-            Return offscreen position if no valid data available.
-            Default True (returns position far outside screen bounds).
+            If True (default), returns an offscreen position (3x screen dimensions)
+            when no valid gaze data is available. If False, returns None.
+        method : str, optional
+            Aggregation method for combining samples and eyes.
+            - "median" (default): Robust to outliers, good for noisy data
+            - "mean": Smoother but sensitive to outliers
+            - "last": Lowest latency, uses only most recent sample
             
         Returns
         -------
         tuple or None
-            Average gaze position (x, y) in Tobii ADCS coordinates,
-            offscreen position, or None if no data and fallback disabled.
+            Gaze position (x, y) in PsychoPy coordinates (current window units),
+            or None if no valid data and fallback_offscreen=False.
             
         Raises
         ------
         RuntimeError
-            If gaze_contingent() was not called first to initialize buffer.
+            If gaze_contingent() was not called to initialize the buffer.
             
         Examples
         --------
-        pos = tracker.get_average_gaze()
-        if pos is not None:
-            psychopy_pos = Coords.get_psychopy_pos(win, pos)
+        >>> # Basic usage (median aggregation)
+        >>> pos = tracker.get_gaze_position()
+        >>> if pos is not None:
+        ...     circle.pos = pos
+        
+        >>> # Use mean for smoother tracking
+        >>> pos = tracker.get_gaze_position(method="mean")
+        
+        >>> # Lowest latency (last sample only)
+        >>> pos = tracker.get_gaze_position(method="last")
+        
+        >>> # Return None instead of offscreen position
+        >>> pos = tracker.get_gaze_position(fallback_offscreen=False)
+        >>> if pos is None:
+        ...     print("No valid gaze data")
         """
         # --- Buffer validation ---
         if self.gaze_contingent_buffer is None:
@@ -934,18 +949,48 @@ class ETracker:
                 "to set up the rolling buffer for real-time gaze processing."
             )
         
-        # --- Data extraction and validation ---
-        # Filter out invalid or malformed coordinate pairs
-        valid_points = [p for p in self.gaze_contingent_buffer if len(p) == 2]
+        # --- Check if buffer is empty ---
+        if len(self.gaze_contingent_buffer) == 0:
+            if fallback_offscreen:
+                tobii_offscreen = (3.0, 3.0)
+                return Coords.convert_height_to_units(self.win, tobii_offscreen)
+            else:
+                return None
         
-        # --- Position calculation ---
-        if not valid_points:
-            # --- No valid data handling ---
-            return self.win.size * 2 if fallback_offscreen else None
-        else:
-            # --- Average computation ---
-            # Compute mean of valid coordinate pairs, handling NaN values
-            return np.nanmean(valid_points, axis=0)
+        # --- Convert buffer to numpy array ---
+        data = np.array(list(self.gaze_contingent_buffer))  # Shape: (n_samples, 2_eyes, 2_coords)
+        
+        # --- Check if all data is NaN (eye tracker lost tracking) ---
+        if np.all(np.isnan(data)):
+            if fallback_offscreen:
+                tobii_offscreen = (3.0, 3.0)
+                return Coords.convert_height_to_units(self.win, tobii_offscreen)
+            else:
+                return None
+        
+        # --- Validate and apply aggregation method ---
+        valid_methods = {"mean", "median", "last"}
+        if method not in valid_methods:
+            warnings.warn(
+                f"Invalid method '{method}' — defaulting to 'median'.",
+                UserWarning,
+                stacklevel=2
+            )
+            method = "median"
+        
+        # --- Aggregate positions ---
+        if method == "mean":
+            # Average across all samples and both eyes
+            mean_tobii = np.nanmean(data, axis=(0, 1))
+        elif method == "median":
+            # Median across all samples and both eyes (robust to outliers)
+            mean_tobii = np.nanmedian(data, axis=(0, 1))
+        elif method == "last":
+            # Use last sample only, averaged across both eyes
+            mean_tobii = np.nanmean(data[-1], axis=0)
+        
+        # --- Convert to PsychoPy coordinates ---
+        return Coords.get_psychopy_pos(self.win, mean_tobii)
 
     # --- Private Data Processing Methods ---
 
@@ -954,8 +999,8 @@ class ETracker:
         Initialize file structure and validate recording setup.
         
         Determines output filename and format, creates empty file structure
-        with proper schema, and validates no conflicts exist. Uses dummy-row
-        technique for HDF5 table creation to ensure pandas compatibility.
+        with proper schema based on raw_format flag. Uses dummy-row technique 
+        for HDF5 table creation to ensure pandas compatibility.
         
         Parameters
         ----------
@@ -970,21 +1015,24 @@ class ETracker:
             If file extension is not supported (.csv, .h5, .hdf5 only).
         FileExistsError
             If target file already exists (prevents accidental overwriting).
+            
+        Notes
+        -----
+        Raw format expands tuple columns into separate x, y, z components
+        for HDF5 compatibility (e.g., left_gaze_point_on_display_area becomes
+        left_gaze_point_on_display_area_x and left_gaze_point_on_display_area_y).
         """
         # --- Filename and format determination ---
-        # Set default timestamp-based filename or process provided name
         if filename is None:
             from datetime import datetime
             self.filename = f"{datetime.now().strftime('%Y-%m-%d_%H-%M-%S')}.h5"
             self.file_format = 'hdf5'
         else:
-            # Parse filename and determine format from extension
             base, ext = os.path.splitext(filename)
             if not ext:
-                ext = '.h5'  # Default to HDF5 if no extension provided
+                ext = '.h5'
                 filename = base + ext
                 
-            # Validate and set format based on extension
             if ext.lower() in ('.h5', '.hdf5'):
                 self.file_format = 'hdf5'
                 self.filename = filename
@@ -998,144 +1046,190 @@ class ETracker:
                 )
         
         # --- File conflict prevention ---
-        # Ensure we don't accidentally overwrite existing data
         if os.path.exists(self.filename):
             raise FileExistsError(
                 f"File '{self.filename}' already exists. "
                 f"Choose a different filename or remove the existing file."
             )
         
+        # --- Create column structure based on format ---
+        if self.raw_format:
+            gaze_columns = cfg.RawDataColumns.get_dummy_dict()
+            validity_dtypes = cfg.RawDataColumns.get_validity_dtypes()
+        else:
+            gaze_columns = cfg.SimplifiedDataColumns.get_dummy_dict()
+            validity_dtypes = cfg.SimplifiedDataColumns.get_validity_dtypes()
+        
         # --- File structure creation ---
-        # Create empty file with proper schema based on format
         if self.file_format == 'hdf5':
-            # --- HDF5 table creation using dummy-row technique ---
-            # Create temporary data with correct structure and types
-            dummy_gaze = pd.DataFrame({
-                'TimeStamp': [-999999],
-                'Left_X': [np.nan], 'Left_Y': [np.nan],
-                'Left_Validity': [0], 'Left_Pupil': [np.nan],
-                'Left_Pupil_Validity': [0],
-                'Right_X': [np.nan], 'Right_Y': [np.nan],
-                'Right_Validity': [0], 'Right_Pupil': [np.nan],
-                'Right_Pupil_Validity': [0],
-                'Events': ['__DUMMY__']
-            })
+            # Create DataFrame for HDF5
+            dummy_gaze = pd.DataFrame(gaze_columns).astype(validity_dtypes)
             
             dummy_events = pd.DataFrame({
                 'TimeStamp': [-999999],
                 'Event': ['__DUMMY__']
             })
             
-            # Create HDF5 file with proper table structure
+            # --- Create HDF5 file with proper table structure ---
             with pd.HDFStore(self.filename, mode='w', complevel=5, complib='blosc') as store:
-                # --- Gaze table creation ---
-                # Create table structure then remove dummy data
+                # Create gaze table
                 store.append('gaze', dummy_gaze, format='table',
                             min_itemsize={'Events': 50},
                             data_columns=['TimeStamp'], index=False)
                 store.remove('gaze', where='TimeStamp == -999999')
                 
-                # --- Events table creation ---
-                # Create table structure then remove dummy data
+                # Create events table
                 store.append('events', dummy_events, format='table',
                             min_itemsize={'Event': 50},
                             data_columns=['TimeStamp'], index=False)
                 store.remove('events', where='TimeStamp == -999999')
                 
-                # --- Metadata attachment ---
-                # Store experiment and system information
+                # Add metadata
                 gaze_attrs = store.get_storer('gaze').attrs
                 gaze_attrs.subject_id = getattr(self, 'subject_id', 'unknown')
                 gaze_attrs.screen_size = tuple(self.win.size)
                 gaze_attrs.framerate = self.fps or cfg.simulation_framerate
-                
-        else:  # self.file_format == 'csv'
-            # --- CSV header creation ---
-            # Create empty CSV file with proper column structure
-            cols = [
-                'TimeStamp', 'Left_X', 'Left_Y', 'Left_Validity',
-                'Left_Pupil', 'Left_Pupil_Validity',
-                'Right_X', 'Right_Y', 'Right_Validity',
-                'Right_Pupil', 'Right_Pupil_Validity', 'Events'
-            ]
-            pd.DataFrame(columns=cols).to_csv(self.filename, index=False)
+                gaze_attrs.raw_format = self.raw_format
+                    
+        else:  # CSV format
+            # Create CSV with just the column names (no dummy row needed)
+            pd.DataFrame(columns=gaze_columns.keys()).to_csv(self.filename, index=False)
         
         # --- Setup confirmation ---
-        # Display recording configuration to user
+        format_type = "RAW (expanded)" if self.raw_format else "SIMPLIFIED"
         self.get_info(moment="recording")
+        print(f"|-- Data format: {format_type} --|")
 
     def _adapt_gaze_data(self, df, df_ev):
         """
-        Transform raw gaze data into analysis-ready format.
+        Transform raw gaze data based on format flag.
         
-        Converts Tobii coordinate system to PsychoPy coordinates, normalizes
-        timestamps, optimizes data types, and merges event data.
+        In raw format mode, expands tuple columns into separate x, y, z components
+        for HDF5 compatibility while preserving all Tobii SDK data. In simplified 
+        format mode, converts coordinates to PsychoPy units and selects only 
+        essential columns.
         
         Parameters
         ----------
         df : pandas.DataFrame
-            DataFrame containing raw gaze data from Tobii SDK.
+            DataFrame containing raw gaze data from Tobii SDK or simulation.
         df_ev : pandas.DataFrame or None
             DataFrame containing event data, or None if no events.
             
         Returns
         -------
         tuple of pandas.DataFrame
-            (adapted_gaze_df, adapted_events_df) with converted coordinates,
-            relative timestamps, and optimized data types.
+            (adapted_gaze_df, adapted_events_df)
+            - Raw format: all Tobii columns with tuples expanded to x, y, z
+            - Simplified format: extracted coordinates in PsychoPy units
+            
+        Notes
+        -----
+        TimeStamp normalization is always performed regardless of format.
+        The first sample's timestamp becomes the reference (time 0).
+        
+        Raw format expands columns like:
+            left_gaze_point_on_display_area: (0.5, 0.3)
+        Into:
+            left_gaze_point_on_display_area_x: 0.5
+            left_gaze_point_on_display_area_y: 0.3
+            
+        Column order is enforced using ETSettings column specifications for
+        HDF5 compatibility.
         """
-        # --- Coordinate conversion ---
-        # Extract coordinate arrays for batch processing (faster than row-by-row)
-        left_coords = np.array(df['left_gaze_point_on_display_area'].tolist())
-        right_coords = np.array(df['right_gaze_point_on_display_area'].tolist())
-        
-        # Convert from Tobii ADCS to PsychoPy coordinate system
-        left_psychopy = np.array([Coords.get_psychopy_pos(self.win, coord) for coord in left_coords])
-        right_psychopy = np.array([Coords.get_psychopy_pos(self.win, coord) for coord in right_coords])
-        
-        # Add converted coordinates to DataFrame
-        df['Left_X'] = left_psychopy[:, 0]
-        df['Left_Y'] = left_psychopy[:, 1]
-        df['Right_X'] = right_psychopy[:, 0]
-        df['Right_Y'] = right_psychopy[:, 1]
-        
-        # --- Timestamp normalization ---
-        # Set baseline timestamp from first sample for relative timing
+        # --- Timestamp normalization (ALWAYS DONE) ---
         if self.first_timestamp is None:
             self.first_timestamp = df.iloc[0]['system_time_stamp']
         
-        # Convert from absolute microseconds to relative milliseconds
         df['TimeStamp'] = ((df['system_time_stamp'] - self.first_timestamp) / 1000.0).astype(int)
         
-        # --- Column renaming and data type optimization ---
-        # Rename to standard format and convert validity flags to int8 for memory efficiency
-        df = df.rename(columns={
-            'left_gaze_point_validity': 'Left_Validity',
-            'left_pupil_diameter': 'Left_Pupil',
-            'left_pupil_validity': 'Left_Pupil_Validity',
-            'right_gaze_point_validity': 'Right_Validity',
-            'right_pupil_diameter': 'Right_Pupil',
-            'right_pupil_validity': 'Right_Pupil_Validity'
-        }).astype({
-            'Left_Validity': 'int8',
-            'Left_Pupil_Validity': 'int8',
-            'Right_Validity': 'int8',
-            'Right_Pupil_Validity': 'int8'
-        })
+        # --- Add Events column (ALWAYS DONE) ---
+        df['Events'] = pd.array([''] * len(df), dtype='string')
         
-        # --- Event data processing ---
-        # Apply same timestamp conversion to events if they exist
+        # --- Event data processing (ALWAYS DONE) ---
         if df_ev is not None:
             df_ev['TimeStamp'] = ((df_ev['system_time_stamp'] - self.first_timestamp) / 1000.0).astype(int)
             df_ev = df_ev[['TimeStamp', 'label']].rename(columns={'label': 'Event'})
         
-        # --- Return structured data ---
-        # Select final columns in standardized order
-        return (df[['TimeStamp', 'Left_X', 'Left_Y', 'Left_Validity',
-                   'Left_Pupil', 'Left_Pupil_Validity',
-                   'Right_X', 'Right_Y', 'Right_Validity',
-                   'Right_Pupil', 'Right_Pupil_Validity', 'Events']],
-                df_ev)
+        # --- Format-specific processing ---
+        if self.raw_format:
+            # =====================================================================
+            # RAW FORMAT: Expand tuples into x, y, z columns
+            # =====================================================================
+            
+            # Define which columns contain 2D tuples (x, y)
+            tuple_2d_columns = [
+                'left_gaze_point_on_display_area',
+                'right_gaze_point_on_display_area'
+            ]
+            
+            # Define which columns contain 3D tuples (x, y, z)
+            tuple_3d_columns = [
+                'left_gaze_point_in_user_coordinate_system',
+                'left_gaze_origin_in_user_coordinate_system',
+                'left_gaze_origin_in_trackbox_coordinate_system',
+                'right_gaze_point_in_user_coordinate_system',
+                'right_gaze_origin_in_user_coordinate_system',
+                'right_gaze_origin_in_trackbox_coordinate_system'
+            ]
+            
+            # --- Expand 2D tuples ---
+            for col in tuple_2d_columns:
+                if col in df.columns:
+                    # Extract values from tuples
+                    values = df[col].apply(lambda x: x if isinstance(x, (tuple, list)) and len(x) >= 2 else (np.nan, np.nan))
+                    df[f'{col}_x'] = values.apply(lambda x: x[0])
+                    df[f'{col}_y'] = values.apply(lambda x: x[1])
+                    # Remove original tuple column
+                    df = df.drop(columns=[col])
+            
+            # --- Expand 3D tuples ---
+            for col in tuple_3d_columns:
+                if col in df.columns:
+                    # Extract values from tuples
+                    values = df[col].apply(lambda x: x if isinstance(x, (tuple, list)) and len(x) >= 3 else (np.nan, np.nan, np.nan))
+                    df[f'{col}_x'] = values.apply(lambda x: x[0])
+                    df[f'{col}_y'] = values.apply(lambda x: x[1])
+                    df[f'{col}_z'] = values.apply(lambda x: x[2])
+                    # Remove original tuple column
+                    df = df.drop(columns=[col])
+
+            return (df[cfg.RawDataColumns.ORDER], df_ev)
+            
+        else:
+            # =====================================================================
+            # SIMPLIFIED FORMAT: Extract, convert, rename for ease of use
+            # =====================================================================
+            
+            # --- Coordinate extraction ---
+            left_coords = np.array(df['left_gaze_point_on_display_area'].tolist())
+            right_coords = np.array(df['right_gaze_point_on_display_area'].tolist())
+
+            # --- Coordinate conversion to PsychoPy units (VECTORIZED!) ---
+            left_psychopy = Coords.get_psychopy_pos(self.win, left_coords)
+            right_psychopy = Coords.get_psychopy_pos(self.win, right_coords)
+
+            # Add converted coordinates
+            df['Left_X'] = left_psychopy[:, 0]
+            df['Left_Y'] = left_psychopy[:, 1]
+            df['Right_X'] = right_psychopy[:, 0]
+            df['Right_Y'] = right_psychopy[:, 1]
+            
+            # --- Column renaming ---
+            df = df.rename(columns={
+                'left_gaze_point_validity': 'Left_Validity',
+                'left_pupil_diameter': 'Left_Pupil',
+                'left_pupil_validity': 'Left_Pupil_Validity',
+                'right_gaze_point_validity': 'Right_Validity',
+                'right_pupil_diameter': 'Right_Pupil',
+                'right_pupil_validity': 'Right_Pupil_Validity'
+            })
+            
+            # --- Data type optimization ---
+            validity_dtypes = cfg.SimplifiedDataColumns.get_validity_dtypes()
+            df = df.astype(validity_dtypes)
+            
+            return (df[cfg.SimplifiedDataColumns.ORDER], df_ev)
 
     def _save_csv_data(self, gaze_df):
         """
@@ -1248,44 +1342,51 @@ class ETracker:
             self._stop_simulation.set()
 
     def _simulate_gaze_data(self):
-
-        # FIIIIIIIIIIIIIIIIIIIIIIIX TIME
-        """
-        Generate single gaze sample from current mouse position.
-        
-        Creates realistic gaze data structure matching Tobii SDK format,
-        using mouse coordinates as gaze point and current experiment time
-        as timestamp. Includes pupil and validity data.
-        """
+        """Generate single gaze sample from current mouse position."""
         try:
-            # --- Position acquisition ---
             pos = self.mouse.getPos()
             tobii_pos = Coords.get_tobii_pos(self.win, pos)
             tbcs_z = getattr(self, 'sim_z_position', 0.6)
             
-            # --- Timestamp generation ---
-            # Use experiment clock for consistency with record_event()
-            timestamp = self.experiment_clock.getTime() * 1_000_000  # Convert to microseconds
+            timestamp = int(self.experiment_clock.getTime() * 1_000_000) 
             
-            # --- Gaze data structure creation ---
+            # Create full Tobii-compatible structure
             gaze_data = {
-                'system_time_stamp': timestamp,
+                'device_time_stamp': timestamp,      # ← DEVICE FIRST
+                'system_time_stamp': timestamp,      # ← SYSTEM SECOND
                 'left_gaze_point_on_display_area': tobii_pos,
-                'right_gaze_point_on_display_area': tobii_pos,
+                'left_gaze_point_in_user_coordinate_system': (tobii_pos[0], tobii_pos[1], tbcs_z),
                 'left_gaze_point_validity': 1,
-                'right_gaze_point_validity': 1,
-                'left_pupil_diameter': 3.0,  # Realistic pupil size in mm
-                'right_pupil_diameter': 3.0,
+                'left_pupil_diameter': 3.0,
                 'left_pupil_validity': 1,
+                'left_gaze_origin_in_user_coordinate_system': (tobii_pos[0], tobii_pos[1], tbcs_z),
+                'left_gaze_origin_in_trackbox_coordinate_system': (tobii_pos[0], tobii_pos[1], tbcs_z),
+                'left_gaze_origin_validity': 1,
+                'right_gaze_point_on_display_area': tobii_pos,
+                'right_gaze_point_in_user_coordinate_system': (tobii_pos[0], tobii_pos[1], tbcs_z),
+                'right_gaze_point_validity': 1,
+                'right_pupil_diameter': 3.0,
                 'right_pupil_validity': 1,
+                'right_gaze_origin_in_user_coordinate_system': (tobii_pos[0], tobii_pos[1], tbcs_z),
+                'right_gaze_origin_in_trackbox_coordinate_system': (tobii_pos[0], tobii_pos[1], tbcs_z),
+                'right_gaze_origin_validity': 1,
+                # These aren't needed for raw format but keep for show_status compatibility:
                 'left_user_position': (tobii_pos[0], tobii_pos[1], tbcs_z),
                 'right_user_position': (tobii_pos[0], tobii_pos[1], tbcs_z),
                 'left_user_position_validity': 1,
-                'right_user_position_validity': 1
+                'right_user_position_validity': 1,
             }
             
-            # --- Data storage ---
             self.gaze_data.append(gaze_data)
+
+            # --- Real-time gaze-contingent buffer ---
+            # Update rolling buffer for immediate gaze-contingent applications
+            if self.gaze_contingent_buffer is not None:
+                self.gaze_contingent_buffer.append([
+                    gaze_data.get('left_gaze_point_on_display_area'),
+                    gaze_data.get('right_gaze_point_on_display_area')
+                ])
+
             
         except Exception as e:
             print(f"Simulated gaze error: {e}")

@@ -312,6 +312,281 @@ class Settings:
     simulation_framerate: int = 120
 
 
+class RawDataColumns:
+    """
+    Column specifications for raw Tobii SDK data format.
+    
+    This class defines the complete structure for raw format data including:
+    - Column order (matching pandas' dtype grouping for HDF5 compatibility)
+    - Data types for each column
+    - Default values for dummy data creation
+    
+    The order is optimized for HDF5 storage where related measurements
+    (coordinates + validity) are grouped together for easier analysis.
+    """
+    
+    # Column order (list)
+    ORDER = [
+        # Timestamps
+        'device_time_stamp', 'system_time_stamp', 'TimeStamp',
+        
+        # Left gaze point on display + validity
+        'left_gaze_point_on_display_area_x', 
+        'left_gaze_point_on_display_area_y',
+        'left_gaze_point_validity',
+        
+        # Right gaze point on display + validity
+        'right_gaze_point_on_display_area_x', 
+        'right_gaze_point_on_display_area_y',
+        'right_gaze_point_validity',
+        
+        # Left gaze point in user coords
+        'left_gaze_point_in_user_coordinate_system_x',
+        'left_gaze_point_in_user_coordinate_system_y',
+        'left_gaze_point_in_user_coordinate_system_z',
+        
+        # Right gaze point in user coords
+        'right_gaze_point_in_user_coordinate_system_x',
+        'right_gaze_point_in_user_coordinate_system_y',
+        'right_gaze_point_in_user_coordinate_system_z',
+        
+        # Left pupil + validity
+        'left_pupil_diameter',
+        'left_pupil_validity',
+        
+        # Right pupil + validity
+        'right_pupil_diameter',
+        'right_pupil_validity',
+        
+        # Left gaze origin in user coords + validity
+        'left_gaze_origin_in_user_coordinate_system_x',
+        'left_gaze_origin_in_user_coordinate_system_y',
+        'left_gaze_origin_in_user_coordinate_system_z',
+        'left_gaze_origin_validity',
+        
+        # Right gaze origin in user coords + validity
+        'right_gaze_origin_in_user_coordinate_system_x',
+        'right_gaze_origin_in_user_coordinate_system_y',
+        'right_gaze_origin_in_user_coordinate_system_z',
+        'right_gaze_origin_validity',
+        
+        # Left gaze origin in trackbox coords
+        'left_gaze_origin_in_trackbox_coordinate_system_x',
+        'left_gaze_origin_in_trackbox_coordinate_system_y',
+        'left_gaze_origin_in_trackbox_coordinate_system_z',
+        
+        # Right gaze origin in trackbox coords
+        'right_gaze_origin_in_trackbox_coordinate_system_x',
+        'right_gaze_origin_in_trackbox_coordinate_system_y',
+        'right_gaze_origin_in_trackbox_coordinate_system_z',
+        
+        # Events
+        'Events'
+    ]
+    
+    # Data types (dict)
+    DTYPES = {
+        # Timestamps and validity - int64
+        'device_time_stamp': 'int64',
+        'system_time_stamp': 'int64',
+        'TimeStamp': 'int64',
+        'left_gaze_point_validity': 'int64',
+        'right_gaze_point_validity': 'int64',
+        'left_pupil_validity': 'int64',
+        'right_pupil_validity': 'int64',
+        'left_gaze_origin_validity': 'int64',
+        'right_gaze_origin_validity': 'int64',
+        
+        # All coordinate and diameter values - float64
+        'left_gaze_point_on_display_area_x': 'float64',
+        'left_gaze_point_on_display_area_y': 'float64',
+        'right_gaze_point_on_display_area_x': 'float64',
+        'right_gaze_point_on_display_area_y': 'float64',
+        'left_gaze_point_in_user_coordinate_system_x': 'float64',
+        'left_gaze_point_in_user_coordinate_system_y': 'float64',
+        'left_gaze_point_in_user_coordinate_system_z': 'float64',
+        'right_gaze_point_in_user_coordinate_system_x': 'float64',
+        'right_gaze_point_in_user_coordinate_system_y': 'float64',
+        'right_gaze_point_in_user_coordinate_system_z': 'float64',
+        'left_pupil_diameter': 'float64',
+        'right_pupil_diameter': 'float64',
+        'left_gaze_origin_in_user_coordinate_system_x': 'float64',
+        'left_gaze_origin_in_user_coordinate_system_y': 'float64',
+        'left_gaze_origin_in_user_coordinate_system_z': 'float64',
+        'right_gaze_origin_in_user_coordinate_system_x': 'float64',
+        'right_gaze_origin_in_user_coordinate_system_y': 'float64',
+        'right_gaze_origin_in_user_coordinate_system_z': 'float64',
+        'left_gaze_origin_in_trackbox_coordinate_system_x': 'float64',
+        'left_gaze_origin_in_trackbox_coordinate_system_y': 'float64',
+        'left_gaze_origin_in_trackbox_coordinate_system_z': 'float64',
+        'right_gaze_origin_in_trackbox_coordinate_system_x': 'float64',
+        'right_gaze_origin_in_trackbox_coordinate_system_y': 'float64',
+        'right_gaze_origin_in_trackbox_coordinate_system_z': 'float64',
+        
+        # Events - string
+        'Events': 'string'
+    }
+    
+    # Default values for dummy data creation (dict)
+    DEFAULTS = {
+        # Timestamps
+        'device_time_stamp': -999999,
+        'system_time_stamp': -999999,
+        'TimeStamp': -999999,
+        
+        # Validity flags
+        'left_gaze_point_validity': 0,
+        'right_gaze_point_validity': 0,
+        'left_pupil_validity': 0,
+        'right_pupil_validity': 0,
+        'left_gaze_origin_validity': 0,
+        'right_gaze_origin_validity': 0,
+        
+        # All float columns default to NaN
+        'left_gaze_point_on_display_area_x': float('nan'),
+        'left_gaze_point_on_display_area_y': float('nan'),
+        'right_gaze_point_on_display_area_x': float('nan'),
+        'right_gaze_point_on_display_area_y': float('nan'),
+        'left_gaze_point_in_user_coordinate_system_x': float('nan'),
+        'left_gaze_point_in_user_coordinate_system_y': float('nan'),
+        'left_gaze_point_in_user_coordinate_system_z': float('nan'),
+        'right_gaze_point_in_user_coordinate_system_x': float('nan'),
+        'right_gaze_point_in_user_coordinate_system_y': float('nan'),
+        'right_gaze_point_in_user_coordinate_system_z': float('nan'),
+        'left_pupil_diameter': float('nan'),
+        'right_pupil_diameter': float('nan'),
+        'left_gaze_origin_in_user_coordinate_system_x': float('nan'),
+        'left_gaze_origin_in_user_coordinate_system_y': float('nan'),
+        'left_gaze_origin_in_user_coordinate_system_z': float('nan'),
+        'right_gaze_origin_in_user_coordinate_system_x': float('nan'),
+        'right_gaze_origin_in_user_coordinate_system_y': float('nan'),
+        'right_gaze_origin_in_user_coordinate_system_z': float('nan'),
+        'left_gaze_origin_in_trackbox_coordinate_system_x': float('nan'),
+        'left_gaze_origin_in_trackbox_coordinate_system_y': float('nan'),
+        'left_gaze_origin_in_trackbox_coordinate_system_z': float('nan'),
+        'right_gaze_origin_in_trackbox_coordinate_system_x': float('nan'),
+        'right_gaze_origin_in_trackbox_coordinate_system_y': float('nan'),
+        'right_gaze_origin_in_trackbox_coordinate_system_z': float('nan'),
+        
+        # Events
+        'Events': '__DUMMY__'
+    }
+    
+    @classmethod
+    def get_dummy_dict(cls):
+        """
+        Get dictionary for creating dummy DataFrame with proper structure.
+        
+        Returns
+        -------
+        dict
+            Dictionary with column names as keys and lists containing default
+            values as values, ready for pd.DataFrame() constructor.
+        """
+        return {col: [cls.DEFAULTS[col]] for col in cls.ORDER}
+    
+    @classmethod
+    def get_validity_dtypes(cls):
+        """
+        Get dictionary of validity column dtypes for optimization.
+        
+        Returns
+        -------
+        dict
+            Dictionary mapping validity column names to 'int8' dtype.
+        """
+        return {col: dtype for col, dtype in cls.DTYPES.items() if 'validity' in col}
+
+
+class SimplifiedDataColumns:
+    """
+    Column specifications for simplified user-friendly data format.
+    
+    This class defines the structure for simplified format data that:
+    - Uses short, intuitive column names
+    - Contains only essential gaze tracking data
+    - Has coordinates already converted to PsychoPy units
+    - Is optimized for quick analysis and visualization
+    """
+    
+    # Column order (list)
+    ORDER = [
+        'TimeStamp',
+        'Left_X', 'Left_Y', 'Left_Validity',
+        'Left_Pupil', 'Left_Pupil_Validity',
+        'Right_X', 'Right_Y', 'Right_Validity',
+        'Right_Pupil', 'Right_Pupil_Validity',
+        'Events'
+    ]
+    
+    # Data types (dict)
+    DTYPES = {
+        # Timestamp - int64
+        'TimeStamp': 'int64',
+        
+        # Coordinates - float64
+        'Left_X': 'float64',
+        'Left_Y': 'float64',
+        'Right_X': 'float64',
+        'Right_Y': 'float64',
+        
+        # Pupil diameters - float64
+        'Left_Pupil': 'float64',
+        'Right_Pupil': 'float64',
+        
+        # Validity flags
+        'Left_Validity': 'int64',
+        'Right_Validity': 'int64',
+        'Left_Pupil_Validity': 'int64',
+        'Right_Pupil_Validity': 'int64',
+        
+        # Events - string
+        'Events': 'string'
+    }
+    
+    # Default values for dummy data creation (dict)
+    DEFAULTS = {
+        'TimeStamp': -999999,
+        'Left_X': float('nan'),
+        'Left_Y': float('nan'),
+        'Left_Validity': 0,
+        'Left_Pupil': float('nan'),
+        'Left_Pupil_Validity': 0,
+        'Right_X': float('nan'),
+        'Right_Y': float('nan'),
+        'Right_Validity': 0,
+        'Right_Pupil': float('nan'),
+        'Right_Pupil_Validity': 0,
+        'Events': '__DUMMY__'
+    }
+    
+    @classmethod
+    def get_dummy_dict(cls):
+        """
+        Get dictionary for creating dummy DataFrame with proper structure.
+        
+        Returns
+        -------
+        dict
+            Dictionary with column names as keys and lists containing default
+            values as values, ready for pd.DataFrame() constructor.
+        """
+        return {col: [cls.DEFAULTS[col]] for col in cls.ORDER}
+    
+    @classmethod
+    def get_validity_dtypes(cls):
+        """
+        Get dictionary of validity column dtypes for optimization.
+        
+        Returns
+        -------
+        dict
+            Dictionary mapping validity column names to 'int8' dtype.
+        """
+        return {col: dtype for col, dtype in cls.DTYPES.items() if 'Validity' in col}
+
+
+
 # =============================================================================
 # Module-Level Configuration Instances
 # =============================================================================
@@ -404,4 +679,6 @@ __all__ = [
     'font_multipliers',
     'numkey_dict',
     'simulation_framerate',
+    'RawDataColumns',
+    'SimplifiedDataColumns',
 ]

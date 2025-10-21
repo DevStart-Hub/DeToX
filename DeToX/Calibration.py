@@ -237,7 +237,7 @@ class BaseCalibrationSession:
         """
         # --- Base Height Conversion ---
         # Get base text height from config and convert to current units
-        base_height = convert_height_to_units(self.win, cfg.DEFAULT_TEXT_HEIGHT_HEIGHT)
+        base_height = convert_height_to_units(self.win, cfg.ui_sizes.text)
         
         # --- Scaling Application ---
         # Scale by the size percentage (normalized to 2.0 as baseline)
@@ -359,7 +359,7 @@ class BaseCalibrationSession:
         if self.anim_type == 'zoom':
             # --- Zoom Animation: Smooth Size Oscillation ---
             # Calculate elapsed time with zoom-specific speed multiplier
-            elapsed_time = clock.getTime() * cfg.ANIMATION_SETTINGS['zoom_speed']
+            elapsed_time = clock.getTime() * cfg.animation.zoom_speed
             
             # Retrieve and convert size settings from height units to current window units
             min_size_height = cfg.animation.min_zoom_size
@@ -486,7 +486,7 @@ Make your choice now:"""
                         self.win,
                         radius=highlight_radius,
                         pos=calibration_points[retry_idx],
-                        lineColor=cfg.CALIBRATION_COLORS['highlight'],
+                        lineColor=cfg.colors.highlight,
                         fillColor=None,                       # No fill for consistency
                         lineWidth=max(1, int(line_width_pixels)),  # Ensure minimum 1 pixel width
                         edges=128,                            # smooth circle
@@ -936,13 +936,13 @@ class TobiiCalibrationSession(BaseCalibrationSession):
                     # Left eye sample (green)
                     if sample.left_eye.validity == tr.VALIDITY_VALID_AND_USED:
                         left_pos = sample.left_eye.position_on_display_area
-                        samples.append((target_pos, left_pos, cfg.CALIBRATION_COLORS['left_eye']))
+                        samples.append((target_pos, left_pos, cfg.colors.left_eye))
                     
                     # --- Right Eye Processing ---
                     # Right eye sample (red)
                     if sample.right_eye.validity == tr.VALIDITY_VALID_AND_USED:
                         right_pos = sample.right_eye.position_on_display_area
-                        samples.append((target_pos, right_pos, cfg.CALIBRATION_COLORS['right_eye']))
+                        samples.append((target_pos, right_pos, cfg.colors.right_eye))
                 
                 if samples:
                     sample_data[point_idx] = samples
@@ -1209,7 +1209,7 @@ class MouseCalibrationSession(BaseCalibrationSession):
             formatted_samples = []
             for target_pos, sample_pos, _ in samples:
                 # Draw a line from the target to each sample; use orange color for mouse samples
-                formatted_samples.append((target_pos, sample_pos, cfg.CALIBRATION_COLORS['mouse']))
+                formatted_samples.append((target_pos, sample_pos, cfg.colors.mouse))
             if formatted_samples:
                 sample_data[point_idx] = formatted_samples
 
