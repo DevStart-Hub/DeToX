@@ -1,5 +1,5 @@
 from psychopy import visual, core
-from . DeToX import ETracker
+from DeToX import ETracker
 
 # Create window - adjust size based on your monitor
 win = visual.Window(
