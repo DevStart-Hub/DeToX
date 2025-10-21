@@ -1162,7 +1162,7 @@ class ETracker:
                 'left_gaze_point_on_display_area',
                 'right_gaze_point_on_display_area'
             ]
-            
+
             # Define which columns contain 3D tuples (x, y, z)
             tuple_3d_columns = [
                 'left_gaze_point_in_user_coordinate_system',
@@ -1172,27 +1172,22 @@ class ETracker:
                 'right_gaze_origin_in_user_coordinate_system',
                 'right_gaze_origin_in_trackbox_coordinate_system'
             ]
-            
+
             # --- Expand 2D tuples ---
             for col in tuple_2d_columns:
-                if col in df.columns:
-                    # Extract values from tuples
-                    values = df[col].apply(lambda x: x if isinstance(x, (tuple, list)) and len(x) >= 2 else (np.nan, np.nan))
-                    df[f'{col}_x'] = values.apply(lambda x: x[0])
-                    df[f'{col}_y'] = values.apply(lambda x: x[1])
-                    # Remove original tuple column
-                    df = df.drop(columns=[col])
-            
+                arr = np.array(df[col].tolist())
+                df[f'{col}_x'] = arr[:, 0]
+                df[f'{col}_y'] = arr[:, 1]
+
             # --- Expand 3D tuples ---
             for col in tuple_3d_columns:
-                if col in df.columns:
-                    # Extract values from tuples
-                    values = df[col].apply(lambda x: x if isinstance(x, (tuple, list)) and len(x) >= 3 else (np.nan, np.nan, np.nan))
-                    df[f'{col}_x'] = values.apply(lambda x: x[0])
-                    df[f'{col}_y'] = values.apply(lambda x: x[1])
-                    df[f'{col}_z'] = values.apply(lambda x: x[2])
-                    # Remove original tuple column
-                    df = df.drop(columns=[col])
+                arr = np.array(df[col].tolist())
+                df[f'{col}_x'] = arr[:, 0]
+                df[f'{col}_y'] = arr[:, 1]
+                df[f'{col}_z'] = arr[:, 2]
+
+            # Drop all original tuple columns at once
+            df = df.drop(columns=tuple_2d_columns + tuple_3d_columns)
 
             return (df[cfg.RawDataColumns.ORDER], df_ev)
             
