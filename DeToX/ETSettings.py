@@ -328,7 +328,7 @@ class RawDataColumns:
     # Column order (list)
     ORDER = [
         # Timestamps
-        'device_time_stamp', 'system_time_stamp', 'TimeStamp',
+        'device_time_stamp', 'system_time_stamp',
         
         # Left gaze point on display + validity
         'left_gaze_point_on_display_area_x', 
@@ -370,16 +370,6 @@ class RawDataColumns:
         'right_gaze_origin_in_user_coordinate_system_z',
         'right_gaze_origin_validity',
         
-        # Left gaze origin in trackbox coords
-        'left_gaze_origin_in_trackbox_coordinate_system_x',
-        'left_gaze_origin_in_trackbox_coordinate_system_y',
-        'left_gaze_origin_in_trackbox_coordinate_system_z',
-        
-        # Right gaze origin in trackbox coords
-        'right_gaze_origin_in_trackbox_coordinate_system_x',
-        'right_gaze_origin_in_trackbox_coordinate_system_y',
-        'right_gaze_origin_in_trackbox_coordinate_system_z',
-        
         # Events
         'Events'
     ]
@@ -389,7 +379,6 @@ class RawDataColumns:
         # Timestamps and validity - int64
         'device_time_stamp': 'int64',
         'system_time_stamp': 'int64',
-        'TimeStamp': 'int64',
         'left_gaze_point_validity': 'int64',
         'right_gaze_point_validity': 'int64',
         'left_pupil_validity': 'int64',
@@ -416,12 +405,6 @@ class RawDataColumns:
         'right_gaze_origin_in_user_coordinate_system_x': 'float64',
         'right_gaze_origin_in_user_coordinate_system_y': 'float64',
         'right_gaze_origin_in_user_coordinate_system_z': 'float64',
-        'left_gaze_origin_in_trackbox_coordinate_system_x': 'float64',
-        'left_gaze_origin_in_trackbox_coordinate_system_y': 'float64',
-        'left_gaze_origin_in_trackbox_coordinate_system_z': 'float64',
-        'right_gaze_origin_in_trackbox_coordinate_system_x': 'float64',
-        'right_gaze_origin_in_trackbox_coordinate_system_y': 'float64',
-        'right_gaze_origin_in_trackbox_coordinate_system_z': 'float64',
         
         # Events - string
         'Events': 'string'
@@ -432,7 +415,6 @@ class RawDataColumns:
         # Timestamps
         'device_time_stamp': -999999,
         'system_time_stamp': -999999,
-        'TimeStamp': -999999,
         
         # Validity flags
         'left_gaze_point_validity': 0,
@@ -461,12 +443,6 @@ class RawDataColumns:
         'right_gaze_origin_in_user_coordinate_system_x': float('nan'),
         'right_gaze_origin_in_user_coordinate_system_y': float('nan'),
         'right_gaze_origin_in_user_coordinate_system_z': float('nan'),
-        'left_gaze_origin_in_trackbox_coordinate_system_x': float('nan'),
-        'left_gaze_origin_in_trackbox_coordinate_system_y': float('nan'),
-        'left_gaze_origin_in_trackbox_coordinate_system_z': float('nan'),
-        'right_gaze_origin_in_trackbox_coordinate_system_x': float('nan'),
-        'right_gaze_origin_in_trackbox_coordinate_system_y': float('nan'),
-        'right_gaze_origin_in_trackbox_coordinate_system_z': float('nan'),
         
         # Events
         'Events': '__DUMMY__'

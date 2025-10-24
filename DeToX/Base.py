@@ -1,5 +1,6 @@
 import os
 import time
+import tables
 import atexit
 import warnings
 import threading
@@ -182,8 +183,8 @@ class ETracker:
             if self.fps is None:
                 self.fps = self.eyetracker.get_gaze_output_frequency()
                 self.freqs = self.eyetracker.get_all_gaze_output_frequencies()
-                self.illum = self.eyetracker.get_illumination_mode()
-                self.illums = self.eyetracker.get_all_illumination_modes()
+                # self.illum = self.eyetracker.get_illumination_mode()
+                # self.illums = self.eyetracker.get_all_illumination_modes()
 
             # Display detailed information upon initial connection.
             if moment == 'connection':
@@ -191,10 +192,10 @@ class ETracker:
                     "Connected to the eyetracker:\n"
                     f" - Model: {self.eyetracker.model}\n"
                     f" - Current frequency: {self.fps} Hz\n"
-                    f" - Illumination mode: {self.illum}\n"
+                    # f" - Illumination mode: {self.illum}\n"
                     "\nOther options:\n"
                     f" - Possible frequencies: {self.freqs}\n"
-                    f" - Possible illumination modes: {self.illums}"
+                    # f" - Possible illumination modes: {self.illums}"
                 )
                 title = "Eyetracker Info"
             else:  # Assumes 'recording' context, shows a concise summary.
@@ -202,7 +203,7 @@ class ETracker:
                     "Starting recording with:\n"
                     f" - Model: {self.eyetracker.model}\n"
                     f" - Current frequency: {self.fps} Hz\n"
-                    f" - Illumination mode: {self.illum}"
+                    # f" - Illumination mode: {self.illum}"
                 )
                 title = "Recording Info"
 
@@ -799,7 +800,7 @@ class ETracker:
         # Add timestamped event to buffer for later merging with gaze data
         self.event_data.append({
             'system_time_stamp': timestamp,
-            'label': label
+            'Events': label
         })
 
     def save_data(self):
@@ -815,7 +816,7 @@ class ETracker:
         
         # --- Ensure event-gaze synchronization ---
         # Wait for 2 samples to ensure events have corresponding gaze data
-        core.wait(2/self.fps)
+        core.wait(10/self.fps)
         
         # --- Thread-safe buffer swap (O(1) operation) ---
         # Swap buffers under lock to minimize thread blocking time
@@ -849,7 +850,7 @@ class ETracker:
                                 side='left')
             
             # Merge events into gaze data at corresponding timestamps
-            gaze_df.iloc[idx, gaze_df.columns.get_loc('Events')] = events_df['label'].values
+            gaze_df.iloc[idx, gaze_df.columns.get_loc('Events')] = events_df['Events'].values
         else:
             print("|-- No new events to save --|")
             events_df = None
@@ -1051,54 +1052,7 @@ class ETracker:
                 f"File '{self.filename}' already exists. "
                 f"Choose a different filename or remove the existing file."
             )
-        
-        # --- Create column structure based on format ---
-        if self.raw_format:
-            gaze_columns = cfg.RawDataColumns.get_dummy_dict()
-            validity_dtypes = cfg.RawDataColumns.get_validity_dtypes()
-        else:
-            gaze_columns = cfg.SimplifiedDataColumns.get_dummy_dict()
-            validity_dtypes = cfg.SimplifiedDataColumns.get_validity_dtypes()
-        
-        # --- File structure creation ---
-        if self.file_format == 'hdf5':
-            # Create DataFrame for HDF5
-            dummy_gaze = pd.DataFrame(gaze_columns).astype(validity_dtypes)
-            
-            dummy_events = pd.DataFrame({
-                'TimeStamp': [-999999],
-                'Event': ['__DUMMY__']
-            })
-            
-            # --- Create HDF5 file with proper table structure ---
-            with pd.HDFStore(self.filename, mode='w', complevel=5, complib='blosc') as store:
-                # Create gaze table
-                store.append('gaze', dummy_gaze, format='table',
-                            min_itemsize={'Events': 50},
-                            data_columns=['TimeStamp'], index=False)
-                store.remove('gaze', where='TimeStamp == -999999')
-                
-                # Create events table
-                store.append('events', dummy_events, format='table',
-                            min_itemsize={'Event': 50},
-                            data_columns=['TimeStamp'], index=False)
-                store.remove('events', where='TimeStamp == -999999')
-                
-                # Add metadata
-                gaze_attrs = store.get_storer('gaze').attrs
-                gaze_attrs.subject_id = getattr(self, 'subject_id', 'unknown')
-                gaze_attrs.screen_size = tuple(self.win.size)
-                gaze_attrs.framerate = self.fps or cfg.simulation_framerate
-                gaze_attrs.raw_format = self.raw_format
-                    
-        else:  # CSV format
-            # Create CSV with just the column names (no dummy row needed)
-            pd.DataFrame(columns=gaze_columns.keys()).to_csv(self.filename, index=False)
-        
-        # --- Setup confirmation ---
-        format_type = "RAW (expanded)" if self.raw_format else "SIMPLIFIED"
-        self.get_info(moment="recording")
-        print(f"|-- Data format: {format_type} --|")
+    
 
     def _adapt_gaze_data(self, df, df_ev):
         """
@@ -1137,20 +1091,7 @@ class ETracker:
         Column order is enforced using ETSettings column specifications for
         HDF5 compatibility.
         """
-        # --- Timestamp normalization (ALWAYS DONE) ---
-        if self.first_timestamp is None:
-            self.first_timestamp = df.iloc[0]['system_time_stamp']
-        
-        df['TimeStamp'] = ((df['system_time_stamp'] - self.first_timestamp) / 1000.0).astype(int)
-        
-        # --- Add Events column (ALWAYS DONE) ---
-        df['Events'] = pd.array([''] * len(df), dtype='string')
-        
-        # --- Event data processing (ALWAYS DONE) ---
-        if df_ev is not None:
-            df_ev['TimeStamp'] = ((df_ev['system_time_stamp'] - self.first_timestamp) / 1000.0).astype(int)
-            df_ev = df_ev[['TimeStamp', 'label']].rename(columns={'label': 'Event'})
-        
+
         # --- Format-specific processing ---
         if self.raw_format:
             # =====================================================================
@@ -1167,10 +1108,8 @@ class ETracker:
             tuple_3d_columns = [
                 'left_gaze_point_in_user_coordinate_system',
                 'left_gaze_origin_in_user_coordinate_system',
-                'left_gaze_origin_in_trackbox_coordinate_system',
                 'right_gaze_point_in_user_coordinate_system',
                 'right_gaze_origin_in_user_coordinate_system',
-                'right_gaze_origin_in_trackbox_coordinate_system'
             ]
 
             # --- Expand 2D tuples ---
@@ -1195,6 +1134,15 @@ class ETracker:
             # =====================================================================
             # SIMPLIFIED FORMAT: Extract, convert, rename for ease of use
             # =====================================================================
+
+            # --- Df timestamp and event normalization ---
+            if self.first_timestamp is None:
+                self.first_timestamp = df.iloc[0]['system_time_stamp']
+            
+            df['TimeStamp'] = ((df['system_time_stamp'] - self.first_timestamp) / 1000.0).astype(int) # normalize to ms and 0
+
+            if df_ev is not None:
+                df_ev['TimeStamp'] = ((df_ev['system_time_stamp'] - self.first_timestamp) / 1000.0).astype(int) # normalize to ms and 0
             
             # --- Coordinate extraction ---
             left_coords = np.array(df['left_gaze_point_on_display_area'].tolist())
@@ -1244,30 +1192,33 @@ class ETracker:
         gaze_df.to_csv(self.filename, index=False, mode='a', header=write_header)
 
     def _save_hdf5_data(self, gaze_df, events_df):
-        """Optimized HDF5 saving without compression."""
-        with pd.HDFStore(self.filename, mode="a") as store:
+        """Save gaze and event data to HDF5 using PyTables."""
+        
+        # Convert string columns to fixed-width bytes
+        gaze_df['Events'] = gaze_df['Events'].astype('S50')
+        gaze_array = gaze_df.to_records(index=False)
+        
+        if events_df is not None:
+            events_df['Events'] = events_df['Events'].astype('S50')
+            events_array = events_df.to_records(index=False)
+        
+        with tables.open_file(self.filename, mode='a') as f:
+            # Gaze table
+            if hasattr(f.root, 'gaze'):
+                f.root.gaze.append(gaze_array)
+            else:
+                gaze_table = f.create_table(f.root, 'gaze', obj=gaze_array)
+                gaze_table.attrs.screen_size = tuple(self.win.size)
+                gaze_table.attrs.framerate = self.fps or cfg.simulation_framerate
+                gaze_table.attrs.raw_format = self.raw_format
             
-            # No compression for maximum speed
-            store.append(
-                "gaze", 
-                gaze_df, 
-                format="table", 
-                append=True,
-                min_itemsize={'Events': 50},  # Pre-allocate string size
-                index=False  # Don't store row indices
-                # No complib/complevel = no compression
-            )
-            
+            # Events table
             if events_df is not None:
-                store.append("events", events_df, format="table", append=True, index=False)
-            
-            # Add metadata only once
-            if "gaze" in store and not hasattr(store.get_storer("gaze").attrs, "subject_id"):
-                attrs = store.get_storer("gaze").attrs
-                attrs.subject_id = getattr(self, "subject_id", "unknown")
-                attrs.screen_size = tuple(self.win.size)
-                attrs.framerate = self.fps
-
+                if hasattr(f.root, 'events'):
+                    f.root.events.append(events_array)
+                else:
+                    events_table = f.create_table(f.root, 'events', obj=events_array)
+                    
     def _on_gaze_data(self, gaze_data):
         """
         Thread-safe callback for incoming eye tracker data.
@@ -1355,7 +1306,6 @@ class ETracker:
                 'left_pupil_diameter': 3.0,
                 'left_pupil_validity': 1,
                 'left_gaze_origin_in_user_coordinate_system': (tobii_pos[0], tobii_pos[1], tbcs_z),
-                'left_gaze_origin_in_trackbox_coordinate_system': (tobii_pos[0], tobii_pos[1], tbcs_z),
                 'left_gaze_origin_validity': 1,
                 'right_gaze_point_on_display_area': tobii_pos,
                 'right_gaze_point_in_user_coordinate_system': (tobii_pos[0], tobii_pos[1], tbcs_z),
@@ -1363,7 +1313,6 @@ class ETracker:
                 'right_pupil_diameter': 3.0,
                 'right_pupil_validity': 1,
                 'right_gaze_origin_in_user_coordinate_system': (tobii_pos[0], tobii_pos[1], tbcs_z),
-                'right_gaze_origin_in_trackbox_coordinate_system': (tobii_pos[0], tobii_pos[1], tbcs_z),
                 'right_gaze_origin_validity': 1,
                 # These aren't needed for raw format but keep for show_status compatibility:
                 'left_user_position': (tobii_pos[0], tobii_pos[1], tbcs_z),
