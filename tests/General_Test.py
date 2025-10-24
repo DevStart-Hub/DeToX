@@ -49,7 +49,7 @@ cal_points = [
 
 # Stimulus images (here are all the same, replace with your actual stimulus files)
 # Note: These should be engaging images for participants (animals, toys, etc.)
-stims = ['1.png', '2.png', '3.png', '4.png', '5.png']
+stims = ['Stimuli\\1.png', 'Stimuli\\2.png', 'Stimuli\\3.png', 'Stimuli\\4.png', 'Stimuli\\5.png']
 
 
 
