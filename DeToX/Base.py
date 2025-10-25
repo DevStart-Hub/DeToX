@@ -96,6 +96,7 @@ class ETracker:
         self.calibration = None         # Tobii calibration object.
         self.mouse = None               # PsychoPy mouse object for simulation.
         self.fps = None                 # Frames per second (frequency) of the tracker.
+        self.illum_mode = None          # Illumination mode of the tracker.
         self._stop_simulation = None    # Threading event to stop simulation loops.
         self._simulation_thread = None  # Thread object for running simulations.
 
@@ -119,96 +120,112 @@ class ETracker:
 
         # --- Finalization ---
         # Display connection info and register the cleanup function to run on exit.
-        self.get_info(moment='connection')
+        self._get_info(moment='connection')
         atexit.register(self._close)
 
-    def _close(self):
-        """
-        Clean shutdown of ETracker instance.
-        
-        Automatically stops any active recording session and performs
-        necessary cleanup. Called automatically on program exit via atexit.
-        """
-        # --- Graceful shutdown ---
-        # Stop recording if active (includes data saving and cleanup)
-        if self.recording:
-            self.stop_recording()
+    def set_eyetracking_settings(self, desired_fps=None, desired_illumination_mode=None, use_gui = False,):
+        """"
+        Configure eye-tracking settings on the connected Tobii eye tracker.
 
-
-    def get_info(self, moment='connection'):
-        """
-        Displays information about the connected eye tracker or simulation settings.
-
-        This method prints a formatted summary of the hardware or simulation
-        configuration. It can be called at different moments (e.g., at connection
-        or before recording) to show relevant information. The information is
-        retrieved from the eye tracker or simulation settings and cached on the
-        first call to avoid repeated hardware queries.
+        This method allows you to set key parameters of the eye tracker,
+        such as the sampling frequency (FPS) and illumination mode. You can
+        either apply default recommended settings or customize them as needed.
 
         Parameters
         ----------
-        moment : str, optional
-            Specifies the context of the information display.
-            - 'connection': Shows detailed information, including all available
-              options (e.g., frequencies, illumination modes). This is typically
-              used right after initialization.
-            - 'recording': Shows a concise summary of the settings being used
-              for the current recording session.
-            Default is 'connection'.
+        use_gui : bool, optional
+            If True, opens a graphical interface for setting parameters.
+            Default is False.
+        desired_fps : int
+            Desired sampling frequency in Hz (e.g., 60, 120, 300).
+        desired_illumination_mode : str
+            Desired illumination mode (e.g., 'Auto', 'Bright', 'Dark').
+
+        Raises
+        ------
+        RuntimeError
+            If called in simulation mode or if no eyetracker is connected.
+        ValueError
+            If provided FPS or illumination mode is not supported by the device.
         """
-        # --- Handle Simulation Mode ---
+        # --- Pre-condition Check ---
+
+        # Ensure we are not recording already, as settings cannot be changed mid-recording.
+        # Raise a non blocking warning instead of an error.
+        if self.recording:
+            warnings.warn(
+                "|-- Ongoging recording!! --|\n"
+                "Eye-tracking settings cannot be changed while recording is active.\n"
+                "Skipping set_eyetracking_settings() call.",
+                UserWarning
+            )
+            return
+
+        # Ensure not in simulation mode, as settings require a physical tracker.
         if self.simulate:
-            # Set the simulated frames per second (fps) if not already set.
-            if self.fps is None:
-                self.fps = cfg.simulation_framerate
+            raise RuntimeError(
+                "Cannot set eye-tracking settings in simulation mode. "
+                "This operation requires a physical Tobii eye tracker."
+            )
+        # Ensure an eyetracker is connected before applying settings.
+        if self.eyetracker is None:
+            raise RuntimeError(
+                "No eyetracker connected. Cannot set eye-tracking settings."
+            )
+        
+        # --- Apply Settings ---
+        if use_gui:
+            from psychopy import gui
 
-            # Display information specific to the simulation context.
-            if moment == 'connection':
-                text = (
-                    "Simulating eyetracker:\n"
-                    f" - Simulated frequency: {self.fps} Hz"
-                )
-                title = "Simulated Eyetracker Info"
-            else:  # Assumes 'recording' context
-                text = (
-                    "Recording mouse position:\n"
-                    f" - frequency: {self.fps} Hz"
-                )
-                title = "Recording Info"
+            # Prepare options for GUI selection
+            desired_settings_dict = {
+                'Hz': self.freqs,
+                'Illumination mode': self.illum_modes  # Creates dropdown
+            }
 
-        # --- Handle Real Eyetracker Mode ---
+            #-- Open GUI dialog for user to select settings ---
+            desired_settings = gui.DlgFromDict(desired_settings_dict, title='Possible Eye-Tracking Settings')
+            
+            # Handle cancellation
+            if not desired_settings.OK:
+                print("|-- Eye-tracking settings configuration cancelled by user. --|")
+                return
+
+            # Extract selected settings
+            desired_fps = desired_settings_dict['Hz']
+            desired_illumination_mode = desired_settings_dict['Illumination mode']
+
         else:
-            # On the first call, query the eyetracker for its properties and cache them.
-            # This avoids redundant SDK calls on subsequent `get_info` invocations.
-            if self.fps is None:
-                self.fps = self.eyetracker.get_gaze_output_frequency()
-                self.freqs = self.eyetracker.get_all_gaze_output_frequencies()
-                # self.illum = self.eyetracker.get_illumination_mode()
-                # self.illums = self.eyetracker.get_all_illumination_modes()
+            # Set the desired FPS and illumination mode
+            if desired_fps is None:
+                print(f"|-- No fps change, still using {self.fps} --|")
+            else:
+                if desired_fps not in self.freqs :
+                    raise ValueError(
+                        f"Desired FPS {desired_fps} not supported. "
+                        f"Supported frequencies: {self.freqs}"
+                    )
+            
+            if desired_illumination_mode is None:
+                print(f"|-- No illumination mode change, still using {self.illum_mode} --|")
+            else:
+                if desired_illumination_mode not in self.illum_modes:
+                    raise ValueError(
+                        f"Desired illumination mode '{desired_illumination_mode}' not supported. "
+                        f"Supported modes: {self.illum_modes}"
+                    )
+        if desired_fps  != self.fps:
+            #-- Update eye tracker frequency ---
+            self.eyetracker.set_gaze_output_frequency(desired_fps)
 
-            # Display detailed information upon initial connection.
-            if moment == 'connection':
-                text = (
-                    "Connected to the eyetracker:\n"
-                    f" - Model: {self.eyetracker.model}\n"
-                    f" - Current frequency: {self.fps} Hz\n"
-                    # f" - Illumination mode: {self.illum}\n"
-                    "\nOther options:\n"
-                    f" - Possible frequencies: {self.freqs}\n"
-                    # f" - Possible illumination modes: {self.illums}"
-                )
-                title = "Eyetracker Info"
-            else:  # Assumes 'recording' context, shows a concise summary.
-                text = (
-                    "Starting recording with:\n"
-                    f" - Model: {self.eyetracker.model}\n"
-                    f" - Current frequency: {self.fps} Hz\n"
-                    # f" - Illumination mode: {self.illum}"
-                )
-                title = "Recording Info"
+            #-- Update internal FPS attribute ---
+            self.fps = desired_fps
 
-        # Use the custom NicePrint utility to display the formatted information.
-        NicePrint(text, title)
+        if desired_illumination_mode != self.illum_mode:
+            # --- Update eye tracker illumination mode ---
+            self.eyetracker.set_illumination_mode(desired_illumination_mode)
+            # --- Update internal illumination mode attribute ---
+            self.illum_mode = desired_illumination_mode
 
     # --- Calibration Methods ---
 
@@ -463,6 +480,15 @@ class ETracker:
             )
             return False
 
+        # --- Recording guard ---
+        if self.recording:
+            warnings.warn(
+                "|-- Ongoging recording!! --|\n"
+                "Better to save calibration before or after recording.\n",
+                UserWarning
+            )
+            return
+
         try:
             # --- Build a default or normalized filename ---
             if filename is None:
@@ -549,6 +575,15 @@ class ETracker:
                 "Calibration loading requires a real Tobii eye tracker."
             )
         
+        # --- Recording guard ---
+        if self.recording:
+            warnings.warn(
+                "|-- Ongoging recording!! --|\n"
+                "Better to load calibration before or after recording.\n",
+                UserWarning
+            )
+            return
+
         # --- Determine the file path to load ---
         load_path = None
         if use_gui:
@@ -995,6 +1030,96 @@ class ETracker:
 
     # --- Private Data Processing Methods ---
 
+    def _close(self):
+        """
+        Clean shutdown of ETracker instance.
+        
+        Automatically stops any active recording session and performs
+        necessary cleanup. Called automatically on program exit via atexit.
+        """
+        # --- Graceful shutdown ---
+        # Stop recording if active (includes data saving and cleanup)
+        if self.recording:
+            self.stop_recording()
+
+
+    def _get_info(self, moment='connection'):
+        """
+        Displays information about the connected eye tracker or simulation settings.
+
+        This method prints a formatted summary of the hardware or simulation
+        configuration. It can be called at different moments (e.g., at connection
+        or before recording) to show relevant information. The information is
+        retrieved from the eye tracker or simulation settings and cached on the
+        first call to avoid repeated hardware queries.
+
+        Parameters
+        ----------
+        moment : str, optional
+            Specifies the context of the information display.
+            - 'connection': Shows detailed information, including all available
+                options (e.g., frequencies, illumination modes). This is typically
+                used right after initialization.
+            - 'recording': Shows a concise summary of the settings being used
+                for the current recording session.
+            Default is 'connection'.
+        """
+        # --- Handle Simulation Mode ---
+        if self.simulate:
+            # Set the simulated frames per second (fps) if not already set.
+            if self.fps is None:
+                self.fps = cfg.simulation_framerate
+
+            # Display information specific to the simulation context.
+            if moment == 'connection':
+                text = (
+                    "Simulating eyetracker:\n"
+                    f" - Simulated frequency: {self.fps} Hz"
+                )
+                title = "Simulated Eyetracker Info"
+            else:  # Assumes 'recording' context
+                text = (
+                    "Recording mouse position:\n"
+                    f" - frequency: {self.fps} Hz"
+                )
+                title = "Recording Info"
+
+        # --- Handle Real Eyetracker Mode ---
+        else:
+            # On the first call, query the eyetracker for its properties and cache them.
+            # This avoids redundant SDK calls on subsequent `get_info` invocations.
+            if self.fps is None:
+                self.fps = self.eyetracker.get_gaze_output_frequency()
+                self.freqs = self.eyetracker.get_all_gaze_output_frequencies()
+
+            if self.illum_mode is None:
+                self.illum_mode = self.eyetracker.get_eye_tracking_mode()
+                self.illum_modes = self.eyetracker.get_all_eye_tracking_modes()
+
+            # Display detailed information upon initial connection.
+            if moment == 'connection':
+                text = (
+                    "Connected to the eyetracker:\n"
+                    f" - Model: {self.eyetracker.model}\n"
+                    f" - Current frequency: {self.fps} Hz\n"
+                    f" - Current illumination mode: {self.illum_mode}"
+                    "\nOther options:\n"
+                    f" - Possible frequencies: {self.freqs}\n"
+                    f" - Possible illumination modes: {self.illum_modes}"
+                )
+                title = "Eyetracker Info"
+            else:  # Assumes 'recording' context, shows a concise summary.
+                text = (
+                    "Starting recording with:\n"
+                    f" - Model: {self.eyetracker.model}\n"
+                    f" - With frequency: {self.fps} Hz\n"
+                    f" - With illumination mode: {self.illum_mode}"
+                )
+                title = "Recording Info"
+
+        # Use the custom NicePrint utility to display the formatted information.
+        NicePrint(text, title)
+
     def _prepare_recording(self, filename=None):
         """
         Initialize file structure and validate recording setup.
@@ -1025,7 +1150,6 @@ class ETracker:
         """
         # --- Filename and format determination ---
         if filename is None:
-            from datetime import datetime
             self.filename = f"{datetime.now().strftime('%Y-%m-%d_%H-%M-%S')}.h5"
             self.file_format = 'hdf5'
         else:
@@ -1048,11 +1172,16 @@ class ETracker:
         
         # --- File conflict prevention ---
         if os.path.exists(self.filename):
-            raise FileExistsError(
+            # Extract base name and extension
+            base, ext = os.path.splitext(self.filename)
+            
+            warnings.warn(
                 f"File '{self.filename}' already exists. "
-                f"Choose a different filename or remove the existing file."
+                f"Attaching datetime suffix to avoid overwriting.",
+                UserWarning
             )
-    
+            self.filename = f"{base}_{datetime.now().strftime('%Y-%m-%d_%H-%M-%S')}{ext}"
+        
 
     def _adapt_gaze_data(self, df, df_ev):
         """
@@ -1217,7 +1346,7 @@ class ETracker:
                 if hasattr(f.root, 'events'):
                     f.root.events.append(events_array)
                 else:
-                    events_table = f.create_table(f.root, 'events', obj=events_array)
+                    f.create_table(f.root, 'events', obj=events_array)
                     
     def _on_gaze_data(self, gaze_data):
         """
