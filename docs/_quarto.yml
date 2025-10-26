@@ -160,7 +160,7 @@ quartodoc:
         positions for experimental logic.
       contents:
         - ETracker.gaze_contingent
-        - ETracker.get_average_gaze
+        - ETracker.get_gaze_position
 
     - title: Internal Calibration 
       desc: >
@@ -191,3 +191,17 @@ quartodoc:
       contents:
         - NicePrint
         - InfantStimuli
+      
+    - title: Configuration Settings
+      desc: >
+        Configuration classes and module-level instances for customizing the 
+        behavior and appearance of the DeToX eye-tracking system. These settings 
+        control animation parameters, colors, UI element sizes, and data formats.
+        Note: These settings should generally not be changed unless you have specific
+        requirements. However, they can be modified through the module-level instances 
+        (e.g., ETSettings.animation) for easy configuration of your experiments.
+      contents:
+        - AnimationSettings
+        - CalibrationColors
+        - UIElementSizes
+        - FontSizeMultipliers
