@@ -29,8 +29,20 @@ core.wait(4)
 controller.record_event('Event1')
 controller.save_data() # Right after the event to test the saving function
 
-core.wait(2)
+core.wait(60)
+
+controller.record_event('Event2')
+controller.save_data() # Right after the event to test the saving function
+
+core.wait(1)
+
+controller.record_event('Event3')
+controller.save_data() # Right after the event to test the saving function
+
+core.wait(1)
 
 # Clean up
 controller.stop_recording() # this closes and saves 
 win.close()
+
+
