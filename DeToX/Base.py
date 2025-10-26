@@ -124,31 +124,43 @@ class ETracker:
         atexit.register(self._close)
 
     def set_eyetracking_settings(self, desired_fps=None, desired_illumination_mode=None, use_gui = False,):
-        """"
-        Configure eye-tracking settings on the connected Tobii eye tracker.
+        """
+        Configure and apply Tobii eye tracker settings.
 
-        This method allows you to set key parameters of the eye tracker,
-        such as the sampling frequency (FPS) and illumination mode. You can
-        either apply default recommended settings or customize them as needed.
+        This method updates the eye tracker's sampling frequency (FPS) and illumination 
+        mode, either programmatically or via a graphical interface. It ensures that 
+        configuration changes are only made when the device is idle and connected.
 
         Parameters
         ----------
+        desired_fps : int, optional
+            Desired sampling frequency in Hz (e.g., 60, 120, 300). If None, the current 
+            frequency is retained.
+        desired_illumination_mode : str, optional
+            Desired illumination mode (e.g., 'Auto', 'Bright', 'Dark'). If None, the current 
+            illumination mode is retained.
         use_gui : bool, optional
-            If True, opens a graphical interface for setting parameters.
-            Default is False.
-        desired_fps : int
-            Desired sampling frequency in Hz (e.g., 60, 120, 300).
-        desired_illumination_mode : str
-            Desired illumination mode (e.g., 'Auto', 'Bright', 'Dark').
+            If True, opens a PsychoPy GUI dialog that allows users to select settings 
+            interactively. Defaults to False.
 
         Raises
         ------
         RuntimeError
-            If called in simulation mode or if no eyetracker is connected.
+            If no physical eye tracker is connected or if the function is called in 
+            simulation mode.
         ValueError
-            If provided FPS or illumination mode is not supported by the device.
+            If the specified FPS or illumination mode is not supported by the connected device.
+
+        Notes
+        -----
+        - Settings cannot be changed during active recording. If an ongoing recording 
+          is detected, a non-blocking warning is issued and the function exits safely.
+        - When `use_gui=True`, a PsychoPy dialog window appears. It must be closed 
+          manually before the program continues.
+        - After successfully applying new settings, the internal attributes `self.fps` 
+          and `self.illum_mode` are updated to reflect the current device configuration.
         """
-        # --- Pre-condition Check ---
+        # Pre-condition Check 
 
         # Ensure we are not recording already, as settings cannot be changed mid-recording.
         # Raise a non blocking warning instead of an error.
@@ -173,7 +185,7 @@ class ETracker:
                 "No eyetracker connected. Cannot set eye-tracking settings."
             )
         
-        # --- Apply Settings ---
+        #  Apply Settings 
         if use_gui:
             from psychopy import gui
 
@@ -215,16 +227,16 @@ class ETracker:
                         f"Supported modes: {self.illum_modes}"
                     )
         if desired_fps  != self.fps:
-            #-- Update eye tracker frequency ---
+            # Update eye tracker frequency 
             self.eyetracker.set_gaze_output_frequency(desired_fps)
 
-            #-- Update internal FPS attribute ---
+            # Update internal FPS attribute 
             self.fps = desired_fps
 
         if desired_illumination_mode != self.illum_mode:
-            # --- Update eye tracker illumination mode ---
+            #  Update eye tracker illumination mode 
             self.eyetracker.set_illumination_mode(desired_illumination_mode)
-            # --- Update internal illumination mode attribute ---
+            #  Update internal illumination mode attribute
             self.illum_mode = desired_illumination_mode
 
     # --- Calibration Methods ---
@@ -850,8 +862,8 @@ class ETracker:
         start_saving = core.getTime()
         
         # --- Ensure event-gaze synchronization ---
-        # Wait for 2 samples to ensure events have corresponding gaze data
-        core.wait(10/self.fps)
+        # Wait for 4 samples to ensure events have corresponding gaze data
+        core.wait(4/self.fps)
         
         # --- Thread-safe buffer swap (O(1) operation) ---
         # Swap buffers under lock to minimize thread blocking time
