@@ -11,16 +11,17 @@ Examples
 --------
 Modify settings in your experiment script:
 
->>> from DeToX import ETSettings
+>>> from DeToX import ETSettings as cfg
 >>> 
->>> # Access settings through the config object
->>> ETSettings.config.animation.max_zoom_size = 0.15
->>> 
->>> # Or use the module-level constants for backward compatibility
->>> ETSettings.ANIMATION_SETTINGS['max_zoom_size'] = 0.15
+>>> # Access animation settings
+>>> cfg.animation.max_zoom_size = 0.15
+>>> cfg.animation.focus_time = 1.0
 >>> 
 >>> # Change colors
->>> ETSettings.config.colors.highlight = (0, 255, 255, 255)  # Cyan
+>>> cfg.colors.highlight = (0, 255, 255, 255)  # Cyan
+>>> 
+>>> # Modify UI sizes
+>>> cfg.ui_sizes.text = 0.035
 
 Notes
 -----
@@ -225,92 +226,6 @@ class FontSizeMultipliers:
     instruction_text: float = 1.5
     message_text: float = 1.3
     title_text: float = 1.4
-
-
-@dataclass
-class Settings:
-    """Main configuration class for DeToX eye tracking package.
-    
-    This class serves as the central configuration container, organizing
-    all settings into logical groups. It provides both a structured interface
-    for accessing settings and maintains backward compatibility with
-    dictionary-based access patterns.
-    
-    Attributes
-    ----------
-    numkey_dict : dict of str to int
-        Mapping from keyboard key names to calibration point indices.
-        Supports both standard number keys ('1'-'9') and numpad keys
-        ('num_1'-'num_9'). Key '0' or 'num_0' maps to index -1 (no selection).
-    animation : AnimationSettings
-        Animation parameters for calibration stimuli including zoom and
-        trill settings. See AnimationSettings for details.
-    colors : CalibrationColors
-        RGBA color definitions for all visual elements in calibration
-        displays. See CalibrationColors for details.
-    ui_sizes : UIElementSizes
-        Size parameters for UI elements in height units.
-        See UIElementSizes for details.
-    font_multipliers : FontSizeMultipliers
-        Scaling factors for different text types relative to base text size.
-        See FontSizeMultipliers for details.
-    simulation_framerate : int
-        Target framerate in Hz for simulation mode when using mouse input
-        instead of real eye tracker. Default is 120 Hz to match Tobii Pro
-        Spectrum specifications.
-    
-    Examples
-    --------
-    Access and modify settings through the config object:
-    
-    >>> from DeToX import ETSettings
-    >>> 
-    >>> # Modify animation settings
-    >>> ETSettings.config.animation.max_zoom_size = 0.15
-    >>> ETSettings.config.animation.focus_time = 1.0
-    >>> 
-    >>> # Change colors
-    >>> ETSettings.config.colors.highlight = (0, 255, 255, 255)  # Cyan
-    >>> 
-    >>> # Adjust UI element sizes
-    >>> ETSettings.config.ui_sizes.text = 0.035  # Larger text
-    >>> 
-    >>> # Modify font multipliers
-    >>> ETSettings.config.font_multipliers.instruction_text = 2.0
-    >>> 
-    >>> # Change simulation framerate
-    >>> ETSettings.config.simulation_framerate = 60
-    
-    Notes
-    -----
-    The Settings class uses dataclasses for clean structure and automatic
-    initialization. All nested settings objects are created automatically
-    with their default values when a Settings instance is created.
-    
-    For backward compatibility, module-level dictionaries are also provided
-    (ANIMATION_SETTINGS, CALIBRATION_COLORS, etc.) that mirror the dataclass
-    structure. These are updated from the config object at module load time.
-    """
-    
-    numkey_dict: Dict[str, int] = field(default_factory=lambda: {
-        "0": -1, "num_0": -1,
-        "1": 0,  "num_1": 0,
-        "2": 1,  "num_2": 1,
-        "3": 2,  "num_3": 2,
-        "4": 3,  "num_4": 3,
-        "5": 4,  "num_5": 4,
-        "6": 5,  "num_6": 5,
-        "7": 6,  "num_7": 6,
-        "8": 7,  "num_8": 7,
-        "9": 8,  "num_9": 8,
-    })
-    
-    animation: AnimationSettings = field(default_factory=AnimationSettings)
-    colors: CalibrationColors = field(default_factory=CalibrationColors)
-    ui_sizes: UIElementSizes = field(default_factory=UIElementSizes)
-    font_multipliers: FontSizeMultipliers = field(default_factory=FontSizeMultipliers)
-    simulation_framerate: int = 120
-
 
 class RawDataColumns:
     """
@@ -648,7 +563,6 @@ __all__ = [
     'CalibrationColors',
     'UIElementSizes',
     'FontSizeMultipliers',
-    'Settings',
     'animation',
     'colors',
     'ui_sizes',
