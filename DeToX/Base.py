@@ -371,56 +371,96 @@ class ETracker:
 
 
     def calibrate(self,
-                calibration_points,
                 infant_stims,
+                calibration_points=5,
                 shuffle=True,
                 audio=None,
-                anim_type='zoom',
-                save_calib=False,
-                num_samples=5):
+                anim_type='zoom'
+                ):
         """
-        Run the infant-friendly calibration procedure.
+        Run infant-friendly calibration procedure.
 
-        Automatically selects the calibration method based on operating mode
+        Automatically selects calibration method based on operating mode
         (real eye tracker vs. simulation). Uses animated stimuli and optional
-        audio to engage infants during calibration.
+        audio to engage infant participants.
 
         Parameters
         ----------
-        calibration_points : list[tuple[float, float]]
-            Target locations in PsychoPy coordinates (e.g., height units).
-            Typically 5–9 points distributed across the screen.
-        infant_stims : list[str]
+        infant_stims : list of str
             Paths to engaging image files for calibration targets
             (e.g., animated characters, colorful objects).
+        calibration_points : int or list of tuple, optional
+            Calibration pattern specification:
+            - 5: Standard 5-point pattern (4 corners + center). Default.
+            - 9: Comprehensive 9-point pattern (3×3 grid).
+            - list: Custom points in normalized coordinates [-1, 1].
+            Example: [(-0.4, 0.4), (0.4, 0.4), (0.0, 0.0)]
         shuffle : bool, optional
             Whether to randomize stimulus presentation order. Default True.
-        audio : psychopy.sound.Sound | None, optional
+        audio : psychopy.sound.Sound, optional
             Attention-getting sound to play during calibration. Default None.
         anim_type : {'zoom', 'trill'}, optional
             Animation style for the stimuli. Default 'zoom'.
-        save_calib : bool | str, optional
-            Controls saving of calibration after a successful run:
-            - False: do not save (default)
-            - True: save using default naming (timestamped)
-            - str: save to this filename; if it has no extension, '.dat' is added.
-        num_samples : int, optional
-            Samples per point in simulation mode. Default 5.
 
         Returns
         -------
         bool
             True if calibration completed successfully, False otherwise.
 
-        Notes
-        -----
-        - Real mode uses Tobii's calibration with result visualization.
-        - Simulation mode uses mouse position to approximate the process.
-        - If in simulation mode, any save request is safely skipped with a warning.
+        Raises
+        ------
+        ValueError
+            If calibration_points is invalid (not 5, 9, or valid list of tuples).
+            
+        Examples
+        --------
+        >>> # Standard 5-point calibration
+        >>> controller.calibrate(stims)
+        
+        >>> # 9-point calibration
+        >>> controller.calibrate(stims, calibration_points=9)
+        
+        >>> # Custom pattern
+        >>> custom = [(-0.5, 0.5), (0.5, 0.5), (0.0, 0.0)]
+        >>> controller.calibrate(stims, calibration_points=custom)
         """
+        
+        # --- Calibration Points Processing ---
+        if isinstance(calibration_points, int):
+            # Use predefined pattern
+            if calibration_points == 5:
+                norm_points = cfg.calibration.points_5
+            elif calibration_points == 9:
+                norm_points = cfg.calibration.points_9
+            else:
+                raise ValueError(
+                    f"calibration_points must be 5, 9, or a list of tuples. Got: {calibration_points}"
+                )
+        elif isinstance(calibration_points, list):
+            # Validate custom points
+            if not calibration_points:
+                raise ValueError("calibration_points list cannot be empty.")
+            
+            for i, point in enumerate(calibration_points):
+                if not isinstance(point, tuple) or len(point) != 2:
+                    raise ValueError(f"Point {i} must be a tuple (x, y). Got: {point}")
+                
+                x, y = point
+                if not (-1 <= x <= 1 and -1 <= y <= 1):
+                    raise ValueError(
+                        f"Point {i} ({x}, {y}) out of range [-1, 1]. "
+                        f"Use normalized coordinates, not window units."
+                    )
+            
+            norm_points = calibration_points
+        else:
+            raise ValueError(
+                f"calibration_points must be int (5 or 9) or list of tuples. "
+                f"Got: {type(calibration_points).__name__}"
+            )
+                
         # --- Mode-specific calibration setup ---
         if self.simulate:
-            # Simulation calibration (mouse-based)
             session = MouseCalibrationSession(
                 win=self.win,
                 infant_stims=infant_stims,
@@ -429,9 +469,7 @@ class ETracker:
                 audio=audio,
                 anim_type=anim_type
             )
-            success = session.run(calibration_points, num_samples=num_samples)
         else:
-            # Real eye tracker calibration (Tobii)
             session = TobiiCalibrationSession(
                 win=self.win,
                 calibration_api=self.calibration,
@@ -440,19 +478,11 @@ class ETracker:
                 audio=audio,
                 anim_type=anim_type
             )
-            success = session.run(calibration_points)
-
-        # --- Save calibration data if requested and calibration succeeded ---
-        if success and save_calib:
-            if isinstance(save_calib, str):
-                # Pass the provided filename (extension handled in save_calibration)
-                self.save_calibration(filename=save_calib)
-            else:
-                # True -> no-arg save with default naming
-                self.save_calibration()
-
+        
+        # --- Run the calibration session ---
+        success = session.run(norm_points)
+        
         return success
-
 
     def save_calibration(self, filename=None, use_gui=False):
         """
