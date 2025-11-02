@@ -10,7 +10,7 @@ from psychopy import core, event, visual
 # Local imports
 from . import ETSettings as cfg
 from .Utils import InfantStimuli, NicePrint
-from .Coords import get_tobii_pos, psychopy_to_pixels, convert_height_to_units
+from .Coords import get_tobii_pos, psychopy_to_pixels, convert_height_to_units, norm_to_window_units
 
 
 class BaseCalibrationSession:
@@ -741,6 +741,7 @@ class TobiiCalibrationSession(BaseCalibrationSession):
         # --- Tobii-Specific Setup ---
         self.calibration = calibration_api
 
+
     def run(self, calibration_points):
         """
         Main routine to run the full Tobii calibration workflow.
@@ -752,8 +753,8 @@ class TobiiCalibrationSession(BaseCalibrationSession):
         Parameters
         ----------
         calibration_points : list of (float, float)
-            List of PsychoPy (x, y) positions for calibration targets. Typically
-            5-9 points distributed across the screen for comprehensive coverage.
+            List of calibration points in NORMALIZED coordinates [-1, 1].
+            Will be converted to window units and then to Tobii ADCS format.
 
         Returns
         -------
@@ -763,68 +764,59 @@ class TobiiCalibrationSession(BaseCalibrationSession):
         """
 
         # --- 1. Instruction Display ---
-        # Show instructions before anything happens
         instructions_text = """Tobii Eye Tracker Calibration Setup:
 
-    • Press number keys (1-9) to select calibration points
-    • Look at the animated stimulus when it appears
-    • Press SPACE to collect eye tracking data
-    • Press ENTER to finish collecting and see results
-    • Press ESCAPE to exit calibration
+        • Press number keys (1-9) to select calibration points
+        • Look at the animated stimulus when it appears
+        • Press SPACE to collect eye tracking data
+        • Press ENTER to finish collecting and see results
+        • Press ESCAPE to exit calibration
 
-    Any key will start calibration immediately!"""
+        Any key will start calibration immediately!"""
 
         self.show_message_and_wait(instructions_text, "Eye Tracker Calibration")
 
-        # --- 2. Setup and Validation ---
-        # Initial verification and preparation
-        self.check_points(calibration_points)
-        self._prepare_session(calibration_points)
-        
-        # --- 3. Pre-convert Coordinates (Once!) ---
-        # Convert all PsychoPy coordinates to Tobii ADCS format once
-        self.tobii_points = [get_tobii_pos(self.win, pt) for pt in calibration_points]
+        # --- 2. Convert from Normalized to Window Units ---
+        cal_points_window = norm_to_window_units(self.win, calibration_points)
 
-        # --- 4. Calibration Mode Activation ---
-        # Enter Tobii calibration mode
+        # --- 3. Setup and Validation ---
+        self.check_points(cal_points_window)
+        self._prepare_session(cal_points_window)
+        
+        # --- 4. Pre-convert to Tobii ADCS Coordinates (Once!) ---
+        self.tobii_points = [get_tobii_pos(self.win, pt) for pt in cal_points_window]
+
+        # --- 5. Calibration Mode Activation ---
         self.calibration.enter_calibration_mode()
 
-        # --- 5. Main Calibration Loop ---
-        # Main calibration-retry loop
+        # --- 6. Main Calibration Loop ---
         while True:
-            # --- 5a. Data Collection ---
-            # Data collection phase
-            success = self._collection_phase(calibration_points)
+            # --- 6a. Data Collection ---
+            success = self._collection_phase(cal_points_window)
             if not success:
                 self.calibration.leave_calibration_mode()
                 return False
 
-            # --- 5b. Calibration Computation ---
-            # Compute and show calibration results
+            # --- 6b. Calibration Computation ---
             self.calibration_result = self.calibration.compute_and_apply()
-            result_img = self._show_calibration_result(calibration_points)
+            result_img = self._show_calibration_result(cal_points_window)
 
-            # --- 5c. User Review and Selection ---
-            # Let user select points to retry
-            retries = self._selection_phase(calibration_points, result_img)
+            # --- 6c. User Review and Selection ---
+            retries = self._selection_phase(cal_points_window, result_img)
             if retries is None:
-                # Restart all: reset remaining points and clear collected data
-                self.remaining_points = list(range(len(calibration_points)))
+                self.remaining_points = list(range(len(cal_points_window)))
                 self._clear_collected_data()
                 continue
             elif not retries:
-                # Accept: finished!
                 break
             else:
-                # Retry specific points: update remaining points and discard data
                 self.remaining_points = retries.copy()
-                self._discard_phase(calibration_points, retries)
+                self._discard_phase(cal_points_window, retries)
 
-        # --- 6. Calibration Mode Deactivation ---
-        # Exit calibration mode
+        # --- 7. Calibration Mode Deactivation ---
         self.calibration.leave_calibration_mode()
 
-        # --- 7. Final Success Check ---
+        # --- 8. Final Success Check ---
         success = (self.calibration_result.status == tr.CALIBRATION_STATUS_SUCCESS)
 
         return success
@@ -1032,8 +1024,8 @@ class MouseCalibrationSession(BaseCalibrationSession):
         self.mouse = mouse
         self.calibration_data = {}  # point_idx -> list of (target_pos, sample_pos, timestamp)
     
-    
-    def run(self, calibration_points, num_samples=5):
+
+    def run(self, calibration_points):
         """
         Main function to run the mouse-based calibration routine.
         
@@ -1044,11 +1036,8 @@ class MouseCalibrationSession(BaseCalibrationSession):
         Parameters
         ----------
         calibration_points : list of (float, float)
-            List of target positions in PsychoPy coordinates. Typically 5-9
-            points distributed across the screen.
-        num_samples : int
-            How many mouse position samples to collect at each calibration point.
-            More samples provide smoother averaging. Default 5.
+            List of calibration points in NORMALIZED coordinates [-1, 1].
+            Will be converted to window units automatically.
 
         Returns
         -------
@@ -1058,55 +1047,50 @@ class MouseCalibrationSession(BaseCalibrationSession):
         """
 
         # --- 1. Instruction Display ---
-        # Show the instructions screen
         instructions_text = """Mouse-Based Calibration Setup:
 
-    • Press number keys (1-9) to select calibration points
-    • Move your mouse to the animated stimulus
-    • Press SPACE to collect samples at the selected point
-    • Press ENTER to finish collecting and see results
-    • Press ESCAPE to exit calibration
+        • Press number keys (1-9) to select calibration points
+        • Move your mouse to the animated stimulus
+        • Press SPACE to collect samples at the selected point
+        • Press ENTER to finish collecting and see results
+        • Press ESCAPE to exit calibration
 
-    Any key will start calibration immediately!"""
+        Any key will start calibration immediately!"""
         
         self.show_message_and_wait(instructions_text, "Calibration Setup")
         
-        # --- 2. Setup and Validation ---
-        # Sanity check and prepare stimuli
-        self.check_points(calibration_points)
-        self._prepare_session(calibration_points)
+        # --- 2. Convert from Normalized to Window Units ---
+        # Import here to avoid circular imports
+        cal_points_window = norm_to_window_units(self.win, calibration_points)
         
-        # --- 3. Main Calibration Loop ---
+        # --- 3. Setup and Validation ---
+        self.check_points(cal_points_window)
+        self._prepare_session(cal_points_window)
+        
+        # --- 4. Main Calibration Loop ---
         while True:
-            # --- 3a. Data Collection ---
-            # Collect calibration data at each point
-            success = self._collection_phase(calibration_points, num_samples=num_samples)
+            # --- 5a. Data Collection ---
+            success = self._collection_phase(cal_points_window, num_samples=cfg.calibration.num_samples_mouse)
             if not success:
                 return False
                 
-            # --- 3b. Results Visualization ---
-            # Show results of current calibration
-            result_img = self._show_results(calibration_points)
+            # --- 4b. Results Visualization ---
+            result_img = self._show_results(cal_points_window)
             
-            # --- 3c. User Review and Selection ---
-            # Let user review and pick points to retry
-            retries = self._selection_phase(calibration_points, result_img)
+            # --- 4c. User Review and Selection ---
+            retries = self._selection_phase(cal_points_window, result_img)
             
             if retries is None:
-                # Restart all: reset remaining points and clear data
-                self.remaining_points = list(range(len(calibration_points)))
+                self.remaining_points = list(range(len(cal_points_window)))
                 self.calibration_data.clear()
                 continue
             elif not retries:
-                # Accept: we're done!
                 return True
             else:
-                # Retry specific points: update remaining points and remove their data
                 self.remaining_points = retries.copy()
                 for idx in retries:
                     if idx in self.calibration_data:
                         del self.calibration_data[idx]
-
     
     
     def _collect_data_at_point(self, target_pos, point_idx, **kwargs):

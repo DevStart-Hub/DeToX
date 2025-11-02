@@ -90,6 +90,59 @@ class AnimationSettings:
 
 
 @dataclass
+class CalibrationPatterns:
+    """Standard calibration point patterns in normalized coordinates.
+    
+    Defines commonly used calibration patterns in normalized units where
+    the screen ranges from -1 to +1 in both dimensions. These universal
+    coordinates work across different screen sizes, aspect ratios, and
+    PsychoPy unit systems.
+    
+    Convert to window-specific coordinates at runtime using the
+    norm_to_window_units() function from the Coords module.
+    
+    Attributes
+    ----------
+    points_5 : list of tuple
+        5-point calibration pattern (4 corners + center).
+        Standard for quick calibrations with good coverage.
+        Pattern: corners at ±0.4 from edges to avoid screen boundaries.
+    points_9 : list of tuple
+        9-point calibration pattern (3×3 grid).
+        Standard for comprehensive calibrations requiring high accuracy.
+        Pattern: 3 rows × 3 columns with ±0.4 positioning.
+    num_samples_mouse : int
+        Number of mouse position samples to collect per calibration point
+        in simulation mode.
+        Default 5.
+    
+    Examples
+    --------
+    >>> from DeToX import ETSettings as cfg
+    >>> from DeToX.Coords import norm_to_window_units
+    >>> 
+    >>> # Change number of mouse samples collected per point
+    >>> cfg.calibration.num_samples_mouse = 10
+    """
+    
+    points_5: list = field(default_factory=lambda: [
+        (-0.4, 0.4),   # Top-left
+        (0.4, 0.4),    # Top-right
+        (0.0, 0.0),    # Center
+        (-0.4, -0.4),  # Bottom-left
+        (0.4, -0.4)    # Bottom-right
+    ])
+    
+    points_9: list = field(default_factory=lambda: [
+        (-0.4, 0.4),   (0.0, 0.4),   (0.4, 0.4),    # Top row
+        (-0.4, 0.0),   (0.0, 0.0),   (0.4, 0.0),    # Middle row
+        (-0.4, -0.4),  (0.0, -0.4),  (0.4, -0.4)    # Bottom row
+    ])
+    
+    num_samples_mouse: int = 5
+
+
+@dataclass
 class CalibrationColors:
     """Color settings for calibration visual elements.
     
@@ -493,6 +546,17 @@ class SimplifiedDataColumns:
 #: >>> cfg.animation.focus_time = 1.0
 animation = AnimationSettings()
 
+#: Standard calibration point patterns.
+#:
+#: Access calibration patterns directly through this object.
+#:
+#: Examples
+#: --------
+#: >>> from DeToX import ETSettings as cfg
+#: >>> from DeToX.Coords import norm_to_window_units
+#: >>> cal_points = norm_to_window_units(win, cfg.calibration.points_5)
+calibration = CalibrationPatterns()
+
 #: Color settings for calibration visual elements.
 #:
 #: Access color definitions directly through this object.
@@ -563,10 +627,12 @@ __all__ = [
     'CalibrationColors',
     'UIElementSizes',
     'FontSizeMultipliers',
+    'CalibrationPatterns',  # Add this
     'animation',
     'colors',
     'ui_sizes',
     'font_multipliers',
+    'calibration',  # Add this
     'numkey_dict',
     'simulation_framerate',
     'RawDataColumns',

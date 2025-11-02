@@ -83,6 +83,69 @@ def convert_height_to_units(win, height_value):
         return height_value
 
 
+def norm_to_window_units(win, norm_coords):
+    """
+    Convert normalized coordinates to current window units.
+    
+    Transforms calibration points from normalized units (-1 to +1 range) to
+    the window's active coordinate system. Enables universal calibration patterns
+    that work across different screens and unit systems.
+    
+    Parameters
+    ----------
+    win : psychopy.visual.Window
+        PsychoPy window providing unit and size information.
+    norm_coords : list of tuple
+        Calibration points as (x, y) tuples in normalized coordinates [-1, 1].
+        
+    Returns
+    -------
+    list of tuple
+        Points converted to current window units.
+        
+    Examples
+    --------
+    >>> from DeToX import ETSettings as cfg
+    >>> cal_points = norm_to_window_units(win, cfg.calibration_5_points)
+    """
+    # --- Unit System Detection ---
+    current_units = win.units
+    
+    # --- Conversion Based on Current Units ---
+    converted = []
+    
+    for x_norm, y_norm in norm_coords:
+        if current_units == "norm":
+            converted.append((x_norm, y_norm))
+            
+        elif current_units == "height":
+            aspect = win.size[0] / win.size[1]
+            x_height = x_norm * (aspect / 2.0)
+            y_height = y_norm * 0.5
+            converted.append((x_height, y_height))
+            
+        elif current_units == "pix":
+            x_pix = x_norm * (win.size[0] / 2.0)
+            y_pix = y_norm * (win.size[1] / 2.0)
+            converted.append((x_pix, y_pix))
+            
+        elif current_units in ["cm", "deg", "degFlat", "degFlatPos"]:
+            x_pix = x_norm * (win.size[0] / 2.0)
+            y_pix = y_norm * (win.size[1] / 2.0)
+            
+            if current_units == "cm":
+                converted.append((pix2cm(x_pix, win.monitor), pix2cm(y_pix, win.monitor)))
+            elif current_units == "deg":
+                converted.append((pix2deg(x_pix, win.monitor), pix2deg(y_pix, win.monitor)))
+            else:
+                converted.append((pix2deg(x_pix, win.monitor, correctFlat=True), 
+                                pix2deg(y_pix, win.monitor, correctFlat=True)))
+        else:
+            converted.append((x_norm, y_norm))
+    
+    return converted
+
+
 def get_psychopy_pos(win, p, units=None):
     """
     Convert Tobii ADCS coordinates to PsychoPy coordinates.
