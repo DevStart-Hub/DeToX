@@ -126,17 +126,17 @@ class CalibrationPatterns:
     """
     
     points_5: list = field(default_factory=lambda: [
-        (-0.4, 0.4),   # Top-left
-        (0.4, 0.4),    # Top-right
-        (0.0, 0.0),    # Center
-        (-0.4, -0.4),  # Bottom-left
-        (0.4, -0.4)    # Bottom-right
+        (0.0, 0.0),     # Center
+        (-0.8,  0.8),   # Top-left
+        ( 0.8,  0.8),   # Top-right
+        (-0.8, -0.8),   # Bottom-left
+        ( 0.8, -0.8)    # Bottom-right
     ])
     
     points_9: list = field(default_factory=lambda: [
-        (-0.4, 0.4),   (0.0, 0.4),   (0.4, 0.4),    # Top row
-        (-0.4, 0.0),   (0.0, 0.0),   (0.4, 0.0),    # Middle row
-        (-0.4, -0.4),  (0.0, -0.4),  (0.4, -0.4)    # Bottom row
+        (-0.8,  0.8), (0.0,  0.8), ( 0.8,  0.8),   # Top row
+        (-0.8,  0.0), (0.0,  0.0), ( 0.8,  0.0),   # Middle row
+        (-0.8, -0.8), (0.0, -0.8), ( 0.8, -0.8)    # Bottom row
     ])
     
     num_samples_mouse: int = 5
