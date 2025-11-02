@@ -38,7 +38,7 @@ print(f"✓ Units: {win.units}")
 #%% Positionning and calibration
 
 # # Create controller in simulation mode
-controller = ETracker(win, simulate=True)
+controller = ETracker(win, simulate=False)
 
 # Define calibration points - 5-point calibration
 cal_points = [
@@ -95,5 +95,5 @@ core.wait(2)
 #%% Closing
 
 # Clean up
-controller.close() # this closes and saves 
+controller.stop_recording() # this closes and saves 
 win.close()
