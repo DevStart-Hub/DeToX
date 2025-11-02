@@ -1,0 +1,39 @@
+# ETSettings.CalibrationColors { #DeToX.ETSettings.CalibrationColors }
+
+```python
+ETSettings.CalibrationColors(
+    left_eye=(0, 255, 0, 255),
+    right_eye=(255, 0, 0, 255),
+    mouse=(255, 128, 0, 255),
+    target_outline=(24, 24, 24, 255),
+    highlight=(255, 255, 0, 255),
+)
+```
+
+Color settings for calibration visual elements.
+
+Defines RGBA color values for various calibration display components
+including eye tracking samples, target outlines, and highlights.
+
+## Attributes {.doc-section .doc-section-attributes}
+
+| Name           | Type         | Description                                                                                                          |
+|----------------|--------------|----------------------------------------------------------------------------------------------------------------------|
+| left_eye       | tuple of int | RGBA color for Tobii left eye gaze samples (R, G, B, A). Default is (0, 255, 0, 255) - bright green.                 |
+| right_eye      | tuple of int | RGBA color for Tobii right eye gaze samples (R, G, B, A). Default is (255, 0, 0, 255) - bright red.                  |
+| mouse          | tuple of int | RGBA color for simulated mouse position samples (R, G, B, A). Default is (255, 128, 0, 255) - orange.                |
+| target_outline | tuple of int | RGBA color for calibration target circle outlines (R, G, B, A). Default is (24, 24, 24, 255) - dark gray/black.      |
+| highlight      | tuple of int | RGBA color for highlighting selected calibration points (R, G, B, A). Default is (255, 255, 0, 255) - bright yellow. |
+
+## Notes {.doc-section .doc-section-notes}
+
+All color values use 8-bit channels (0-255 range) in RGBA format.
+The alpha channel (A) controls opacity where 255 is fully opaque.
+
+## Examples {.doc-section .doc-section-examples}
+
+```python
+>>> colors = CalibrationColors()
+>>> colors.highlight = (0, 255, 255, 255)  # Change to cyan
+>>> colors.left_eye = (0, 200, 0, 200)  # Semi-transparent green
+```

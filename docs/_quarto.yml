@@ -5,13 +5,7 @@ execute:
 
 metadata-files:
   - api/_sidebar.yml
-<<<<<<< HEAD
-website:
-  title: "DeToX"
-  navbar:
-    logo: resources/logo/full_logo.png
-=======
-  
+
 website:
   title: "DeToX"
 
@@ -201,7 +195,7 @@ quartodoc:
         requirements. However, they can be modified through the module-level instances 
         (e.g., ETSettings.animation) for easy configuration of your experiments.
       contents:
-        - AnimationSettings
-        - CalibrationColors
-        - UIElementSizes
-        - FontSizeMultipliers
+        - ETSettings.AnimationSettings
+        - ETSettings.CalibrationColors
+        - ETSettings.UIElementSizes
+        - ETSettings.FontSizeMultipliers

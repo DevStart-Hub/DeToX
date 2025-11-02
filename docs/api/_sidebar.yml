@@ -18,7 +18,7 @@ website:
         section: Calibration
       - contents:
         - api/ETracker.gaze_contingent.qmd
-        - api/ETracker.get_average_gaze.qmd
+        - api/ETracker.get_gaze_position.qmd
         section: Gaze Contingent
       section: Main Eye-tracker Class
     - contents:
@@ -39,5 +39,11 @@ website:
       - api/NicePrint.qmd
       - api/InfantStimuli.qmd
       section: Utilities
+    - contents:
+      - api/ETSettings.AnimationSettings.qmd
+      - api/ETSettings.CalibrationColors.qmd
+      - api/ETSettings.UIElementSizes.qmd
+      - api/ETSettings.FontSizeMultipliers.qmd
+      section: Configuration Settings
     id: api
   - id: dummy-sidebar

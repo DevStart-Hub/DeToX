@@ -1,0 +1,43 @@
+# ETSettings.AnimationSettings { #DeToX.ETSettings.AnimationSettings }
+
+```python
+ETSettings.AnimationSettings(
+    focus_time=0.5,
+    zoom_speed=6.0,
+    max_zoom_size=0.11,
+    min_zoom_size=0.05,
+    trill_size=0.075,
+    trill_rotation_range=20,
+    trill_cycle_duration=1.5,
+    trill_active_duration=1.1,
+    trill_frequency=3.0,
+)
+```
+
+Animation parameters for calibration stimuli.
+
+Controls the behavior and appearance of animated calibration targets
+including zoom and trill animations. All size parameters are specified
+in height units (percentage of screen height).
+
+## Attributes {.doc-section .doc-section-attributes}
+
+| Name                  | Type   | Description                                                                                                                                |
+|-----------------------|--------|--------------------------------------------------------------------------------------------------------------------------------------------|
+| focus_time            | float  | Wait time in seconds before collecting calibration data at each point. Allows participant to fixate on the target. Default is 0.5 seconds. |
+| zoom_speed            | float  | Speed multiplier for the zoom animation. Higher values make the size oscillation faster. Default is 6.0.                                   |
+| max_zoom_size         | float  | Maximum size for zoom animation as percentage of screen height. Default is 0.11 (11% of screen height).                                    |
+| min_zoom_size         | float  | Minimum size for zoom animation as percentage of screen height. Default is 0.05 (5% of screen height).                                     |
+| trill_size            | float  | Fixed size for trill animation as percentage of screen height. Default is 0.075 (7.5% of screen height).                                   |
+| trill_rotation_range  | float  | Maximum rotation angle in degrees for trill animation. Default is 20 degrees.                                                              |
+| trill_cycle_duration  | float  | Total cycle time for trill animation in seconds (active + pause). Default is 1.5 seconds.                                                  |
+| trill_active_duration | float  | Duration of active trill rotation in seconds, within each cycle. Default is 1.1 seconds (leaves 0.4s pause).                               |
+| trill_frequency       | float  | Number of back-and-forth rotation oscillations per second during active trill phase. Default is 3.0 oscillations/second.                   |
+
+## Examples {.doc-section .doc-section-examples}
+
+```python
+>>> settings = AnimationSettings()
+>>> settings.max_zoom_size = 0.15  # Increase max size to 15%
+>>> settings.trill_frequency = 5.0  # Faster trill
+```

@@ -41,7 +41,7 @@ Tools for running gaze-contingent experiments, where visual presentation  adapts
 | | |
 | --- | --- |
 | [ETracker.gaze_contingent](ETracker.gaze_contingent.qmd#DeToX.ETracker.gaze_contingent) | Initialize real-time gaze buffer for contingent applications. |
-| [ETracker.get_average_gaze](ETracker.get_average_gaze.qmd#DeToX.ETracker.get_average_gaze) | Compute smoothed gaze position from recent samples. |
+| [ETracker.get_gaze_position](ETracker.get_gaze_position.qmd#DeToX.ETracker.get_gaze_position) | Get current gaze position from rolling buffer. |
 
 ## Internal Calibration
 
@@ -78,3 +78,15 @@ A set of utility classes and functions for presenting stimuli and formatted text
 | --- | --- |
 | [NicePrint](NicePrint.qmd#DeToX.NicePrint) | Print a message in a box with an optional title AND return the formatted text. |
 | [InfantStimuli](InfantStimuli.qmd#DeToX.InfantStimuli) | Stimuli manager for infant-friendly calibration procedures. |
+
+## Configuration Settings
+
+Configuration classes and module-level instances for customizing the  behavior and appearance of the DeToX eye-tracking system. These settings  control animation parameters, colors, UI element sizes, and data formats. Note: These settings should generally not be changed unless you have specific requirements. However, they can be modified through the module-level instances  (e.g., ETSettings.animation) for easy configuration of your experiments.
+
+
+| | |
+| --- | --- |
+| [ETSettings.AnimationSettings](ETSettings.AnimationSettings.qmd#DeToX.ETSettings.AnimationSettings) | Animation parameters for calibration stimuli. |
+| [ETSettings.CalibrationColors](ETSettings.CalibrationColors.qmd#DeToX.ETSettings.CalibrationColors) | Color settings for calibration visual elements. |
+| [ETSettings.UIElementSizes](ETSettings.UIElementSizes.qmd#DeToX.ETSettings.UIElementSizes) | Size settings for user interface elements. |
+| [ETSettings.FontSizeMultipliers](ETSettings.FontSizeMultipliers.qmd#DeToX.ETSettings.FontSizeMultipliers) | Font size multipliers for different text types. |

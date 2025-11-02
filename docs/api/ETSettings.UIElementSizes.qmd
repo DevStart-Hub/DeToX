@@ -1,0 +1,48 @@
+# ETSettings.UIElementSizes { #DeToX.ETSettings.UIElementSizes }
+
+```python
+ETSettings.UIElementSizes(
+    highlight=0.04,
+    line_width=0.003,
+    marker=0.02,
+    border=0.005,
+    plot_line=0.002,
+    text=0.025,
+    target_circle=0.012,
+    target_circle_width=0.006,
+)
+```
+
+Size settings for user interface elements.
+
+Defines sizes for various UI components in the calibration interface.
+All sizes are specified in height units (as fraction of screen height)
+and are automatically converted to appropriate units based on the
+PsychoPy window configuration.
+
+## Attributes {.doc-section .doc-section-attributes}
+
+| Name                | Type   | Description                                                                                                         |
+|---------------------|--------|---------------------------------------------------------------------------------------------------------------------|
+| highlight           | float  | Radius of circles highlighting selected calibration points for retry. Default is 0.04 (4% of screen height).        |
+| line_width          | float  | Thickness of lines drawn in calibration visualizations. Default is 0.003 (0.3% of screen height).                   |
+| marker              | float  | Size of markers indicating data collection points. Default is 0.02 (2% of screen height).                           |
+| border              | float  | Thickness of the red calibration mode border around the screen. Default is 0.005 (0.5% of screen height).           |
+| plot_line           | float  | Width of lines in calibration result plots connecting targets to samples. Default is 0.002 (0.2% of screen height). |
+| text                | float  | Base text height for all text displays in the calibration interface. Default is 0.025 (2.5% of screen height).      |
+| target_circle       | float  | Radius of target circles drawn in calibration result visualizations. Default is 0.012 (1.2% of screen height).      |
+| target_circle_width | float  | Line width for target circle outlines in result visualizations. Default is 0.006 (0.6% of screen height).           |
+
+## Notes {.doc-section .doc-section-notes}
+
+Height units provide consistent visual appearance across different
+screen sizes and aspect ratios. The conversion to pixels or other
+units is handled automatically by the coordinate conversion functions.
+
+## Examples {.doc-section .doc-section-examples}
+
+```python
+>>> ui_sizes = UIElementSizes()
+>>> ui_sizes.highlight = 0.06  # Larger highlight circles
+>>> ui_sizes.text = 0.035  # Larger text
+```

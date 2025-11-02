@@ -5,24 +5,3 @@ ETracker.gaze_contingent(N=5)
 ```
 
 Initialize real-time gaze buffer for contingent applications.
-
-Sets up rolling buffer to store recent gaze coordinates for
-immediate processing during experiments. Enables smooth gaze
-estimation and real-time gaze-contingent paradigms.
-
-## Parameters {.doc-section .doc-section-parameters}
-
-| Name   | Type   | Description                                                                            | Default   |
-|--------|--------|----------------------------------------------------------------------------------------|-----------|
-| N      | int    | Number of recent gaze samples to buffer. Buffer holds coordinate pairs from both eyes. | `5`       |
-
-## Raises {.doc-section .doc-section-raises}
-
-| Name   | Type      | Description             |
-|--------|-----------|-------------------------|
-|        | TypeError | If N is not an integer. |
-
-## Examples {.doc-section .doc-section-examples}
-
-tracker.gaze_contingent(10)  # Buffer last 10 samples
-pos = tracker.get_average_gaze()  # Get smoothed position

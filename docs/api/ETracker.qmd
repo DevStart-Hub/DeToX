@@ -24,12 +24,12 @@ This class is intended to be the first object you instantiate in your experiment
 | --- | --- |
 | [calibrate](#DeToX.ETracker.calibrate) | Run the infant-friendly calibration procedure. |
 | [gaze_contingent](#DeToX.ETracker.gaze_contingent) | Initialize real-time gaze buffer for contingent applications. |
-| [get_average_gaze](#DeToX.ETracker.get_average_gaze) | Compute smoothed gaze position from recent samples. |
-| [get_info](#DeToX.ETracker.get_info) | Displays information about the connected eye tracker or simulation settings. |
+| [get_gaze_position](#DeToX.ETracker.get_gaze_position) | Get current gaze position from rolling buffer. |
 | [load_calibration](#DeToX.ETracker.load_calibration) | Loads calibration data from a file and applies it to the eye tracker. |
 | [record_event](#DeToX.ETracker.record_event) | Record timestamped experimental event during data collection. |
 | [save_calibration](#DeToX.ETracker.save_calibration) | Save the current calibration data to a file. |
 | [save_data](#DeToX.ETracker.save_data) | Save buffered gaze and event data to file with optimized processing. |
+| [set_eyetracking_settings](#DeToX.ETracker.set_eyetracking_settings) | Configure and apply Tobii eye tracker settings. |
 | [show_status](#DeToX.ETracker.show_status) | Real-time visualization of participant's eye position in track box. |
 | [start_recording](#DeToX.ETracker.start_recording) | Begin gaze data recording session. |
 | [stop_recording](#DeToX.ETracker.stop_recording) | Stop gaze data recording and finalize session. |
@@ -86,82 +86,61 @@ ETracker.gaze_contingent(N=5)
 
 Initialize real-time gaze buffer for contingent applications.
 
-Sets up rolling buffer to store recent gaze coordinates for
-immediate processing during experiments. Enables smooth gaze
-estimation and real-time gaze-contingent paradigms.
-
-#### Parameters {.doc-section .doc-section-parameters}
-
-| Name   | Type   | Description                                                                            | Default   |
-|--------|--------|----------------------------------------------------------------------------------------|-----------|
-| N      | int    | Number of recent gaze samples to buffer. Buffer holds coordinate pairs from both eyes. | `5`       |
-
-#### Raises {.doc-section .doc-section-raises}
-
-| Name   | Type      | Description             |
-|--------|-----------|-------------------------|
-|        | TypeError | If N is not an integer. |
-
-#### Examples {.doc-section .doc-section-examples}
-
-tracker.gaze_contingent(10)  # Buffer last 10 samples
-pos = tracker.get_average_gaze()  # Get smoothed position
-
-### get_average_gaze { #DeToX.ETracker.get_average_gaze }
+### get_gaze_position { #DeToX.ETracker.get_gaze_position }
 
 ```python
-ETracker.get_average_gaze(fallback_offscreen=True)
+ETracker.get_gaze_position(fallback_offscreen=True, method='median')
 ```
 
-Compute smoothed gaze position from recent samples.
+Get current gaze position from rolling buffer.
 
-Averages valid gaze coordinates from rolling buffer to provide
-stable gaze estimates for real-time applications. Handles missing
-or invalid data gracefully.
+Aggregates recent gaze samples from both eyes to provide a stable,
+real-time gaze estimate. Handles missing or invalid data gracefully.
 
 #### Parameters {.doc-section .doc-section-parameters}
 
-| Name               | Type   | Description                                                                                                      | Default   |
-|--------------------|--------|------------------------------------------------------------------------------------------------------------------|-----------|
-| fallback_offscreen | bool   | Return offscreen position if no valid data available. Default True (returns position far outside screen bounds). | `True`    |
+| Name               | Type   | Description                                                                                                                                                                                                          | Default    |
+|--------------------|--------|----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------|------------|
+| fallback_offscreen | bool   | If True (default), returns an offscreen position (3x screen dimensions) when no valid gaze data is available. If False, returns None.                                                                                | `True`     |
+| method             | str    | Aggregation method for combining samples and eyes. - "median" (default): Robust to outliers, good for noisy data - "mean": Smoother but sensitive to outliers - "last": Lowest latency, uses only most recent sample | `'median'` |
 
 #### Returns {.doc-section .doc-section-returns}
 
-| Name   | Type          | Description                                                                                                           |
-|--------|---------------|-----------------------------------------------------------------------------------------------------------------------|
-|        | tuple or None | Average gaze position (x, y) in Tobii ADCS coordinates, offscreen position, or None if no data and fallback disabled. |
+| Name   | Type          | Description                                                                                                                 |
+|--------|---------------|-----------------------------------------------------------------------------------------------------------------------------|
+|        | tuple or None | Gaze position (x, y) in PsychoPy coordinates (current window units), or None if no valid data and fallback_offscreen=False. |
 
 #### Raises {.doc-section .doc-section-raises}
 
-| Name   | Type         | Description                                                     |
-|--------|--------------|-----------------------------------------------------------------|
-|        | RuntimeError | If gaze_contingent() was not called first to initialize buffer. |
+| Name   | Type         | Description                                                   |
+|--------|--------------|---------------------------------------------------------------|
+|        | RuntimeError | If gaze_contingent() was not called to initialize the buffer. |
 
 #### Examples {.doc-section .doc-section-examples}
 
-pos = tracker.get_average_gaze()
-if pos is not None:
-    psychopy_pos = Coords.get_psychopy_pos(win, pos)
-
-### get_info { #DeToX.ETracker.get_info }
-
 ```python
-ETracker.get_info(moment='connection')
+>>> # Basic usage (median aggregation)
+>>> pos = tracker.get_gaze_position()
+>>> if pos is not None:
+...     circle.pos = pos
 ```
 
-Displays information about the connected eye tracker or simulation settings.
+```python
+>>> # Use mean for smoother tracking
+>>> pos = tracker.get_gaze_position(method="mean")
+```
 
-This method prints a formatted summary of the hardware or simulation
-configuration. It can be called at different moments (e.g., at connection
-or before recording) to show relevant information. The information is
-retrieved from the eye tracker or simulation settings and cached on the
-first call to avoid repeated hardware queries.
+```python
+>>> # Lowest latency (last sample only)
+>>> pos = tracker.get_gaze_position(method="last")
+```
 
-#### Parameters {.doc-section .doc-section-parameters}
-
-| Name   | Type   | Description                                                                                                                                                                                                                                                                                                                                                   | Default        |
-|--------|--------|---------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------|----------------|
-| moment | str    | Specifies the context of the information display. - 'connection': Shows detailed information, including all available   options (e.g., frequencies, illumination modes). This is typically   used right after initialization. - 'recording': Shows a concise summary of the settings being used   for the current recording session. Default is 'connection'. | `'connection'` |
+```python
+>>> # Return None instead of offscreen position
+>>> pos = tracker.get_gaze_position(fallback_offscreen=False)
+>>> if pos is None:
+...     print("No valid gaze data")
+```
 
 ### load_calibration { #DeToX.ETracker.load_calibration }
 
@@ -269,6 +248,46 @@ Uses thread-safe buffer swapping to minimize lock time, then processes
 and saves data in CSV or HDF5 format. Events are merged with gaze data
 based on timestamp proximity.
 
+### set_eyetracking_settings { #DeToX.ETracker.set_eyetracking_settings }
+
+```python
+ETracker.set_eyetracking_settings(
+    desired_fps=None,
+    desired_illumination_mode=None,
+    use_gui=False,
+)
+```
+
+Configure and apply Tobii eye tracker settings.
+
+This method updates the eye tracker's sampling frequency (FPS) and illumination 
+mode, either programmatically or via a graphical interface. It ensures that 
+configuration changes are only made when the device is idle and connected.
+
+#### Parameters {.doc-section .doc-section-parameters}
+
+| Name                      | Type   | Description                                                                                                      | Default   |
+|---------------------------|--------|------------------------------------------------------------------------------------------------------------------|-----------|
+| desired_fps               | int    | Desired sampling frequency in Hz (e.g., 60, 120, 300). If None, the current  frequency is retained.              | `None`    |
+| desired_illumination_mode | str    | Desired illumination mode (e.g., 'Auto', 'Bright', 'Dark'). If None, the current  illumination mode is retained. | `None`    |
+| use_gui                   | bool   | If True, opens a PsychoPy GUI dialog that allows users to select settings  interactively. Defaults to False.     | `False`   |
+
+#### Raises {.doc-section .doc-section-raises}
+
+| Name   | Type         | Description                                                                               |
+|--------|--------------|-------------------------------------------------------------------------------------------|
+|        | RuntimeError | If no physical eye tracker is connected or if the function is called in  simulation mode. |
+|        | ValueError   | If the specified FPS or illumination mode is not supported by the connected device.       |
+
+#### Notes {.doc-section .doc-section-notes}
+
+- Settings cannot be changed during active recording. If an ongoing recording 
+  is detected, a non-blocking warning is issued and the function exits safely.
+- When `use_gui=True`, a PsychoPy dialog window appears. It must be closed 
+  manually before the program continues.
+- After successfully applying new settings, the internal attributes `self.fps` 
+  and `self.illum_mode` are updated to reflect the current device configuration.
+
 ### show_status { #DeToX.ETracker.show_status }
 
 ```python
@@ -295,7 +314,7 @@ Eye positions shown as green (left) and red (right) circles.
 ### start_recording { #DeToX.ETracker.start_recording }
 
 ```python
-ETracker.start_recording(filename=None)
+ETracker.start_recording(filename=None, raw_format=False)
 ```
 
 Begin gaze data recording session.
@@ -306,15 +325,18 @@ Creates HDF5 or CSV files based on filename extension.
 
 #### Parameters {.doc-section .doc-section-parameters}
 
-| Name     | Type   | Description                                                                                                                                                   | Default   |
-|----------|--------|---------------------------------------------------------------------------------------------------------------------------------------------------------------|-----------|
-| filename | str    | Output filename for gaze data. If None, generates timestamp-based name. File extension determines format (.h5/.hdf5 for HDF5, .csv for CSV, defaults to .h5). | `None`    |
+| Name       | Type   | Description                                                                                                                                                                                                  | Default   |
+|------------|--------|--------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------|-----------|
+| filename   | str    | Output filename for gaze data. If None, generates timestamp-based name. File extension determines format (.h5/.hdf5 for HDF5, .csv for CSV, defaults to .h5).                                                | `None`    |
+| raw_format | bool   | If True, preserves all original Tobii SDK column names and data. If False (default), uses simplified column names and subset of columns. Raw format is useful for advanced analysis requiring full metadata. | `False`   |
 
-#### Raises {.doc-section .doc-section-raises}
+#### Examples {.doc-section .doc-section-examples}
 
-| Name   | Type        | Description                          |
-|--------|-------------|--------------------------------------|
-|        | UserWarning | If recording is already in progress. |
+# Standard format (simplified columns)
+tracker.start_recording('data.h5')
+
+# Raw format (all Tobii SDK columns preserved)
+tracker.start_recording('data_raw.h5', raw_format=True)
 
 ### stop_recording { #DeToX.ETracker.stop_recording }
 
