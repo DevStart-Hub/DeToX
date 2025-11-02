@@ -11,7 +11,8 @@ from .Coords import (
     tobii2pix,
     get_psychopy_pos_from_trackbox,
     psychopy_to_pixels,
-    convert_height_to_units
+    convert_height_to_units,
+    norm_to_window_units
 )
 
 # Define the version
@@ -32,5 +33,6 @@ __all__ = [
     'tobii2pix',
     'get_psychopy_pos_from_trackbox',
     'psychopy_to_pixels',
-    'convert_height_to_units'
+    'convert_height_to_units',
+    'norm_to_window_units'
 ]
