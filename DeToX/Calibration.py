@@ -762,27 +762,31 @@ class TobiiCalibrationSession(BaseCalibrationSession):
         # Initial verification and preparation
         self.check_points(calibration_points)
         self._prepare_session(calibration_points)
+        
+        # --- 3. Pre-convert Coordinates (Once!) ---
+        # Convert all PsychoPy coordinates to Tobii ADCS format once
+        self.tobii_points = [get_tobii_pos(self.win, pt) for pt in calibration_points]
 
-        # --- 3. Calibration Mode Activation ---
+        # --- 4. Calibration Mode Activation ---
         # Enter Tobii calibration mode
         self.calibration.enter_calibration_mode()
 
-        # --- 4. Main Calibration Loop ---
+        # --- 5. Main Calibration Loop ---
         # Main calibration-retry loop
         while True:
-            # --- 4a. Data Collection ---
+            # --- 5a. Data Collection ---
             # Data collection phase
             success = self._collection_phase(calibration_points)
             if not success:
                 self.calibration.leave_calibration_mode()
                 return False
 
-            # --- 4b. Calibration Computation ---
+            # --- 5b. Calibration Computation ---
             # Compute and show calibration results
             self.calibration_result = self.calibration.compute_and_apply()
             result_img = self._show_calibration_result(calibration_points)
 
-            # --- 4c. User Review and Selection ---
+            # --- 5c. User Review and Selection ---
             # Let user select points to retry
             retries = self._selection_phase(calibration_points, result_img)
             if retries is None:
@@ -798,11 +802,11 @@ class TobiiCalibrationSession(BaseCalibrationSession):
                 self.remaining_points = retries.copy()
                 self._discard_phase(calibration_points, retries)
 
-        # --- 5. Calibration Mode Deactivation ---
+        # --- 6. Calibration Mode Deactivation ---
         # Exit calibration mode
         self.calibration.leave_calibration_mode()
 
-        # --- 6. Final Success Check ---
+        # --- 7. Final Success Check ---
         success = (self.calibration_result.status == tr.CALIBRATION_STATUS_SUCCESS)
 
         return success
@@ -813,8 +817,8 @@ class TobiiCalibrationSession(BaseCalibrationSession):
         Collect Tobii eye tracking data at a calibration point.
         
         Interfaces with the Tobii SDK to collect gaze samples while the participant
-        looks at the calibration target. Converts coordinates from PsychoPy to
-        Tobii's coordinate system and manages the timing of data collection.
+        looks at the calibration target. Uses pre-converted coordinates from
+        self.tobii_points for efficiency.
         
         Parameters
         ----------
@@ -831,9 +835,8 @@ class TobiiCalibrationSession(BaseCalibrationSession):
             Always returns True to indicate data collection was initiated.
             Actual success is determined during calibration computation.
         """
-        # --- Coordinate Conversion ---
-        # Convert from PsychoPy to Tobii ADCS coordinates
-        x, y = get_tobii_pos(self.win, target_pos)
+        # --- Use Pre-converted Coordinates ---
+        x, y = self.tobii_points[point_idx]
         
         # --- Data Cleanup ---
         # Clear any existing data at this point first
@@ -868,23 +871,25 @@ class TobiiCalibrationSession(BaseCalibrationSession):
     
     def _clear_collected_data(self):
         """
-        Clear Tobii calibration data.
+        Clear Tobii calibration data for all points.
         
-        Resets the calibration state for a fresh start. For Tobii hardware,
-        data clearing is handled internally by the SDK when calibration mode
-        is re-entered or when specific points are discarded.
+        Discards previously collected gaze data from all calibration points
+        to prepare for a fresh calibration attempt. Uses pre-converted 
+        Tobii coordinates for efficiency. Called when user chooses to 
+        restart the entire calibration process.
         """
-        # --- Tobii Internal Handling ---
-        # Tobii handles clearing internally
-        pass
+        # --- Clear All Points ---
+        # Loop through all points and discard their data
+        for idx in range(len(self.tobii_points)):
+            x, y = self.tobii_points[idx]
+            self.calibration.discard_data(x, y)
 
     def _discard_phase(self, calibration_points, retries):
         """
         Remove collected data for each retry point.
         
         Discards previously collected gaze data for points that the user
-        wants to recalibrate. This ensures fresh data collection without
-        interference from potentially poor previous samples.
+        wants to recalibrate. Uses pre-converted coordinates for efficiency.
         
         Parameters
         ----------
@@ -895,7 +900,7 @@ class TobiiCalibrationSession(BaseCalibrationSession):
         """
         # --- Selective Data Removal ---
         for idx in retries:
-            x, y = get_tobii_pos(self.win, calibration_points[idx])
+            x, y = self.tobii_points[idx]
             self.calibration.discard_data(x, y)
 
     def _show_calibration_result(self, calibration_points):
