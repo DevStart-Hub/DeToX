@@ -40,13 +40,6 @@ print(f"✓ Units: {win.units}")
 # # Create controller in simulation mode
 controller = ETracker(win, simulate=False)
 
-# Define calibration points - 5-point calibration
-cal_points = [
-    (-0.4, 0.4),  (0.4, 0.4),      # Top row
-    (0.0, 0.0),      # Middle row  
-    (-0.4, -0.4), (0.4, -0.4)    # Bottom row
-]
-
 # Stimulus images (here are all the same, replace with your actual stimulus files)
 # Note: These should be engaging images for participants (animals, toys, etc.)
 stims = ['Stimuli\\1.png', 'Stimuli\\2.png', 'Stimuli\\3.png', 'Stimuli\\4.png', 'Stimuli\\5.png']
@@ -58,12 +51,10 @@ stims = ['Stimuli\\1.png', 'Stimuli\\2.png', 'Stimuli\\3.png', 'Stimuli\\4.png',
 controller.show_status()
 
 success = controller.calibrate(
-    calibration_points=cal_points,
     infant_stims=stims,
+    calibration_points=5,
     shuffle=True,
-    anim_type='zoom', # you can also try trill
-    num_samples=5  # Collect 5 samples per point (only for simulation to be removed)
-)
+    anim_type='zoom')
 
 
 if success:
