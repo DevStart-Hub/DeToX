@@ -332,8 +332,8 @@ class BaseCalibrationSession:
         # Initialize remaining points to all points
         self.remaining_points = list(range(len(calibration_points)))
     
-    
-    def _animate(self, stim, clock):
+        
+    def _animate(self, stim, clock, point_idx):
         """
         Animate a stimulus with zoom or rotation ('trill') effects.
         
@@ -371,20 +371,38 @@ class BaseCalibrationSession:
             # Calculate smooth oscillation between min and max sizes using cosine
             # Cosine provides smooth acceleration/deceleration at size extremes
             size_range = max_size - min_size
-            normalized_oscillation = (np.cos(elapsed_time) + 1) / 2.0  # Normalize to 0-1 range
+            normalized_oscillation = (np.cos(elapsed_time) + 1) / 2.0
             current_size = min_size + (normalized_oscillation * size_range)
             
-            # Apply calculated size to stimulus (square aspect ratio)
-            stim.setSize([current_size, current_size])
+            # Get original aspect ratio
+            original_size = self.targets.get_stim_original_size(point_idx)
+            aspect_ratio = original_size[0] / original_size[1]  # width / height
+            
+            # Apply size while maintaining aspect ratio
+            if aspect_ratio >= 1.0:
+                # Landscape or square: scale based on width
+                stim.setSize([current_size, current_size / aspect_ratio])
+            else:
+                # Portrait: scale based on height
+                stim.setSize([current_size * aspect_ratio, current_size])
             
         elif self.anim_type == 'trill':
             # --- Trill Animation: Rapid Rotation with Pauses ---
             # Set fixed size for trill animation from configuration
             trill_size_height = cfg.animation.trill_size
             trill_size = convert_height_to_units(self.win, trill_size_height)
-            stim.setSize([trill_size, trill_size])
             
-            # Create rapid trill and stop pattern
+            # Get original aspect ratio
+            original_size = self.targets.get_stim_original_size(point_idx)
+            aspect_ratio = original_size[0] / original_size[1]
+            
+            # Apply size while maintaining aspect ratio
+            if aspect_ratio >= 1.0:
+                stim.setSize([trill_size, trill_size / aspect_ratio])
+            else:
+                stim.setSize([trill_size * aspect_ratio, trill_size])
+            
+            # Rotation logic (unchanged)
             elapsed_time = clock.getTime()
             trill_cycle_duration = cfg.animation.trill_cycle_duration
             trill_active_duration = cfg.animation.trill_active_duration
@@ -593,7 +611,7 @@ Make your choice now:"""
             if point_idx in self.remaining_points:
                 stim = self.targets.get_stim(point_idx)
                 stim.setPos(calibration_points[point_idx])
-                self._animate(stim, clock)
+                self._animate(stim, clock, point_idx)  # ← Add point_idx here
             
             self.win.flip()
     
@@ -845,6 +863,7 @@ class TobiiCalibrationSession(BaseCalibrationSession):
         # --- Data Collection ---
         # Wait focus time then collect NEW data
         core.wait(self.focus_time)
+
         self.calibration.collect_data(x, y)
         return True
 
