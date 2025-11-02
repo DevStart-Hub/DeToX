@@ -100,9 +100,11 @@ def get_psychopy_pos(win, p, units=None):
     win : psychopy.visual.Window
         The PsychoPy window which provides information about units and size.
         Window properties determine the target coordinate system.
-    p : tuple
-        The Tobii ADCS coordinates to convert as (x, y). Values should be in
-        range [0, 1] where (0, 0) is top-left and (1, 1) is bottom-right.
+    p : tuple or array-like
+        The Tobii ADCS coordinates to convert. Can be:
+        - Single coordinate: (x, y) tuple
+        - Multiple coordinates: (N, 2) array where N is number of samples
+        Values should be in range [0, 1] where (0, 0) is top-left and (1, 1) is bottom-right.
     units : str, optional
         The target units for the PsychoPy coordinates. If None, uses the
         window's default units. Supported: 'norm', 'height', 'pix', 'cm',
@@ -110,8 +112,10 @@ def get_psychopy_pos(win, p, units=None):
 
     Returns
     -------
-    tuple
+    tuple or ndarray
         The converted PsychoPy coordinates in the specified unit system.
+        - Single input: returns (x, y) tuple
+        - Array input: returns (N, 2) array
         Origin is at screen center for most unit systems.
 
     Raises
@@ -121,48 +125,76 @@ def get_psychopy_pos(win, p, units=None):
         
     Examples
     --------
-    >>> # Convert center of screen from Tobii to PsychoPy
+    >>> # Single coordinate
     >>> pos = get_psychopy_pos(win, (0.5, 0.5))  # Returns (0, 0) in most units
     
-    >>> # Convert top-left corner
-    >>> pos = get_psychopy_pos(win, (0, 0), units='norm')  # Returns (-1, 1)
+    >>> # Multiple coordinates (vectorized)
+    >>> coords = np.array([[0.5, 0.5], [0.0, 0.0], [1.0, 1.0]])
+    >>> positions = get_psychopy_pos(win, coords)  # Returns (N, 2) array
     """
     # --- Unit System Resolution ---
     if units is None:
         units = win.units
 
+    # --- Check if input is array or single coordinate ---
+    p_array = np.asarray(p)
+    is_single = (p_array.ndim == 1)
+    
+    # Ensure we have a 2D array for processing
+    if is_single:
+        p_array = p_array.reshape(1, -1)
+    
+    # Extract x and y columns
+    x = p_array[:, 0]
+    y = p_array[:, 1]
+
     if units == "norm":
         # --- Normalized Units ---
         # Convert to normalized units, where screen ranges from -1 to 1
         # ADCS (0,1) -> norm (-1,1) with Y-axis inversion
-        return (2 * p[0] - 1, -2 * p[1] + 1)
+        result_x = 2 * x - 1
+        result_y = -2 * y + 1
         
     elif units == "height": 
         # --- Height Units ---
         # Convert to height units, where screen height is 1 and width is adjusted
         # Maintains aspect ratio with centered origin
-        return ((p[0] - 0.5) * (win.size[0] / win.size[1]), -p[1] + 0.5)
+        aspect = win.size[0] / win.size[1]
+        result_x = (x - 0.5) * aspect
+        result_y = -y + 0.5
         
-    elif units in ["pix", "cm", "deg", "degFlat", "degFlatPos"]:
+    elif units == "pix":
+        # --- Pixel Units ---
+        result_x = (x - 0.5) * win.size[0]
+        result_y = -(y - 0.5) * win.size[1]
+        
+    elif units in ["cm", "deg", "degFlat", "degFlatPos"]:
         # --- Physical and Pixel Units ---
         # Convert to pixel units first as intermediate step
-        p_pix = tobii2pix(win, p)
+        x_pix = (x - 0.5) * win.size[0]
+        y_pix = -(y - 0.5) * win.size[1]
         
-        if units == "pix":
-            # Return pixel coordinates directly
-            return p_pix
-        elif units == "cm":
+        if units == "cm":
             # Convert pixels to centimeters using monitor calibration
-            return tuple(pix2cm(pos, win.monitor) for pos in p_pix)
+            result_x = pix2cm(x_pix, win.monitor)
+            result_y = pix2cm(y_pix, win.monitor)
         elif units == "deg":
             # Convert pixels to visual degrees
-            return tuple(pix2deg(pos, win.monitor) for pos in p_pix)
+            result_x = pix2deg(x_pix, win.monitor)
+            result_y = pix2deg(y_pix, win.monitor)
         else:
             # Convert pixels to degrees with flat screen correction
-            return tuple(pix2deg(np.array(p_pix), win.monitor, correctFlat=True))
+            result_x = pix2deg(x_pix, win.monitor, correctFlat=True)
+            result_y = pix2deg(y_pix, win.monitor, correctFlat=True)
     else:
         # --- Unsupported Units ---
         raise ValueError(f"unit ({units}) is not supported.")
+    
+    # --- Return in original format ---
+    if is_single:
+        return (float(result_x[0]), float(result_y[0]))
+    else:
+        return np.column_stack([result_x, result_y])
 
 
 def psychopy_to_pixels(win, pos):

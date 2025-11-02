@@ -70,7 +70,7 @@ class BaseCalibrationSession:
         self.infant_stims = infant_stims
         self.shuffle = shuffle
         self.audio = audio
-        self.focus_time = cfg.ANIMATION_SETTINGS['focus_time']
+        self.focus_time = cfg.animation.focus_time
         self.anim_type = anim_type
         
         # --- State Management ---
@@ -99,7 +99,7 @@ class BaseCalibrationSession:
         
         # --- Border Scaling ---
         # Convert border thickness from height units to current units
-        border_thickness = convert_height_to_units(self.win, cfg.DEFAULT_BORDER_THICKNESS_HEIGHT)
+        border_thickness = convert_height_to_units(self.win, cfg.ui_sizes.border)
         
         # --- Unit-Specific Dimension Conversion ---
         # Convert to appropriate units for consistent sizing
@@ -199,7 +199,7 @@ class BaseCalibrationSession:
         """
         # --- Font Configuration ---
         # Get font and size multiplier from configuration
-        size_multiplier = cfg.FONT_SIZE_MULTIPLIERS[font_type]
+        size_multiplier = getattr(cfg.font_multipliers, font_type)
 
         return visual.TextStim(
             self.win,
@@ -237,7 +237,7 @@ class BaseCalibrationSession:
         """
         # --- Base Height Conversion ---
         # Get base text height from config and convert to current units
-        base_height = convert_height_to_units(self.win, cfg.DEFAULT_TEXT_HEIGHT_HEIGHT)
+        base_height = convert_height_to_units(self.win, cfg.ui_sizes.text)
         
         # --- Scaling Application ---
         # Scale by the size percentage (normalized to 2.0 as baseline)
@@ -359,11 +359,11 @@ class BaseCalibrationSession:
         if self.anim_type == 'zoom':
             # --- Zoom Animation: Smooth Size Oscillation ---
             # Calculate elapsed time with zoom-specific speed multiplier
-            elapsed_time = clock.getTime() * cfg.ANIMATION_SETTINGS['zoom_speed']
+            elapsed_time = clock.getTime() * cfg.animation.zoom_speed
             
             # Retrieve and convert size settings from height units to current window units
-            min_size_height = cfg.ANIMATION_SETTINGS['min_zoom_size']
-            max_size_height = cfg.ANIMATION_SETTINGS['max_zoom_size']
+            min_size_height = cfg.animation.min_zoom_size
+            max_size_height = cfg.animation.max_zoom_size
             
             min_size = convert_height_to_units(self.win, min_size_height)
             max_size = convert_height_to_units(self.win, max_size_height)
@@ -380,14 +380,14 @@ class BaseCalibrationSession:
         elif self.anim_type == 'trill':
             # --- Trill Animation: Rapid Rotation with Pauses ---
             # Set fixed size for trill animation from configuration
-            trill_size_height = cfg.ANIMATION_SETTINGS['trill_size']
+            trill_size_height = cfg.animation.trill_size
             trill_size = convert_height_to_units(self.win, trill_size_height)
             stim.setSize([trill_size, trill_size])
             
             # Create rapid trill and stop pattern
             elapsed_time = clock.getTime()
-            trill_cycle_duration = cfg.ANIMATION_SETTINGS['trill_cycle_duration']  # 1.5s total
-            trill_active_duration = cfg.ANIMATION_SETTINGS['trill_active_duration']  # 1.0s active
+            trill_cycle_duration = cfg.animation.trill_cycle_duration
+            trill_active_duration = cfg.animation.trill_active_duration
             
             # Determine position in the cycle
             cycle_position = elapsed_time % trill_cycle_duration
@@ -396,14 +396,14 @@ class BaseCalibrationSession:
                 # --- TRILL PHASE: Rapid back-and-forth oscillations ---
                 
                 # Create rapid oscillations using high-frequency sine wave
-                trill_frequency = cfg.ANIMATION_SETTINGS['trill_frequency']  # Oscillations per second
+                trill_frequency = cfg.animation.trill_frequency  # Oscillations per second
                 trill_time = cycle_position * trill_frequency * 2 * np.pi
                 
                 # Create sharp, rapid back-and-forth movement
                 rotation_base = np.sin(trill_time)
                 
                 # Apply rotation range
-                rotation_angle = rotation_base * cfg.ANIMATION_SETTINGS['trill_rotation_range']
+                rotation_angle = rotation_base * cfg.animation.trill_rotation_range
                 stim.setOri(rotation_angle)
                 
             else:
@@ -476,8 +476,8 @@ Make your choice now:"""
             for retry_idx in retries:
                 if retry_idx < len(calibration_points):
                     # Convert highlight size and line width from height units
-                    highlight_radius = convert_height_to_units(self.win, cfg.DEFAULT_HIGHLIGHT_SIZE_HEIGHT)
-                    line_width_height = cfg.DEFAULT_LINE_WIDTH_HEIGHT
+                    highlight_radius = convert_height_to_units(self.win, cfg.ui_sizes.highlight)
+                    line_width_height = cfg.ui_sizes.line_width
                     # Convert line width to pixels for consistency (PsychoPy expects pixel values for lineWidth)
                     line_width_pixels = line_width_height * self.win.size[1]
                     
@@ -486,7 +486,7 @@ Make your choice now:"""
                         self.win,
                         radius=highlight_radius,
                         pos=calibration_points[retry_idx],
-                        lineColor=cfg.CALIBRATION_COLORS['highlight'],
+                        lineColor=cfg.colors.highlight,
                         fillColor=None,                       # No fill for consistency
                         lineWidth=max(1, int(line_width_pixels)),  # Ensure minimum 1 pixel width
                         edges=128,                            # smooth circle
@@ -498,9 +498,9 @@ Make your choice now:"""
             
             # --- User Input Processing ---
             for key in event.getKeys():
-                if key in cfg.NUMKEY_DICT:
+                if key in cfg.numkey_dict:
                     # --- Point Selection Toggle ---
-                    idx = cfg.NUMKEY_DICT[key]
+                    idx = cfg.numkey_dict[key]
                     if 0 <= idx < len(calibration_points):
                         if idx in retries:
                             retries.remove(idx)
@@ -550,10 +550,10 @@ Make your choice now:"""
             
             # --- Keyboard Input Processing ---
             for key in event.getKeys():
-                if key in cfg.NUMKEY_DICT:
+                if key in cfg.numkey_dict:
                     # --- Point Selection ---
                     # Select point; play audio if available
-                    candidate_idx = cfg.NUMKEY_DICT[key]
+                    candidate_idx = cfg.numkey_dict[key]
                     # Only allow selection of points that are still remaining
                     if candidate_idx in self.remaining_points:
                         point_idx = candidate_idx
@@ -627,12 +627,12 @@ Make your choice now:"""
         
         # --- Line Width Configuration ---
         # Convert plot line width from height units to pixels
-        line_width_pixels = cfg.DEFAULT_PLOT_LINE_WIDTH_HEIGHT * self.win.size[1]
+        line_width_pixels = cfg.ui_sizes.plot_line * self.win.size[1]
         
         # --- Target Circle Configuration ---
         # Convert target circle size and line width from height units to pixels
-        target_circle_radius_pixels = cfg.DEFAULT_TARGET_CIRCLE_SIZE_HEIGHT * self.win.size[1]
-        target_circle_width_pixels = cfg.DEFAULT_TARGET_CIRCLE_WIDTH_HEIGHT * self.win.size[1]
+        target_circle_radius_pixels = cfg.ui_sizes.target_circle * self.win.size[1]
+        target_circle_width_pixels = cfg.ui_sizes.target_circle_width * self.win.size[1]
         
         # --- Calibration Data Rendering ---
         # Draw calibration data for each point
@@ -649,7 +649,7 @@ Make your choice now:"""
                     target_pix[1] - target_circle_radius_pixels,
                     target_pix[0] + target_circle_radius_pixels, 
                     target_pix[1] + target_circle_radius_pixels),
-                    outline=cfg.CALIBRATION_COLORS['target_outline'],
+                    outline=cfg.colors.target_outline,
                     width=max(1, int(target_circle_width_pixels))  # Ensure minimum 1 pixel width
                 )
                 
@@ -936,13 +936,13 @@ class TobiiCalibrationSession(BaseCalibrationSession):
                     # Left eye sample (green)
                     if sample.left_eye.validity == tr.VALIDITY_VALID_AND_USED:
                         left_pos = sample.left_eye.position_on_display_area
-                        samples.append((target_pos, left_pos, cfg.CALIBRATION_COLORS['left_eye']))
+                        samples.append((target_pos, left_pos, cfg.colors.left_eye))
                     
                     # --- Right Eye Processing ---
                     # Right eye sample (red)
                     if sample.right_eye.validity == tr.VALIDITY_VALID_AND_USED:
                         right_pos = sample.right_eye.position_on_display_area
-                        samples.append((target_pos, right_pos, cfg.CALIBRATION_COLORS['right_eye']))
+                        samples.append((target_pos, right_pos, cfg.colors.right_eye))
                 
                 if samples:
                     sample_data[point_idx] = samples
@@ -1209,7 +1209,7 @@ class MouseCalibrationSession(BaseCalibrationSession):
             formatted_samples = []
             for target_pos, sample_pos, _ in samples:
                 # Draw a line from the target to each sample; use orange color for mouse samples
-                formatted_samples.append((target_pos, sample_pos, cfg.CALIBRATION_COLORS['mouse']))
+                formatted_samples.append((target_pos, sample_pos, cfg.colors.mouse))
             if formatted_samples:
                 sample_data[point_idx] = formatted_samples
 
