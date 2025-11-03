@@ -1,0 +1,50 @@
+<svg viewBox="0 0 200 200" xmlns="http://www.w3.org/2000/svg">
+  <!-- Head -->
+  <ellipse cx="100" cy="115" rx="45" ry="48" fill="#8B6F47"/>
+  
+  <!-- Snout area -->
+  <ellipse cx="100" cy="135" rx="32" ry="26" fill="#A68A5F"/>
+  
+  <!-- Left ear -->
+  <ellipse cx="70" cy="85" rx="14" ry="22" fill="#8B6F47"/>
+  <ellipse cx="70" cy="88" rx="8" ry="14" fill="#A68A5F"/>
+  
+  <!-- Right ear -->
+  <ellipse cx="130" cy="85" rx="14" ry="22" fill="#8B6F47"/>
+  <ellipse cx="130" cy="88" rx="8" ry="14" fill="#A68A5F"/>
+  
+  <!-- Antlers - Left main branch -->
+  <path d="M 75 70 L 70 55 L 68 40" stroke="#6B5538" stroke-width="5" fill="none" stroke-linecap="round"/>
+  <path d="M 70 55 L 65 50" stroke="#6B5538" stroke-width="4" fill="none" stroke-linecap="round"/>
+  <path d="M 70 55 L 60 55" stroke="#6B5538" stroke-width="4" fill="none" stroke-linecap="round"/>
+  <path d="M 68 40 L 60 38" stroke="#6B5538" stroke-width="3" fill="none" stroke-linecap="round"/>
+  <path d="M 68 40 L 70 32" stroke="#6B5538" stroke-width="3" fill="none" stroke-linecap="round"/>
+  
+  <!-- Antlers - Right main branch -->
+  <path d="M 125 70 L 130 55 L 132 40" stroke="#6B5538" stroke-width="5" fill="none" stroke-linecap="round"/>
+  <path d="M 130 55 L 135 50" stroke="#6B5538" stroke-width="4" fill="none" stroke-linecap="round"/>
+  <path d="M 130 55 L 140 55" stroke="#6B5538" stroke-width="4" fill="none" stroke-linecap="round"/>
+  <path d="M 132 40 L 140 38" stroke="#6B5538" stroke-width="3" fill="none" stroke-linecap="round"/>
+  <path d="M 132 40 L 130 32" stroke="#6B5538" stroke-width="3" fill="none" stroke-linecap="round"/>
+  
+  <!-- Left eye -->
+  <ellipse cx="82" cy="108" rx="9" ry="12" fill="#2C3E50"/>
+  <ellipse cx="84" cy="105" rx="3" ry="4" fill="white"/>
+  
+  <!-- Right eye -->
+  <ellipse cx="118" cy="108" rx="9" ry="12" fill="#2C3E50"/>
+  <ellipse cx="120" cy="105" rx="3" ry="4" fill="white"/>
+  
+  <!-- Nose -->
+  <ellipse cx="100" cy="135" rx="8" ry="7" fill="#5C4A35"/>
+  
+  <!-- Mouth -->
+  <path d="M 100 142 Q 88 148 83 145" stroke="#5C4A35" stroke-width="2" fill="none" stroke-linecap="round"/>
+  <path d="M 100 142 Q 112 148 117 145" stroke="#5C4A35" stroke-width="2" fill="none" stroke-linecap="round"/>
+  
+  <!-- Cheek blush left -->
+  <ellipse cx="60" cy="120" rx="8" ry="6" fill="#FFB6C1" opacity="0.5"/>
+  
+  <!-- Cheek blush right -->
+  <ellipse cx="140" cy="120" rx="8" ry="6" fill="#FFB6C1" opacity="0.5"/>
+</svg>

@@ -1,0 +1,43 @@
+<svg viewBox="0 0 200 200" xmlns="http://www.w3.org/2000/svg">
+  <!-- Dog head -->
+  <ellipse cx="100" cy="110" rx="48" ry="46" fill="#D4A574"/>
+  
+  <!-- Left ear -->
+  <ellipse cx="65" cy="85" rx="20" ry="35" fill="#A67C52" transform="rotate(-25 65 85)"/>
+  
+  <!-- Right ear -->
+  <ellipse cx="135" cy="85" rx="20" ry="35" fill="#A67C52" transform="rotate(25 135 85)"/>
+  
+  <!-- Snout area -->
+  <ellipse cx="100" cy="125" rx="32" ry="28" fill="#F5DEB3"/>
+  
+  <!-- Left eye -->
+  <ellipse cx="85" cy="100" rx="9" ry="13" fill="#2C3E50"/>
+  <ellipse cx="86" cy="97" rx="3" ry="5" fill="white"/>
+  
+  <!-- Right eye -->
+  <ellipse cx="115" cy="100" rx="9" ry="13" fill="#2C3E50"/>
+  <ellipse cx="116" cy="97" rx="3" ry="5" fill="white"/>
+  
+  <!-- Nose -->
+  <ellipse cx="100" cy="122" rx="8" ry="7" fill="#3C3C3C"/>
+  <ellipse cx="98" cy="120" rx="2" ry="2" fill="white"/>
+  
+  <!-- Mouth -->
+  <path d="M 100 129 L 100 135" stroke="#2C3E50" stroke-width="2" stroke-linecap="round"/>
+  <path d="M 100 135 Q 88 142 82 138" stroke="#2C3E50" stroke-width="2" fill="none" stroke-linecap="round"/>
+  <path d="M 100 135 Q 112 142 118 138" stroke="#2C3E50" stroke-width="2" fill="none" stroke-linecap="round"/>
+  
+  <!-- Tongue -->
+  <ellipse cx="100" cy="145" rx="8" ry="5" fill="#FF8B94"/>
+  
+  <!-- Spots -->
+  <ellipse cx="70" cy="95" rx="10" ry="9" fill="#A67C52" opacity="0.6"/>
+  <ellipse cx="130" cy="110" rx="12" ry="10" fill="#A67C52" opacity="0.6"/>
+  
+  <!-- Cheek blush left -->
+  <ellipse cx="60" cy="115" rx="8" ry="6" fill="#FFB6C1" opacity="0.5"/>
+  
+  <!-- Cheek blush right -->
+  <ellipse cx="140" cy="115" rx="8" ry="6" fill="#FFB6C1" opacity="0.5"/>
+</svg>

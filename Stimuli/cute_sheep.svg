@@ -1,0 +1,47 @@
+<svg viewBox="0 0 200 200" xmlns="http://www.w3.org/2000/svg">
+  <!-- Fluffy body circles -->
+  <circle cx="100" cy="110" r="45" fill="#F0F0F0"/>
+  <circle cx="70" cy="95" r="28" fill="#F0F0F0"/>
+  <circle cx="130" cy="95" r="28" fill="#F0F0F0"/>
+  <circle cx="75" cy="125" r="25" fill="#F0F0F0"/>
+  <circle cx="125" cy="125" r="25" fill="#F0F0F0"/>
+  <circle cx="90" cy="80" r="22" fill="#F0F0F0"/>
+  <circle cx="110" cy="80" r="22" fill="#F0F0F0"/>
+  
+  <!-- Face -->
+  <ellipse cx="100" cy="100" rx="30" ry="32" fill="#E8D5C4"/>
+  
+  <!-- Left ear -->
+  <ellipse cx="78" cy="75" rx="10" ry="16" fill="#E8D5C4" transform="rotate(-25 78 75)"/>
+  
+  <!-- Right ear -->
+  <ellipse cx="122" cy="75" rx="10" ry="16" fill="#E8D5C4" transform="rotate(25 122 75)"/>
+  
+  <!-- Left eye -->
+  <ellipse cx="88" cy="95" rx="7" ry="10" fill="#2C3E50"/>
+  <ellipse cx="89" cy="93" rx="2" ry="3" fill="white"/>
+  
+  <!-- Right eye -->
+  <ellipse cx="112" cy="95" rx="7" ry="10" fill="#2C3E50"/>
+  <ellipse cx="113" cy="93" rx="2" ry="3" fill="white"/>
+  
+  <!-- Nose -->
+  <ellipse cx="100" cy="108" rx="5" ry="4" fill="#D4A5A5"/>
+  
+  <!-- Mouth -->
+  <path d="M 100 112 Q 92 118 88 116" stroke="#2C3E50" stroke-width="2" fill="none" stroke-linecap="round"/>
+  <path d="M 100 112 Q 108 118 112 116" stroke="#2C3E50" stroke-width="2" fill="none" stroke-linecap="round"/>
+  
+  <!-- Wool details (small circles for texture) -->
+  <circle cx="65" cy="110" r="8" fill="#FAFAFA" opacity="0.7"/>
+  <circle cx="135" cy="110" r="8" fill="#FAFAFA" opacity="0.7"/>
+  <circle cx="100" cy="135" r="10" fill="#FAFAFA" opacity="0.7"/>
+  <circle cx="85" cy="145" r="7" fill="#FAFAFA" opacity="0.7"/>
+  <circle cx="115" cy="145" r="7" fill="#FAFAFA" opacity="0.7"/>
+  
+  <!-- Cheek blush left -->
+  <ellipse cx="70" cy="105" rx="8" ry="6" fill="#FFB6C1" opacity="0.5"/>
+  
+  <!-- Cheek blush right -->
+  <ellipse cx="130" cy="105" rx="8" ry="6" fill="#FFB6C1" opacity="0.5"/>
+</svg>

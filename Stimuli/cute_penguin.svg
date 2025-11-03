@@ -1,0 +1,45 @@
+<svg viewBox="0 0 200 200" xmlns="http://www.w3.org/2000/svg">
+  <!-- Body (black part) -->
+  <ellipse cx="100" cy="120" rx="45" ry="55" fill="#2C3E50"/>
+  
+  <!-- White belly -->
+  <ellipse cx="100" cy="125" rx="32" ry="42" fill="white"/>
+  
+  <!-- Head -->
+  <ellipse cx="100" cy="80" rx="38" ry="40" fill="#2C3E50"/>
+  
+  <!-- White face -->
+  <ellipse cx="100" cy="85" rx="30" ry="32" fill="white"/>
+  
+  <!-- Left eye -->
+  <ellipse cx="88" cy="80" rx="10" ry="13" fill="white"/>
+  <ellipse cx="88" cy="82" rx="6" ry="9" fill="#2C3E50"/>
+  <ellipse cx="90" cy="79" rx="2" ry="3" fill="white"/>
+  
+  <!-- Right eye -->
+  <ellipse cx="112" cy="80" rx="10" ry="13" fill="white"/>
+  <ellipse cx="112" cy="82" rx="6" ry="9" fill="#2C3E50"/>
+  <ellipse cx="114" cy="79" rx="2" ry="3" fill="white"/>
+  
+  <!-- Beak -->
+  <ellipse cx="100" cy="95" rx="8" ry="6" fill="#FF9F43"/>
+  <path d="M 92 95 L 100 100 L 108 95" fill="#FF8B2E"/>
+  
+  <!-- Left wing -->
+  <ellipse cx="65" cy="115" rx="12" ry="35" fill="#2C3E50" transform="rotate(-20 65 115)"/>
+  
+  <!-- Right wing -->
+  <ellipse cx="135" cy="115" rx="12" ry="35" fill="#2C3E50" transform="rotate(20 135 115)"/>
+  
+  <!-- Left foot -->
+  <ellipse cx="85" cy="172" rx="15" ry="10" fill="#FF9F43"/>
+  
+  <!-- Right foot -->
+  <ellipse cx="115" cy="172" rx="15" ry="10" fill="#FF9F43"/>
+  
+  <!-- Cheek blush left -->
+  <ellipse cx="70" cy="90" rx="7" ry="5" fill="#FFB6C1" opacity="0.5"/>
+  
+  <!-- Cheek blush right -->
+  <ellipse cx="130" cy="90" rx="7" ry="5" fill="#FFB6C1" opacity="0.5"/>
+</svg>
