@@ -10,7 +10,7 @@ from psychopy import core, event, visual
 # Local imports
 from . import ETSettings as cfg
 from .Utils import InfantStimuli, NicePrint
-from .Coords import get_tobii_pos, psychopy_to_pixels, convert_height_to_units, norm_to_window_units
+from .Coords import get_tobii_pos, psychopy_to_pixels, tobii2pix, convert_height_to_units, norm_to_window_units
 
 
 class BaseCalibrationSession:
@@ -327,6 +327,9 @@ class BaseCalibrationSession:
             self.infant_stims,
             shuffle=self.shuffle
         )
+
+        # --- Store Calibration Points for Visualization ---
+        self.calibration_points = calibration_points  # ← ADDED
         
         # --- Point Tracking Setup ---
         # Initialize remaining points to all points
@@ -597,9 +600,7 @@ Make your choice now:"""
                         
                 elif key == 'return':
                     # --- Early Completion ---
-                    # Finish early - check if we have any data
-                    if self._has_collected_data():
-                        return True
+                    return True
                         
                 elif key == 'escape':
                     # --- Abort Calibration ---
@@ -615,23 +616,27 @@ Make your choice now:"""
             
             self.win.flip()
     
-    
-    def _create_calibration_result_image(self, calibration_points, sample_data):
+ 
+    def _create_calibration_result_image(self, sample_data):
         """
         Common function to create calibration result visualization.
         
-        Generates a visual representation of calibration quality by drawing
-        lines from each target to collected gaze samples. Uses color coding
-        to distinguish left eye (green), right eye (red), and mouse (orange)
-        data. Line length indicates calibration accuracy.
+        ALWAYS draws target circles for ALL calibration points from 
+        self.calibration_points, then draws sample lines only for points
+        that have valid data in sample_data.
         
         Parameters
         ----------
-        calibration_points : list of (float, float)
-            List of calibration target coordinates in window units.
         sample_data : dict
-            Dictionary mapping point indices to lists of (target_pos, sample_pos, color)
-            tuples. Each tuple represents one gaze sample with its deviation from target.
+            Dictionary mapping point indices to lists of sample lines:
+            {
+                point_idx: [
+                    (sample_pos_pixels, color),
+                    (sample_pos_pixels, color),
+                    ...
+                ]
+            }
+            Points not in this dict will show circles only (no lines).
             
         Returns
         -------
@@ -639,50 +644,44 @@ Make your choice now:"""
             PsychoPy image stimulus containing the rendered calibration results.
         """
         # --- Image Canvas Creation ---
-        # Create blank RGBA image matching window size (transparent background like Tobii)
         img = Image.new("RGBA", tuple(self.win.size))
         img_draw = ImageDraw.Draw(img)
         
-        # --- Line Width Configuration ---
-        # Convert plot line width from height units to pixels
+        # --- Configuration ---
         line_width_pixels = cfg.ui_sizes.plot_line * self.win.size[1]
-        
-        # --- Target Circle Configuration ---
-        # Convert target circle size and line width from height units to pixels
         target_circle_radius_pixels = cfg.ui_sizes.target_circle * self.win.size[1]
         target_circle_width_pixels = cfg.ui_sizes.target_circle_width * self.win.size[1]
         
-        # --- Calibration Data Rendering ---
-        # Draw calibration data for each point
+        # --- STEP 1: Draw ALL Target Circles (Always) ---
+        for point_idx, target_pos in enumerate(self.calibration_points):
+            # Convert to pixels
+            target_pix = psychopy_to_pixels(self.win, target_pos)
+            
+            # Draw target circle
+            img_draw.ellipse(
+                (target_pix[0] - target_circle_radius_pixels, 
+                target_pix[1] - target_circle_radius_pixels,
+                target_pix[0] + target_circle_radius_pixels, 
+                target_pix[1] + target_circle_radius_pixels),
+                outline=cfg.colors.target_outline,
+                width=max(1, int(target_circle_width_pixels))
+            )
+        
+        # --- STEP 2: Draw Sample Lines (Only for points with data) ---
         for point_idx, samples in sample_data.items():
-            if point_idx < len(calibration_points):
-                # --- Target Position Processing ---
-                target_pos = calibration_points[point_idx]
+            if point_idx < len(self.calibration_points):
+                # Get target position in pixels
+                target_pos = self.calibration_points[point_idx]
                 target_pix = psychopy_to_pixels(self.win, target_pos)
                 
-                # --- Target Circle Drawing ---
-                # Draw target circle with configurable size and line width
-                img_draw.ellipse(
-                    (target_pix[0] - target_circle_radius_pixels, 
-                    target_pix[1] - target_circle_radius_pixels,
-                    target_pix[0] + target_circle_radius_pixels, 
-                    target_pix[1] + target_circle_radius_pixels),
-                    outline=cfg.colors.target_outline,
-                    width=max(1, int(target_circle_width_pixels))  # Ensure minimum 1 pixel width
-                )
-                
-                # --- Sample Lines Drawing ---
-                # Draw lines from target to samples
-                for _, sample_pos, line_color in samples:
-                    sample_pix = psychopy_to_pixels(self.win, sample_pos)
+                # Draw lines from target to each sample
+                for sample_pix, line_color in samples:
                     img_draw.line(
                         (target_pix[0], target_pix[1], sample_pix[0], sample_pix[1]),
                         fill=line_color,
-                        width=max(1, int(line_width_pixels))  # Ensure minimum 1 pixel width
+                        width=max(1, int(line_width_pixels))
                     )
         
-        # --- Image Stimulus Creation ---
-        # Wrap in SimpleImageStim and return
         return visual.SimpleImageStim(self.win, img, autoLog=False)
 
 
@@ -799,7 +798,7 @@ class TobiiCalibrationSession(BaseCalibrationSession):
 
             # --- 6b. Calibration Computation ---
             self.calibration_result = self.calibration.compute_and_apply()
-            result_img = self._show_calibration_result(cal_points_window)
+            result_img = self._show_calibration_result()
 
             # --- 6c. User Review and Selection ---
             retries = self._selection_phase(cal_points_window, result_img)
@@ -858,26 +857,6 @@ class TobiiCalibrationSession(BaseCalibrationSession):
 
         self.calibration.collect_data(x, y)
         return True
-
-    
-    
-    def _has_collected_data(self):
-        """
-        Check if any Tobii calibration data has been collected.
-        
-        Determines whether the calibration session has accumulated any gaze
-        data by comparing the current remaining points to the initial set.
-        Used to validate early termination requests.
-        
-        Returns
-        -------
-        bool
-            True if any calibration points have been collected, False if
-            no data has been gathered yet.
-        """
-        # --- Collection Status Check ---
-        # If remaining points is smaller than total points, we've collected some data
-        return len(self.remaining_points) < len(range(9))  # Assuming max 9 points
     
     
     def _clear_collected_data(self):
@@ -914,58 +893,55 @@ class TobiiCalibrationSession(BaseCalibrationSession):
             x, y = self.tobii_points[idx]
             self.calibration.discard_data(x, y)
 
-    def _show_calibration_result(self, calibration_points):
+
+    def _show_calibration_result(self):
         """
-        Show Tobii calibration results using the common plotting function.
+        Show Tobii calibration results.
         
-        Processes the calibration computation results from the Tobii SDK and
-        creates a visual representation showing the accuracy of gaze estimation
-        at each calibration point. Green lines indicate left eye samples, red
-        lines indicate right eye samples.
-
-        Parameters
-        ----------
-        calibration_points : list of (float, float)
-            List of calibration point coordinates in window units.
-
+        Extracts sample data from Tobii results and builds line data only.
+        Circles are drawn automatically by base class from self.calibration_points.
+        
         Returns
         -------
         SimpleImageStim
             PsychoPy stimulus containing the rendered calibration results image.
         """
-        # --- Sample Data Preparation ---
-        # Prepare sample data in common format
+        # --- Initialize Sample Data (lines only) ---
         sample_data = {}
         
-        # --- Result Processing ---
-        # Only process if not a full failure
+        # --- Extract Lines from Tobii Results ---
         if self.calibration_result.status != tr.CALIBRATION_STATUS_FAILURE:
-            for point_idx, point in enumerate(self.calibration_result.calibration_points):
-                samples = []
+            for point in self.calibration_result.calibration_points:
+                # Find which point_idx this corresponds to
+                target_adcs = point.position_on_display_area
                 
-                # --- Sample Extraction ---
-                # Process each calibration sample
-                for sample in point.calibration_samples:
-                    target_pos = point.position_on_display_area
-                    
-                    # --- Left Eye Processing ---
-                    # Left eye sample (green)
-                    if sample.left_eye.validity == tr.VALIDITY_VALID_AND_USED:
-                        left_pos = sample.left_eye.position_on_display_area
-                        samples.append((target_pos, left_pos, cfg.colors.left_eye))
-                    
-                    # --- Right Eye Processing ---
-                    # Right eye sample (red)
-                    if sample.right_eye.validity == tr.VALIDITY_VALID_AND_USED:
-                        right_pos = sample.right_eye.position_on_display_area
-                        samples.append((target_pos, right_pos, cfg.colors.right_eye))
-                
-                if samples:
-                    sample_data[point_idx] = samples
+                # Match to original points by finding closest ADCS coordinate
+                for point_idx in range(len(self.tobii_points)):
+                    if (abs(self.tobii_points[point_idx][0] - target_adcs[0]) < 0.01 and
+                        abs(self.tobii_points[point_idx][1] - target_adcs[1]) < 0.01):
+                        
+                        # Collect sample lines for this point
+                        samples = []
+                        for sample in point.calibration_samples:
+                            # Left eye
+                            if sample.left_eye.validity == tr.VALIDITY_VALID_AND_USED:
+                                left_pix = tobii2pix(self.win, sample.left_eye.position_on_display_area)
+                                samples.append((left_pix, cfg.colors.left_eye))
+                            
+                            # Right eye
+                            if sample.right_eye.validity == tr.VALIDITY_VALID_AND_USED:
+                                right_pix = tobii2pix(self.win, sample.right_eye.position_on_display_area)
+                                samples.append((right_pix, cfg.colors.right_eye))
+                        
+                        # Store lines (if any)
+                        if samples:
+                            sample_data[point_idx] = samples
+                        
+                        break  # Found the match, move to next point
         
-        # --- Visualization Generation ---
-        # Use common plotting function
-        return self._create_calibration_result_image(calibration_points, sample_data)
+        # --- Generate Visualization ---
+        # Base class will draw ALL circles + lines from sample_data
+        return self._create_calibration_result_image(sample_data)
 
 
 class MouseCalibrationSession(BaseCalibrationSession):
@@ -1157,25 +1133,6 @@ class MouseCalibrationSession(BaseCalibrationSession):
         # Done! Return True to indicate success
         return True
 
-        
-        
-    def _has_collected_data(self):
-        """
-        Check if any mouse calibration data has been collected yet.
-        
-        Determines whether the calibration session has accumulated any mouse
-        position samples. Used to validate early termination requests and
-        ensure at least some data exists before allowing completion.
-
-        Returns
-        -------
-        bool
-            True if there is any calibration data in storage,
-            False if no samples have been collected yet.
-        """
-        # --- Data Presence Check ---
-        return bool(self.calibration_data)
-
 
     def _clear_collected_data(self):
         """
@@ -1191,36 +1148,37 @@ class MouseCalibrationSession(BaseCalibrationSession):
 
     def _show_results(self, calibration_points):
         """
-        Visualize and return a summary image of the collected mouse calibration data.
+        Visualize mouse calibration results.
         
-        Creates a visual representation of calibration quality by drawing lines
-        from each target to the collected mouse samples. Orange lines indicate
-        mouse position samples, with line length showing the deviation from target.
-
+        Builds sample line data only. Circles are drawn automatically 
+        by base class from self.calibration_points.
+        
         Parameters
         ----------
         calibration_points : list of (float, float)
-            The (x, y) positions of all calibration targets in window units.
-
+            Calibration targets in window units (kept for API compatibility).
+            
         Returns
         -------
         visual.SimpleImageStim
-            A PsychoPy image stimulus with the plotted calibration results,
-            ready for display in the selection phase.
+            PsychoPy image stimulus with calibration results.
         """
-        # --- Data Structure Preparation ---
-        # Prepare data for plotting
+        # --- Initialize Sample Data (lines only) ---
         sample_data = {}
 
-        # --- Sample Formatting ---
+        # --- Extract Lines from Mouse Data ---
         for point_idx, samples in self.calibration_data.items():
             formatted_samples = []
-            for target_pos, sample_pos, _ in samples:
-                # Draw a line from the target to each sample; use orange color for mouse samples
-                formatted_samples.append((target_pos, sample_pos, cfg.colors.mouse))
+            
+            for _, sample_pos, _ in samples:  # (target, sample, timestamp)
+                # Convert sample to pixels
+                sample_pix = psychopy_to_pixels(self.win, sample_pos)
+                formatted_samples.append((sample_pix, cfg.colors.mouse))
+            
+            # Store lines
             if formatted_samples:
                 sample_data[point_idx] = formatted_samples
 
-        # --- Visualization Generation ---
-        # Use the shared plotting function
-        return self._create_calibration_result_image(calibration_points, sample_data)
+        # --- Generate Visualization ---
+        # Base class will draw ALL circles + lines from sample_data
+        return self._create_calibration_result_image(sample_data)
