@@ -371,8 +371,8 @@ class ETracker:
 
 
     def calibrate(self,
-                infant_stims,
                 calibration_points=5,
+                infant_stims=None,
                 shuffle=True,
                 audio=None,
                 anim_type='zoom'
@@ -380,54 +380,60 @@ class ETracker:
         """
         Run infant-friendly calibration procedure.
 
-        Automatically selects calibration method based on operating mode
-        (real eye tracker vs. simulation). Uses animated stimuli and optional
-        audio to engage infant participants.
+        Performs eye tracker calibration using animated stimuli to engage infant 
+        participants. The calibration establishes the mapping between eye position 
+        and screen coordinates, which is essential for accurate gaze data collection.
+        Automatically selects the appropriate calibration method based on operating 
+        mode (real eye tracker vs. mouse simulation).
 
         Parameters
         ----------
-        infant_stims : list of str
-            Paths to engaging image files for calibration targets
-            (e.g., animated characters, colorful objects).
         calibration_points : int or list of tuple, optional
             Calibration pattern specification:
             - 5: Standard 5-point pattern (4 corners + center). Default.
             - 9: Comprehensive 9-point pattern (3×3 grid).
             - list: Custom points in normalized coordinates [-1, 1].
             Example: [(-0.4, 0.4), (0.4, 0.4), (0.0, 0.0)]
+        infant_stims : list of str or None, optional
+            Paths to engaging image files for calibration targets (e.g., colorful
+            characters, animated objects). If None (default), uses built-in stimuli 
+            from the package. If fewer stimuli than calibration points are provided, 
+            stimuli are automatically repeated in sequence to cover all points 
+            (e.g., 3 stimuli for 7 points becomes [s1, s2, s3, s1, s2, s3, s1]).
         shuffle : bool, optional
-            Whether to randomize stimulus presentation order. Default True.
-        audio : psychopy.sound.Sound, optional
-            Attention-getting sound to play during calibration. Default None.
+                Whether to randomize stimulus presentation order. When True (default), 
+                stimuli are shuffled after any necessary repetition and before assignment 
+                to calibration points. Set to False if you want deterministic 
+                stimulus-to-point mapping or specific stimulus ordering. Default True.
+        audio : psychopy.sound.Sound or None, optional
+            Attention-getting sound to play when selecting calibration points. 
+            Default None (no sound).
         anim_type : {'zoom', 'trill'}, optional
-            Animation style for the stimuli. Default 'zoom'.
+            Animation style for the calibration stimuli:
+            - 'zoom': Smooth size oscillation (default)
+            - 'trill': Rapid rotation with pauses
 
         Returns
         -------
         bool
-            True if calibration completed successfully, False otherwise.
+            True if calibration completed successfully and was accepted by the user,
+            False if calibration was aborted or failed.
 
-        Raises
-        ------
-        ValueError
-            If calibration_points is invalid (not 5, 9, or valid list of tuples).
-            
         Examples
         --------
-        >>> # Standard 5-point calibration
-        >>> controller.calibrate(stims)
+        >>> # Standard 5-point calibration with default stimuli
+        >>> controller.calibrate()
         
-        >>> # 9-point calibration
-        >>> controller.calibrate(stims, calibration_points=9)
+        >>> # 9-point calibration with custom stimuli
+        >>> controller.calibrate(9, infant_stims=['stim1.png', 'stim2.png'])
         
-        >>> # Custom pattern
-        >>> custom = [(-0.5, 0.5), (0.5, 0.5), (0.0, 0.0)]
-        >>> controller.calibrate(stims, calibration_points=custom)
+        >>> # Custom calibration pattern
+        >>> custom_points = [(-0.5, 0.5), (0.5, 0.5), (0.0, 0.0)]
+        >>> controller.calibrate(custom_points, anim_type='trill')
         """
         
         # --- Calibration Points Processing ---
         if isinstance(calibration_points, int):
-            # Use predefined pattern
             if calibration_points == 5:
                 norm_points = cfg.calibration.points_5
             elif calibration_points == 9:
@@ -437,7 +443,6 @@ class ETracker:
                     f"calibration_points must be 5, 9, or a list of tuples. Got: {calibration_points}"
                 )
         elif isinstance(calibration_points, list):
-            # Validate custom points
             if not calibration_points:
                 raise ValueError("calibration_points list cannot be empty.")
             
@@ -448,8 +453,7 @@ class ETracker:
                 x, y = point
                 if not (-1 <= x <= 1 and -1 <= y <= 1):
                     raise ValueError(
-                        f"Point {i} ({x}, {y}) out of range [-1, 1]. "
-                        f"Use normalized coordinates, not window units."
+                        f"Point {i} ({x}, {y}) out of range [-1, 1]."
                     )
             
             norm_points = calibration_points
@@ -458,14 +462,41 @@ class ETracker:
                 f"calibration_points must be int (5 or 9) or list of tuples. "
                 f"Got: {type(calibration_points).__name__}"
             )
-                
+        
+        num_points = len(norm_points)
+        
+        # --- Stimuli Loading ---
+        if infant_stims is None:
+            # Load default stimuli from package
+            import glob
+            
+            package_dir = os.path.dirname(__file__)
+            stimuli_dir = os.path.join(package_dir, 'stimuli')
+            
+            # Get all PNG files
+            infant_stims = glob.glob(os.path.join(stimuli_dir, '*.png'))
+            infant_stims.sort()  # Consistent ordering
+        
+        # --- Repeat stimuli if needed to cover all calibration points ---
+        num_stims = len(infant_stims)
+        if num_stims < num_points:
+            repetitions = (num_points // num_stims) + 1
+            infant_stims = infant_stims * repetitions
+        
+        # --- Shuffle if requested ---
+        if shuffle:
+            import random
+            random.shuffle(infant_stims)
+        
+        # --- Subset to exact number needed ---
+        infant_stims = infant_stims[:num_points]
+        
         # --- Mode-specific calibration setup ---
         if self.simulate:
             session = MouseCalibrationSession(
                 win=self.win,
                 infant_stims=infant_stims,
                 mouse=self.mouse,
-                shuffle=shuffle,
                 audio=audio,
                 anim_type=anim_type
             )
@@ -474,15 +505,15 @@ class ETracker:
                 win=self.win,
                 calibration_api=self.calibration,
                 infant_stims=infant_stims,
-                shuffle=shuffle,
                 audio=audio,
                 anim_type=anim_type
             )
         
-        # --- Run the calibration session ---
+        # --- Run calibration ---
         success = session.run(norm_points)
         
         return success
+
 
     def save_calibration(self, filename=None, use_gui=False):
         """

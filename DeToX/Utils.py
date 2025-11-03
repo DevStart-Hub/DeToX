@@ -123,7 +123,7 @@ class InfantStimuli:
         List defining the presentation sequence of stimuli.
     """
 
-    def __init__(self, win, infant_stims, shuffle=True, **kwargs):
+    def __init__(self, win, infant_stims, **kwargs):
         """
         Initialize the InfantStimuli manager.
         
@@ -140,17 +140,9 @@ class InfantStimuli:
             List of paths to the image files to use for the stimuli. These should
             be engaging images suitable for infant participants (e.g., cartoon
             characters, colorful objects, animated figures).
-        shuffle : bool, optional
-            Whether to randomize the presentation order of stimuli. Randomization
-            helps prevent habituation and maintains infant attention. Default True.
         **kwargs : dict
             Additional keyword arguments to be passed to the ImageStim constructor.
             Common options include 'size', 'pos', 'units', etc.
-            
-        Notes
-        -----
-        The shuffle operation uses numpy's random number generator, so setting
-        a random seed before initialization will make the shuffle reproducible.
         """
         # --- Window Reference ---
         # Store reference to the PsychoPy window for rendering
@@ -169,10 +161,6 @@ class InfantStimuli:
         # Create initial presentation order matching stimulus indices
         self.present_order = [*self.stims]
         
-        # --- Order Randomization ---
-        # Shuffle presentation order if requested to prevent habituation
-        if shuffle:
-            np.random.shuffle(self.present_order)
 
     def get_stim(self, idx):
         """

@@ -32,7 +32,6 @@ class BaseCalibrationSession:
         self,
         win,
         infant_stims,
-        shuffle=True,
         audio=None,
         anim_type='zoom',
     ):
@@ -52,9 +51,6 @@ class BaseCalibrationSession:
             List of image file paths for attention-getting stimuli. These should
             be engaging images suitable for infant participants (e.g., cartoon
             characters, colorful objects).
-        shuffle : bool, optional
-            Whether to randomize stimulus order each run. This prevents habituation
-            to a fixed sequence. Default True.
         audio : psychopy.sound.Sound, optional
             Sound to play when user selects a calibration point. Provides auditory
             feedback during the calibration process. Default None.
@@ -68,7 +64,6 @@ class BaseCalibrationSession:
         # Store window and stimulus configuration
         self.win = win
         self.infant_stims = infant_stims
-        self.shuffle = shuffle
         self.audio = audio
         self.focus_time = cfg.animation.focus_time
         self.anim_type = anim_type
@@ -325,7 +320,6 @@ class BaseCalibrationSession:
         self.targets = InfantStimuli(
             self.win,
             self.infant_stims,
-            shuffle=self.shuffle
         )
 
         # --- Store Calibration Points for Visualization ---
@@ -705,7 +699,6 @@ class TobiiCalibrationSession(BaseCalibrationSession):
         win,
         calibration_api,
         infant_stims,
-        shuffle=True,
         audio=None,
         anim_type='zoom',
     ):
@@ -725,8 +718,6 @@ class TobiiCalibrationSession(BaseCalibrationSession):
             eye tracker. This handles the low-level calibration data collection.
         infant_stims : list of str
             Paths to engaging image files for calibration targets.
-        shuffle : bool, optional
-            Whether to randomize stimulus presentation order. Default True.
         audio : psychopy.sound.Sound, optional
             Attention-getting sound for point selection feedback. Default None.
         anim_type : str, optional
@@ -734,7 +725,7 @@ class TobiiCalibrationSession(BaseCalibrationSession):
         """
         # --- Base Class Initialization ---
         super().__init__(
-            win, infant_stims, shuffle, audio, anim_type
+            win, infant_stims, audio, anim_type
         )
         
         # --- Tobii-Specific Setup ---
@@ -964,7 +955,6 @@ class MouseCalibrationSession(BaseCalibrationSession):
         win,
         infant_stims,
         mouse,
-        shuffle=True,
         audio=None,
         anim_type='zoom',
     ):
@@ -984,8 +974,6 @@ class MouseCalibrationSession(BaseCalibrationSession):
         mouse : psychopy.event.Mouse
             Mouse object for getting position samples. Should be configured
             for the same window used for display.
-        shuffle : bool, optional
-            Whether to randomize stimulus presentation order. Default True.
         audio : psychopy.sound.Sound, optional
             Attention-getting sound for point selection feedback. Default None.
         anim_type : str, optional
@@ -993,7 +981,7 @@ class MouseCalibrationSession(BaseCalibrationSession):
         """
         # --- Base Class Initialization ---
         super().__init__(
-            win, infant_stims, shuffle, audio, anim_type
+            win, infant_stims, audio, anim_type
         )
         
         # --- Mouse-Specific Setup ---
