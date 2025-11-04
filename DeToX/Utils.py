@@ -123,7 +123,7 @@ class InfantStimuli:
         List defining the presentation sequence of stimuli.
     """
 
-    def __init__(self, win, infant_stims, **kwargs):
+    def __init__(self, win, infant_stims, **kwargs): # TODO: check if kwargs is needed
         """
         Initialize the InfantStimuli manager.
         

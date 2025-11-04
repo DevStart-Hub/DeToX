@@ -726,7 +726,7 @@ class TobiiCalibrationSession(BaseCalibrationSession):
         # --- Base Class Initialization ---
         super().__init__(
             win, infant_stims, audio, anim_type
-        )
+        ) # TODO: check what this does
         
         # --- Tobii-Specific Setup ---
         self.calibration = calibration_api

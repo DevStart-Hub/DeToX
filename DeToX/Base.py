@@ -374,7 +374,7 @@ class ETracker:
                 calibration_points=5,
                 infant_stims=None,
                 shuffle=True,
-                audio=None,
+                audio=None, # TODO: add default sound
                 anim_type='zoom'
                 ):
         """

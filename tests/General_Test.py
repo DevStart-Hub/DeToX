@@ -40,18 +40,11 @@ print(f"✓ Units: {win.units}")
 # # Create controller in simulation mode
 controller = ETracker(win, simulate=False)
 
-# Stimulus images (here are all the same, replace with your actual stimulus files)
-# Note: These should be engaging images for participants (animals, toys, etc.)
-stims = ['Stimuli\\1.png', 'Stimuli\\2.png', 'Stimuli\\3.png', 'Stimuli\\4.png', 'Stimuli\\5.png']
-
-
-
 # Run calibration
 # Show participant position
 controller.show_status()
 
 success = controller.calibrate(
-    infant_stims=stims,
     calibration_points=5,
     shuffle=True,
     anim_type='zoom')
