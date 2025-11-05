@@ -1,0 +1,187 @@
+---
+title: "Getting Started with DeToX"
+description: "Starting using DeToX"
+author: Tommaso Ghilardi
+
+execute:
+  enabled: false
+---
+
+Great! You've got DeToX installed—now let's jump into the exciting part!
+
+This tutorial will walk you through an **EXTREMELY** basic example showing what DeToX can do and what you'll need to get started. Think of it as your quick-start guide to running your first eye-tracking experiment.
+
+::: callout-note
+## Before we begin
+
+This tutorial walks you through the essential steps for running an eye-tracking experiment with DeToX. We've designed it to be as straightforward as possible, though you'll need some basic familiarity with PsychoPy - specifically how to create windows and display stimuli. If you're new to PsychoPy or need a refresher, their [official tutorial](https://www.psychopy.org/coder/tutorial1.html) is an excellent starting point.
+
+Don't worry if you're not a PsychoPy expert! The concepts we'll use are fundamental and easy to pick up.
+:::
+
+DeToX bridges two powerful Python libraries: **PsychoPy** and **tobii_research**.
+
+-   **PsychoPy** is your experiment-building toolkit. It gives you the flexibility and control to design studies exactly how you want them—from simple reaction time tasks to complex visual paradigms.
+
+-   **tobii_research** is your direct line to Tobii eye trackers. It's incredibly powerful, but let's be honest—some of its low-level details can be... *complex*.
+
+**That's where DeToX comes in**: we've wrapped the tricky bits so you can focus on your research, not wrestling with SDK documentation.
+
+## Preparation
+
+let's begin importing the libraries that we will need for this example
+
+```{python}
+#| label: Libraries
+#| eval: false
+from psychopy import visual, core
+from DeToX import ETracker
+```
+
+**`visual`** and `core` are some of PsychoPy's main modules—it's what you'll use to create the window where your stimuli appear and your experiment runs.
+
+**`ETracker`** is DeToX's main class and your central hub for all eye-tracking operations. This is the object you'll interact with throughout your experiment to control calibration, recording, and data collection.
+
+## Window
+
+Every experiment needs a stage—in PsychoPy, that's your **Window**. This is where all your stimuli will appear and where participants will interact with your study.
+
+```{python}
+#| label: Window creation
+#| eval: false
+# Create the experiment window
+win = visual.Window(
+    size=[1920, 1080],  # Window dimensions in pixels
+    fullscr=True,       # Expand to fill the entire screen
+    units='pix'         # Use pixels as the measurement unit
+)
+```
+
+Breaking it down:
+
+-   **`size`**: Sets your window dimensions. Here we're using 1920×1080, but adjust this to match your monitor.
+
+-   **`fullscr=True`**: Makes the window take over the whole screen—crucial for experiments where you want to eliminate distractions.
+
+-   **`units='pix'`**: Defines how you'll specify positions and sizes throughout your experiment. DeToX supports multiple PsychoPy unit systems—`'height'`, `'norm'`, `'pix'`—so choose whichever you're most comfortable with or best fits your experimental design.
+
+::: callout-important
+## Window size
+
+If you're following along with this tutorial and experimenting on your own, we **strongly recommend** using a smaller window with `fullscr=False` instead of fullscreen mode. When `fullscr=True`, the window takes over your entire screen, making it tricky (or impossible!) to interact with your computer—like stopping the script or checking documentation. Save fullscreen for your actual experiments.
+:::
+
+Perfect now we have our window where we can draw images, videos and interact with them!!
+
+## ETracker
+
+So far we've focused on creating the canvas for our stimuli—but how do we actually interact with the eye tracker? Simple! We use the **`ETracker`** class we imported earlier.
+
+The `ETracker` needs access to the window we just created, so initializing it is straightforward:
+
+```{python}
+#| label: Et controller
+#| eval: false
+ET_controller = ETracker(win)
+```
+
+::: callout-important
+## Don't Have an Eye Tracker? No Problem!
+
+If you're following along without a Tobii eye tracker connected, you can still test everything using **simulation mode**. Just pass `simulate=True` when creating your `ETracker`:
+
+```{python}
+#| label: Et controller simulation
+#| eval: false
+ET_controller = ETracker(win, simulate=True)
+```
+
+This tells DeToX to collect data from your **mouse position** instead of an actual eye tracker—perfect for development, testing, or learning the workflow before you have hardware access 😉
+:::
+
+Once you run this code, DeToX will connect to your eye tracker and set everything up for you. It will also gather information about the connected device and display it in a nice, readable format:
+
+``` markdown
+┌────────────────── Eyetracker Info ──────────────────┐
+│Connected to the eyetracker:                         │
+│ - Model: Tobii Pro Fusion                           │
+│ - Current frequency: 250.0 Hz                       │
+│ - Current illumination mode: Default                │
+│Other options:                                       │
+│ - Possible frequencies: (30.0, 60.0, 120.0, 250.0)  │
+│ - Possible illumination modes: ('Default',)         │
+└─────────────────────────────────────────────────────┘
+```
+
+This tells us we're connected to the eye tracker and ready to start recording data!
+
+## Recod data
+
+Great! You're now connected to the eye-tracker (or simulating it). However, we're not actually collecting any data yet - let's fix that.
+
+To begin data collection, call the `start_recording` method on your ETracker instance:
+
+```{python}
+#| label: Recording
+#| eval: false
+# Start recording data
+ET_controller.start_recording(filename="testing.h5")
+```
+
+The `start_recording` method accepts a `filename` parameter for naming your data file. If you don't specify one, DeToX automatically generates a timestamp-based filename.
+
+Your eye-tracking data is now being collected continuously and will be later saved in a HDF5 format, which is ideal for storing large datasets efficiently. For details on the data structure and how to analyze your files, see our [DataFormats](DataFormats.qmd) guide.
+
+## Events
+
+OK, now that we're recording data, we can show images, videos, or whatever we want! It's entirely up to you and your experimental design!
+
+Since this is a **SUPER BASIC** example to get you started, we won't overcomplicate things with elaborate stimuli or complex tasks. Let's keep it stupidly simple. As we show images, videos or whatnot we need to keep track at which point thesee stimuli happen in our eyetracking data. And how to do so?? well we can use the `record_event` function!!
+
+```{python}
+#| label: Events
+#| eval: false
+# Send event 1
+ET_controller.record_event('wait 1')
+core.wait(2) # wait 2s
+
+# Send event 2
+ET_controller.record_event('wait 2')
+core.wait(2) # wait 2s
+```
+
+Here's what's happening:
+
+-   **`controller.record_event('wait 1')`**: Drops a timestamped marker labeled `'wait 1'` into your data stream. This is like planting a flag that says "something important happened HERE."
+
+-   **`core.wait(2)`**: Pauses execution for 2 seconds. During this time, the eye tracker keeps collecting gaze data in the background.
+
+-   **`controller.record_event('wait 2')`**: Plants another marker at the 2-second point, labeled `'wait 2'`.
+
+-   Another **`core.wait(2)`**: Waits another 2 seconds.
+
+Here we're just using `core.wait()` as a **placeholder**. In your actual experiment, this is where you'd display your stimuli—show images, play videos, present text, or run whatever task your study requires. The `record_event()` calls mark when those stimuli begin in this case!
+
+## Stop recording
+
+After the experiment is done, we need to stop the recording and save the data!!!
+
+```{python}
+#| label: Stop recording
+#| eval: false
+# Stop recording data
+ET_controller.stop_recording()
+```
+
+**Voilà!** DeToX will stop the recording and automatically save all your data to a file. You'll get another nice confirmation message showing you what happened:
+
+``` markdown
+┌────────────── Recording Complete ───────────────┐
+│Data collection lasted approximately 4.02 seconds│
+│Data has been saved to testing.h5                │
+└─────────────────────────────────────────────────┘
+```
+
+This tells you how long the recording session lasted and where your data file was saved. By default, DeToX creates a timestamped filename (like `testing.h5`) so you never accidentally overwrite previous recordings.
+
+**And that's it!** Your eye-tracking data—complete with all those event markers you recorded—is now safely stored and ready for analysis.
