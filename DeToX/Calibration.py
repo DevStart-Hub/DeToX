@@ -10,7 +10,7 @@ from psychopy import core, event, visual
 # Local imports
 from . import ETSettings as cfg
 from .Utils import InfantStimuli, NicePrint
-from .Coords import get_tobii_pos, psychopy_to_pixels, tobii2pix, convert_height_to_units, norm_to_window_units
+from .Coords import get_tobii_pos, psychopy_to_pixels, tobii2pix, convert_height_to_units, norm_to_window_units, get_psychopy_pos
 
 
 class BaseCalibrationSession:
@@ -916,12 +916,16 @@ class TobiiCalibrationSession(BaseCalibrationSession):
                         for sample in point.calibration_samples:
                             # Left eye
                             if sample.left_eye.validity == tr.VALIDITY_VALID_AND_USED:
-                                left_pix = tobii2pix(self.win, sample.left_eye.position_on_display_area)
+                                left_adcs = sample.left_eye.position_on_display_area
+                                left_psychopy = get_psychopy_pos(self.win, left_adcs)
+                                left_pix = psychopy_to_pixels(self.win, left_psychopy)
                                 samples.append((left_pix, cfg.colors.left_eye))
-                            
+
                             # Right eye
                             if sample.right_eye.validity == tr.VALIDITY_VALID_AND_USED:
-                                right_pix = tobii2pix(self.win, sample.right_eye.position_on_display_area)
+                                right_adcs = sample.right_eye.position_on_display_area
+                                right_psychopy = get_psychopy_pos(self.win, right_adcs)
+                                right_pix = psychopy_to_pixels(self.win, right_psychopy)
                                 samples.append((right_pix, cfg.colors.right_eye))
                         
                         # Store lines (if any)
