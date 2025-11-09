@@ -17,18 +17,28 @@ It validates:
 from psychopy import visual, core
 from DeToX import ETracker
 
+from DeToX import ETSettings as cfg
+
+left_eye:  (175, 238, 238, 255)  # Pale Turquoise
+right_eye: (255, 160, 122, 255)  # Light Salmon/Coral
+
+# Set pastel colors (Option 1: Sky Blue & Pink)
+cfg.colors.left_eye = (175, 238, 238, 70)   # Sky Blue
+cfg.colors.right_eye = (255, 160, 122, 70) # Light Pink
+
+
 #%% Preparation 
 
 # Create window - adjust size based on your monitor
 win = visual.Window(
     size=[1920, 1080], 
     units='height', 
-    fullscr=False,      # Set to True for real experiments
+    fullscr=True,      # Set to True for real experiments
     allowGUI=True,      # Allows window controls for debugging
-    color='grey',       # Neutral background
     monitor='testMonitor'  # Use your calibrated monitor name
 )
 win.setMouseVisible(True)  # Set to False for real experiments
+win.close()
 
 print(f"✓ Window created: {win.size[0]}x{win.size[1]} pixels")
 print(f"✓ Units: {win.units}")
@@ -47,13 +57,17 @@ controller.show_status()
 success = controller.calibrate(
     calibration_points=5,
     shuffle=True,
-    anim_type='zoom')
+    anim_type='zoom',
+    visualization_style='circles')
 
 
 if success:
     print("✓ Calibration completed successfully!")
 else:
     print("✗ Calibration failed or was aborted")
+
+
+win.close()
 
 
 #%% Recording

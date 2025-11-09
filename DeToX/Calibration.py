@@ -34,6 +34,7 @@ class BaseCalibrationSession:
         infant_stims,
         audio=None,
         anim_type='zoom',
+        visualization_style='lines'
     ):
         """
         Initialize base calibration session with common parameters.
@@ -67,6 +68,7 @@ class BaseCalibrationSession:
         self.audio = audio
         self.focus_time = cfg.animation.focus_time
         self.anim_type = anim_type
+        self.visualization_style = visualization_style
         
         # --- State Management ---
         # Initialize calibration state variables
@@ -662,19 +664,46 @@ Make your choice now:"""
             )
         
         # --- STEP 2: Draw Sample Lines (Only for points with data) ---
-        for point_idx, samples in sample_data.items():
-            if point_idx < len(self.calibration_points):
-                # Get target position in pixels
-                target_pos = self.calibration_points[point_idx]
-                target_pix = psychopy_to_pixels(self.win, target_pos)
-                
-                # Draw lines from target to each sample
-                for sample_pix, line_color in samples:
-                    img_draw.line(
-                        (target_pix[0], target_pix[1], sample_pix[0], sample_pix[1]),
-                        fill=line_color,
-                        width=max(1, int(line_width_pixels))
+    # --- STEP 2: Draw Samples (Style-Dependent) ---
+        if self.visualization_style == 'lines':
+            # ═══════════════════════════════════════════════════
+            # LINES STYLE: Draw lines from targets to samples
+            # ═══════════════════════════════════════════════════
+            for point_idx, samples in sample_data.items():
+                if point_idx < len(self.calibration_points):
+                    target_pos = self.calibration_points[point_idx]
+                    target_pix = psychopy_to_pixels(self.win, target_pos)
+                    
+                    for sample_pix, line_color in samples:
+                        img_draw.line(
+                            (target_pix[0], target_pix[1], 
+                            sample_pix[0], sample_pix[1]),
+                            fill=line_color,
+                            width=max(1, int(line_width_pixels))
+                        )
+        
+        elif self.visualization_style == 'circles':
+            # ═══════════════════════════════════════════════════
+            # CIRCLES STYLE: Draw filled circles at sample positions
+            # ═══════════════════════════════════════════════════
+            sample_marker_radius = cfg.ui_sizes.sample_marker * self.win.size[1]
+            
+            for point_idx, samples in sample_data.items():
+                for sample_pix, fill_color in samples:
+                    img_draw.ellipse(
+                        (sample_pix[0] - sample_marker_radius,
+                        sample_pix[1] - sample_marker_radius,
+                        sample_pix[0] + sample_marker_radius,
+                        sample_pix[1] + sample_marker_radius),
+                        fill=fill_color,
+                        outline=None
                     )
+        
+        else:
+            raise ValueError(
+                f"Unknown visualization style: '{self.visualization_style}'. "
+                f"Use 'lines' or 'circles'."
+            )
         
         return visual.SimpleImageStim(self.win, img, autoLog=False)
 
@@ -701,6 +730,7 @@ class TobiiCalibrationSession(BaseCalibrationSession):
         infant_stims,
         audio=None,
         anim_type='zoom',
+        visualization_style='lines',  # \u2190 ADD THIS
     ):
         """
         Initialize Tobii calibration session.
@@ -723,10 +753,9 @@ class TobiiCalibrationSession(BaseCalibrationSession):
         anim_type : str, optional
             Animation style: 'zoom' or 'trill'. Default 'zoom'.
         """
-        # --- Base Class Initialization ---
         super().__init__(
-            win, infant_stims, audio, anim_type
-        ) # TODO: check what this does
+            win, infant_stims, audio, anim_type, visualization_style  # \u2190 ADD PARAM
+        )
         
         # --- Tobii-Specific Setup ---
         self.calibration = calibration_api
@@ -961,6 +990,7 @@ class MouseCalibrationSession(BaseCalibrationSession):
         mouse,
         audio=None,
         anim_type='zoom',
+        visualization_style='lines',  # \u2190 ADD THIS
     ):
         """
         Initialize mouse-based calibration session.
@@ -985,7 +1015,7 @@ class MouseCalibrationSession(BaseCalibrationSession):
         """
         # --- Base Class Initialization ---
         super().__init__(
-            win, infant_stims, audio, anim_type
+            win, infant_stims, audio, anim_type, visualization_style  # \u2190 ADD PARAM
         )
         
         # --- Mouse-Specific Setup ---

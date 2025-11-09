@@ -30,7 +30,7 @@ backward-compatible module-level dictionaries for existing code.
 """
 
 from dataclasses import dataclass, field
-from typing import Dict, Tuple
+from typing import Tuple
 
 
 @dataclass
@@ -243,6 +243,7 @@ class UIElementSizes:
     text: float = 0.025
     target_circle: float = 0.012
     target_circle_width: float = 0.006
+    sample_marker: float = 0.008  # ← ADD THIS LINE
 
 
 @dataclass

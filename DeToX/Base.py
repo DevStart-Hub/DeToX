@@ -371,12 +371,14 @@ class ETracker:
 
 
     def calibrate(self,
-                calibration_points=5,
-                infant_stims=None,
-                shuffle=True,
-                audio=None, # TODO: add default sound
-                anim_type='zoom'
-                ):
+            calibration_points,
+            infant_stims= None,
+            shuffle=True,
+            audio=None, # TODO: add default sound
+            anim_type='zoom',
+            visualization_style='circles'
+
+    ):
         """
         Run infant-friendly calibration procedure.
 
@@ -412,6 +414,11 @@ class ETracker:
             Animation style for the calibration stimuli:
             - 'zoom': Smooth size oscillation (default)
             - 'trill': Rapid rotation with pauses
+        visualization_style : {'lines', 'circles'}, optional
+            How to display calibration results:
+            - 'lines': Draw lines from targets to gaze samples
+            - 'circles': Draw small filled circles at gaze sample positions
+            Default 'circles'.
 
         Returns
         -------
@@ -431,6 +438,14 @@ class ETracker:
         >>> custom_points = [(-0.5, 0.5), (0.5, 0.5), (0.0, 0.0)]
         >>> controller.calibrate(custom_points, anim_type='trill')
         """
+
+        # --- Visualization Style Validation ---
+        valid_styles = ['lines', 'circles']
+        if visualization_style not in valid_styles:
+            raise ValueError(
+                f"Invalid visualization_style: '{visualization_style}'. "
+                f"Must be one of {valid_styles}."
+            )
         
         # --- Calibration Points Processing ---
         if isinstance(calibration_points, int):
@@ -498,7 +513,8 @@ class ETracker:
                 infant_stims=infant_stims,
                 mouse=self.mouse,
                 audio=audio,
-                anim_type=anim_type
+                anim_type=anim_type,
+                visualization_style=visualization_style 
             )
         else:
             session = TobiiCalibrationSession(
@@ -506,7 +522,8 @@ class ETracker:
                 calibration_api=self.calibration,
                 infant_stims=infant_stims,
                 audio=audio,
-                anim_type=anim_type
+                anim_type=anim_type,
+                visualization_style=visualization_style
             )
         
         # --- Run calibration ---
