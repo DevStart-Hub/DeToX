@@ -1,0 +1,201 @@
+project:
+  type: website
+  output-dir: ../docs
+  resources:                 
+    - resources/**
+  
+  render:
+    - "*.qmd"
+    - "!Draft/*" 
+
+execute:
+  kernel: tester
+
+metadata-files:
+  - api/_sidebar.yml
+
+
+website:
+  title: "DeToX"
+
+  cookie-consent:
+    type: implied
+    style: simple 
+    palette: dark
+
+
+  navbar:
+    logo: resources/full_logo.png
+
+    right:
+      - text: "Vignettes"
+        menu:
+          - text: "Installation"
+            href: Vignettes/Installation.qmd
+          - text: Getting Started
+            href: Vignettes/GettingStarted.qmd
+
+
+      - href: api/index.qmd
+        text: Reference
+        
+    tools:
+      - icon: twitter
+        href: https://twitter.com
+      - icon: github
+        menu:
+          - text: Source Code
+            href:  https://code.com
+          - text: Report a Bug
+            href:  https://bugs.com
+
+  sidebar: 
+    - title: "Vignettes"
+      style: "floating"
+      contents:
+          - text: "Installation"
+            href: Vignettes/Installation.qmd
+          - text: Getting Started
+            href: Vignettes/GettingStarted.qmd
+
+
+  # Utilities
+  back-to-top-navigation: true
+  page-navigation: true
+  reader-mode: false
+
+    ## Footer
+  page-footer:
+    center:  
+      - href: https://github.com/TommasoGhilardi/DevStart
+        icon: github
+        aria-label: GitHub
+      - href: https://x.com/DevSciStart
+        icon: twitter
+        aria-label: Twitter
+
+
+format:
+  html:
+    theme:
+      - pulse
+      - styles.scss  # your custom SCSS file
+    toc: true
+    toc-expand: 4   
+
+    # Font
+    mainfont: 'Arial'
+
+    # Code variables
+    code-fold: false
+    code-copy: true
+    code-link: true
+    code-overflow: scroll
+    code-tools:
+      source: true
+      toggle: true
+      caption: none
+    highlight-style: zenburn
+    code-block-background: true
+    code-block-border-left: "#00B3B3"
+
+    # # Pagination
+    # grid:
+    #   sidebar-width: 300px
+    #   body-width: 1100px
+    #   margin-width: 300px
+    #   gutter-width: 1.5rem
+
+quartodoc:
+  style: pkgdown
+  title: Reference
+  package: DeToX
+  dir: api
+  sidebar: api/_sidebar.yml
+
+  sections:
+    - title: Main Eye-tracker Class
+      desc: >
+        The central class of the DeToX package, responsible for connecting to 
+        and managing the Tobii eye tracker. This class must be instantiated 
+        before any other functionality can be used. It provides access to 
+        calibration, recording control, and gaze-contingent presentation methods.
+        Below are the main methods and properties of this class:
+      contents:
+        - ETracker
+
+    - subtitle: Control the Recording
+      desc: >
+        Functions for starting, stopping, and managing the capture of eye-tracking 
+        data. These methods allow you to initiate and terminate recordings, 
+        mark events of interest, and save collected data to disk.
+      contents:
+        - ETracker.start_recording
+        - ETracker.stop_recording
+        - ETracker.record_event
+        - ETracker.save_data
+
+    - subtitle: Calibration
+      desc: >
+        Methods for running and managing eye tracker calibration. These include 
+        displaying calibration status, initiating calibration routines, and 
+        saving or loading calibration settings to ensure accurate gaze data.
+      contents:
+        - ETracker.show_status
+        - ETracker.calibrate
+        - ETracker.save_calibration
+        - ETracker.load_calibration
+
+    - subtitle: Gaze Contingent
+      desc: >
+        Tools for running gaze-contingent experiments, where visual presentation 
+        adapts dynamically to a participants gaze position. Includes functionality 
+        for live gaze-contingent control and methods to compute average gaze 
+        positions for experimental logic.
+      contents:
+        - ETracker.gaze_contingent
+        - ETracker.get_gaze_position
+
+    - title: Internal Calibration 
+      desc: >
+        Classes for running eye-tracker calibration. These get called internally by the ETracker class, and are reported here only for completeness.
+        They are comprise of a base calibration class that set the common interface, and the specific implementations for Tobii and Mouse calibration.
+      contents:
+        - BaseCalibrationSession
+        - TobiiCalibrationSession
+        - MouseCalibrationSession
+
+    - title: Coordinate Conversion
+      desc: >
+        A collection of utility functions designed to help the conversion of the data from different formats.
+        These are called internally by the ETracker class, but can be used independently if needed.
+      contents:
+        - convert_height_to_units
+        - get_psychopy_pos
+        - psychopy_to_pixels
+        - get_tobii_pos
+        - pix2tobii
+        - tobii2pix
+        - get_psychopy_pos_from_trackbox
+
+    - title: Utilities
+      desc: >
+        A set of utility classes and functions for presenting stimuli
+        and formatted text. These are called internally by the ETracker class.
+      contents:
+        - NicePrint
+        - InfantStimuli
+      
+    - title: Configuration Settings
+      desc: >
+        Configuration classes and module-level instances for customizing the 
+        behavior and appearance of the DeToX eye-tracking system. These settings 
+        control animation parameters, colors, UI element sizes, and data formats.
+        Note: These settings should generally not be changed unless you have specific
+        requirements. However, they can be modified through the module-level instances 
+        (e.g., ETSettings.animation) for easy configuration of your experiments.
+      contents:
+        - ETSettings.AnimationSettings
+        - ETSettings.CalibrationColors
+        - ETSettings.UIElementSizes
+        - ETSettings.FontSizeMultipliers
