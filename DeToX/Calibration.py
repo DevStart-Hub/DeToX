@@ -240,48 +240,44 @@ class BaseCalibrationSession:
         # Scale by the size percentage (normalized to 2.0 as baseline)
         return base_height * (size_percentage / 2.0)
     
-    
+        
     def show_message_and_wait(self, body, title="", pos=(0, -0.15)):
         """
         Display a message on screen and in console, then wait for keypress.
         
         Shows formatted message both in the PsychoPy window and console output,
-        then pauses execution until any key is pressed. Useful for instructions
-        and status messages during calibration.
+        enforces a minimum display time for readability and system stabilization,
+        then pauses execution until any key is pressed.
         
         Parameters
         ----------
         body : str
-            The main message text to display. Will be formatted with box-drawing
-            characters via NicePrint.
+            The main message text to display.
         title : str, optional
-            Title for the message box. Appears at the top of the formatted box.
-            Default empty string.
+            Title for the message box. Default empty string.
         pos : tuple, optional
-            Position of the message box center on screen in window units.
-            Default (0, -0.15) places message slightly below center.
-            
-        Returns
-        -------
-        None
+            Position of the message box center on screen. Default (0, -0.15).
         """
         # --- Console Output ---
-        # Use NicePrint to print to console AND get formatted text
         formatted_text = NicePrint(body, title)
         
         # --- Visual Message Creation ---
-        # Create on-screen message using the formatted text
         message_visual = self._create_message_visual(formatted_text, pos)
         
         # --- Display and Wait ---
-        # Show message on screen
         self.win.clearBuffer()
         message_visual.draw()
         self.win.flip()
         
-        # Wait for any key press
+        # --- Clear any buffered keypresses ---
+        event.clearEvents()
+        
+        # --- Minimum stabilization/readability time ---
+        core.wait(0.5)  # Ensures eye tracker stabilization + prevents accidental key press
+        
+        # --- Wait for intentional keypress ---
         event.waitKeys()
-    
+            
     
     def check_points(self, calibration_points):
         """
@@ -782,12 +778,17 @@ class TobiiCalibrationSession(BaseCalibrationSession):
             aborted via escape key or if calibration computation failed.
         """
 
-        # --- 1. Instruction Display ---
-        instructions_text = """Tobii Eye Tracker Calibration Setup:
+        # --- 1. Calibration Mode Activation ---
+        # Enter calibration mode early to allow stabilization during instruction reading
+        self.calibration.enter_calibration_mode()
+
+        # --- 2. Instruction Display ---
+        # Natural stabilization period while user reads instructions
+        instructions_text = """Tobbi Eye Tracker Calibration Setup:
 
         • Press number keys (1-9) to select calibration points
-        • Look at the animated stimulus when it appears
-        • Press SPACE to collect eye tracking data
+        • Move your mouse to the animated stimulus
+        • Press SPACE to collect samples at the selected point
         • Press ENTER to finish collecting and see results
         • Press ESCAPE to exit calibration
 
@@ -795,18 +796,15 @@ class TobiiCalibrationSession(BaseCalibrationSession):
 
         self.show_message_and_wait(instructions_text, "Eye Tracker Calibration")
 
-        # --- 2. Convert from Normalized to Window Units ---
+        # --- 3. Convert from Normalized to Window Units ---
         cal_points_window = norm_to_window_units(self.win, calibration_points)
 
-        # --- 3. Setup and Validation ---
+        # --- 4. Setup and Validation ---
         self.check_points(cal_points_window)
         self._prepare_session(cal_points_window)
         
-        # --- 4. Pre-convert to Tobii ADCS Coordinates (Once!) ---
+        # --- 5. Pre-convert to Tobii ADCS Coordinates (Once!) ---
         self.tobii_points = [get_tobii_pos(self.win, pt) for pt in cal_points_window]
-
-        # --- 5. Calibration Mode Activation ---
-        self.calibration.enter_calibration_mode()
 
         # --- 6. Main Calibration Loop ---
         while True:
@@ -823,12 +821,15 @@ class TobiiCalibrationSession(BaseCalibrationSession):
             # --- 6c. User Review and Selection ---
             retries = self._selection_phase(cal_points_window, result_img)
             if retries is None:
+                # Restart all: reset remaining points and clear data
                 self.remaining_points = list(range(len(cal_points_window)))
                 self._clear_collected_data()
                 continue
             elif not retries:
+                # Accept: finished!
                 break
             else:
+                # Retry specific points: update remaining points and discard data
                 self.remaining_points = retries.copy()
                 self._discard_phase(cal_points_window, retries)
 
