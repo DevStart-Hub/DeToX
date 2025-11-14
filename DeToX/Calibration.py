@@ -503,10 +503,10 @@ class BaseCalibrationSession:
         
         result_instructions ="""Review calibration results above.
 
-        - Press ENTER to accept calibration
-        - Press Numbers → SPACE to retry some points
-        - Press ESCAPE to restart calibration
-        """
+    - Press ENTER to accept calibration
+    - Press Numbers → SPACE to retry some points
+    - Press ESCAPE to restart calibration
+    """
         
         formatted_instructions = NicePrint(result_instructions, "Calibration Results")
         result_instructions_visual = visual.TextStim(
@@ -833,13 +833,13 @@ class TobiiCalibrationSession(BaseCalibrationSession):
         # --- 2. Instruction Display ---
         instructions_text = f"""Tobii Eye Tracker Calibration Setup:
 
-        - Press number keys (1-{len(calibration_points)}) to select calibration points
-        - Look at the animated stimulus when it appears
-        - Press SPACE to collect samples at the selected point
-        - Press ENTER to finish collecting and see results
-        - Press ESCAPE to exit calibration
+    - Press number keys (1-{len(calibration_points)}) to select calibration points
+    - Look at the animated stimulus when it appears
+    - Press SPACE to collect samples at the selected point
+    - Press ENTER to finish collecting and see results
+    - Press ESCAPE to exit calibration
 
-        Any key will start calibration immediately!"""
+    Any key will start calibration immediately!"""
 
         self.show_message_and_wait(instructions_text, "Eye Tracker Calibration")
 
@@ -1100,13 +1100,13 @@ class MouseCalibrationSession(BaseCalibrationSession):
         # --- 1. Instruction Display ---
         instructions_text = f"""Mouse-Based Calibration Setup:
 
-        - Press number keys (1-{len(calibration_points)}) to select calibration points
-        - Move your mouse to the animated stimulus
-        - Press SPACE to collect samples at the selected point
-        - Press ENTER to finish collecting and see results
-        - Press ESCAPE to exit calibration
+    - Press number keys (1-{len(calibration_points)}) to select calibration points
+    - Move your mouse to the animated stimulus
+    - Press SPACE to collect samples at the selected point
+    - Press ENTER to finish collecting and see results
+    - Press ESCAPE to exit calibration
 
-        Any key will start calibration immediately!"""
+    Any key will start calibration immediately!"""
         
         self.show_message_and_wait(instructions_text, "Calibration Setup")
         
