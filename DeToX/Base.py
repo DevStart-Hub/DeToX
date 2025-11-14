@@ -241,7 +241,7 @@ class ETracker:
 
     # --- Calibration Methods ---
 
-    def show_status(self, decision_key="space"):
+    def show_status(self, decision_key="space", video_help=True):
         """
         Real-time visualization of participant's eye position in track box.
         
@@ -249,26 +249,76 @@ class ETracker:
         from screen. Useful for positioning participants before data collection.
         Updates continuously until exit key is pressed.
         
+        Optionally displays an instructional video in the background to help guide
+        participant positioning. You can use the built-in video, disable the video,
+        or provide your own custom MovieStim object.
+        
         Parameters
         ----------
         decision_key : str, optional
             Key to press to exit visualization. Default 'space'.
+        video_help : bool or visual.MovieStim, optional
+            Controls background video display:
+            - True: Uses built-in instructional video (default)
+            - False: No video displayed
+            - visual.MovieStim: Uses your pre-loaded custom video. You are
+            responsible for scaling (size) and positioning (pos) the MovieStim
+            to fit your desired layout.
+            Default True.
             
         Notes
         -----
         In simulation mode, use scroll wheel to adjust simulated distance.
         Eye positions shown as green (left) and red (right) circles.
+        
+        The built-in video (when video_help=True) is sized at (1.06, 0.6) in 
+        height units and positioned at (0, -0.08) to avoid covering the track box.
+        
+        Examples
+        --------
+        >>> # Use built-in video
+        >>> tracker.show_status()
+        
+        >>> # No video
+        >>> tracker.show_status(video_help=False)
+        
+        >>> # Custom video
+        >>> my_video = visual.MovieStim(win, 'custom.mp4', size=0.5, pos=(0, -0.2))
+        >>> tracker.show_status(video_help=my_video)
         """
+
+        # --- Video setup (if enabled) ---
+        status_movie = None
+
+        if isinstance(video_help, visual.MovieStim):
+            # video_help is already a loaded MovieStim, just use it
+            status_movie = video_help
+            status_movie.play()  # Start playing
+            
+        elif video_help:
+            # video_help is True, create new MovieStim from file
+            video_path = os.path.join(os.path.dirname(__file__), 'stimuli', 'ShowStatus.mp4')
+            status_movie = visual.MovieStim(
+                self.win, 
+                video_path,
+                size=(1.06, 0.6),  # Width x Height maintaining 16:9 ratio
+                pos=(0, -0.08),  # Offset down so it doesn't cover track box
+                loop=True,
+                units='height'
+            )
+            status_movie.play()  # Start playing
+
+
         # --- Visual element creation ---
         # Create display components for track box visualization
         bgrect = visual.Rect(self.win, pos=(0, 0.4), width=0.25, height=0.2,
                             lineColor="white", fillColor="black", units="height")
         
         leye = visual.Circle(self.win, size=0.02, units="height",
-                            lineColor=None, fillColor="green")  # Left eye indicator
+                            lineColor=None, fillColor=cfg.colors.left_eye, colorSpace='rgb255')  # Left eye indicator
         
         reye = visual.Circle(self.win, size=0.02, units="height", 
-                            lineColor=None, fillColor="red")    # Right eye indicator
+                            lineColor=None, fillColor=cfg.colors.right_eye, colorSpace='rgb255')    # Right eye indicator
         
         # Z-position visualization elements
         zbar = visual.Rect(self.win, pos=(0, 0.28), width=0.25, height=0.03,
@@ -311,6 +361,11 @@ class ETracker:
         # --- Main visualization loop ---
         b_show_status = True
         while b_show_status:
+
+            # --- Draw video first ---
+            if status_movie:
+                status_movie.draw()
+
             # --- Draw static elements ---
             bgrect.draw()
             zbar.draw()
@@ -354,6 +409,9 @@ class ETracker:
             self.win.flip()
         
         # --- Cleanup ---
+        if status_movie:
+            status_movie.stop()  # Stop video playback
+
         self.win.flip()  # Clear display
         
         if self.simulate:
