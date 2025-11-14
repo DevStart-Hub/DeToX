@@ -179,8 +179,8 @@ class CalibrationColors:
     >>> colors.left_eye = (0, 200, 0, 200)  # Semi-transparent green
     """
     
-    left_eye: Tuple[int, int, int, int] = (0, 255, 0, 255)
-    right_eye: Tuple[int, int, int, int] = (255, 0, 0, 255)
+    left_eye: Tuple[int, int, int, int] = (100, 200, 255, 120)
+    right_eye: Tuple[int, int, int, int] = (255, 100, 120, 120) 
     mouse: Tuple[int, int, int, int] = (255, 128, 0, 255)
     target_outline: Tuple[int, int, int, int] = (24, 24, 24, 255)
     highlight: Tuple[int, int, int, int] = (255, 255, 0, 255)
@@ -199,7 +199,7 @@ class UIElementSizes:
     ----------
     highlight : float
         Radius of circles highlighting selected calibration points for retry.
-        Default is 0.04 (4% of screen height).
+        Default is 0.02 (2% of screen height).
     line_width : float
         Thickness of lines drawn in calibration visualizations.
         Default is 0.003 (0.3% of screen height).
@@ -213,14 +213,29 @@ class UIElementSizes:
         Width of lines in calibration result plots connecting targets to samples.
         Default is 0.002 (0.2% of screen height).
     text : float
-        Base text height for all text displays in the calibration interface.
+        Base text height (deprecated - use specific text sizes below).
         Default is 0.025 (2.5% of screen height).
     target_circle : float
         Radius of target circles drawn in calibration result visualizations.
         Default is 0.012 (1.2% of screen height).
     target_circle_width : float
         Line width for target circle outlines in result visualizations.
-        Default is 0.006 (0.6% of screen height).
+        Default is 0.003 (0.3% of screen height).
+    sample_marker : float
+        Radius of sample markers in circle visualization style.
+        Default is 0.005 (0.5% of screen height).
+    instruction_text : float
+        Text height for instruction displays during calibration.
+        Default is 0.019 (1.9% of screen height).
+    message_text : float
+        Text height for general message displays.
+        Default is 0.016 (1.6% of screen height).
+    title_text : float
+        Text height for title text in message boxes.
+        Default is 0.018 (1.8% of screen height).
+    legend_text : float
+        Text height for legend labels showing eye color coding.
+        Default is 0.015 (1.5% of screen height).
     
     Notes
     -----
@@ -232,54 +247,26 @@ class UIElementSizes:
     --------
     >>> ui_sizes = UIElementSizes()
     >>> ui_sizes.highlight = 0.06  # Larger highlight circles
-    >>> ui_sizes.text = 0.035  # Larger text
+    >>> ui_sizes.instruction_text = 0.025  # Larger instructions
     """
     
-    highlight: float = 0.04
+    # Visual element sizes
+    highlight: float = 0.02
     line_width: float = 0.003
     marker: float = 0.02
     border: float = 0.005
     plot_line: float = 0.002
-    text: float = 0.025
+    text: float = 0.025  # Deprecated - use specific text sizes below
     target_circle: float = 0.012
-    target_circle_width: float = 0.006
-    sample_marker: float = 0.008  # ← ADD THIS LINE
+    target_circle_width: float = 0.003
+    sample_marker: float = 0.005
+    
+    # Text sizes (direct height units)
+    instruction_text: float = 0.019   # Instructions during calibration
+    message_text: float = 0.016       # General messages
+    title_text: float = 0.018         # Title text
+    legend_text: float = 0.015        # Legend labels
 
-
-@dataclass
-class FontSizeMultipliers:
-    """Font size multipliers for different text types.
-    
-    Defines scaling factors applied to the base text size (from UIElementSizes)
-    for different types of text displays in the calibration interface.
-    
-    Attributes
-    ----------
-    instruction_text : float
-        Multiplier for instruction text displayed during calibration.
-        Default is 1.5 (150% of base text size).
-    message_text : float
-        Multiplier for general message text.
-        Default is 1.3 (130% of base text size).
-    title_text : float
-        Multiplier for title text in message boxes.
-        Default is 1.4 (140% of base text size).
-    
-    Notes
-    -----
-    The final text size is calculated as: base_text_size * multiplier
-    where base_text_size comes from UIElementSizes.text.
-    
-    Examples
-    --------
-    >>> font_sizes = FontSizeMultipliers()
-    >>> font_sizes.instruction_text = 2.0  # Larger instructions
-    >>> font_sizes.title_text = 1.8  # Larger titles
-    """
-    
-    instruction_text: float = 1.5
-    message_text: float = 1.3
-    title_text: float = 1.4
 
 class RawDataColumns:
     """
@@ -580,16 +567,6 @@ colors = CalibrationColors()
 #: >>> cfg.ui_sizes.highlight = 0.06
 ui_sizes = UIElementSizes()
 
-#: Font size multipliers for different text types.
-#:
-#: Access font scaling factors directly through this object.
-#:
-#: Examples
-#: --------
-#: >>> from DeToX import ETSettings as cfg
-#: >>> cfg.font_multipliers.instruction_text = 2.0
-font_multipliers = FontSizeMultipliers()
-
 #: Keyboard key to calibration point index mapping.
 #:
 #: Maps key names (str) to calibration point indices (int).
@@ -627,13 +604,11 @@ __all__ = [
     'AnimationSettings',
     'CalibrationColors',
     'UIElementSizes',
-    'FontSizeMultipliers',
-    'CalibrationPatterns',  # Add this
+    'CalibrationPatterns',
     'animation',
     'colors',
     'ui_sizes',
-    'font_multipliers',
-    'calibration',  # Add this
+    'calibration',
     'numkey_dict',
     'simulation_framerate',
     'RawDataColumns',

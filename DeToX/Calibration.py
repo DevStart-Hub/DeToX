@@ -1,5 +1,7 @@
 # Standard library imports
 import time
+import warnings
+
 import numpy as np
 from PIL import Image, ImageDraw
 
@@ -167,79 +169,6 @@ class BaseCalibrationSession:
         self.border_left.draw()
         self.border_right.draw()
     
-    
-    def _create_message_visual(self, formatted_text, pos=(0, -0.15), font_type="instruction_text"):
-        """
-        Create a visual text stimulus from pre-formatted text.
-        
-        Generates a PsychoPy TextStim object with consistent formatting for
-        displaying instructions and messages during calibration. Uses monospace
-        font to preserve text alignment and box-drawing characters.
-        
-        Parameters
-        ----------
-        formatted_text : str
-            Pre-formatted text string, typically from NicePrint utility. Should
-            include any box-drawing characters and formatting.
-        pos : tuple, optional
-            Position of the text box center in window units. Default (0, -0.15)
-            places text slightly below center.
-        font_type : str, optional
-            Type of font sizing to use from cfg.FONT_SIZE_MULTIPLIERS dictionary.
-            Options include 'instruction_text', 'small_text', etc. Default
-            'instruction_text'.
-            
-        Returns
-        -------
-        visual.TextStim
-            Configured PsychoPy text stimulus ready for drawing.
-        """
-        # --- Font Configuration ---
-        # Get font and size multiplier from configuration
-        size_multiplier = getattr(cfg.font_multipliers, font_type)
-
-        return visual.TextStim(
-            self.win,
-            text=formatted_text,
-            pos=pos,
-            color='white',
-            height=self._get_text_height(size_multiplier),
-            alignText='center',
-            anchorHoriz='center',
-            anchorVert='center',
-            units=self.win.units,  # Use same units as window
-            font='Consolas',  # Monospace font that supports Unicode box characters
-            languageStyle='LTR'  # Left-to-right text
-        )
-    
-    
-    def _get_text_height(self, size_percentage=2.0):
-        """
-        Calculate text height based on height units and size multiplier.
-        
-        Converts base text height from configuration to current window units
-        and applies scaling factor for different text sizes. Ensures consistent
-        text sizing across different display configurations.
-        
-        Parameters
-        ----------
-        size_percentage : float
-            Multiplier for the base text height. Standard value is 2.0.
-            Smaller values produce smaller text, larger values produce larger text.
-            
-        Returns
-        -------
-        float
-            Text height in current window units, scaled by the size percentage.
-        """
-        # --- Base Height Conversion ---
-        # Get base text height from config and convert to current units
-        base_height = convert_height_to_units(self.win, cfg.ui_sizes.text)
-        
-        # --- Scaling Application ---
-        # Scale by the size percentage (normalized to 2.0 as baseline)
-        return base_height * (size_percentage / 2.0)
-    
         
     def show_message_and_wait(self, body, title="", pos=(0, -0.15)):
         """
@@ -262,7 +191,19 @@ class BaseCalibrationSession:
         formatted_text = NicePrint(body, title)
         
         # --- Visual Message Creation ---
-        message_visual = self._create_message_visual(formatted_text, pos)
+        message_visual = visual.TextStim(
+            self.win,
+            text=formatted_text,
+            pos=pos,
+            color='white',
+            height=convert_height_to_units(self.win, cfg.ui_sizes.instruction_text),
+            alignText='center',
+            anchorHoriz='center',
+            anchorVert='center',
+            units=self.win.units,
+            font='Consolas',
+            languageStyle='LTR'
+        )
         
         # --- Display and Wait ---
         self.win.clearBuffer()
@@ -273,7 +214,7 @@ class BaseCalibrationSession:
         event.clearEvents()
         
         # --- Minimum stabilization/readability time ---
-        core.wait(0.5)  # Ensures eye tracker stabilization + prevents accidental key press
+        core.wait(0.5)
         
         # --- Wait for intentional keypress ---
         event.waitKeys()
@@ -427,39 +368,99 @@ class BaseCalibrationSession:
         stim.draw()
     
 
+    def _create_legend_visuals(self, base_y_pos):
+        """
+        Create legend visual elements showing eye color coding.
+        
+        Parameters
+        ----------
+        base_y_pos : float
+            Vertical position in window units where legend should be centered.
+            
+        Returns
+        -------
+        list
+            List of PsychoPy visual elements ready for drawing.
+        """
+        # Eye shape dimensions (wider than tall for almond shape)
+        eye_width = convert_height_to_units(self.win, 0.025)   # Width of eye
+        eye_height = convert_height_to_units(self.win, 0.012)  # Height of eye
+        
+        legend_spacing = convert_height_to_units(self.win, 0.10)  # Horizontal spacing between eyes
+        text_offset = convert_height_to_units(self.win, 0.025)   # Vertical offset above eye
+        
+        # Convert RGBA colors to RGB for PsychoPy (drop alpha channel)
+        left_eye_color_rgb = tuple(c / 255.0 for c in cfg.colors.left_eye[:3])   # Normalize to 0-1
+        right_eye_color_rgb = tuple(c / 255.0 for c in cfg.colors.right_eye[:3])  # Normalize to 0-1
+        
+        # Left eye legend (green ellipse + text)
+        left_eye_legend = visual.Circle(
+            self.win,
+            size=(eye_width, eye_height),  # Ellipse shape (width, height)
+            pos=(-legend_spacing, base_y_pos),
+            fillColor= cfg.colors.left_eye,
+            colorSpace='rgb255',
+            lineColor='black',
+            units=self.win.units
+        )
+        
+        left_eye_text = visual.TextStim(
+            self.win,
+            text='Left Eye',
+            pos=(-legend_spacing, base_y_pos + text_offset),
+            color='white',
+            height=convert_height_to_units(self.win, cfg.ui_sizes.legend_text),  # ← NEW
+            anchorHoriz='center',
+            anchorVert='center',
+            units=self.win.units,
+            font='Consolas'
+        )
+        
+        # Right eye legend (red ellipse + text)
+        right_eye_legend = visual.Circle(
+            self.win,
+            size=(eye_width, eye_height),  # Ellipse shape (width, height)
+            pos=(legend_spacing, base_y_pos),
+            fillColor= cfg.colors.right_eye,
+            colorSpace='rgb255',
+            lineColor='black',
+            units=self.win.units
+        )
+        
+        right_eye_text = visual.TextStim(
+            self.win,
+            text='Right Eye',
+            pos=(legend_spacing, base_y_pos + text_offset),
+            color='white',
+            height=convert_height_to_units(self.win, cfg.ui_sizes.legend_text),  # ← NEW
+            anchorHoriz='center',
+            anchorVert='center',
+            units=self.win.units,
+            font='Consolas'
+        )
+        
+        return [left_eye_legend, left_eye_text, right_eye_legend, right_eye_text]
+
+
     def _selection_phase(self, calibration_points, result_img):
         """
         Show results and allow user to select points for retry.
         
-        Displays calibration results overlaid with interactive controls for
-        selecting which points to retry. Uses height-based sizing for highlight
-        circles to maintain consistent appearance across displays.
-        
-        Parameters
-        ----------
-        calibration_points : list of (float, float)
-            List of calibration point coordinates in window units.
-        result_img : visual.SimpleImageStim
-            Image showing calibration results with lines from targets to samples.
-        
         Returns
         -------
         list or None
-            - List of point indices to retry (may be empty to accept all)
+            - [] (empty list) to accept calibration
+            - [list of indices] to retry those specific points
             - None to restart entire calibration from beginning
         """
-        # --- Selection State Initialization ---
         retries = set()
         
-        # --- Instructions Creation ---
-        # Create instructions for results phase
-        result_instructions = """Review calibration results above.
+        result_instructions ="""Review calibration results above.
 
-• Press SPACE to accept calibration
-• Press numbers to select points for retry  
-• Press ESCAPE to restart calibration
-
-Make your choice now:"""
+        - Press ENTER to accept calibration
+        - Press Numbers → SPACE to retry some points
+        - Press ESCAPE to restart calibration
+        """
         
         formatted_instructions = NicePrint(result_instructions, "Calibration Results")
         result_instructions_visual = visual.TextStim(
@@ -467,52 +468,47 @@ Make your choice now:"""
             text=formatted_instructions,
             pos=(0, -0.25),
             color='white',
-            height=self._get_text_height(1.2),
+            height=convert_height_to_units(self.win, cfg.ui_sizes.instruction_text),  # ← NEW
             alignText='center',
             anchorHoriz='center',
             anchorVert='center',
             units=self.win.units,
-            font='Consolas',  # Monospace font for Unicode support
+            font='Consolas',
             languageStyle='LTR'
         )
         
-        # --- Interactive Selection Loop ---
+        # Create legend positioned below the message
+        legend_visuals = self._create_legend_visuals(base_y_pos=-0.37)
+        
         while True:
-            # --- Frame Rendering ---
-            # Draw result image, calibration border, and instructions
             result_img.draw()
             self._draw_calibration_border()
             result_instructions_visual.draw()
             
-            # --- Retry Point Highlighting ---
-            # Highlight retry points with height-based sizing
+            # Draw legend
+            for visual_element in legend_visuals:
+                visual_element.draw()
+            
             for retry_idx in retries:
                 if retry_idx < len(calibration_points):
-                    # Convert highlight size and line width from height units
                     highlight_radius = convert_height_to_units(self.win, cfg.ui_sizes.highlight)
-                    line_width_height = cfg.ui_sizes.line_width
-                    # Convert line width to pixels for consistency (PsychoPy expects pixel values for lineWidth)
-                    line_width_pixels = line_width_height * self.win.size[1]
+                    line_width_pixels = cfg.ui_sizes.line_width * self.win.size[1]
                     
-                    # Create highlight circle with proper scaling
                     highlight = visual.Circle(
                         self.win,
                         radius=highlight_radius,
                         pos=calibration_points[retry_idx],
                         lineColor=cfg.colors.highlight,
-                        fillColor=None,                       # No fill for consistency
-                        lineWidth=max(1, int(line_width_pixels)),  # Ensure minimum 1 pixel width
-                        edges=128,                            # smooth circle
-                        units=self.win.units                  # Explicit units
+                        fillColor=None,
+                        lineWidth=max(1, int(line_width_pixels)),
+                        edges=128,
+                        units=self.win.units
                     )
                     highlight.draw()
-
             self.win.flip()
             
-            # --- User Input Processing ---
             for key in event.getKeys():
                 if key in cfg.numkey_dict:
-                    # --- Point Selection Toggle ---
                     idx = cfg.numkey_dict[key]
                     if 0 <= idx < len(calibration_points):
                         if idx in retries:
@@ -520,13 +516,22 @@ Make your choice now:"""
                         else:
                             retries.add(idx)
                             
+                elif key == 'return':
+                    return []
+                    
                 elif key == 'space':
-                    # --- Accept Current Results ---
-                    return list(retries)  # Accept calibration (with or without retries)
+                    if retries:
+                        return list(retries)
+                    else:
+                        warnings.warn(
+                            "No points selected for retry. "
+                            "Press number keys to select points first, or press ENTER to accept calibration.",
+                            UserWarning
+                        )
                     
                 elif key == 'escape':
-                    # --- Restart All Calibration ---
-                    return None  # Restart all calibration
+                    return None
+
                     
     def _collection_phase(self, calibration_points, **kwargs):
         """
@@ -644,7 +649,49 @@ Make your choice now:"""
         target_circle_radius_pixels = cfg.ui_sizes.target_circle * self.win.size[1]
         target_circle_width_pixels = cfg.ui_sizes.target_circle_width * self.win.size[1]
         
-        # --- STEP 1: Draw ALL Target Circles (Always) ---
+        # --- STEP 1: Draw Samples (Style-Dependent) ---
+        
+        ## Warning and default to circles if unknown style
+        if self.visualization_style not in ['lines', 'circles']:
+            warnings.warn(
+                f"Unknown visualization style: '{self.visualization_style}'. "
+                f"Defaulting to 'circles'.",
+                UserWarning
+            )
+            self.visualization_style = 'circles'
+
+        ## LINES STYLE: Draw lines from targets to samples
+        elif self.visualization_style == 'lines':
+            for point_idx, samples in sample_data.items():
+                if point_idx < len(self.calibration_points):
+                    target_pos = self.calibration_points[point_idx]
+                    target_pix = psychopy_to_pixels(self.win, target_pos)
+                    
+                    for sample_pix, line_color in samples:
+                        img_draw.line(
+                            (target_pix[0], target_pix[1], 
+                            sample_pix[0], sample_pix[1]),
+                            fill=line_color,
+                            width=max(1, int(line_width_pixels))
+                        )
+       
+        ## CIRCLES STYLE: Draw filled circles at sample positions
+        elif self.visualization_style == 'circles':
+            sample_marker_radius = cfg.ui_sizes.sample_marker * self.win.size[1]
+            start= time.time()    
+            for point_idx, samples in sample_data.items():
+                for sample_pix, fill_color in samples:
+                    img_draw.ellipse(
+                        (sample_pix[0] - sample_marker_radius,
+                        sample_pix[1] - sample_marker_radius,
+                        sample_pix[0] + sample_marker_radius,
+                        sample_pix[1] + sample_marker_radius),
+                        fill=fill_color,
+                        outline=None
+                    )
+            print("Circle drawing time:", time.time() - start)
+
+        # --- STEP 2: Draw ALL Target Circles (Always) ---
         for point_idx, target_pos in enumerate(self.calibration_points):
             # Convert to pixels
             target_pix = psychopy_to_pixels(self.win, target_pos)
@@ -658,49 +705,8 @@ Make your choice now:"""
                 outline=cfg.colors.target_outline,
                 width=max(1, int(target_circle_width_pixels))
             )
-        
-        # --- STEP 2: Draw Sample Lines (Only for points with data) ---
-    # --- STEP 2: Draw Samples (Style-Dependent) ---
-        if self.visualization_style == 'lines':
-            # ═══════════════════════════════════════════════════
-            # LINES STYLE: Draw lines from targets to samples
-            # ═══════════════════════════════════════════════════
-            for point_idx, samples in sample_data.items():
-                if point_idx < len(self.calibration_points):
-                    target_pos = self.calibration_points[point_idx]
-                    target_pix = psychopy_to_pixels(self.win, target_pos)
-                    
-                    for sample_pix, line_color in samples:
-                        img_draw.line(
-                            (target_pix[0], target_pix[1], 
-                            sample_pix[0], sample_pix[1]),
-                            fill=line_color,
-                            width=max(1, int(line_width_pixels))
-                        )
-        
-        elif self.visualization_style == 'circles':
-            # ═══════════════════════════════════════════════════
-            # CIRCLES STYLE: Draw filled circles at sample positions
-            # ═══════════════════════════════════════════════════
-            sample_marker_radius = cfg.ui_sizes.sample_marker * self.win.size[1]
-            
-            for point_idx, samples in sample_data.items():
-                for sample_pix, fill_color in samples:
-                    img_draw.ellipse(
-                        (sample_pix[0] - sample_marker_radius,
-                        sample_pix[1] - sample_marker_radius,
-                        sample_pix[0] + sample_marker_radius,
-                        sample_pix[1] + sample_marker_radius),
-                        fill=fill_color,
-                        outline=None
-                    )
-        
-        else:
-            raise ValueError(
-                f"Unknown visualization style: '{self.visualization_style}'. "
-                f"Use 'lines' or 'circles'."
-            )
-        
+
+
         return visual.SimpleImageStim(self.win, img, autoLog=False)
 
 
@@ -779,18 +785,16 @@ class TobiiCalibrationSession(BaseCalibrationSession):
         """
 
         # --- 1. Calibration Mode Activation ---
-        # Enter calibration mode early to allow stabilization during instruction reading
         self.calibration.enter_calibration_mode()
 
         # --- 2. Instruction Display ---
-        # Natural stabilization period while user reads instructions
-        instructions_text = """Tobbi Eye Tracker Calibration Setup:
+        instructions_text = f"""Tobii Eye Tracker Calibration Setup:
 
-        • Press number keys (1-9) to select calibration points
-        • Move your mouse to the animated stimulus
-        • Press SPACE to collect samples at the selected point
-        • Press ENTER to finish collecting and see results
-        • Press ESCAPE to exit calibration
+        - Press number keys (1-{len(calibration_points)}) to select calibration points
+        - Look at the animated stimulus when it appears
+        - Press SPACE to collect samples at the selected point
+        - Press ENTER to finish collecting and see results
+        - Press ESCAPE to exit calibration
 
         Any key will start calibration immediately!"""
 
@@ -1046,13 +1050,13 @@ class MouseCalibrationSession(BaseCalibrationSession):
         """
 
         # --- 1. Instruction Display ---
-        instructions_text = """Mouse-Based Calibration Setup:
+        instructions_text = f"""Mouse-Based Calibration Setup:
 
-        • Press number keys (1-9) to select calibration points
-        • Move your mouse to the animated stimulus
-        • Press SPACE to collect samples at the selected point
-        • Press ENTER to finish collecting and see results
-        • Press ESCAPE to exit calibration
+        - Press number keys (1-{len(calibration_points)}) to select calibration points
+        - Move your mouse to the animated stimulus
+        - Press SPACE to collect samples at the selected point
+        - Press ENTER to finish collecting and see results
+        - Press ESCAPE to exit calibration
 
         Any key will start calibration immediately!"""
         
