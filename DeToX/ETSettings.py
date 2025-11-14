@@ -80,7 +80,7 @@ class AnimationSettings:
     
     focus_time: float = 0.5
     zoom_speed: float = 6.0
-    max_zoom_size: float = 0.11
+    max_zoom_size: float = 0.15
     min_zoom_size: float = 0.05
     trill_size: float = 0.075
     trill_rotation_range: float = 20
