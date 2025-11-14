@@ -140,9 +140,6 @@ class InfantStimuli:
             List of paths to the image files to use for the stimuli. These should
             be engaging images suitable for infant participants (e.g., cartoon
             characters, colorful objects, animated figures).
-        **kwargs : dict
-            Additional keyword arguments to be passed to the ImageStim constructor.
-            Common options include 'size', 'pos', 'units', etc.
         """
         # --- Window Reference ---
         # Store reference to the PsychoPy window for rendering
@@ -150,7 +147,7 @@ class InfantStimuli:
         
         # --- Stimulus Loading ---
         # Create ImageStim objects for each provided image file
-        self.stims = dict((i, visual.ImageStim(self.win, image=stim, **kwargs))
+        self.stims = dict((i, visual.ImageStim(self.win, image=stim, units='height', interpolate=True))
                           for i, stim in enumerate(infant_stims))
         
         # --- Size Preservation ---
