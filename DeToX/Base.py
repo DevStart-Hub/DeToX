@@ -430,12 +430,11 @@ class ETracker:
 
     def calibrate(self,
             calibration_points,
-            infant_stims= None,
+            infant_stims=None,
             shuffle=True,
-            audio=None, # TODO: add default sound
+            audio=True,
             anim_type='zoom',
             visualization_style='circles'
-
     ):
         """
         Run infant-friendly calibration procedure.
@@ -461,13 +460,21 @@ class ETracker:
             stimuli are automatically repeated in sequence to cover all points 
             (e.g., 3 stimuli for 7 points becomes [s1, s2, s3, s1, s2, s3, s1]).
         shuffle : bool, optional
-                Whether to randomize stimulus presentation order. When True (default), 
-                stimuli are shuffled after any necessary repetition and before assignment 
-                to calibration points. Set to False if you want deterministic 
-                stimulus-to-point mapping or specific stimulus ordering. Default True.
-        audio : psychopy.sound.Sound or None, optional
-            Attention-getting sound to play when selecting calibration points. 
-            Default None (no sound).
+            Whether to randomize stimulus presentation order. When True (default), 
+            stimuli are shuffled after any necessary repetition and before assignment 
+            to calibration points. Set to False if you want deterministic 
+            stimulus-to-point mapping or specific stimulus ordering. Default True.
+        audio : bool or psychopy.sound.Sound or None, optional
+            Controls attention-getting audio during calibration:
+            - True: Uses built-in calibration sound (default). Sound loops 
+            continuously while stimulus is selected.
+            - False or None: No audio feedback.
+            - psychopy.sound.Sound: Uses your pre-loaded custom sound object.
+            You are responsible for setting the sound parameters (e.g., 
+            loops=-1 for continuous looping).
+            The audio provides auditory feedback when the experimenter selects
+            a calibration point by pressing a number key.
+            Default True.
         anim_type : {'zoom', 'trill'}, optional
             Animation style for the calibration stimuli:
             - 'zoom': Smooth size oscillation (default)
@@ -486,15 +493,20 @@ class ETracker:
 
         Examples
         --------
-        >>> # Standard 5-point calibration with default stimuli
-        >>> controller.calibrate()
+        >>> # Standard 5-point calibration with default audio
+        >>> controller.calibrate(5)
         
-        >>> # 9-point calibration with custom stimuli
-        >>> controller.calibrate(9, infant_stims=['stim1.png', 'stim2.png'])
+        >>> # Calibration without audio
+        >>> controller.calibrate(5, audio=False)
         
-        >>> # Custom calibration pattern
-        >>> custom_points = [(-0.5, 0.5), (0.5, 0.5), (0.0, 0.0)]
-        >>> controller.calibrate(custom_points, anim_type='trill')
+        >>> # Custom audio
+        >>> from psychopy import sound
+        >>> my_sound = sound.Sound('custom_beep.wav', loops=-1)
+        >>> controller.calibrate(5, audio=my_sound)
+        
+        >>> # 9-point calibration with custom stimuli and trill animation
+        >>> controller.calibrate(9, infant_stims=['stim1.png', 'stim2.png'], 
+        ...                      anim_type='trill')
         """
 
         # --- Visualization Style Validation ---
@@ -563,6 +575,24 @@ class ETracker:
         
         # --- Subset to exact number needed ---
         infant_stims = infant_stims[:num_points]
+
+
+        # --- Setup audio stimulus ---
+        audio_stim = None
+
+        if audio is not None and audio is not False:
+            # Only import sound when needed
+            from psychopy import sound
+            
+            if isinstance(audio, sound.Sound):
+                # audio is already a loaded Sound object, just use it
+                audio_stim = audio
+                
+            elif audio is True:
+                # audio is True, create new Sound from default file
+                audio_path = os.path.join(os.path.dirname(__file__), 'stimuli', 'CalibrationSound.wav')
+                audio_stim = sound.Sound(audio_path, loops=-1)
+            
         
         # --- Mode-specific calibration setup ---
         if self.simulate:
@@ -570,7 +600,7 @@ class ETracker:
                 win=self.win,
                 infant_stims=infant_stims,
                 mouse=self.mouse,
-                audio=audio,
+                audio=audio_stim,
                 anim_type=anim_type,
                 visualization_style=visualization_style 
             )
@@ -579,7 +609,7 @@ class ETracker:
                 win=self.win,
                 calibration_api=self.calibration,
                 infant_stims=infant_stims,
-                audio=audio,
+                audio=audio_stim,
                 anim_type=anim_type,
                 visualization_style=visualization_style
             )

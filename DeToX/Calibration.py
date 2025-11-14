@@ -368,6 +368,52 @@ class BaseCalibrationSession:
         stim.draw()
     
 
+    def _fade_sound(self, sound, fade_duration=0.5, steps=10):
+        """
+        Gradually fade out a sound over the specified duration.
+        
+        Reduces sound volume from its current level to silence over the fade
+        duration, then stops playback and resets volume to maximum. Useful for 
+        smooth audio transitions during calibration without abrupt cutoffs that 
+        might startle participants.
+        
+        Parameters
+        ----------
+        sound : psychopy.sound.Sound
+            The sound object to fade out. Must be currently playing.
+        fade_duration : float, optional
+            Total time in seconds for the fade-out effect. Default 0.5 seconds.
+        steps : int, optional
+            Number of volume steps in the fade. More steps create smoother fade
+            but increase CPU overhead. Default 20 steps provides smooth transition
+            without performance impact.
+            
+        Notes
+        -----
+        The sound is automatically stopped after the fade completes, and volume
+        is reset to 1.0 (maximum) so it's ready for the next playback at full volume.
+        
+        Examples
+        --------
+        >>> # Fade out calibration audio when point is collected
+        >>> self._fade_sound(self.audio, fade_duration=0.5)
+        >>> # Next play() will start at full volume
+        >>> self.audio.play()
+        """
+        # --- Fade-out Loop ---
+        # Gradually decrease volume from current level to 0
+        for i in range(steps, 0, -1):
+            sound.setVolume(i / steps)
+            core.wait(fade_duration / steps)
+        
+        # --- Final Cleanup ---
+        # Stop sound playback after fade completes
+        sound.stop()
+        
+        # Reset volume to maximum for next playback
+        sound.setVolume(1.0)
+
+
     def _create_legend_visuals(self, base_y_pos):
         """
         Create legend visual elements showing eye color coding.
@@ -590,8 +636,6 @@ class BaseCalibrationSession:
                         **kwargs
                     )
                     if success:
-                        if self.audio:
-                            self.audio.pause()
                         # DON'T remove from remaining points - allow re-doing same point
                         point_idx = -1
                         
@@ -609,7 +653,7 @@ class BaseCalibrationSession:
             if point_idx in self.remaining_points:
                 stim = self.targets.get_stim(point_idx)
                 stim.setPos(calibration_points[point_idx])
-                self._animate(stim, clock, point_idx)  # ← Add point_idx here
+                self._animate(stim, clock, point_idx)
             
             self.win.flip()
     
@@ -852,7 +896,8 @@ class TobiiCalibrationSession(BaseCalibrationSession):
         
         Interfaces with the Tobii SDK to collect gaze samples while the participant
         looks at the calibration target. Uses pre-converted coordinates from
-        self.tobii_points for efficiency.
+        self.tobii_points for efficiency. Provides focus time either through audio
+        fade-out (smooth) or silent wait.
         
         Parameters
         ----------
@@ -873,13 +918,17 @@ class TobiiCalibrationSession(BaseCalibrationSession):
         x, y = self.tobii_points[point_idx]
         
         # --- Data Cleanup ---
-        # Clear any existing data at this point first
         self.calibration.discard_data(x, y)
         
+        # --- Focus Time (with or without audio) ---
+        if self.audio:
+            # Fade audio while participant fixates (dual purpose)
+            self._fade_sound(self.audio, fade_duration=self.focus_time)
+        else:
+            # Silent wait for fixation
+            core.wait(self.focus_time)
+        
         # --- Data Collection ---
-        # Wait focus time then collect NEW data
-        core.wait(self.focus_time)
-
         self.calibration.collect_data(x, y)
         return True
     
@@ -1102,7 +1151,8 @@ class MouseCalibrationSession(BaseCalibrationSession):
         
         Gathers multiple mouse position samples over a brief period to simulate
         the variability of real gaze data. Samples are distributed over time
-        to capture any mouse movement or positioning adjustments.
+        to capture any mouse movement or positioning adjustments. Provides focus
+        time either through audio fade-out (smooth) or silent wait.
 
         Parameters
         ----------
@@ -1119,45 +1169,40 @@ class MouseCalibrationSession(BaseCalibrationSession):
         bool
             Always returns True to indicate samples were collected successfully.
         """
-
         # --- Existing Data Cleanup ---
-        # Clear existing data for this point first (Option 2: Replace)
         if point_idx in self.calibration_data:
             del self.calibration_data[point_idx]
 
         # --- Sampling Configuration ---
-        # How many mouse samples to take at this point? (Default: 5)
         num_samples = kwargs.get('num_samples', 5)
 
-        # --- Focus Period ---
-        # Wait a moment before sampling
-        core.wait(self.focus_time)
+        # --- Focus Time (with or without audio) ---
+        if self.audio:
+            # Fade audio while participant fixates (dual purpose)
+            self._fade_sound(self.audio, fade_duration=self.focus_time)
+        else:
+            # Silent wait for fixation
+            core.wait(self.focus_time)
 
         # --- Sample Collection Setup ---
-        # Setup: collect all samples in this list
         samples = []
-        sample_duration = 1.0  # Total time (seconds) over which to collect samples
-        sample_interval = sample_duration / num_samples  # Time between samples
+        sample_duration = 1.0
+        sample_interval = sample_duration / num_samples
 
-        # --- 1. Mouse Position Sampling ---
-        # Collect mouse samples over a brief period
+        # --- Mouse Position Sampling ---
         for i in range(num_samples):
-            mouse_pos = self.mouse.getPos()      # Get current mouse position (x, y)
-            timestamp = time.time()              # Record current time
+            mouse_pos = self.mouse.getPos()
+            timestamp = time.time()
             samples.append((target_pos, mouse_pos, timestamp))
 
-            # Don't wait after the final sample
             if i < num_samples - 1:
                 core.wait(sample_interval)
 
-        # --- 2. Data Storage ---
-        # Store the collected samples
+        # --- Data Storage ---
         if point_idx not in self.calibration_data:
             self.calibration_data[point_idx] = []
         self.calibration_data[point_idx].extend(samples)
 
-        # --- 3. Collection Complete ---
-        # Done! Return True to indicate success
         return True
 
 
