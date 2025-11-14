@@ -5,6 +5,12 @@ DeToX (Developmental Tobii Experiment) is a user-friendly Python wrapper for the
 ## Quick Install
 
 ``` bash
+pip install dvst-detox
+```
+
+or for the latest version:
+
+``` bash
 pip install git+https://github.com/DevStart-Hub/DeToX.git
 ```
 
