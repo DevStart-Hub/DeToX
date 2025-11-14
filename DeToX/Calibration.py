@@ -622,7 +622,8 @@ class BaseCalibrationSession:
                     if candidate_idx in self.remaining_points:
                         point_idx = candidate_idx
                         if self.audio:
-                            self.audio.play()
+                            if not self.audio.isPlaying:
+                                self.audio.play()
                     else:
                         # Ignore key press for points not in remaining list
                         point_idx = -1
@@ -722,7 +723,6 @@ class BaseCalibrationSession:
         ## CIRCLES STYLE: Draw filled circles at sample positions
         elif self.visualization_style == 'circles':
             sample_marker_radius = cfg.ui_sizes.sample_marker * self.win.size[1]
-            start= time.time()    
             for point_idx, samples in sample_data.items():
                 for sample_pix, fill_color in samples:
                     img_draw.ellipse(
@@ -733,7 +733,6 @@ class BaseCalibrationSession:
                         fill=fill_color,
                         outline=None
                     )
-            print("Circle drawing time:", time.time() - start)
 
         # --- STEP 2: Draw ALL Target Circles (Always) ---
         for point_idx, target_pos in enumerate(self.calibration_points):
