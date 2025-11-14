@@ -3,6 +3,12 @@
 from psychopy import visual, core
 from DeToX import ETracker
 
+from DeToX import ETSettings as cfg
+
+# Option 1: Moderately Vibrant (40% more saturated)
+cfg.colors.left_eye = (100, 200, 255, 120)   # Brighter Sky Blue
+cfg.colors.right_eye = (255, 100, 120, 120)  # Coral Pink
+
 
 #%% Preparation 
 
@@ -15,11 +21,7 @@ win = visual.Window(
     screen=1
 )
 win.setMouseVisible(True)  # Set to False for real experiments
-
-print(f"✓ Window created: {win.size[0]}x{win.size[1]} pixels")
-print(f"✓ Units: {win.units}")
-
-
+  
 
 #%% Positionning and calibration
 
@@ -37,37 +39,4 @@ success = controller.calibrate(
     visualization_style='circles')
 
 
-if success:
-    print("✓ Calibration completed successfully!")
-else:
-    print("✗ Calibration failed or was aborted")
-
-
-win.close()
-
-
-#%% Recording
-
-## Start recording
-controller.start_recording('TEST.h5', raw_format=True) # save to hdf5 ( set to csv for easier debug)
-
-win.flip()
-core.wait(4)
-
-controller.record_event('Event1')
-controller.save_data() # Right after the event to test the saving function
-
-core.wait(2)
-
-controller.record_event('Event2')
-core.wait(2)
-controller.save_data()
-
-core.wait(2)
-
-
-#%% Closing
-
-# Clean up
-controller.stop_recording() # this closes and saves 
 win.close()
