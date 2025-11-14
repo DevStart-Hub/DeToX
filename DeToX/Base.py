@@ -287,6 +287,21 @@ class ETracker:
         >>> tracker.show_status(video_help=my_video)
         """
 
+        # --- 1. Instruction Display ---
+        instructions_text = f"""Showing participant position:
+
+    - The track box is shown as a white rectangle.
+    - Both eyes are shown as colored circles.
+        (try to center them within the box)
+    - The green bar  on the bottom indicates distance from screen. 
+        (try to have the black marker in the center of
+        the green bar, around 60 cm from the screen)
+
+    Press '{decision_key}' to finish positioning.
+        """
+
+        NicePrint(instructions_text, title="Participant Positioning")
+
         # --- Video setup (if enabled) ---
         status_movie = None
 
@@ -1278,20 +1293,20 @@ class ETracker:
             if moment == 'connection':
                 text = (
                     "Connected to the eyetracker:\n"
-                    f" - Model: {self.eyetracker.model}\n"
-                    f" - Current frequency: {self.fps} Hz\n"
-                    f" - Current illumination mode: {self.illum_mode}"
+                    f"    - Model: {self.eyetracker.model}\n"
+                    f"    - Current frequency: {self.fps} Hz\n"
+                    f"    - Current illumination mode: {self.illum_mode}"
                     "\nOther options:\n"
-                    f" - Possible frequencies: {self.freqs}\n"
-                    f" - Possible illumination modes: {self.illum_modes}"
+                    f"    - Possible frequencies: {self.freqs}\n"
+                    f"    - Possible illumination modes: {self.illum_modes}"
                 )
                 title = "Eyetracker Info"
             else:  # Assumes 'recording' context, shows a concise summary.
                 text = (
                     "Starting recording with:\n"
-                    f" - Model: {self.eyetracker.model}\n"
-                    f" - With frequency: {self.fps} Hz\n"
-                    f" - With illumination mode: {self.illum_mode}"
+                    f"    - Model: {self.eyetracker.model}\n"
+                    f"    - With frequency: {self.fps} Hz\n"
+                    f"    - With illumination mode: {self.illum_mode}"
                 )
                 title = "Recording Info"
 
