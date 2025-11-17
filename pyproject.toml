@@ -23,3 +23,6 @@ authors = [
 [tool.setuptools]
 # This tells setuptools to package your folder named "DeToX"
 packages = ["DeToX"]
+
+[tool.setuptools.package-data]
+DeToX = ["stimuli/*"]
