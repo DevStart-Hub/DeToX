@@ -4,7 +4,7 @@ from psychopy import visual
 
 
 
-def NicePrint(body: str, title: str = "") -> str:
+def NicePrint(body: str, title: str = "", verbose=True) -> str:
     """
     Print a message in a box with an optional title AND return the formatted text.
     
@@ -27,6 +27,8 @@ def NicePrint(body: str, title: str = "") -> str:
         A title to print on the top border of the box. The title will be centered
         within the top border. If empty string or not provided, the top border
         will be solid. Default empty string.
+    verbose : bool, optional
+        If True, the formatted box will be printed to the console. Default is True.
         
     Returns
     -------
@@ -82,7 +84,8 @@ def NicePrint(body: str, title: str = "") -> str:
     
     # --- Console Output ---
     # Print to console for immediate feedback
-    print(formatted_text)
+    if verbose:
+        print(formatted_text)
     
     # --- Return Formatted Text ---
     # Return the formatted text for use in PsychoPy visual stimuli

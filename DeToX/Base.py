@@ -41,7 +41,7 @@ class ETracker:
 
     # --- Core Lifecycle Methods ---
 
-    def __init__(self, win, etracker_id=0, simulate=False):
+    def __init__(self, win, etracker_id=0, simulate=False, verbose=True):
         """
         Initializes the ETracker controller.
 
@@ -62,6 +62,8 @@ class ETracker:
             If True, the controller will run in simulation mode, using the mouse
             as a proxy for gaze data. If False (default), it will attempt to
             connect to a physical Tobii eye tracker.
+        verbose : bool, optional
+            If True (default), prints connection information to the console.
 
         Raises
         ------
@@ -73,6 +75,7 @@ class ETracker:
         self.win = win
         self.simulate = simulate
         self.eyetracker_id = etracker_id
+        self.verbose = verbose
 
         # --- State Management ---
         # Flags and variables to track the current state of the controller.
@@ -300,7 +303,7 @@ class ETracker:
     Press '{decision_key}' to finish positioning.
         """
 
-        NicePrint(instructions_text, title="Participant Positioning")
+        NicePrint(instructions_text, title="Participant Positioning", verbose=self.verbose)
 
         # --- Video setup (if enabled) ---
         status_movie = None
@@ -617,7 +620,8 @@ class ETracker:
                 mouse=self.mouse,
                 audio=audio_stim,
                 anim_type=anim_type,
-                visualization_style=visualization_style 
+                visualization_style=visualization_style,
+                verbose=self.verbose
             )
         else:
             session = TobiiCalibrationSession(
@@ -626,7 +630,8 @@ class ETracker:
                 infant_stims=infant_stims,
                 audio=audio_stim,
                 anim_type=anim_type,
-                visualization_style=visualization_style
+                visualization_style=visualization_style,
+                verbose=self.verbose
             )
         
         # --- Run calibration ---
@@ -719,7 +724,7 @@ class ETracker:
             with open(path, 'wb') as f:
                 f.write(calib_data)
 
-            NicePrint(f"Calibration data saved to:\n{path}", title="Calibration Saved")
+            NicePrint(f"Calibration data saved to:\n{path}", title="Calibration Saved", verbose=self.verbose)
             return True
 
         except Exception as e:
@@ -822,7 +827,7 @@ class ETracker:
 
             # --- Final Confirmation ---
             NicePrint(f"Calibration data loaded from:\n{load_path}",
-                      title="Calibration Loaded")
+                      title="Calibration Loaded", verbose=self.verbose)
             return True
 
         except FileNotFoundError:
@@ -978,7 +983,8 @@ class ETracker:
         NicePrint(
             f'Data collection lasted approximately {duration_seconds:.2f} seconds\n'
             f'Data has been saved to {self.filename}',
-            title="Recording Complete"
+            title="Recording Complete",
+            verbose=self.verbose
         )
 
     def record_event(self, label):
@@ -1257,61 +1263,62 @@ class ETracker:
                 for the current recording session.
             Default is 'connection'.
         """
-        # --- Handle Simulation Mode ---
-        if self.simulate:
-            # Set the simulated frames per second (fps) if not already set.
-            if self.fps is None:
-                self.fps = cfg.simulation_framerate
+        if self.verbose:
+            # --- Handle Simulation Mode ---
+            if self.simulate:
+                # Set the simulated frames per second (fps) if not already set.
+                if self.fps is None:
+                    self.fps = cfg.simulation_framerate
 
-            # Display information specific to the simulation context.
-            if moment == 'connection':
-                text = (
-                    "Simulating eyetracker:\n"
-                    f" - Simulated frequency: {self.fps} Hz"
-                )
-                title = "Simulated Eyetracker Info"
-            else:  # Assumes 'recording' context
-                text = (
-                    "Recording mouse position:\n"
-                    f" - frequency: {self.fps} Hz"
-                )
-                title = "Recording Info"
+                # Display information specific to the simulation context.
+                if moment == 'connection':
+                    text = (
+                        "Simulating eyetracker:\n"
+                        f" - Simulated frequency: {self.fps} Hz"
+                    )
+                    title = "Simulated Eyetracker Info"
+                else:  # Assumes 'recording' context
+                    text = (
+                        "Recording mouse position:\n"
+                        f" - frequency: {self.fps} Hz"
+                    )
+                    title = "Recording Info"
 
-        # --- Handle Real Eyetracker Mode ---
-        else:
-            # On the first call, query the eyetracker for its properties and cache them.
-            # This avoids redundant SDK calls on subsequent `get_info` invocations.
-            if self.fps is None:
-                self.fps = self.eyetracker.get_gaze_output_frequency()
-                self.freqs = self.eyetracker.get_all_gaze_output_frequencies()
+            # --- Handle Real Eyetracker Mode ---
+            else:
+                # On the first call, query the eyetracker for its properties and cache them.
+                # This avoids redundant SDK calls on subsequent `get_info` invocations.
+                if self.fps is None:
+                    self.fps = self.eyetracker.get_gaze_output_frequency()
+                    self.freqs = self.eyetracker.get_all_gaze_output_frequencies()
 
-            if self.illum_mode is None:
-                self.illum_mode = self.eyetracker.get_eye_tracking_mode()
-                self.illum_modes = self.eyetracker.get_all_eye_tracking_modes()
+                if self.illum_mode is None:
+                    self.illum_mode = self.eyetracker.get_eye_tracking_mode()
+                    self.illum_modes = self.eyetracker.get_all_eye_tracking_modes()
 
-            # Display detailed information upon initial connection.
-            if moment == 'connection':
-                text = (
-                    "Connected to the eyetracker:\n"
-                    f"    - Model: {self.eyetracker.model}\n"
-                    f"    - Current frequency: {self.fps} Hz\n"
-                    f"    - Current illumination mode: {self.illum_mode}"
-                    "\nOther options:\n"
-                    f"    - Possible frequencies: {self.freqs}\n"
-                    f"    - Possible illumination modes: {self.illum_modes}"
-                )
-                title = "Eyetracker Info"
-            else:  # Assumes 'recording' context, shows a concise summary.
-                text = (
-                    "Starting recording with:\n"
-                    f"    - Model: {self.eyetracker.model}\n"
-                    f"    - With frequency: {self.fps} Hz\n"
-                    f"    - With illumination mode: {self.illum_mode}"
-                )
-                title = "Recording Info"
+                # Display detailed information upon initial connection.
+                if moment == 'connection':
+                    text = (
+                        "Connected to the eyetracker:\n"
+                        f"    - Model: {self.eyetracker.model}\n"
+                        f"    - Current frequency: {self.fps} Hz\n"
+                        f"    - Current illumination mode: {self.illum_mode}"
+                        "\nOther options:\n"
+                        f"    - Possible frequencies: {self.freqs}\n"
+                        f"    - Possible illumination modes: {self.illum_modes}"
+                    )
+                    title = "Eyetracker Info"
+                else:  # Assumes 'recording' context, shows a concise summary.
+                    text = (
+                        "Starting recording with:\n"
+                        f"    - Model: {self.eyetracker.model}\n"
+                        f"    - With frequency: {self.fps} Hz\n"
+                        f"    - With illumination mode: {self.illum_mode}"
+                    )
+                    title = "Recording Info"
 
-        # Use the custom NicePrint utility to display the formatted information.
-        NicePrint(text, title)
+            # Use the custom NicePrint utility to display the formatted information.
+            NicePrint(text, title, verbose=self.verbose)
 
     def _prepare_recording(self, filename=None):
         """

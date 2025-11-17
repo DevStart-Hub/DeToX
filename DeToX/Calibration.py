@@ -188,7 +188,7 @@ class BaseCalibrationSession:
             Position of the message box center on screen. Default (0, -0.15).
         """
         # --- Console Output ---
-        formatted_text = NicePrint(body, title)
+        formatted_text = NicePrint(body, title, self.verbose)
         
         # --- Visual Message Creation ---
         message_visual = visual.TextStim(
@@ -508,7 +508,7 @@ class BaseCalibrationSession:
     - Press ESCAPE to restart calibration
     """
         
-        formatted_instructions = NicePrint(result_instructions, "Calibration Results")
+        formatted_instructions = NicePrint(result_instructions, "Calibration Results", verbose=self.verbose)
         result_instructions_visual = visual.TextStim(
             self.win,
             text=formatted_instructions,
@@ -775,7 +775,8 @@ class TobiiCalibrationSession(BaseCalibrationSession):
         infant_stims,
         audio=None,
         anim_type='zoom',
-        visualization_style='lines',  # \u2190 ADD THIS
+        visualization_style='lines', 
+        verbose=True
     ):
         """
         Initialize Tobii calibration session.
@@ -829,7 +830,7 @@ class TobiiCalibrationSession(BaseCalibrationSession):
 
         # --- 1. Calibration Mode Activation ---
         self.calibration.enter_calibration_mode()
-
+        
         # --- 2. Instruction Display ---
         instructions_text = f"""Tobii Eye Tracker Calibration Setup:
 
@@ -857,6 +858,7 @@ class TobiiCalibrationSession(BaseCalibrationSession):
         while True:
             # --- 6a. Data Collection ---
             success = self._collection_phase(cal_points_window)
+            
             if not success:
                 self.calibration.leave_calibration_mode()
                 return False
@@ -867,6 +869,7 @@ class TobiiCalibrationSession(BaseCalibrationSession):
 
             # --- 6c. User Review and Selection ---
             retries = self._selection_phase(cal_points_window, result_img)
+
             if retries is None:
                 # Restart all: reset remaining points and clear data
                 self.remaining_points = list(range(len(cal_points_window)))
@@ -1043,7 +1046,8 @@ class MouseCalibrationSession(BaseCalibrationSession):
         mouse,
         audio=None,
         anim_type='zoom',
-        visualization_style='lines',  # \u2190 ADD THIS
+        visualization_style='lines', 
+        verbose=True
     ):
         """
         Initialize mouse-based calibration session.
@@ -1130,7 +1134,7 @@ class MouseCalibrationSession(BaseCalibrationSession):
             
             # --- 4c. User Review and Selection ---
             retries = self._selection_phase(cal_points_window, result_img)
-            
+
             if retries is None:
                 self.remaining_points = list(range(len(cal_points_window)))
                 self.calibration_data.clear()
@@ -1142,9 +1146,10 @@ class MouseCalibrationSession(BaseCalibrationSession):
                 for idx in retries:
                     if idx in self.calibration_data:
                         del self.calibration_data[idx]
+
     
     
-    def _collect_data_at_point(self, target_pos, point_idx, **kwargs):
+    def _collect_data_at_point(self, target_pos, point_idx, **kwargs): # TODO: remove kwargs
         """
         Collect mouse samples at a single calibration target.
         
