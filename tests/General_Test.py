@@ -1,21 +1,8 @@
-
-"""
-ETracker Testing Script
-===============================
-
-This script tests the ETracker eyetracking system in simulation mode.
-It validates:
-- Initialization and connection
-- Calibration procedures (both successful and retry scenarios)
-- Data recording with events
-- File saving (HDF5 format)
-
-"""
-
 #%% Libraries and Setup
 
 from psychopy import visual, core
 from DeToX import ETracker
+
 
 #%% Preparation 
 
@@ -23,10 +10,9 @@ from DeToX import ETracker
 win = visual.Window(
     size=[1920, 1080], 
     units='height', 
-    fullscr=False,      # Set to True for real experiments
+    fullscr=True,      # Set to True for real experiments
     allowGUI=True,      # Allows window controls for debugging
-    color='grey',       # Neutral background
-    monitor='testMonitor'  # Use your calibrated monitor name
+    screen=1
 )
 win.setMouseVisible(True)  # Set to False for real experiments
 
@@ -47,13 +33,17 @@ controller.show_status()
 success = controller.calibrate(
     calibration_points=5,
     shuffle=True,
-    anim_type='zoom')
+    anim_type='zoom',
+    visualization_style='circles')
 
 
 if success:
     print("✓ Calibration completed successfully!")
 else:
     print("✗ Calibration failed or was aborted")
+
+
+win.close()
 
 
 #%% Recording

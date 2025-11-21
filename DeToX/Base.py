@@ -41,7 +41,7 @@ class ETracker:
 
     # --- Core Lifecycle Methods ---
 
-    def __init__(self, win, etracker_id=0, simulate=False):
+    def __init__(self, win, etracker_id=0, simulate=False, verbose=True):
         """
         Initializes the ETracker controller.
 
@@ -62,6 +62,8 @@ class ETracker:
             If True, the controller will run in simulation mode, using the mouse
             as a proxy for gaze data. If False (default), it will attempt to
             connect to a physical Tobii eye tracker.
+        verbose : bool, optional
+            If True (default), prints connection information to the console.
 
         Raises
         ------
@@ -73,6 +75,7 @@ class ETracker:
         self.win = win
         self.simulate = simulate
         self.eyetracker_id = etracker_id
+        self.verbose = verbose
 
         # --- State Management ---
         # Flags and variables to track the current state of the controller.
@@ -241,7 +244,7 @@ class ETracker:
 
     # --- Calibration Methods ---
 
-    def show_status(self, decision_key="space"):
+    def show_status(self, decision_key="space", video_help=True):
         """
         Real-time visualization of participant's eye position in track box.
         
@@ -249,26 +252,91 @@ class ETracker:
         from screen. Useful for positioning participants before data collection.
         Updates continuously until exit key is pressed.
         
+        Optionally displays an instructional video in the background to help guide
+        participant positioning. You can use the built-in video, disable the video,
+        or provide your own custom MovieStim object.
+        
         Parameters
         ----------
         decision_key : str, optional
             Key to press to exit visualization. Default 'space'.
+        video_help : bool or visual.MovieStim, optional
+            Controls background video display:
+            - True: Uses built-in instructional video (default)
+            - False: No video displayed
+            - visual.MovieStim: Uses your pre-loaded custom video. You are
+            responsible for scaling (size) and positioning (pos) the MovieStim
+            to fit your desired layout.
+            Default True.
             
         Notes
         -----
         In simulation mode, use scroll wheel to adjust simulated distance.
         Eye positions shown as green (left) and red (right) circles.
+        
+        The built-in video (when video_help=True) is sized at (1.06, 0.6) in 
+        height units and positioned at (0, -0.08) to avoid covering the track box.
+        
+        Examples
+        --------
+        >>> # Use built-in video
+        >>> tracker.show_status()
+        
+        >>> # No video
+        >>> tracker.show_status(video_help=False)
+        
+        >>> # Custom video
+        >>> my_video = visual.MovieStim(win, 'custom.mp4', size=0.5, pos=(0, -0.2))
+        >>> tracker.show_status(video_help=my_video)
         """
+
+        # --- 1. Instruction Display ---
+        instructions_text = f"""Showing participant position:
+
+    - The track box is shown as a white rectangle.
+    - Both eyes are shown as colored circles.
+        (try to center them within the box)
+    - The green bar  on the bottom indicates distance from screen. 
+        (try to have the black marker in the center of
+        the green bar, around 60 cm from the screen)
+
+    Press '{decision_key}' to finish positioning.
+        """
+
+        NicePrint(instructions_text, title="Participant Positioning", verbose=self.verbose)
+
+        # --- Video setup (if enabled) ---
+        status_movie = None
+
+        if isinstance(video_help, visual.MovieStim):
+            # video_help is already a loaded MovieStim, just use it
+            status_movie = video_help
+            status_movie.play()  # Start playing
+            
+        elif video_help:
+            # video_help is True, create new MovieStim from file
+            video_path = os.path.join(os.path.dirname(__file__), 'stimuli', 'ShowStatus.mp4')
+            status_movie = visual.MovieStim(
+                self.win, 
+                video_path,
+                size=(1.06, 0.6),  # Width x Height maintaining 16:9 ratio
+                pos=(0, -0.08),  # Offset down so it doesn't cover track box
+                loop=True,
+                units='height'
+            )
+            status_movie.play()  # Start playing
+
+
         # --- Visual element creation ---
         # Create display components for track box visualization
         bgrect = visual.Rect(self.win, pos=(0, 0.4), width=0.25, height=0.2,
                             lineColor="white", fillColor="black", units="height")
         
         leye = visual.Circle(self.win, size=0.02, units="height",
-                            lineColor=None, fillColor="green")  # Left eye indicator
+                            lineColor=None, fillColor=cfg.colors.left_eye, colorSpace='rgb255')  # Left eye indicator
         
         reye = visual.Circle(self.win, size=0.02, units="height", 
-                            lineColor=None, fillColor="red")    # Right eye indicator
+                            lineColor=None, fillColor=cfg.colors.right_eye, colorSpace='rgb255')    # Right eye indicator
         
         # Z-position visualization elements
         zbar = visual.Rect(self.win, pos=(0, 0.28), width=0.25, height=0.03,
@@ -311,6 +379,11 @@ class ETracker:
         # --- Main visualization loop ---
         b_show_status = True
         while b_show_status:
+
+            # --- Draw video first ---
+            if status_movie:
+                status_movie.draw()
+
             # --- Draw static elements ---
             bgrect.draw()
             zbar.draw()
@@ -354,6 +427,9 @@ class ETracker:
             self.win.flip()
         
         # --- Cleanup ---
+        if status_movie:
+            status_movie.stop()  # Stop video playback
+
         self.win.flip()  # Clear display
         
         if self.simulate:
@@ -371,12 +447,13 @@ class ETracker:
 
 
     def calibrate(self,
-                calibration_points=5,
-                infant_stims=None,
-                shuffle=True,
-                audio=None, # TODO: add default sound
-                anim_type='zoom'
-                ):
+            calibration_points,
+            infant_stims=None,
+            shuffle=True,
+            audio=True,
+            anim_type='zoom',
+            visualization_style='circles'
+    ):
         """
         Run infant-friendly calibration procedure.
 
@@ -401,17 +478,30 @@ class ETracker:
             stimuli are automatically repeated in sequence to cover all points 
             (e.g., 3 stimuli for 7 points becomes [s1, s2, s3, s1, s2, s3, s1]).
         shuffle : bool, optional
-                Whether to randomize stimulus presentation order. When True (default), 
-                stimuli are shuffled after any necessary repetition and before assignment 
-                to calibration points. Set to False if you want deterministic 
-                stimulus-to-point mapping or specific stimulus ordering. Default True.
-        audio : psychopy.sound.Sound or None, optional
-            Attention-getting sound to play when selecting calibration points. 
-            Default None (no sound).
+            Whether to randomize stimulus presentation order. When True (default), 
+            stimuli are shuffled after any necessary repetition and before assignment 
+            to calibration points. Set to False if you want deterministic 
+            stimulus-to-point mapping or specific stimulus ordering. Default True.
+        audio : bool or psychopy.sound.Sound or None, optional
+            Controls attention-getting audio during calibration:
+            - True: Uses built-in calibration sound (default). Sound loops 
+            continuously while stimulus is selected.
+            - False or None: No audio feedback.
+            - psychopy.sound.Sound: Uses your pre-loaded custom sound object.
+            You are responsible for setting the sound parameters (e.g., 
+            loops=-1 for continuous looping).
+            The audio provides auditory feedback when the experimenter selects
+            a calibration point by pressing a number key.
+            Default True.
         anim_type : {'zoom', 'trill'}, optional
             Animation style for the calibration stimuli:
             - 'zoom': Smooth size oscillation (default)
             - 'trill': Rapid rotation with pauses
+        visualization_style : {'lines', 'circles'}, optional
+            How to display calibration results:
+            - 'lines': Draw lines from targets to gaze samples
+            - 'circles': Draw small filled circles at gaze sample positions
+            Default 'circles'.
 
         Returns
         -------
@@ -421,16 +511,29 @@ class ETracker:
 
         Examples
         --------
-        >>> # Standard 5-point calibration with default stimuli
-        >>> controller.calibrate()
+        >>> # Standard 5-point calibration with default audio
+        >>> controller.calibrate(5)
         
-        >>> # 9-point calibration with custom stimuli
-        >>> controller.calibrate(9, infant_stims=['stim1.png', 'stim2.png'])
+        >>> # Calibration without audio
+        >>> controller.calibrate(5, audio=False)
         
-        >>> # Custom calibration pattern
-        >>> custom_points = [(-0.5, 0.5), (0.5, 0.5), (0.0, 0.0)]
-        >>> controller.calibrate(custom_points, anim_type='trill')
+        >>> # Custom audio
+        >>> from psychopy import sound
+        >>> my_sound = sound.Sound('custom_beep.wav', loops=-1)
+        >>> controller.calibrate(5, audio=my_sound)
+        
+        >>> # 9-point calibration with custom stimuli and trill animation
+        >>> controller.calibrate(9, infant_stims=['stim1.png', 'stim2.png'], 
+        ...                      anim_type='trill')
         """
+
+        # --- Visualization Style Validation ---
+        valid_styles = ['lines', 'circles']
+        if visualization_style not in valid_styles:
+            raise ValueError(
+                f"Invalid visualization_style: '{visualization_style}'. "
+                f"Must be one of {valid_styles}."
+            )
         
         # --- Calibration Points Processing ---
         if isinstance(calibration_points, int):
@@ -490,6 +593,24 @@ class ETracker:
         
         # --- Subset to exact number needed ---
         infant_stims = infant_stims[:num_points]
+
+
+        # --- Setup audio stimulus ---
+        audio_stim = None
+
+        if audio is not None and audio is not False:
+            # Only import sound when needed
+            from psychopy import sound
+            
+            if isinstance(audio, sound.Sound):
+                # audio is already a loaded Sound object, just use it
+                audio_stim = audio
+                
+            elif audio is True:
+                # audio is True, create new Sound from default file
+                audio_path = os.path.join(os.path.dirname(__file__), 'stimuli', 'CalibrationSound.wav')
+                audio_stim = sound.Sound(audio_path, loops=-1)
+            
         
         # --- Mode-specific calibration setup ---
         if self.simulate:
@@ -497,16 +618,20 @@ class ETracker:
                 win=self.win,
                 infant_stims=infant_stims,
                 mouse=self.mouse,
-                audio=audio,
-                anim_type=anim_type
+                audio=audio_stim,
+                anim_type=anim_type,
+                visualization_style=visualization_style,
+                verbose=self.verbose
             )
         else:
             session = TobiiCalibrationSession(
                 win=self.win,
                 calibration_api=self.calibration,
                 infant_stims=infant_stims,
-                audio=audio,
-                anim_type=anim_type
+                audio=audio_stim,
+                anim_type=anim_type,
+                visualization_style=visualization_style,
+                verbose=self.verbose
             )
         
         # --- Run calibration ---
@@ -599,7 +724,7 @@ class ETracker:
             with open(path, 'wb') as f:
                 f.write(calib_data)
 
-            NicePrint(f"Calibration data saved to:\n{path}", title="Calibration Saved")
+            NicePrint(f"Calibration data saved to:\n{path}", title="Calibration Saved", verbose=self.verbose)
             return True
 
         except Exception as e:
@@ -702,7 +827,7 @@ class ETracker:
 
             # --- Final Confirmation ---
             NicePrint(f"Calibration data loaded from:\n{load_path}",
-                      title="Calibration Loaded")
+                      title="Calibration Loaded", verbose=self.verbose)
             return True
 
         except FileNotFoundError:
@@ -858,7 +983,8 @@ class ETracker:
         NicePrint(
             f'Data collection lasted approximately {duration_seconds:.2f} seconds\n'
             f'Data has been saved to {self.filename}',
-            title="Recording Complete"
+            title="Recording Complete",
+            verbose=self.verbose
         )
 
     def record_event(self, label):
@@ -1137,61 +1263,62 @@ class ETracker:
                 for the current recording session.
             Default is 'connection'.
         """
-        # --- Handle Simulation Mode ---
-        if self.simulate:
-            # Set the simulated frames per second (fps) if not already set.
-            if self.fps is None:
-                self.fps = cfg.simulation_framerate
+        if self.verbose:
+            # --- Handle Simulation Mode ---
+            if self.simulate:
+                # Set the simulated frames per second (fps) if not already set.
+                if self.fps is None:
+                    self.fps = cfg.simulation_framerate
 
-            # Display information specific to the simulation context.
-            if moment == 'connection':
-                text = (
-                    "Simulating eyetracker:\n"
-                    f" - Simulated frequency: {self.fps} Hz"
-                )
-                title = "Simulated Eyetracker Info"
-            else:  # Assumes 'recording' context
-                text = (
-                    "Recording mouse position:\n"
-                    f" - frequency: {self.fps} Hz"
-                )
-                title = "Recording Info"
+                # Display information specific to the simulation context.
+                if moment == 'connection':
+                    text = (
+                        "Simulating eyetracker:\n"
+                        f" - Simulated frequency: {self.fps} Hz"
+                    )
+                    title = "Simulated Eyetracker Info"
+                else:  # Assumes 'recording' context
+                    text = (
+                        "Recording mouse position:\n"
+                        f" - frequency: {self.fps} Hz"
+                    )
+                    title = "Recording Info"
 
-        # --- Handle Real Eyetracker Mode ---
-        else:
-            # On the first call, query the eyetracker for its properties and cache them.
-            # This avoids redundant SDK calls on subsequent `get_info` invocations.
-            if self.fps is None:
-                self.fps = self.eyetracker.get_gaze_output_frequency()
-                self.freqs = self.eyetracker.get_all_gaze_output_frequencies()
+            # --- Handle Real Eyetracker Mode ---
+            else:
+                # On the first call, query the eyetracker for its properties and cache them.
+                # This avoids redundant SDK calls on subsequent `get_info` invocations.
+                if self.fps is None:
+                    self.fps = self.eyetracker.get_gaze_output_frequency()
+                    self.freqs = self.eyetracker.get_all_gaze_output_frequencies()
 
-            if self.illum_mode is None:
-                self.illum_mode = self.eyetracker.get_eye_tracking_mode()
-                self.illum_modes = self.eyetracker.get_all_eye_tracking_modes()
+                if self.illum_mode is None:
+                    self.illum_mode = self.eyetracker.get_eye_tracking_mode()
+                    self.illum_modes = self.eyetracker.get_all_eye_tracking_modes()
 
-            # Display detailed information upon initial connection.
-            if moment == 'connection':
-                text = (
-                    "Connected to the eyetracker:\n"
-                    f" - Model: {self.eyetracker.model}\n"
-                    f" - Current frequency: {self.fps} Hz\n"
-                    f" - Current illumination mode: {self.illum_mode}"
-                    "\nOther options:\n"
-                    f" - Possible frequencies: {self.freqs}\n"
-                    f" - Possible illumination modes: {self.illum_modes}"
-                )
-                title = "Eyetracker Info"
-            else:  # Assumes 'recording' context, shows a concise summary.
-                text = (
-                    "Starting recording with:\n"
-                    f" - Model: {self.eyetracker.model}\n"
-                    f" - With frequency: {self.fps} Hz\n"
-                    f" - With illumination mode: {self.illum_mode}"
-                )
-                title = "Recording Info"
+                # Display detailed information upon initial connection.
+                if moment == 'connection':
+                    text = (
+                        "Connected to the eyetracker:\n"
+                        f"    - Model: {self.eyetracker.model}\n"
+                        f"    - Current frequency: {self.fps} Hz\n"
+                        f"    - Current illumination mode: {self.illum_mode}"
+                        "\nOther options:\n"
+                        f"    - Possible frequencies: {self.freqs}\n"
+                        f"    - Possible illumination modes: {self.illum_modes}"
+                    )
+                    title = "Eyetracker Info"
+                else:  # Assumes 'recording' context, shows a concise summary.
+                    text = (
+                        "Starting recording with:\n"
+                        f"    - Model: {self.eyetracker.model}\n"
+                        f"    - With frequency: {self.fps} Hz\n"
+                        f"    - With illumination mode: {self.illum_mode}"
+                    )
+                    title = "Recording Info"
 
-        # Use the custom NicePrint utility to display the formatted information.
-        NicePrint(text, title)
+            # Use the custom NicePrint utility to display the formatted information.
+            NicePrint(text, title, verbose=self.verbose)
 
     def _prepare_recording(self, filename=None):
         """

@@ -99,12 +99,12 @@ format:
     code-block-background: true
     code-block-border-left: "#00B3B3"
 
-    # Pagination
-    grid:
-      sidebar-width: 300px
-      body-width: 1100px
-      margin-width: 300px
-      gutter-width: 1.5rem
+    # # Pagination
+    # grid:
+    #   sidebar-width: 300px
+    #   body-width: 1100px
+    #   margin-width: 300px
+    #   gutter-width: 1.5rem
 
 quartodoc:
   style: pkgdown

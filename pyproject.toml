@@ -3,11 +3,14 @@ requires = ["setuptools", "wheel"]
 build-backend = "setuptools.build_meta"
 
 [project]
-name = "DeToX"
-version = "0.1.0"
+# This is the PYPI name (what users pip install)
+name = "dvst-detox"
+
+version = "0.1.0b1"
 description = "Lightweight Python wrapper around tobii-researcher"
 readme = "README.md"
 requires-python = ">=3.10"
+
 dependencies = [
     "tobii-research",
     "psychopy",
@@ -18,4 +21,8 @@ authors = [
 ]
 
 [tool.setuptools]
+# This tells setuptools to package your folder named "DeToX"
 packages = ["DeToX"]
+
+[tool.setuptools.package-data]
+DeToX = ["stimuli/*"]
