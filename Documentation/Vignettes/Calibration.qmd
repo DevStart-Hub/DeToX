@@ -1,31 +1,35 @@
 ---
-title: "Getting Started with DeToX"
-description: "Starting using DeToX"
+title: "Calibration"
+description-meta:: "Learn how to use DeToX to perform calibration to ensure the best data quality"
 author: Tommaso Ghilardi
-
+keywords: [DeToX, Eye Tracking, Calibration, Setup, Tobii, PsychoPy, Infatn calibration, infant friendly, eye tracker setup, python]
 execute:
   enabled: false
 ---
 
-In this tutorial we will take a look at the calibration procedure that usually precedes an eye-tracking experiment. In this tutoria we will cover two parts: 1. Centering the participant in the eye-tracker headbox 2. Running the calibration
+Good eye tracking data starts long before you present your first stimulus—it begins with proper setup and calibration. Even the most carefully designed experiment will produce noisy, unusable data if the eye tracker isn't configured correctly. This is particularly critical when testing infants and children, where data quality can be challenging even under ideal conditions. In this tutorial, we'll walk through how to use DeToX to ensure the best possible data quality from the start.
 
-## Centering the participant
+We'll focus on two essential steps:
 
-This is not strictly part of the calibration but this is usually the first step when working with eye-trackers. Ok but what is this centering thing?? Well, eye-trackers have a limited area where they can track the eyes properly, this area is called the headbox. If the participant is outside this area the eye-tracker will not be able to track the eyes properly.
+1.  positioning your participant in the eye tracker's optimal tracking zone
 
-While we strive to always sit the aprticipants in teh same position adn at the same distance from teh screena dn eyetacker small diffrence can make lots of difference in terms of tracking quality.
+2.  running the calibration procedure
 
-Well...then how can we make sure to be as precise as possible?? Easy we can ask the tobii eyetracker to show us where the eyes of our participans are getting detected and then we can adjust their position until they are centered in the headbox.
+Get these right, and everything else falls into place.
 
-Sounds simple in theory but it may even be easier in practice with DeToX!
+## Part 1: Positioning Your Participant
+
+### Understanding the Track Box
+
+Every eye tracker has a track box—an invisible 3D zone where it can accurately detect eyes. Step outside this zone, and tracking quality drops fast! While we try to seat everyone consistently, even small differences in posture or chair height can matter. The good news? DeToX makes checking position as easy as calling a single method.
 
 ::: callout-warning
-We will assume you already followed the previous tutorial [Getting started](GettingStarted.qmd) so if you haven't check that please go and follow it!!
+This tutorial assumes you've completed [Getting started](GettingStarted.qmd). If not, start there first!!!
 :::
 
-Let's see how to do it:
+### Setup Code
 
-### Setting up
+Let's begin with our standard setup:
 
 ```{python}
 #| label: Libraries
@@ -46,12 +50,209 @@ win = visual.Window(
 ET_controller = ETracker(win)
 ```
 
-Here we followed the previous tutorial and we just, imported the libraries, create a window where to render our stimuli and finally we connected to our eye-tracker.
+We're following the same steps from the previous tutorial. First, we import the libraries we need—`psychopy.visual` for creating our display window and `DeToX.ETracker` for controlling the eye tracker.
 
-Now we are ready to check if our participants in actually in our trackbox!
+Next, we create a PsychoPy window where all our stimuli will appear.
+
+Finally, we connect to the Tobii eye tracker by creating an `ETracker` object. This automatically searches for connected devices, establishes communication, and links the tracker to our window. You'll see connection info printed to confirm everything's working. Now the `ET_controller` object is ready to control all eye-tracking operations!
+
+### Checking Position in Real-Time
+
+Now for the magic—visualizing where your participant's eyes are in the track box:
 
 ```{python}
 Et_controller.show_status()
+```
+
+### What You'll See
+
+When you call `show_status()`, an animated video of animals appears to keep infants engaged. Overlaid on the video are two colored circles—🔵 **light blue** and 🔴 **pink** —showing where the tracker detects your participant's eyes in real-time. A black rectangle marks the track box boundaries where tracking works best.
+
+Below the rectangle, a green bar with a moving black line indicates distance from the screen. The line should be centered on the bar (about 65 cm distance).
+
+![](/resources/Vids\ShowStatus.gif){fig-align="center" width="960"}
+
+::: callout-important
+### Simulation Mode
+
+If you're running with `simulate=True`, the positioning interface uses your mouse instead of real eye tracker data. Move the mouse around to see the eye circles follow, and use the **scroll wheel** to simulate moving closer to or further from the screen.
+:::
+
+Center both colored circles within the black rectangle. If they're drifting toward the edges, ask the participant to lean in the needed direction, or adjust the eye tracker mount if possible.
+
+For distance, watch the black line on the green bar. Too far left means too close (move back), too far right means too far (move forward). Aim for the center.
+
+Press **SPACE** when positioning looks good—you're ready for calibration!
+
+::: Advanced
+### Customizing the Positioning Display
+
+By default, `show_status()` displays an animated video of animals to keep infants engaged while you adjust their position. However, you can customize this behavior using the `video_help` parameter:
+
+**`video_help=True`**: Uses the built-in instructional video included with DeToX (default). This is the easiest option and works well for most studies.
+
+**`video_help=False`**: Disables the video entirely, showing only the eye position circles and track box. Useful if you prefer a minimal display or if video playback causes performance issues.
+
+**`video_help=visual.MovieStim(...)`**: Uses your own custom video. You'll need to pre-load and configure the MovieStim object yourself, including setting the appropriate size and position for your display layout.
+:::
+
+## Part 2: Calibration
+
+With your participant positioned correctly, you're ready for calibration. But what exactly is calibration, and why do we need it?
+
+### Understanding Calibration
+
+Calibration teaches the eye tracker how to interpret each participant's unique eye characteristics. Everyone's eyes are slightly different—different sizes, shapes, reflection patterns—so the tracker needs a personalized model to accurately estimate where someone is looking.
+
+The process is straightforward: you present targets at known locations on the screen, the participant looks at each one, and the tracker records the relationship between eye features and screen coordinates. This creates a custom mapping for that individual.
+
+![Image from [tobii website](https://help.tobii.com/hc/en-us/articles/360023794433-How-does-the-calibration-work)](https://help.tobii.com/hc/article_attachments/360036648293/How_DoesEyetrackingWork_ScreenBased.jpg){fig-align="center" width="712"}
+
+Sounds complex, right? It is—but DeToX handles the complexity for you. Here's how simple it becomes:
+
+### Launching Calibration with DeToX
+
+```{python}
+ET_controller.calibrate(
+    calibration_points = 5,
+    shuffle=True,
+    audio=True,
+    anim_type='zoom',
+    visualization_style='circles'
+)
+```
+
+Let's break down what's happening here:
+
+**`calibration_points=5`**: Uses a standard 5-point calibration pattern (corners plus center). This is the default and works well for most studies. You can also choose 9 points for higher precision, or pass a custom list of coordinates in height units for specialized configurations.
+
+**`shuffle=True`**: Randomizes which image appears at each calibration point. This prevents habituation and keeps participants engaged throughout the procedure.
+
+**`audio=True`**: Plays an attention-getting sound along with the visual stimulus to help capture and maintain the participant's focus. **`anim_type='zoom'`**: Makes the stimuli gently pulse in size to attract attention. You can also use `'trill'` for a rotating animation.
+
+**`visualization_style='circles'`**: Displays the calibration results using dots at each point. You can also choose `'lines'` to show lines connecting the target to where the gaze landed.
+
+::: Advanced
+### Customizing Calibration Parameters
+
+Beyond the basic configuration, you can customize several aspects of the calibration procedure to match your experimental needs:
+
+**`infant_stims`**: By default (`infant_stims=True`), DeToX uses a set of engaging animal cartoons included with the package. These work well for most infant studies, but you can provide a list of file paths to your own images if you prefer custom stimuli that better match your study's theme or participant age group.
+
+**`audio`**: By default (`audio=True`), an attention-getting sound included with DeToX plays automatically when stimuli appear. Set this to `None` to disable audio entirely, or pass your own pre-loaded `psychopy.sound.Sound` object to use custom sounds that fit your experimental context.
+
+**`calibration_points`**: By default uses a 5-point pattern (corners plus center). You can specify `9` for higher precision, or pass a custom list of coordinates in height units for specialized configurations tailored to your stimulus regions.
+:::
+
+### The Calibration Process
+
+#### Step 1: Instructions
+
+First, you'll see instructions explaining the controls:
+
+``` markdown
+┌──────────────────── Calibration Setup ─────────────────────┐
+│Mouse-Based Calibration Setup:                              │
+│                                                            │
+│    - Press number keys (1-5) to select calibration points  │
+│    - Move your mouse to the animated stimulus              │
+│    - Press SPACE to collect samples at the selected point  │
+│    - Press ENTER to finish collecting and see results      │
+│    - Press ESCAPE to exit calibration                      │
+│                                                            │
+│    Any key will start calibration immediately!             │
+└────────────────────────────────────────────────────────────┘
+```
+
+these instructions will tell you how to control the calibration using your keyboard.
+
+Press any key when you're ready to begin.
+
+#### Data Collection
+
+The calibration screen appears with a thin red border indicating you're in calibration mode. Press a number key (1-5) to display an animated stimulus at the corresponding calibration point. The participant should look at the stimulus while it animates. When you're confident they're fixating on the target, press **SPACE** to collect gaze samples. The system waits briefly (0.25 seconds) to ensure stable fixation, then records the eye tracking data for that point. Repeat this process for all calibration points. You don't need to go in order.
+
+#### Step 3: Review Results
+
+Once you've collected data for all points (or whenever you're satisfied), press **ENTER** to compute and visualize the calibration results. You'll see a display showing the calibration targets and dots (or lines if you selected them in the `visualization_style`) to where the gaze samples actually landed.
+
+At this stage, you have several options:
+
+``` markdown
+┌────────────── Calibration Results ───────────────┐
+│Review calibration results above.                 │
+│                                                  │
+│    - Press ENTER to accept calibration           │
+│    - Press Numbers → SPACE to retry some points  │
+│    - Press ESCAPE to restart calibration         │
+│                                                  │
+└──────────────────────────────────────────────────┘
+```
+
+**Accept the calibration**: If the results look good across all points, press **SPACE** to accept and move forward with your experiment.
+
+**Retry specific points**: Notice one or two points with poor accuracy? Press the number keys corresponding to those points—they'll highlight in yellow to confirm your selection. You can select multiple points if needed. Once you've marked all points for retry, press **SPACE** again to recollect data for just those points. This targeted approach is especially valuable with infants and children, where you might get excellent data at most points but struggle with one or two locations.
+
+**Start over**: If the overall quality is poor or you want a fresh start, press **ESCAPE** to discard all data and restart the entire calibration procedure from the beginning.
 
 
+::: callout-important
+### Simulation Mode
+When running with `simulate=True`, the calibration procedure uses mouse position instead of real eye tracker data. Press number keys to display stimuli at calibration points, move your mouse to each target location, and press SPACE to "collect" samples. This allows you to test your entire experiment workflow without needing physical eye tracking hardware.
+:::
+
+
+### Calibration Complete!
+
+Congratulations! You've successfully positioned your participant and completed the calibration procedure using DeToX. With accurate calibration in place, you're now ready to present your experimental stimuli and collect high-quality eye tracking data.
+
+Here's a video demonstrating the entire calibration workflow from start to finish:
+
+{{< video resources/Vids/CalibrationVid.mp4 >}}
+
+
+## Save and Load calibration
+
+While we recommend performing calibration at the start of each session to ensure optimal accuracy, DeToX also allows you to save and load calibration data for convenience. In our opinion, this should only be used in special circumstances where there is a headrest and little to no chance of movement between sessions. However, if you need to save and reuse calibration data, here's how:
+
+### Saving Calibration
+
+After completing a successful calibration, you can save the calibration data to a file:
+```python
+# Save with custom filename
+ET_controller.save_calibration(filename="S01_calibration.dat")
+```
+```markdown
+┌────── Calibration Saved ─────┐
+│Calibration data saved to:    │
+│S01_calibration.dat           │
+└──────────────────────────────┘
+```
+The calibration data is saved as a binary file (`.dat` format) that can be reloaded in future sessions. If you don't specify a filename, DeToX automatically generates a timestamped name like `2024-01-15_14-30-00_calibration.dat`.
+
+you can also choose to use a GUI file dialog to select the save location:
+
+```python
+# Save with GUI file dialog
+ET.save_calibration(use_gui=True)
+```
+
+### Loading Calibration
+
+To reuse a previously saved calibration in a new session:
+```python
+# Load from specific file
+ET.load_calibration(filename="S01_calibration.dat")
+```
+
+```markdown
+┌───── Calibration Loaded ──────┐
+│Calibration data loaded from:  │
+│S01_calibration.dat            │
+└───────────────────────────────┘
+```
+or again, use a GUI file dialog to select the file:
+```python
+# Load with GUI file dialog
+ET.load_calibration(use_gui=True)
 ```
