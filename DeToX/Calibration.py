@@ -805,7 +805,7 @@ class TobiiCalibrationSession(BaseCalibrationSession):
         
         # --- Tobii-Specific Setup ---
         self.calibration = calibration_api
-
+        self.verbose = verbose
 
     def run(self, calibration_points):
         """
@@ -1078,7 +1078,7 @@ class MouseCalibrationSession(BaseCalibrationSession):
         # --- Mouse-Specific Setup ---
         self.mouse = mouse
         self.calibration_data = {}  # point_idx -> list of (target_pos, sample_pos, timestamp)
-    
+        self.verbose = verbose
 
     def run(self, calibration_points):
         """
