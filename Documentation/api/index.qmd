@@ -9,6 +9,18 @@ The central class of the DeToX package, responsible for connecting to  and manag
 | --- | --- |
 | [ETracker](ETracker.qmd#DeToX.ETracker) | A high-level controller for running eye-tracking experiments with Tobii Pro and PsychoPy. |
 
+### Control the Recording
+
+Functions for starting, stopping, and managing the capture of eye-tracking  data. These methods allow you to initiate and terminate recordings,  mark events of interest, and save collected data to disk.
+
+
+| | |
+| --- | --- |
+| [ETracker.start_recording](ETracker.start_recording.qmd#DeToX.ETracker.start_recording) | Begin gaze data recording session. |
+| [ETracker.stop_recording](ETracker.stop_recording.qmd#DeToX.ETracker.stop_recording) | Stop gaze data recording and finalize session. |
+| [ETracker.record_event](ETracker.record_event.qmd#DeToX.ETracker.record_event) | Record timestamped experimental event during data collection. |
+| [ETracker.save_data](ETracker.save_data.qmd#DeToX.ETracker.save_data) | Save buffered gaze and event data to file with optimized processing. |
+
 ### Calibration
 
 Methods for running and managing eye tracker calibration. These include  displaying calibration status, initiating calibration routines, and  saving or loading calibration settings to ensure accurate gaze data.

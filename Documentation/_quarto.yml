@@ -49,13 +49,10 @@ website:
         
     tools:
       - icon: twitter
-        href: https://twitter.com
+        href: https://bsky.app/profile/devstart.org
       - icon: github
-        menu:
-          - text: Source Code
-            href:  https://code.com
-          - text: Report a Bug
-            href:  https://bugs.com
+        href: https://github.com/DevStart-Hub/DeToX
+
 
   sidebar: 
     - title: "Vignettes"
@@ -140,16 +137,16 @@ quartodoc:
       contents:
         - ETracker
 
-    # - subtitle: Control the Recording
-    #   desc: >
-    #     Functions for starting, stopping, and managing the capture of eye-tracking 
-    #     data. These methods allow you to initiate and terminate recordings, 
-    #     mark events of interest, and save collected data to disk.
-    #   contents:
-    #     - ETracker.start_recording
-    #     - ETracker.stop_recording
-    #     - ETracker.record_event
-    #     - ETracker.save_data
+    - subtitle: Control the Recording
+      desc: >
+        Functions for starting, stopping, and managing the capture of eye-tracking 
+        data. These methods allow you to initiate and terminate recordings, 
+        mark events of interest, and save collected data to disk.
+      contents:
+        - ETracker.start_recording
+        - ETracker.stop_recording
+        - ETracker.record_event
+        - ETracker.save_data
 
     - subtitle: Calibration
       desc: >

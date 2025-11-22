@@ -28,12 +28,12 @@ This method is ideal if you prefer working in an IDE (like Positron, VS Code, Py
 
 #### Step 1: Create a Virtual Environment
 
-We like to use miniforge to handle our environments and Python installations. Any other method would work as well, but for simplicity we'll show you how we prefer to do it.
+We like to use miniconda to handle our environments and Python installations. Any other method would work as well, but for simplicity we'll show you how we prefer to do it.
 
 *We recommend using Python 3.10 for the best compatibility:*
 
 ``` bash
-mamba create -n detox_env python=3.10
+conda create -n detox_env python=3.10
 ```
 
 This will create an environment called detox_env with python 3.10. Exactly what we need!
@@ -45,7 +45,7 @@ You will probably need to confirm by pressing `y`, and after a few seconds you'l
 Now let's activate this environment (making sure we're using it) and then install PsychoPy:
 
 ``` bash
-mamba activate detox_env
+conda activate detox_env
 pip install psychopy
 ```
 
@@ -72,15 +72,6 @@ You are done!!! Great!
 
 Once PsychoPy is installed, we can look at DeToX. Let's gets our hand dirty! The installation is the same for both the Package and Standalone PsychoPy installations but some steps differ.
 
-::: callout-warning
-## DeToX is Still in Development
-
-DeToX isn't yet available on PyPI, so you'll need to install it directly from our **GitHub repository**. Don't worry—it's straightforward, and we'll guide you through it!
-
-**One requirement:** You need **Git** installed on your system.
-
-📥 **Don't have Git?** Download it from [git-scm.com](https://git-scm.com/)—installation takes just a minute.
-:::
 
 ::: panel-tabset
 ### Package
@@ -88,13 +79,13 @@ DeToX isn't yet available on PyPI, so you'll need to install it directly from ou
 Again make sure to be in the correct environment if you installed PsychoPy as a package. with the following command:
 
 ``` bash
-mamba activate detox_env
+conda activate detox_env
 ```
 
 Then simply run:
 
 ``` bash
-pip install git+https://github.com/DevStart-Hub/DeToX.git
+pip install dvst-detox
 ```
 
 Wait a few seconds, confirm if needed, and you are done!
@@ -113,9 +104,19 @@ Wait a few seconds, confirm if needed, and you are done!
 
 6.  **Click the "Open PIP terminal" button**
 
-7.  **Type the following command:** `pip install git+https://github.com/DevStart-Hub/DeToX.git`
+7.  **Type the following command:** `pip install devst-detox `
 
 That's it! You now have both PsychoPy and DeToX installed and ready to use.
+:::
+
+::: callout-tip
+## Install from git
+If you want to install the latest development version of DeToX directly from the GitHub repository, you can do so by replacing the installation command with the following:
+
+``` bash
+pip install git+https://github.com/DevStart-Hub/DeToX.git
+
+```
 :::
 
 ::: callout-warning

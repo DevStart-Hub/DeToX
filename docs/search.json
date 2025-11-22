@@ -355,6 +355,45 @@
     ]
   },
   {
+    "objectID": "api/ETracker.stop_recording.html",
+    "href": "api/ETracker.stop_recording.html",
+    "title": "",
+    "section": "",
+    "text": "Main Eye-tracker ClassControl the RecordingETracker.stop_recording",
+    "crumbs": [
+      "Reference",
+      "Main Eye-tracker Class",
+      "Control the Recording",
+      "ETracker.stop_recording"
+    ]
+  },
+  {
+    "objectID": "api/ETracker.stop_recording.html#raises",
+    "href": "api/ETracker.stop_recording.html#raises",
+    "title": "",
+    "section": "Raises",
+    "text": "Raises\n\n\n\nName\nType\nDescription\n\n\n\n\n\nUserWarning\nIf recording is not currently active.",
+    "crumbs": [
+      "Reference",
+      "Main Eye-tracker Class",
+      "Control the Recording",
+      "ETracker.stop_recording"
+    ]
+  },
+  {
+    "objectID": "api/ETracker.stop_recording.html#notes",
+    "href": "api/ETracker.stop_recording.html#notes",
+    "title": "",
+    "section": "Notes",
+    "text": "Notes\nAll pending data in buffers is automatically saved before completion. Recording duration is measured from start_recording() call.",
+    "crumbs": [
+      "Reference",
+      "Main Eye-tracker Class",
+      "Control the Recording",
+      "ETracker.stop_recording"
+    ]
+  },
+  {
     "objectID": "api/ETracker.show_status.html",
     "href": "api/ETracker.show_status.html",
     "title": "",
@@ -404,6 +443,58 @@
       "Main Eye-tracker Class",
       "Calibration",
       "ETracker.show_status"
+    ]
+  },
+  {
+    "objectID": "api/ETracker.save_calibration.html",
+    "href": "api/ETracker.save_calibration.html",
+    "title": "",
+    "section": "",
+    "text": "Main Eye-tracker ClassCalibrationETracker.save_calibration",
+    "crumbs": [
+      "Reference",
+      "Main Eye-tracker Class",
+      "Calibration",
+      "ETracker.save_calibration"
+    ]
+  },
+  {
+    "objectID": "api/ETracker.save_calibration.html#parameters",
+    "href": "api/ETracker.save_calibration.html#parameters",
+    "title": "",
+    "section": "Parameters",
+    "text": "Parameters\n\n\n\n\n\n\n\n\n\nName\nType\nDescription\nDefault\n\n\n\n\nfilename\nstr | None\nDesired output path. If None and use_gui is False, a timestamped default name is used (e.g., ‘YYYY-mm-dd_HH-MM-SS_calibration.dat’). If provided without an extension, ‘.dat’ is appended. If an extension is already present, it is left unchanged.\nNone\n\n\nuse_gui\nbool\nIf True, opens a file-save dialog (Psychopy) where the user chooses the path. The suggested name respects the logic above. Default False.\nFalse",
+    "crumbs": [
+      "Reference",
+      "Main Eye-tracker Class",
+      "Calibration",
+      "ETracker.save_calibration"
+    ]
+  },
+  {
+    "objectID": "api/ETracker.save_calibration.html#returns",
+    "href": "api/ETracker.save_calibration.html#returns",
+    "title": "",
+    "section": "Returns",
+    "text": "Returns\n\n\n\n\n\n\n\n\nName\nType\nDescription\n\n\n\n\n\nbool\nTrue if saved successfully; False if cancelled, no data available, in simulation mode, or on error.",
+    "crumbs": [
+      "Reference",
+      "Main Eye-tracker Class",
+      "Calibration",
+      "ETracker.save_calibration"
+    ]
+  },
+  {
+    "objectID": "api/ETracker.save_calibration.html#notes",
+    "href": "api/ETracker.save_calibration.html#notes",
+    "title": "",
+    "section": "Notes",
+    "text": "Notes\n\nIn simulation mode, saving is skipped and a warning is issued.\nIf use_gui is True and the dialog is cancelled, returns False.",
+    "crumbs": [
+      "Reference",
+      "Main Eye-tracker Class",
+      "Calibration",
+      "ETracker.save_calibration"
     ]
   },
   {
@@ -805,55 +896,107 @@
     ]
   },
   {
-    "objectID": "api/ETracker.save_calibration.html",
-    "href": "api/ETracker.save_calibration.html",
+    "objectID": "api/ETracker.record_event.html",
+    "href": "api/ETracker.record_event.html",
     "title": "",
     "section": "",
-    "text": "Main Eye-tracker ClassCalibrationETracker.save_calibration",
+    "text": "Main Eye-tracker ClassControl the RecordingETracker.record_event",
     "crumbs": [
       "Reference",
       "Main Eye-tracker Class",
-      "Calibration",
-      "ETracker.save_calibration"
+      "Control the Recording",
+      "ETracker.record_event"
     ]
   },
   {
-    "objectID": "api/ETracker.save_calibration.html#parameters",
-    "href": "api/ETracker.save_calibration.html#parameters",
+    "objectID": "api/ETracker.record_event.html#parameters",
+    "href": "api/ETracker.record_event.html#parameters",
     "title": "",
     "section": "Parameters",
-    "text": "Parameters\n\n\n\n\n\n\n\n\n\nName\nType\nDescription\nDefault\n\n\n\n\nfilename\nstr | None\nDesired output path. If None and use_gui is False, a timestamped default name is used (e.g., ‘YYYY-mm-dd_HH-MM-SS_calibration.dat’). If provided without an extension, ‘.dat’ is appended. If an extension is already present, it is left unchanged.\nNone\n\n\nuse_gui\nbool\nIf True, opens a file-save dialog (Psychopy) where the user chooses the path. The suggested name respects the logic above. Default False.\nFalse",
+    "text": "Parameters\n\n\n\n\n\n\n\n\n\nName\nType\nDescription\nDefault\n\n\n\n\nlabel\nstr\nDescriptive label for the event (e.g., ‘trial_start’, ‘stimulus_onset’).\nrequired",
     "crumbs": [
       "Reference",
       "Main Eye-tracker Class",
-      "Calibration",
-      "ETracker.save_calibration"
+      "Control the Recording",
+      "ETracker.record_event"
     ]
   },
   {
-    "objectID": "api/ETracker.save_calibration.html#returns",
-    "href": "api/ETracker.save_calibration.html#returns",
+    "objectID": "api/ETracker.record_event.html#raises",
+    "href": "api/ETracker.record_event.html#raises",
     "title": "",
-    "section": "Returns",
-    "text": "Returns\n\n\n\n\n\n\n\n\nName\nType\nDescription\n\n\n\n\n\nbool\nTrue if saved successfully; False if cancelled, no data available, in simulation mode, or on error.",
+    "section": "Raises",
+    "text": "Raises\n\n\n\nName\nType\nDescription\n\n\n\n\n\nRuntimeWarning\nIf called when recording is not active.",
     "crumbs": [
       "Reference",
       "Main Eye-tracker Class",
-      "Calibration",
-      "ETracker.save_calibration"
+      "Control the Recording",
+      "ETracker.record_event"
     ]
   },
   {
-    "objectID": "api/ETracker.save_calibration.html#notes",
-    "href": "api/ETracker.save_calibration.html#notes",
+    "objectID": "api/ETracker.record_event.html#examples",
+    "href": "api/ETracker.record_event.html#examples",
     "title": "",
-    "section": "Notes",
-    "text": "Notes\n\nIn simulation mode, saving is skipped and a warning is issued.\nIf use_gui is True and the dialog is cancelled, returns False.",
+    "section": "Examples",
+    "text": "Examples\ntracker.record_event(‘trial_1_start’) # … present stimulus … tracker.record_event(‘stimulus_offset’)",
     "crumbs": [
       "Reference",
       "Main Eye-tracker Class",
-      "Calibration",
-      "ETracker.save_calibration"
+      "Control the Recording",
+      "ETracker.record_event"
+    ]
+  },
+  {
+    "objectID": "api/ETracker.save_data.html",
+    "href": "api/ETracker.save_data.html",
+    "title": "",
+    "section": "",
+    "text": "Main Eye-tracker ClassControl the RecordingETracker.save_data\n\n\n\n\n\nETracker.save_data\nETracker.save_data()\nSave buffered gaze and event data to file with optimized processing.\nUses thread-safe buffer swapping to minimize lock time, then processes and saves data in CSV or HDF5 format. Events are merged with gaze data based on timestamp proximity.\n\n\n\n\n\n\n Back to top",
+    "crumbs": [
+      "Reference",
+      "Main Eye-tracker Class",
+      "Control the Recording",
+      "ETracker.save_data"
+    ]
+  },
+  {
+    "objectID": "api/ETracker.start_recording.html",
+    "href": "api/ETracker.start_recording.html",
+    "title": "",
+    "section": "",
+    "text": "Main Eye-tracker ClassControl the RecordingETracker.start_recording",
+    "crumbs": [
+      "Reference",
+      "Main Eye-tracker Class",
+      "Control the Recording",
+      "ETracker.start_recording"
+    ]
+  },
+  {
+    "objectID": "api/ETracker.start_recording.html#parameters",
+    "href": "api/ETracker.start_recording.html#parameters",
+    "title": "",
+    "section": "Parameters",
+    "text": "Parameters\n\n\n\n\n\n\n\n\n\nName\nType\nDescription\nDefault\n\n\n\n\nfilename\nstr\nOutput filename for gaze data. If None, generates timestamp-based name. File extension determines format (.h5/.hdf5 for HDF5, .csv for CSV, defaults to .h5).\nNone\n\n\nraw_format\nbool\nIf True, preserves all original Tobii SDK column names and data. If False (default), uses simplified column names and subset of columns. Raw format is useful for advanced analysis requiring full metadata.\nFalse",
+    "crumbs": [
+      "Reference",
+      "Main Eye-tracker Class",
+      "Control the Recording",
+      "ETracker.start_recording"
+    ]
+  },
+  {
+    "objectID": "api/ETracker.start_recording.html#examples",
+    "href": "api/ETracker.start_recording.html#examples",
+    "title": "",
+    "section": "Examples",
+    "text": "Examples",
+    "crumbs": [
+      "Reference",
+      "Main Eye-tracker Class",
+      "Control the Recording",
+      "ETracker.start_recording"
     ]
   },
   {
@@ -1041,7 +1184,7 @@
     "href": "api/index.html#main-eye-tracker-class",
     "title": "",
     "section": "Main Eye-tracker Class",
-    "text": "Main Eye-tracker Class\nThe central class of the DeToX package, responsible for connecting to and managing the Tobii eye tracker. This class must be instantiated before any other functionality can be used. It provides access to calibration, recording control, and gaze-contingent presentation methods. Below are the main methods and properties of this class:\n\n\n\nETracker\nA high-level controller for running eye-tracking experiments with Tobii Pro and PsychoPy.\n\n\n\n\nCalibration\nMethods for running and managing eye tracker calibration. These include displaying calibration status, initiating calibration routines, and saving or loading calibration settings to ensure accurate gaze data.\n\n\n\nETracker.show_status\nReal-time visualization of participant’s eye position in track box.\n\n\nETracker.calibrate\nRun infant-friendly calibration procedure.\n\n\nETracker.save_calibration\nSave the current calibration data to a file.\n\n\nETracker.load_calibration\nLoads calibration data from a file and applies it to the eye tracker.\n\n\n\n\n\nGaze Contingent\nTools for running gaze-contingent experiments, where visual presentation adapts dynamically to a participants gaze position. Includes functionality for live gaze-contingent control and methods to compute average gaze positions for experimental logic.\n\n\n\nETracker.gaze_contingent\nInitialize real-time gaze buffer for contingent applications.\n\n\nETracker.get_gaze_position\nGet current gaze position from rolling buffer.",
+    "text": "Main Eye-tracker Class\nThe central class of the DeToX package, responsible for connecting to and managing the Tobii eye tracker. This class must be instantiated before any other functionality can be used. It provides access to calibration, recording control, and gaze-contingent presentation methods. Below are the main methods and properties of this class:\n\n\n\nETracker\nA high-level controller for running eye-tracking experiments with Tobii Pro and PsychoPy.\n\n\n\n\nControl the Recording\nFunctions for starting, stopping, and managing the capture of eye-tracking data. These methods allow you to initiate and terminate recordings, mark events of interest, and save collected data to disk.\n\n\n\nETracker.start_recording\nBegin gaze data recording session.\n\n\nETracker.stop_recording\nStop gaze data recording and finalize session.\n\n\nETracker.record_event\nRecord timestamped experimental event during data collection.\n\n\nETracker.save_data\nSave buffered gaze and event data to file with optimized processing.\n\n\n\n\n\nCalibration\nMethods for running and managing eye tracker calibration. These include displaying calibration status, initiating calibration routines, and saving or loading calibration settings to ensure accurate gaze data.\n\n\n\nETracker.show_status\nReal-time visualization of participant’s eye position in track box.\n\n\nETracker.calibrate\nRun infant-friendly calibration procedure.\n\n\nETracker.save_calibration\nSave the current calibration data to a file.\n\n\nETracker.load_calibration\nLoads calibration data from a file and applies it to the eye tracker.\n\n\n\n\n\nGaze Contingent\nTools for running gaze-contingent experiments, where visual presentation adapts dynamically to a participants gaze position. Includes functionality for live gaze-contingent control and methods to compute average gaze positions for experimental logic.\n\n\n\nETracker.gaze_contingent\nInitialize real-time gaze buffer for contingent applications.\n\n\nETracker.get_gaze_position\nGet current gaze position from rolling buffer.",
     "crumbs": [
       "Reference"
     ]
@@ -1149,7 +1292,7 @@
     "href": "Vignettes/Installation.html#installing-psychopy",
     "title": "Installation",
     "section": "Installing PsychoPy",
-    "text": "Installing PsychoPy\nSince PsychoPy is the main challenge, let’s tackle that first. You have two main options:\n\nPackage Installation\nInstall PsychoPy like any other Python package using pip. This approach is flexible and ideal if you prefer working in an IDE (like Positron, VS Code, PyCharm, or Spyder) where you have full control over your Python environment.\nStandalone Installation\nUse the PsychoPy standalone installer, which bundles PsychoPy and all its dependencies into a single, ready-to-use application. This is often the easiest way to get started, especially if you’re not familiar with managing Python environments or just want to hit the ground running.\n\nWe like installing psychopy as a package but you do you!\n\nPackageStandalone\n\n\nThis method is ideal if you prefer working in an IDE (like Positron, VS Code, PyCharm, or Spyder) and want full control over your Python environment.\n\nStep 1: Create a Virtual Environment\nWe like to use miniforge to handle our environments and Python installations. Any other method would work as well, but for simplicity we’ll show you how we prefer to do it.\nWe recommend using Python 3.10 for the best compatibility:\nmamba create -n detox_env python=3.10\nThis will create an environment called detox_env with python 3.10. Exactly what we need!\nYou will probably need to confirm by pressing y, and after a few seconds you’ll have your environment with Python 3.10! Great!\n\n\nStep 2: Activate Environment and Install PsychoPy\nNow let’s activate this environment (making sure we’re using it) and then install PsychoPy:\nmamba activate detox_env\npip install psychopy\nthis will take some time but if you are lucky you will have psychopy in your enviroment\nAgain, confirm if needed and you’re done! Amazing!\n\n\n\nPsychoPy is a large package with many dependencies, and sometimes (depending on your operating system) installing it can be quite tricky! For this reason, the PsychoPy website suggests using the standalone installation method. This is like installing regular software on your computer - it will install PsychoPy and all its dependencies in one go.\n\nStep 1: Install PsychoPy Standalone\n\nGo to the PsychoPy download page\nDownload the standalone installer for your operating system\nRun the installer and follow the setup instructions\n\nYou are done!!! Great!",
+    "text": "Installing PsychoPy\nSince PsychoPy is the main challenge, let’s tackle that first. You have two main options:\n\nPackage Installation\nInstall PsychoPy like any other Python package using pip. This approach is flexible and ideal if you prefer working in an IDE (like Positron, VS Code, PyCharm, or Spyder) where you have full control over your Python environment.\nStandalone Installation\nUse the PsychoPy standalone installer, which bundles PsychoPy and all its dependencies into a single, ready-to-use application. This is often the easiest way to get started, especially if you’re not familiar with managing Python environments or just want to hit the ground running.\n\nWe like installing psychopy as a package but you do you!\n\nPackageStandalone\n\n\nThis method is ideal if you prefer working in an IDE (like Positron, VS Code, PyCharm, or Spyder) and want full control over your Python environment.\n\nStep 1: Create a Virtual Environment\nWe like to use miniconda to handle our environments and Python installations. Any other method would work as well, but for simplicity we’ll show you how we prefer to do it.\nWe recommend using Python 3.10 for the best compatibility:\nconda create -n detox_env python=3.10\nThis will create an environment called detox_env with python 3.10. Exactly what we need!\nYou will probably need to confirm by pressing y, and after a few seconds you’ll have your environment with Python 3.10! Great!\n\n\nStep 2: Activate Environment and Install PsychoPy\nNow let’s activate this environment (making sure we’re using it) and then install PsychoPy:\nconda activate detox_env\npip install psychopy\nthis will take some time but if you are lucky you will have psychopy in your enviroment\nAgain, confirm if needed and you’re done! Amazing!\n\n\n\nPsychoPy is a large package with many dependencies, and sometimes (depending on your operating system) installing it can be quite tricky! For this reason, the PsychoPy website suggests using the standalone installation method. This is like installing regular software on your computer - it will install PsychoPy and all its dependencies in one go.\n\nStep 1: Install PsychoPy Standalone\n\nGo to the PsychoPy download page\nDownload the standalone installer for your operating system\nRun the installer and follow the setup instructions\n\nYou are done!!! Great!",
     "crumbs": [
       "Installation"
     ]
@@ -1159,7 +1302,7 @@
     "href": "Vignettes/Installation.html#installing-detox",
     "title": "Installation",
     "section": "Installing DeToX",
-    "text": "Installing DeToX\nOnce PsychoPy is installed, we can look at DeToX. Let’s gets our hand dirty! The installation is the same for both the Package and Standalone PsychoPy installations but some steps differ.\n\n\n\n\n\n\nDeToX is Still in Development\n\n\n\nDeToX isn’t yet available on PyPI, so you’ll need to install it directly from our GitHub repository. Don’t worry—it’s straightforward, and we’ll guide you through it!\nOne requirement: You need Git installed on your system.\n📥 Don’t have Git? Download it from git-scm.com—installation takes just a minute.\n\n\n\nPackageStandalone\n\n\nAgain make sure to be in the correct environment if you installed PsychoPy as a package. with the following command:\nmamba activate detox_env\nThen simply run:\npip install git+https://github.com/DevStart-Hub/DeToX.git\nWait a few seconds, confirm if needed, and you are done!\n\n\n\nOpen PsychoPy\nGo to Coder View (the interface with the code editor)\nOpen the Tools menu\nSelect “Plugins/package manager…”\nClick on “Packages” in the top tabs\nClick the “Open PIP terminal” button\nType the following command: pip install git+https://github.com/DevStart-Hub/DeToX.git\n\nThat’s it! You now have both PsychoPy and DeToX installed and ready to use.\n\n\n\n\n\n\n\n\n\nImportant: DeToX requires coding\n\n\n\nDeToX is a code-based library that works with PsychoPy’s Coder interface. If you typically use PsychoPy’s Builder (the drag-and-drop visual interface), you’ll need to switch to the Coder interface to use DeToX. Don’t worry - we provide plenty of code examples to get you started!",
+    "text": "Installing DeToX\nOnce PsychoPy is installed, we can look at DeToX. Let’s gets our hand dirty! The installation is the same for both the Package and Standalone PsychoPy installations but some steps differ.\n\nPackageStandalone\n\n\nAgain make sure to be in the correct environment if you installed PsychoPy as a package. with the following command:\nconda activate detox_env\nThen simply run:\npip install dvst-detox\nWait a few seconds, confirm if needed, and you are done!\n\n\n\nOpen PsychoPy\nGo to Coder View (the interface with the code editor)\nOpen the Tools menu\nSelect “Plugins/package manager…”\nClick on “Packages” in the top tabs\nClick the “Open PIP terminal” button\nType the following command: pip install devst-detox\n\nThat’s it! You now have both PsychoPy and DeToX installed and ready to use.\n\n\n\n\n\n\n\n\n\nInstall from git\n\n\n\nIf you want to install the latest development version of DeToX directly from the GitHub repository, you can do so by replacing the installation command with the following:\npip install git+https://github.com/DevStart-Hub/DeToX.git\n\n\n\n\n\n\n\n\nImportant: DeToX requires coding\n\n\n\nDeToX is a code-based library that works with PsychoPy’s Coder interface. If you typically use PsychoPy’s Builder (the drag-and-drop visual interface), you’ll need to switch to the Coder interface to use DeToX. Don’t worry - we provide plenty of code examples to get you started!",
     "crumbs": [
       "Installation"
     ]

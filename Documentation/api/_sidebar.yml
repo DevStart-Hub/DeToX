@@ -5,6 +5,12 @@ website:
     - contents:
       - api/ETracker.qmd
       - contents:
+        - api/ETracker.start_recording.qmd
+        - api/ETracker.stop_recording.qmd
+        - api/ETracker.record_event.qmd
+        - api/ETracker.save_data.qmd
+        section: Control the Recording
+      - contents:
         - api/ETracker.show_status.qmd
         - api/ETracker.calibrate.qmd
         - api/ETracker.save_calibration.qmd
