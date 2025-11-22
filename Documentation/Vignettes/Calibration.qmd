@@ -195,12 +195,11 @@ At this stage, you have several options:
 
 **Start over**: If the overall quality is poor or you want a fresh start, press **ESCAPE** to discard all data and restart the entire calibration procedure from the beginning.
 
-
 ::: callout-important
 ### Simulation Mode
+
 When running with `simulate=True`, the calibration procedure uses mouse position instead of real eye tracker data. Press number keys to display stimuli at calibration points, move your mouse to each target location, and press SPACE to "collect" samples. This allows you to test your entire experiment workflow without needing physical eye tracking hardware.
 :::
-
 
 ### Calibration Complete!
 
@@ -208,8 +207,9 @@ Congratulations! You've successfully positioned your participant and completed t
 
 Here's a video demonstrating the entire calibration workflow from start to finish:
 
-{{< video \resources\Vids\CalibrationVid.mp4 >}}
-
+```{=html}
+<div style="padding:56.25% 0 0 0;position:relative;"><iframe src="https://player.vimeo.com/video/1139719474?badge=0&amp;autopause=0&amp;player_id=0&amp;app_id=58479" frameborder="0" allow="autoplay; fullscreen; picture-in-picture; clipboard-write; encrypted-media; web-share" referrerpolicy="strict-origin-when-cross-origin" style="position:absolute;top:0;left:0;width:100%;height:100%;" title="Calibration procedure using DeToX"></iframe></div><script src="https://player.vimeo.com/api/player.js"></script>
+```
 
 ## Save and Load calibration
 
@@ -218,21 +218,24 @@ While we recommend performing calibration at the start of each session to ensure
 ### Saving Calibration
 
 After completing a successful calibration, you can save the calibration data to a file:
-```python
+
+``` python
 # Save with custom filename
 ET_controller.save_calibration(filename="S01_calibration.dat")
 ```
-```markdown
+
+``` markdown
 ┌────── Calibration Saved ─────┐
 │Calibration data saved to:    │
 │S01_calibration.dat           │
 └──────────────────────────────┘
 ```
+
 The calibration data is saved as a binary file (`.dat` format) that can be reloaded in future sessions. If you don't specify a filename, DeToX automatically generates a timestamped name like `2024-01-15_14-30-00_calibration.dat`.
 
 you can also choose to use a GUI file dialog to select the save location:
 
-```python
+``` python
 # Save with GUI file dialog
 ET.save_calibration(use_gui=True)
 ```
@@ -240,19 +243,22 @@ ET.save_calibration(use_gui=True)
 ### Loading Calibration
 
 To reuse a previously saved calibration in a new session:
-```python
+
+``` python
 # Load from specific file
 ET.load_calibration(filename="S01_calibration.dat")
 ```
 
-```markdown
+``` markdown
 ┌───── Calibration Loaded ──────┐
 │Calibration data loaded from:  │
 │S01_calibration.dat            │
 └───────────────────────────────┘
 ```
+
 or again, use a GUI file dialog to select the file:
-```python
+
+``` python
 # Load with GUI file dialog
 ET.load_calibration(use_gui=True)
 ```
