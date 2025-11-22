@@ -17,6 +17,14 @@ metadata-files:
 
 website:
   title: "DeToX"
+  
+  # BANNER
+  announcement: 
+    icon: exclamation-triangle
+    dismissable: true
+    content: "**Development Version** - DeToX is currently in beta. Features may change without notice. Thoroughly test before using in production studies."
+    type: danger
+    position: below-navbar
 
   cookie-consent:
     type: implied
@@ -99,12 +107,21 @@ format:
     code-block-background: true
     code-block-border-left: "#00B3B3"
 
-    # # Pagination
-    # grid:
-    #   sidebar-width: 300px
-    #   body-width: 1100px
-    #   margin-width: 300px
-    #   gutter-width: 1.5rem
+    # Pagination
+    grid:
+      sidebar-width: 300px
+      body-width: 1100px
+      margin-width: 300px
+      gutter-width: 1.5rem
+
+custom-callout:
+  Advanced:
+    icon-symbol: "🔍"
+    color: "pink"
+    collapse: true
+filters:
+- custom-callout
+
 
 quartodoc:
   style: pkgdown
