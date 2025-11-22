@@ -4,9 +4,9 @@
 ETSettings.AnimationSettings(
     focus_time=0.5,
     zoom_speed=6.0,
-    max_zoom_size=0.11,
+    max_zoom_size=0.16,
     min_zoom_size=0.05,
-    trill_size=0.075,
+    trill_size=0.14,
     trill_rotation_range=20,
     trill_cycle_duration=1.5,
     trill_active_duration=1.1,

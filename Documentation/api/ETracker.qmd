@@ -1,7 +1,7 @@
 # ETracker { #DeToX.ETracker }
 
 ```python
-ETracker(win, etracker_id=0, simulate=False)
+ETracker(win, etracker_id=0, simulate=False, verbose=True)
 ```
 
 A high-level controller for running eye-tracking experiments with Tobii Pro and PsychoPy.
@@ -22,7 +22,7 @@ This class is intended to be the first object you instantiate in your experiment
 
 | Name | Description |
 | --- | --- |
-| [calibrate](#DeToX.ETracker.calibrate) | Run the infant-friendly calibration procedure. |
+| [calibrate](#DeToX.ETracker.calibrate) | Run infant-friendly calibration procedure. |
 | [gaze_contingent](#DeToX.ETracker.gaze_contingent) | Initialize real-time gaze buffer for contingent applications. |
 | [get_gaze_position](#DeToX.ETracker.get_gaze_position) | Get current gaze position from rolling buffer. |
 | [load_calibration](#DeToX.ETracker.load_calibration) | Loads calibration data from a file and applies it to the eye tracker. |
@@ -39,44 +39,63 @@ This class is intended to be the first object you instantiate in your experiment
 ```python
 ETracker.calibrate(
     calibration_points,
-    infant_stims,
+    infant_stims=None,
     shuffle=True,
-    audio=None,
+    audio=True,
     anim_type='zoom',
-    save_calib=False,
-    num_samples=5,
+    visualization_style='circles',
 )
 ```
 
-Run the infant-friendly calibration procedure.
+Run infant-friendly calibration procedure.
 
-Automatically selects the calibration method based on operating mode
-(real eye tracker vs. simulation). Uses animated stimuli and optional
-audio to engage infants during calibration.
+Performs eye tracker calibration using animated stimuli to engage infant 
+participants. The calibration establishes the mapping between eye position 
+and screen coordinates, which is essential for accurate gaze data collection.
+Automatically selects the appropriate calibration method based on operating 
+mode (real eye tracker vs. mouse simulation).
 
 #### Parameters {.doc-section .doc-section-parameters}
 
-| Name               | Type                          | Description                                                                                                                                                                                                  | Default    |
-|--------------------|-------------------------------|--------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------|------------|
-| calibration_points | list\[tuple\[float, float\]\] | Target locations in PsychoPy coordinates (e.g., height units). Typically 5–9 points distributed across the screen.                                                                                           | _required_ |
-| infant_stims       | list\[str\]                   | Paths to engaging image files for calibration targets (e.g., animated characters, colorful objects).                                                                                                         | _required_ |
-| shuffle            | bool                          | Whether to randomize stimulus presentation order. Default True.                                                                                                                                              | `True`     |
-| audio              | psychopy.sound.Sound \| None  | Attention-getting sound to play during calibration. Default None.                                                                                                                                            | `None`     |
-| anim_type          | (zoom, trill)                 | Animation style for the stimuli. Default 'zoom'.                                                                                                                                                             | `'zoom'`   |
-| save_calib         | bool \| str                   | Controls saving of calibration after a successful run: - False: do not save (default) - True: save using default naming (timestamped) - str: save to this filename; if it has no extension, '.dat' is added. | `False`    |
-| num_samples        | int                           | Samples per point in simulation mode. Default 5.                                                                                                                                                             | `5`        |
+| Name                | Type                                 | Description                                                                                                                                                                                                                                                                                                                                                                                                                                                                                       | Default    |
+|---------------------|--------------------------------------|---------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------|------------|
+| calibration_points  | int or list of tuple                 | Calibration pattern specification: - 5: Standard 5-point pattern (4 corners + center). Default. - 9: Comprehensive 9-point pattern (3×3 grid). - list: Custom points in normalized coordinates [-1, 1]. Example: [(-0.4, 0.4), (0.4, 0.4), (0.0, 0.0)]                                                                                                                                                                                                                                            | _required_ |
+| infant_stims        | list of str or True                  | Paths to engaging image files for calibration targets (e.g., colorful characters, animated objects). If True (default), uses built-in stimuli  from the package. If fewer stimuli than calibration points are provided,  stimuli are automatically repeated in sequence to cover all points  (e.g., 3 stimuli for 7 points becomes [s1, s2, s3, s1, s2, s3, s1]).                                                                                                                                 | `None`     |
+| shuffle             | bool                                 | Whether to randomize stimulus presentation order. When True (default),  stimuli are shuffled after any necessary repetition and before assignment  to calibration points. Set to False if you want deterministic  stimulus-to-point mapping or specific stimulus ordering. Default True.                                                                                                                                                                                                          | `True`     |
+| audio               | bool or psychopy.sound.Sound or None | Controls attention-getting audio during calibration: - True: Uses built-in calibration sound (default). Sound loops  continuously while stimulus is selected. - False or None: No audio feedback. - psychopy.sound.Sound: Uses your pre-loaded custom sound object. You are responsible for setting the sound parameters (e.g.,  loops=-1 for continuous looping). The audio provides auditory feedback when the experimenter selects a calibration point by pressing a number key. Default True. | `True`     |
+| anim_type           | (zoom, trill)                        | Animation style for the calibration stimuli: - 'zoom': Smooth size oscillation (default) - 'trill': Rapid rotation with pauses                                                                                                                                                                                                                                                                                                                                                                    | `'zoom'`   |
+| visualization_style | (lines, circles)                     | How to display calibration results: - 'lines': Draw lines from targets to gaze samples - 'circles': Draw small filled circles at gaze sample positions Default 'circles'.                                                                                                                                                                                                                                                                                                                         | `'lines'`  |
 
 #### Returns {.doc-section .doc-section-returns}
 
-| Name   | Type   | Description                                                  |
-|--------|--------|--------------------------------------------------------------|
-|        | bool   | True if calibration completed successfully, False otherwise. |
+| Name   | Type   | Description                                                                                                          |
+|--------|--------|----------------------------------------------------------------------------------------------------------------------|
+|        | bool   | True if calibration completed successfully and was accepted by the user, False if calibration was aborted or failed. |
 
-#### Notes {.doc-section .doc-section-notes}
+#### Examples {.doc-section .doc-section-examples}
 
-- Real mode uses Tobii's calibration with result visualization.
-- Simulation mode uses mouse position to approximate the process.
-- If in simulation mode, any save request is safely skipped with a warning.
+```python
+>>> # Standard 5-point calibration with default audio
+>>> controller.calibrate(5)
+```
+
+```python
+>>> # Calibration without audio
+>>> controller.calibrate(5, audio=False)
+```
+
+```python
+>>> # Custom audio
+>>> from psychopy import sound
+>>> my_sound = sound.Sound('custom_beep.wav', loops=-1)
+>>> controller.calibrate(5, audio=my_sound)
+```
+
+```python
+>>> # 9-point calibration with custom stimuli and trill animation
+>>> controller.calibrate(9, infant_stims=['stim1.png', 'stim2.png'], 
+...                      anim_type='trill')
+```
 
 ### gaze_contingent { #DeToX.ETracker.gaze_contingent }
 
@@ -291,7 +310,7 @@ configuration changes are only made when the device is idle and connected.
 ### show_status { #DeToX.ETracker.show_status }
 
 ```python
-ETracker.show_status(decision_key='space')
+ETracker.show_status(decision_key='space', video_help=True)
 ```
 
 Real-time visualization of participant's eye position in track box.
@@ -300,16 +319,42 @@ Creates interactive display showing left/right eye positions and distance
 from screen. Useful for positioning participants before data collection.
 Updates continuously until exit key is pressed.
 
+Optionally displays an instructional video in the background to help guide
+participant positioning. You can use the built-in video, disable the video,
+or provide your own custom MovieStim object.
+
 #### Parameters {.doc-section .doc-section-parameters}
 
-| Name         | Type   | Description                                          | Default   |
-|--------------|--------|------------------------------------------------------|-----------|
-| decision_key | str    | Key to press to exit visualization. Default 'space'. | `'space'` |
+| Name         | Type                     | Description                                                                                                                                                                                                                                                                                    | Default   |
+|--------------|--------------------------|------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------|-----------|
+| decision_key | str                      | Key to press to exit visualization. Default 'space'.                                                                                                                                                                                                                                           | `'space'` |
+| video_help   | bool or visual.MovieStim | Controls background video display: - True: Uses built-in instructional video (default) - False: No video displayed - visual.MovieStim: Uses your pre-loaded custom video. You are responsible for scaling (size) and positioning (pos) the MovieStim to fit your desired layout. Default True. | `True`    |
 
 #### Notes {.doc-section .doc-section-notes}
 
 In simulation mode, use scroll wheel to adjust simulated distance.
 Eye positions shown as green (left) and red (right) circles.
+
+The built-in video (when video_help=True) is sized at (1.06, 0.6) in 
+height units and positioned at (0, -0.08) to avoid covering the track box.
+
+#### Examples {.doc-section .doc-section-examples}
+
+```python
+>>> # Use built-in video
+>>> tracker.show_status()
+```
+
+```python
+>>> # No video
+>>> tracker.show_status(video_help=False)
+```
+
+```python
+>>> # Custom video
+>>> my_video = visual.MovieStim(win, 'custom.mp4', size=0.5, pos=(0, -0.2))
+>>> tracker.show_status(video_help=my_video)
+```
 
 ### start_recording { #DeToX.ETracker.start_recording }
 

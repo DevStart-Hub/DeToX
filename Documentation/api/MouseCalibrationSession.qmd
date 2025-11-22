@@ -5,9 +5,10 @@ MouseCalibrationSession(
     win,
     infant_stims,
     mouse,
-    shuffle=True,
     audio=None,
     anim_type='zoom',
+    visualization_style='lines',
+    verbose=True,
 )
 ```
 
@@ -32,7 +33,7 @@ data collection modes.
 ### run { #DeToX.MouseCalibrationSession.run }
 
 ```python
-MouseCalibrationSession.run(calibration_points, num_samples=5)
+MouseCalibrationSession.run(calibration_points)
 ```
 
 Main function to run the mouse-based calibration routine.
@@ -43,10 +44,9 @@ calibration to ensure consistency across modes.
 
 #### Parameters {.doc-section .doc-section-parameters}
 
-| Name               | Type                   | Description                                                                                                               | Default    |
-|--------------------|------------------------|---------------------------------------------------------------------------------------------------------------------------|------------|
-| calibration_points | list of (float, float) | List of target positions in PsychoPy coordinates. Typically 5-9 points distributed across the screen.                     | _required_ |
-| num_samples        | int                    | How many mouse position samples to collect at each calibration point. More samples provide smoother averaging. Default 5. | `5`        |
+| Name               | Type                   | Description                                                                                                    | Default    |
+|--------------------|------------------------|----------------------------------------------------------------------------------------------------------------|------------|
+| calibration_points | list of (float, float) | List of calibration points in NORMALIZED coordinates [-1, 1]. Will be converted to window units automatically. | _required_ |
 
 #### Returns {.doc-section .doc-section-returns}
 

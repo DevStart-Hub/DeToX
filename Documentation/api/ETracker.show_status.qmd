@@ -1,7 +1,7 @@
 # ETracker.show_status { #DeToX.ETracker.show_status }
 
 ```python
-ETracker.show_status(decision_key='space')
+ETracker.show_status(decision_key='space', video_help=True)
 ```
 
 Real-time visualization of participant's eye position in track box.
@@ -10,13 +10,39 @@ Creates interactive display showing left/right eye positions and distance
 from screen. Useful for positioning participants before data collection.
 Updates continuously until exit key is pressed.
 
+Optionally displays an instructional video in the background to help guide
+participant positioning. You can use the built-in video, disable the video,
+or provide your own custom MovieStim object.
+
 ## Parameters {.doc-section .doc-section-parameters}
 
-| Name         | Type   | Description                                          | Default   |
-|--------------|--------|------------------------------------------------------|-----------|
-| decision_key | str    | Key to press to exit visualization. Default 'space'. | `'space'` |
+| Name         | Type                     | Description                                                                                                                                                                                                                                                                                    | Default   |
+|--------------|--------------------------|------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------|-----------|
+| decision_key | str                      | Key to press to exit visualization. Default 'space'.                                                                                                                                                                                                                                           | `'space'` |
+| video_help   | bool or visual.MovieStim | Controls background video display: - True: Uses built-in instructional video (default) - False: No video displayed - visual.MovieStim: Uses your pre-loaded custom video. You are responsible for scaling (size) and positioning (pos) the MovieStim to fit your desired layout. Default True. | `True`    |
 
 ## Notes {.doc-section .doc-section-notes}
 
 In simulation mode, use scroll wheel to adjust simulated distance.
 Eye positions shown as green (left) and red (right) circles.
+
+The built-in video (when video_help=True) is sized at (1.06, 0.6) in 
+height units and positioned at (0, -0.08) to avoid covering the track box.
+
+## Examples {.doc-section .doc-section-examples}
+
+```python
+>>> # Use built-in video
+>>> tracker.show_status()
+```
+
+```python
+>>> # No video
+>>> tracker.show_status(video_help=False)
+```
+
+```python
+>>> # Custom video
+>>> my_video = visual.MovieStim(win, 'custom.mp4', size=0.5, pos=(0, -0.2))
+>>> tracker.show_status(video_help=my_video)
+```

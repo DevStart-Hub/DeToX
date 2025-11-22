@@ -5,12 +5,6 @@ website:
     - contents:
       - api/ETracker.qmd
       - contents:
-        - api/ETracker.start_recording.qmd
-        - api/ETracker.stop_recording.qmd
-        - api/ETracker.record_event.qmd
-        - api/ETracker.save_data.qmd
-        section: Control the Recording
-      - contents:
         - api/ETracker.show_status.qmd
         - api/ETracker.calibrate.qmd
         - api/ETracker.save_calibration.qmd
@@ -41,9 +35,9 @@ website:
       section: Utilities
     - contents:
       - api/ETSettings.AnimationSettings.qmd
+      - api/ETSettings.CalibrationPatterns.qmd
       - api/ETSettings.CalibrationColors.qmd
       - api/ETSettings.UIElementSizes.qmd
-      - api/ETSettings.FontSizeMultipliers.qmd
       section: Configuration Settings
     id: api
   - id: dummy-sidebar

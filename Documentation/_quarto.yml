@@ -18,7 +18,6 @@ metadata-files:
 website:
   title: "DeToX"
   
-  # BANNER
   announcement: 
     icon: exclamation-triangle
     dismissable: true
@@ -42,7 +41,8 @@ website:
             href: Vignettes/Installation.qmd
           - text: Getting Started
             href: Vignettes/GettingStarted.qmd
-
+          - text: Calibration
+            href: Vignettes/Calibration.qmd
 
       - href: api/index.qmd
         text: Reference
@@ -116,7 +116,6 @@ format:
 
 custom-callout:
   Advanced:
-    icon-symbol: "🔍"
     color: "pink"
     collapse: true
 filters:
@@ -141,16 +140,16 @@ quartodoc:
       contents:
         - ETracker
 
-    - subtitle: Control the Recording
-      desc: >
-        Functions for starting, stopping, and managing the capture of eye-tracking 
-        data. These methods allow you to initiate and terminate recordings, 
-        mark events of interest, and save collected data to disk.
-      contents:
-        - ETracker.start_recording
-        - ETracker.stop_recording
-        - ETracker.record_event
-        - ETracker.save_data
+    # - subtitle: Control the Recording
+    #   desc: >
+    #     Functions for starting, stopping, and managing the capture of eye-tracking 
+    #     data. These methods allow you to initiate and terminate recordings, 
+    #     mark events of interest, and save collected data to disk.
+    #   contents:
+    #     - ETracker.start_recording
+    #     - ETracker.stop_recording
+    #     - ETracker.record_event
+    #     - ETracker.save_data
 
     - subtitle: Calibration
       desc: >
@@ -213,6 +212,6 @@ quartodoc:
         (e.g., ETSettings.animation) for easy configuration of your experiments.
       contents:
         - ETSettings.AnimationSettings
+        - ETSettings.CalibrationPatterns
         - ETSettings.CalibrationColors
         - ETSettings.UIElementSizes
-        - ETSettings.FontSizeMultipliers

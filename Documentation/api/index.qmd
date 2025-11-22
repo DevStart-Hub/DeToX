@@ -9,18 +9,6 @@ The central class of the DeToX package, responsible for connecting to  and manag
 | --- | --- |
 | [ETracker](ETracker.qmd#DeToX.ETracker) | A high-level controller for running eye-tracking experiments with Tobii Pro and PsychoPy. |
 
-### Control the Recording
-
-Functions for starting, stopping, and managing the capture of eye-tracking  data. These methods allow you to initiate and terminate recordings,  mark events of interest, and save collected data to disk.
-
-
-| | |
-| --- | --- |
-| [ETracker.start_recording](ETracker.start_recording.qmd#DeToX.ETracker.start_recording) | Begin gaze data recording session. |
-| [ETracker.stop_recording](ETracker.stop_recording.qmd#DeToX.ETracker.stop_recording) | Stop gaze data recording and finalize session. |
-| [ETracker.record_event](ETracker.record_event.qmd#DeToX.ETracker.record_event) | Record timestamped experimental event during data collection. |
-| [ETracker.save_data](ETracker.save_data.qmd#DeToX.ETracker.save_data) | Save buffered gaze and event data to file with optimized processing. |
-
 ### Calibration
 
 Methods for running and managing eye tracker calibration. These include  displaying calibration status, initiating calibration routines, and  saving or loading calibration settings to ensure accurate gaze data.
@@ -29,7 +17,7 @@ Methods for running and managing eye tracker calibration. These include  display
 | | |
 | --- | --- |
 | [ETracker.show_status](ETracker.show_status.qmd#DeToX.ETracker.show_status) | Real-time visualization of participant's eye position in track box. |
-| [ETracker.calibrate](ETracker.calibrate.qmd#DeToX.ETracker.calibrate) | Run the infant-friendly calibration procedure. |
+| [ETracker.calibrate](ETracker.calibrate.qmd#DeToX.ETracker.calibrate) | Run infant-friendly calibration procedure. |
 | [ETracker.save_calibration](ETracker.save_calibration.qmd#DeToX.ETracker.save_calibration) | Save the current calibration data to a file. |
 | [ETracker.load_calibration](ETracker.load_calibration.qmd#DeToX.ETracker.load_calibration) | Loads calibration data from a file and applies it to the eye tracker. |
 
@@ -87,6 +75,6 @@ Configuration classes and module-level instances for customizing the  behavior a
 | | |
 | --- | --- |
 | [ETSettings.AnimationSettings](ETSettings.AnimationSettings.qmd#DeToX.ETSettings.AnimationSettings) | Animation parameters for calibration stimuli. |
+| [ETSettings.CalibrationPatterns](ETSettings.CalibrationPatterns.qmd#DeToX.ETSettings.CalibrationPatterns) | Standard calibration point patterns in normalized coordinates. |
 | [ETSettings.CalibrationColors](ETSettings.CalibrationColors.qmd#DeToX.ETSettings.CalibrationColors) | Color settings for calibration visual elements. |
 | [ETSettings.UIElementSizes](ETSettings.UIElementSizes.qmd#DeToX.ETSettings.UIElementSizes) | Size settings for user interface elements. |
-| [ETSettings.FontSizeMultipliers](ETSettings.FontSizeMultipliers.qmd#DeToX.ETSettings.FontSizeMultipliers) | Font size multipliers for different text types. |

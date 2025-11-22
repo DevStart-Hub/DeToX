@@ -70,736 +70,364 @@
     ]
   },
   {
-    "objectID": "Vignettes/Installation.html",
-    "href": "Vignettes/Installation.html",
-    "title": "Installation",
+    "objectID": "index.html",
+    "href": "index.html",
+    "title": "DeToX",
     "section": "",
-    "text": "So you’re interested in using DeToX? Awesome! Let’s get you set up quickly.\nDeToX is designed as a lightweight wrapper around PsychoPy and tobii_research. Here’s the good news: tobii_research usually comes bundled with PsychoPy, which means the only real hurdle is installing PsychoPy itself. And yes, PsychoPy can be a bit tricky to install due to its many dependencies—but don’t worry, we’ll walk you through it. Once PsychoPy is up and running, adding DeToX is a breeze.",
-    "crumbs": [
-      "Installation"
-    ]
+    "text": "This package was created out of the need to run eye-tracking experiments using tobii_research. The Tobii SDK provides a powerful way to interact with Tobii eye trackers in Python, offering many advanced features. However, certain aspects of its implementation can be complex and unintuitive for routine research tasks. Since we often run experiments using PsychoPy, we developed this lightweight wrapper around PsychoPy and tobii_research to simplify the process. The goal is to make it easy to run infant-friendly eye-tracking studies while handling the more technical aspects of eye tracker integration behind the scenes.\nThe beauty of DeToX lies in its simplicity - if you already have PsychoPy installed, you only need to add DeToX and you’re ready to go. No additional dependencies, no complex setup procedures. It’s just a clean, intuitive wrapper that makes eye-tracking accessible.\nThis project didn’t start from scratch—it builds upon an existing repository that we have used in the past: psychopy_tobii_infant\nWhile this repository provided solid solutions for integrating Tobii eye trackers with PsychoPy, we added features and improvements that we found useful for running infant-friendly eye-tracking studies. Our goal was to simplify some of the more technical aspects while keeping the flexibility needed for research."
   },
   {
-    "objectID": "Vignettes/Installation.html#installing-psychopy",
-    "href": "Vignettes/Installation.html#installing-psychopy",
-    "title": "Installation",
-    "section": "Installing PsychoPy",
-    "text": "Installing PsychoPy\nSince PsychoPy is the main challenge, let’s tackle that first. You have two main options:\n\nPackage Installation\nInstall PsychoPy like any other Python package using pip. This approach is flexible and ideal if you prefer working in an IDE (like Positron, VS Code, PyCharm, or Spyder) where you have full control over your Python environment.\nStandalone Installation\nUse the PsychoPy standalone installer, which bundles PsychoPy and all its dependencies into a single, ready-to-use application. This is often the easiest way to get started, especially if you’re not familiar with managing Python environments or just want to hit the ground running.\n\nWe like installing psychopy as a package but you do you!\n\nPackageStandalone\n\n\nThis method is ideal if you prefer working in an IDE (like Positron, VS Code, PyCharm, or Spyder) and want full control over your Python environment.\n\nStep 1: Create a Virtual Environment\nWe like to use miniforge to handle our environments and Python installations. Any other method would work as well, but for simplicity we’ll show you how we prefer to do it.\nWe recommend using Python 3.10 for the best compatibility:\nmamba create -n detox_env python=3.10\nThis will create an environment called detox_env with python 3.10. Exactly what we need!\nYou will probably need to confirm by pressing y, and after a few seconds you’ll have your environment with Python 3.10! Great!\n\n\nStep 2: Activate Environment and Install PsychoPy\nNow let’s activate this environment (making sure we’re using it) and then install PsychoPy:\nmamba activate detox_env\npip install psychopy\nthis will take some time but if you are lucky you will have psychopy in your enviroment\nAgain, confirm if needed and you’re done! Amazing!\n\n\n\nPsychoPy is a large package with many dependencies, and sometimes (depending on your operating system) installing it can be quite tricky! For this reason, the PsychoPy website suggests using the standalone installation method. This is like installing regular software on your computer - it will install PsychoPy and all its dependencies in one go.\n\nStep 1: Install PsychoPy Standalone\n\nGo to the PsychoPy download page\nDownload the standalone installer for your operating system\nRun the installer and follow the setup instructions\n\nYou are done!!! Great!",
-    "crumbs": [
-      "Installation"
-    ]
+    "objectID": "index.html#simplicity",
+    "href": "index.html#simplicity",
+    "title": "DeToX",
+    "section": "Simplicity",
+    "text": "Simplicity\nWhile the eye-tracking landscape offers many excellent tools—from PsychoPy’s built-in Tobii integration to comprehensive packages like Titta—DeToX carves out its own niche through thoughtful simplicity. We’ve prioritized clarity and ease-of-use without sacrificing the flexibility researchers need. When your codebase is straightforward and well-documented, it becomes a platform for innovation rather than an obstacle to overcome."
   },
   {
-    "objectID": "Vignettes/Installation.html#installing-detox",
-    "href": "Vignettes/Installation.html#installing-detox",
-    "title": "Installation",
-    "section": "Installing DeToX",
-    "text": "Installing DeToX\nOnce PsychoPy is installed, we can look at DeToX. Let’s gets our hand dirty! The installation is the same for both the Package and Standalone PsychoPy installations but some steps differ.\n\n\n\n\n\n\nDeToX is Still in Development\n\n\n\nDeToX isn’t yet available on PyPI, so you’ll need to install it directly from our GitHub repository. Don’t worry—it’s straightforward, and we’ll guide you through it!\nOne requirement: You need Git installed on your system.\n📥 Don’t have Git? Download it from git-scm.com—installation takes just a minute.\n\n\n\nPackageStandalone\n\n\nAgain make sure to be in the correct environment if you installed PsychoPy as a package. with the following command:\nmamba activate detox_env\nThen simply run:\npip install git+https://github.com/DevStart-Hub/DeToX.git\nWait a few seconds, confirm if needed, and you are done!\n\n\n\nOpen PsychoPy\nGo to Coder View (the interface with the code editor)\nOpen the Tools menu\nSelect “Plugins/package manager…”\nClick on “Packages” in the top tabs\nClick the “Open PIP terminal” button\nType the following command: pip install git+https://github.com/DevStart-Hub/DeToX.git\n\nThat’s it! You now have both PsychoPy and DeToX installed and ready to use.\n\n\n\n\n\n\n\n\n\nImportant: DeToX requires coding\n\n\n\nDeToX is a code-based library that works with PsychoPy’s Coder interface. If you typically use PsychoPy’s Builder (the drag-and-drop visual interface), you’ll need to switch to the Coder interface to use DeToX. Don’t worry - we provide plenty of code examples to get you started!",
-    "crumbs": [
-      "Installation"
-    ]
+    "objectID": "index.html#documentation",
+    "href": "index.html#documentation",
+    "title": "DeToX",
+    "section": "Documentation",
+    "text": "Documentation\nWe believe that good software is only as valuable as its documentation. Too often, researchers encounter powerful packages that become frustrating to use due to unclear or incomplete documentation. When you’re left wondering what a function does or how to modify basic settings, the package becomes more of a hindrance than a help. A package should empower users, not confuse them. That’s why we’ve prioritized creating clear, comprehensive documentation with practical examples and step-by-step tutorials. Our goal is documentation that helps you understand not just what to do, but why—so you can confidently adapt the code to your specific experimental needs.\n\nVignettes\nOur vignettes offer hands-on explanations of DeToX’s settings and features through practical examples. Each vignette focuses on specific functionality, walking you through the implementation details and configuration options you’ll need to effectively integrate these features into your research workflow.\n\n\nTutorial\nWhile vignettes dive deep into individual features, our tutorial take a different approach - it demonstrate a complete working experiment from start to finish. Rather than explaining every parameter in detail it shows you how all the pieces fit together in real research scenarios."
   },
   {
-    "objectID": "api/psychopy_to_pixels.html",
-    "href": "api/psychopy_to_pixels.html",
+    "objectID": "api/tobii2pix.html",
+    "href": "api/tobii2pix.html",
     "title": "",
     "section": "",
-    "text": "Coordinate Conversionpsychopy_to_pixels",
+    "text": "Coordinate Conversiontobii2pix",
     "crumbs": [
       "Reference",
       "Coordinate Conversion",
-      "psychopy_to_pixels"
+      "tobii2pix"
     ]
   },
   {
-    "objectID": "api/psychopy_to_pixels.html#parameters",
-    "href": "api/psychopy_to_pixels.html#parameters",
+    "objectID": "api/tobii2pix.html#parameters",
+    "href": "api/tobii2pix.html#parameters",
     "title": "",
     "section": "Parameters",
-    "text": "Parameters\n\n\n\n\n\n\n\n\n\nName\nType\nDescription\nDefault\n\n\n\n\nwin\npsychopy.visual.Window\nThe PsychoPy window which provides information about units and size. Window units and dimensions determine the conversion method.\nrequired\n\n\npos\ntuple\nThe PsychoPy coordinates to convert as (x, y) in current window units.\nrequired",
+    "text": "Parameters\n\n\n\n\n\n\n\n\n\nName\nType\nDescription\nDefault\n\n\n\n\nwin\npsychopy.visual.Window\nThe PsychoPy window which provides screen dimensions for scaling.\nrequired\n\n\np\ntuple\nThe Tobii ADCS coordinates to convert as (x, y) in range [0, 1]. Origin is top-left, x increases rightward, y increases downward.\nrequired",
     "crumbs": [
       "Reference",
       "Coordinate Conversion",
-      "psychopy_to_pixels"
+      "tobii2pix"
     ]
   },
   {
-    "objectID": "api/psychopy_to_pixels.html#returns",
-    "href": "api/psychopy_to_pixels.html#returns",
+    "objectID": "api/tobii2pix.html#returns",
+    "href": "api/tobii2pix.html#returns",
     "title": "",
     "section": "Returns",
-    "text": "Returns\n\n\n\n\n\n\n\n\nName\nType\nDescription\n\n\n\n\n\ntuple\nThe converted pixel coordinates as (int, int) with origin at top-left. Values are rounded to nearest integer for pixel alignment.",
+    "text": "Returns\n\n\n\n\n\n\n\n\nName\nType\nDescription\n\n\n\n\n\ntuple\nThe converted PsychoPy pixel coordinates as (x, y) with origin at screen center. Values are rounded to nearest integer for pixel alignment.",
     "crumbs": [
       "Reference",
       "Coordinate Conversion",
-      "psychopy_to_pixels"
+      "tobii2pix"
     ]
   },
   {
-    "objectID": "api/psychopy_to_pixels.html#notes",
-    "href": "api/psychopy_to_pixels.html#notes",
+    "objectID": "api/tobii2pix.html#notes",
+    "href": "api/tobii2pix.html#notes",
     "title": "",
     "section": "Notes",
-    "text": "Notes\nThis function handles the main PsychoPy coordinate systems: - ‘height’: Screen height = 1, width adjusted by aspect ratio, centered origin - ‘norm’: Screen ranges from -1 to 1 in both dimensions, centered origin - Other units: Assumes coordinates are already close to pixel values\nThe output uses standard image coordinates where (0,0) is top-left and y increases downward, suitable for PIL and similar libraries.",
+    "text": "Notes\nThe conversion involves: 1. Shifting origin from top-left to center (-0.5 offset) 2. Scaling by screen dimensions to get pixel values 3. Inverting the Y-axis to match PsychoPy’s bottom-up convention\nOutput coordinates follow PsychoPy’s pixel convention where (0, 0) is at screen center.",
     "crumbs": [
       "Reference",
       "Coordinate Conversion",
-      "psychopy_to_pixels"
+      "tobii2pix"
     ]
   },
   {
-    "objectID": "api/index.html#main-eye-tracker-class",
-    "href": "api/index.html#main-eye-tracker-class",
-    "title": "",
-    "section": "Main Eye-tracker Class",
-    "text": "Main Eye-tracker Class\nThe central class of the DeToX package, responsible for connecting to and managing the Tobii eye tracker. This class must be instantiated before any other functionality can be used. It provides access to calibration, recording control, and gaze-contingent presentation methods. Below are the main methods and properties of this class:\n\n\n\nETracker\nA high-level controller for running eye-tracking experiments with Tobii Pro and PsychoPy.\n\n\n\n\nControl the Recording\nFunctions for starting, stopping, and managing the capture of eye-tracking data. These methods allow you to initiate and terminate recordings, mark events of interest, and save collected data to disk.\n\n\n\nETracker.start_recording\nBegin gaze data recording session.\n\n\nETracker.stop_recording\nStop gaze data recording and finalize session.\n\n\nETracker.record_event\nRecord timestamped experimental event during data collection.\n\n\nETracker.save_data\nSave buffered gaze and event data to file with optimized processing.\n\n\n\n\n\nCalibration\nMethods for running and managing eye tracker calibration. These include displaying calibration status, initiating calibration routines, and saving or loading calibration settings to ensure accurate gaze data.\n\n\n\nETracker.show_status\nReal-time visualization of participant’s eye position in track box.\n\n\nETracker.calibrate\nRun the infant-friendly calibration procedure.\n\n\nETracker.save_calibration\nSave the current calibration data to a file.\n\n\nETracker.load_calibration\nLoads calibration data from a file and applies it to the eye tracker.\n\n\n\n\n\nGaze Contingent\nTools for running gaze-contingent experiments, where visual presentation adapts dynamically to a participants gaze position. Includes functionality for live gaze-contingent control and methods to compute average gaze positions for experimental logic.\n\n\n\nETracker.gaze_contingent\nInitialize real-time gaze buffer for contingent applications.\n\n\nETracker.get_gaze_position\nGet current gaze position from rolling buffer.",
-    "crumbs": [
-      "Reference"
-    ]
-  },
-  {
-    "objectID": "api/index.html#internal-calibration",
-    "href": "api/index.html#internal-calibration",
-    "title": "",
-    "section": "Internal Calibration",
-    "text": "Internal Calibration\nClasses for running eye-tracker calibration. These get called internally by the ETracker class, and are reported here only for completeness. They are comprise of a base calibration class that set the common interface, and the specific implementations for Tobii and Mouse calibration.\n\n\n\nBaseCalibrationSession\nBase class with common functionality for both calibration types.\n\n\nTobiiCalibrationSession\nTobii-based calibration session for real eye tracking.\n\n\nMouseCalibrationSession\nMouse-based calibration session for simulation mode.",
-    "crumbs": [
-      "Reference"
-    ]
-  },
-  {
-    "objectID": "api/index.html#coordinate-conversion",
-    "href": "api/index.html#coordinate-conversion",
-    "title": "",
-    "section": "Coordinate Conversion",
-    "text": "Coordinate Conversion\nA collection of utility functions designed to help the conversion of the data from different formats. These are called internally by the ETracker class, but can be used independently if needed.\n\n\n\nconvert_height_to_units\nConvert a size from height units to the current window units.\n\n\nget_psychopy_pos\nConvert Tobii ADCS coordinates to PsychoPy coordinates.\n\n\npsychopy_to_pixels\nConvert PsychoPy coordinates to pixel coordinates.\n\n\nget_tobii_pos\nConvert PsychoPy coordinates to Tobii ADCS coordinates.\n\n\npix2tobii\nConvert PsychoPy pixel coordinates to Tobii ADCS coordinates.\n\n\ntobii2pix\nConvert Tobii ADCS coordinates to PsychoPy pixel coordinates.\n\n\nget_psychopy_pos_from_trackbox\nConvert Tobii TBCS coordinates to PsychoPy coordinates.",
-    "crumbs": [
-      "Reference"
-    ]
-  },
-  {
-    "objectID": "api/index.html#utilities",
-    "href": "api/index.html#utilities",
-    "title": "",
-    "section": "Utilities",
-    "text": "Utilities\nA set of utility classes and functions for presenting stimuli and formatted text. These are called internally by the ETracker class.\n\n\n\nNicePrint\nPrint a message in a box with an optional title AND return the formatted text.\n\n\nInfantStimuli\nStimuli manager for infant-friendly calibration procedures.",
-    "crumbs": [
-      "Reference"
-    ]
-  },
-  {
-    "objectID": "api/index.html#configuration-settings",
-    "href": "api/index.html#configuration-settings",
-    "title": "",
-    "section": "Configuration Settings",
-    "text": "Configuration Settings\nConfiguration classes and module-level instances for customizing the behavior and appearance of the DeToX eye-tracking system. These settings control animation parameters, colors, UI element sizes, and data formats. Note: These settings should generally not be changed unless you have specific requirements. However, they can be modified through the module-level instances (e.g., ETSettings.animation) for easy configuration of your experiments.\n\n\n\nETSettings.AnimationSettings\nAnimation parameters for calibration stimuli.\n\n\nETSettings.CalibrationColors\nColor settings for calibration visual elements.\n\n\nETSettings.UIElementSizes\nSize settings for user interface elements.\n\n\nETSettings.FontSizeMultipliers\nFont size multipliers for different text types.",
-    "crumbs": [
-      "Reference"
-    ]
-  },
-  {
-    "objectID": "api/get_psychopy_pos_from_trackbox.html",
-    "href": "api/get_psychopy_pos_from_trackbox.html",
+    "objectID": "api/pix2tobii.html",
+    "href": "api/pix2tobii.html",
     "title": "",
     "section": "",
-    "text": "Coordinate Conversionget_psychopy_pos_from_trackbox",
+    "text": "Coordinate Conversionpix2tobii",
     "crumbs": [
       "Reference",
       "Coordinate Conversion",
-      "get_psychopy_pos_from_trackbox"
+      "pix2tobii"
     ]
   },
   {
-    "objectID": "api/get_psychopy_pos_from_trackbox.html#parameters",
-    "href": "api/get_psychopy_pos_from_trackbox.html#parameters",
+    "objectID": "api/pix2tobii.html#parameters",
+    "href": "api/pix2tobii.html#parameters",
     "title": "",
     "section": "Parameters",
-    "text": "Parameters\n\n\n\n\n\n\n\n\n\nName\nType\nDescription\nDefault\n\n\n\n\nwin\npsychopy.visual.Window\nThe PsychoPy window which provides information about units and size. Window properties determine the target coordinate system.\nrequired\n\n\np\ntuple\nThe Tobii TBCS coordinates to convert as (x, y). Values are in range [0, 1] representing position within the track box from the tracker’s perspective.\nrequired\n\n\nunits\nstr\nThe target units for the PsychoPy coordinates. If None, uses the window’s default units. Supported: ‘norm’, ‘height’, ‘pix’, ‘cm’, ‘deg’, ‘degFlat’, ‘degFlatPos’.\nNone",
+    "text": "Parameters\n\n\n\n\n\n\n\n\n\nName\nType\nDescription\nDefault\n\n\n\n\nwin\npsychopy.visual.Window\nThe PsychoPy window which provides screen dimensions for normalization.\nrequired\n\n\np\ntuple\nThe PsychoPy pixel coordinates to convert as (x, y). Origin is at screen center, x increases rightward, y increases upward.\nrequired",
     "crumbs": [
       "Reference",
       "Coordinate Conversion",
-      "get_psychopy_pos_from_trackbox"
+      "pix2tobii"
     ]
   },
   {
-    "objectID": "api/get_psychopy_pos_from_trackbox.html#returns",
-    "href": "api/get_psychopy_pos_from_trackbox.html#returns",
+    "objectID": "api/pix2tobii.html#returns",
+    "href": "api/pix2tobii.html#returns",
     "title": "",
     "section": "Returns",
-    "text": "Returns\n\n\n\n\n\n\n\n\nName\nType\nDescription\n\n\n\n\n\ntuple\nThe converted PsychoPy coordinates in the specified unit system. Suitable for positioning visual feedback about user position.",
+    "text": "Returns\n\n\n\n\n\n\n\n\nName\nType\nDescription\n\n\n\n\n\ntuple\nThe converted Tobii ADCS coordinates as (x, y) in range [0, 1]. Origin is top-left, x increases rightward, y increases downward.",
     "crumbs": [
       "Reference",
       "Coordinate Conversion",
-      "get_psychopy_pos_from_trackbox"
+      "pix2tobii"
     ]
   },
   {
-    "objectID": "api/get_psychopy_pos_from_trackbox.html#raises",
-    "href": "api/get_psychopy_pos_from_trackbox.html#raises",
+    "objectID": "api/pix2tobii.html#notes",
+    "href": "api/pix2tobii.html#notes",
+    "title": "",
+    "section": "Notes",
+    "text": "Notes\nThe conversion involves: 1. Translating the origin from center to top-left (+0.5 offset) 2. Normalizing by screen dimensions to get [0, 1] range 3. Inverting the Y-axis to match Tobii’s top-down convention\nThis function assumes PsychoPy’s pixel coordinate convention where (0, 0) is at screen center.",
+    "crumbs": [
+      "Reference",
+      "Coordinate Conversion",
+      "pix2tobii"
+    ]
+  },
+  {
+    "objectID": "api/get_tobii_pos.html",
+    "href": "api/get_tobii_pos.html",
+    "title": "",
+    "section": "",
+    "text": "Coordinate Conversionget_tobii_pos",
+    "crumbs": [
+      "Reference",
+      "Coordinate Conversion",
+      "get_tobii_pos"
+    ]
+  },
+  {
+    "objectID": "api/get_tobii_pos.html#parameters",
+    "href": "api/get_tobii_pos.html#parameters",
+    "title": "",
+    "section": "Parameters",
+    "text": "Parameters\n\n\n\n\n\n\n\n\n\nName\nType\nDescription\nDefault\n\n\n\n\nwin\npsychopy.visual.Window\nThe PsychoPy window which provides information about units and size. Window properties determine the source coordinate system.\nrequired\n\n\np\ntuple\nThe PsychoPy coordinates to convert as (x, y) in specified units.\nrequired\n\n\nunits\nstr\nThe units of the input PsychoPy coordinates. If None, uses the window’s default units. Supported: ‘norm’, ‘height’, ‘pix’, ‘cm’, ‘deg’, ‘degFlat’, ‘degFlatPos’.\nNone",
+    "crumbs": [
+      "Reference",
+      "Coordinate Conversion",
+      "get_tobii_pos"
+    ]
+  },
+  {
+    "objectID": "api/get_tobii_pos.html#returns",
+    "href": "api/get_tobii_pos.html#returns",
+    "title": "",
+    "section": "Returns",
+    "text": "Returns\n\n\n\n\n\n\n\n\nName\nType\nDescription\n\n\n\n\n\ntuple\nThe converted Tobii ADCS coordinates as (x, y) where both values are in range [0, 1]. (0, 0) is top-left, (1, 1) is bottom-right.",
+    "crumbs": [
+      "Reference",
+      "Coordinate Conversion",
+      "get_tobii_pos"
+    ]
+  },
+  {
+    "objectID": "api/get_tobii_pos.html#raises",
+    "href": "api/get_tobii_pos.html#raises",
     "title": "",
     "section": "Raises",
     "text": "Raises\n\n\n\nName\nType\nDescription\n\n\n\n\n\nValueError\nIf the provided units are not supported.",
     "crumbs": [
       "Reference",
       "Coordinate Conversion",
-      "get_psychopy_pos_from_trackbox"
+      "get_tobii_pos"
     ]
   },
   {
-    "objectID": "api/get_psychopy_pos_from_trackbox.html#notes",
-    "href": "api/get_psychopy_pos_from_trackbox.html#notes",
+    "objectID": "api/get_tobii_pos.html#notes",
+    "href": "api/get_tobii_pos.html#notes",
     "title": "",
     "section": "Notes",
-    "text": "Notes\nTBCS coordinates are primarily used in the show_status() method to provide visual feedback about participant positioning. The X-axis is reversed compared to ADCS because TBCS uses the tracker’s perspective.\nThis function handles the perspective reversal and transforms to PsychoPy’s coordinate conventions for proper visualization.",
+    "text": "Notes\nThis function is the inverse of get_psychopy_pos() and is primarily used during calibration to inform the eye tracker where calibration targets are displayed on screen.",
     "crumbs": [
       "Reference",
       "Coordinate Conversion",
-      "get_psychopy_pos_from_trackbox"
+      "get_tobii_pos"
     ]
   },
   {
-    "objectID": "api/convert_height_to_units.html",
-    "href": "api/convert_height_to_units.html",
+    "objectID": "api/get_psychopy_pos.html",
+    "href": "api/get_psychopy_pos.html",
     "title": "",
     "section": "",
-    "text": "Coordinate Conversionconvert_height_to_units",
+    "text": "Coordinate Conversionget_psychopy_pos",
     "crumbs": [
       "Reference",
       "Coordinate Conversion",
-      "convert_height_to_units"
+      "get_psychopy_pos"
     ]
   },
   {
-    "objectID": "api/convert_height_to_units.html#parameters",
-    "href": "api/convert_height_to_units.html#parameters",
+    "objectID": "api/get_psychopy_pos.html#parameters",
+    "href": "api/get_psychopy_pos.html#parameters",
     "title": "",
     "section": "Parameters",
-    "text": "Parameters\n\n\n\n\n\n\n\n\n\nName\nType\nDescription\nDefault\n\n\n\n\nwin\npsychopy.visual.Window\nThe PsychoPy window which provides information about units and size. The window’s current unit system determines the conversion method.\nrequired\n\n\nheight_value\nfloat\nSize in height units (fraction of screen height). For example, 0.1 represents 10% of the screen height.\nrequired",
+    "text": "Parameters\n\n\n\n\n\n\n\n\n\nName\nType\nDescription\nDefault\n\n\n\n\nwin\npsychopy.visual.Window\nThe PsychoPy window which provides information about units and size. Window properties determine the target coordinate system.\nrequired\n\n\np\ntuple or array - like\nThe Tobii ADCS coordinates to convert. Can be: - Single coordinate: (x, y) tuple - Multiple coordinates: (N, 2) array where N is number of samples Values should be in range [0, 1] where (0, 0) is top-left and (1, 1) is bottom-right.\nrequired\n\n\nunits\nstr\nThe target units for the PsychoPy coordinates. If None, uses the window’s default units. Supported: ‘norm’, ‘height’, ‘pix’, ‘cm’, ‘deg’, ‘degFlat’, ‘degFlatPos’.\nNone",
     "crumbs": [
       "Reference",
       "Coordinate Conversion",
-      "convert_height_to_units"
+      "get_psychopy_pos"
     ]
   },
   {
-    "objectID": "api/convert_height_to_units.html#returns",
-    "href": "api/convert_height_to_units.html#returns",
+    "objectID": "api/get_psychopy_pos.html#returns",
+    "href": "api/get_psychopy_pos.html#returns",
     "title": "",
     "section": "Returns",
-    "text": "Returns\n\n\n\n\n\n\n\n\nName\nType\nDescription\n\n\n\n\n\nfloat\nSize converted to current window units. The returned value maintains the same visual size on screen as the original height specification.",
+    "text": "Returns\n\n\n\n\n\n\n\n\nName\nType\nDescription\n\n\n\n\n\ntuple or ndarray\nThe converted PsychoPy coordinates in the specified unit system. - Single input: returns (x, y) tuple - Array input: returns (N, 2) array Origin is at screen center for most unit systems.",
     "crumbs": [
       "Reference",
       "Coordinate Conversion",
-      "convert_height_to_units"
+      "get_psychopy_pos"
     ]
   },
   {
-    "objectID": "api/convert_height_to_units.html#notes",
-    "href": "api/convert_height_to_units.html#notes",
-    "title": "",
-    "section": "Notes",
-    "text": "Notes\nHeight units are PsychoPy’s recommended unit system for maintaining consistent appearance across different screen sizes and aspect ratios. This function enables that consistency when working with other unit systems.\nSupported unit conversions: - height: No conversion needed (identity transform) - norm: Scales by 2.0 to match normalized coordinate range - pix: Multiplies by screen height in pixels - cm/deg: Converts through pixels using monitor calibration",
-    "crumbs": [
-      "Reference",
-      "Coordinate Conversion",
-      "convert_height_to_units"
-    ]
-  },
-  {
-    "objectID": "api/NicePrint.html",
-    "href": "api/NicePrint.html",
-    "title": "",
-    "section": "",
-    "text": "UtilitiesNicePrint",
-    "crumbs": [
-      "Reference",
-      "Utilities",
-      "NicePrint"
-    ]
-  },
-  {
-    "objectID": "api/NicePrint.html#parameters",
-    "href": "api/NicePrint.html#parameters",
-    "title": "",
-    "section": "Parameters",
-    "text": "Parameters\n\n\n\n\n\n\n\n\n\nName\nType\nDescription\nDefault\n\n\n\n\nbody\nstr\nThe string to print inside the box. Can contain multiple lines separated by newline characters. Each line will be padded to align within the box.\nrequired\n\n\ntitle\nstr\nA title to print on the top border of the box. The title will be centered within the top border. If empty string or not provided, the top border will be solid. Default empty string.\n''",
-    "crumbs": [
-      "Reference",
-      "Utilities",
-      "NicePrint"
-    ]
-  },
-  {
-    "objectID": "api/NicePrint.html#returns",
-    "href": "api/NicePrint.html#returns",
-    "title": "",
-    "section": "Returns",
-    "text": "Returns\n\n\n\n\n\n\n\n\nName\nType\nDescription\n\n\n\n\n\nstr\nThe formatted text with box characters, ready for display in console or use with PsychoPy TextStim objects. Includes all box-drawing characters and proper spacing.",
-    "crumbs": [
-      "Reference",
-      "Utilities",
-      "NicePrint"
-    ]
-  },
-  {
-    "objectID": "api/InfantStimuli.html",
-    "href": "api/InfantStimuli.html",
-    "title": "",
-    "section": "",
-    "text": "UtilitiesInfantStimuli",
-    "crumbs": [
-      "Reference",
-      "Utilities",
-      "InfantStimuli"
-    ]
-  },
-  {
-    "objectID": "api/InfantStimuli.html#attributes",
-    "href": "api/InfantStimuli.html#attributes",
-    "title": "",
-    "section": "Attributes",
-    "text": "Attributes\n\n\n\n\n\n\n\n\nName\nType\nDescription\n\n\n\n\nwin\npsychopy.visual.Window\nThe PsychoPy window used for rendering.\n\n\nstims\ndict\nDictionary mapping indices to ImageStim objects.\n\n\nstim_size\ndict\nDictionary mapping indices to original stimulus sizes.\n\n\npresent_order\nlist\nList defining the presentation sequence of stimuli.",
-    "crumbs": [
-      "Reference",
-      "Utilities",
-      "InfantStimuli"
-    ]
-  },
-  {
-    "objectID": "api/InfantStimuli.html#methods",
-    "href": "api/InfantStimuli.html#methods",
-    "title": "",
-    "section": "Methods",
-    "text": "Methods\n\n\n\nName\nDescription\n\n\n\n\nget_stim\nGet the stimulus by presentation order.\n\n\nget_stim_original_size\nGet the original size of the stimulus by presentation order.\n\n\n\n\nget_stim\nInfantStimuli.get_stim(idx)\nGet the stimulus by presentation order.\nRetrieves a stimulus based on its position in the presentation sequence. Uses modulo arithmetic to wrap around when the index exceeds the number of available stimuli, enabling circular access patterns.\n\nParameters\n\n\n\n\n\n\n\n\n\nName\nType\nDescription\nDefault\n\n\n\n\nidx\nint\nThe index of the stimulus in the presentation order. Can be any non-negative integer; values beyond the stimulus count will wrap around using modulo operation.\nrequired\n\n\n\n\n\nReturns\n\n\n\n\n\n\n\n\nName\nType\nDescription\n\n\n\n\n\npsychopy.visual.ImageStim\nThe stimulus corresponding to the given index in the presentation order. The returned stimulus is ready for positioning, animation, and drawing operations.\n\n\n\n\n\nExamples\n&gt;&gt;&gt; stim_manager = InfantStimuli(win, ['img1.png', 'img2.png'])\n&gt;&gt;&gt; stim = stim_manager.get_stim(0)  # Get first stimulus\n&gt;&gt;&gt; stim = stim_manager.get_stim(5)  # Wraps around if only 2 stimuli\n\n\n\nget_stim_original_size\nInfantStimuli.get_stim_original_size(idx)\nGet the original size of the stimulus by presentation order.\nReturns the original dimensions of a stimulus as loaded from the image file. This is useful for animation calculations where you need to know the base size before applying scaling transformations.\n\nParameters\n\n\n\n\n\n\n\n\n\nName\nType\nDescription\nDefault\n\n\n\n\nidx\nint\nThe index of the stimulus in the presentation order. Can be any non-negative integer; values beyond the stimulus count will wrap around using modulo operation.\nrequired\n\n\n\n\n\nReturns\n\n\n\n\n\n\n\n\nName\nType\nDescription\n\n\n\n\n\ntuple\nThe original size of the stimulus as (width, height) in the units specified during stimulus creation. These values represent the stimulus dimensions before any scaling or animation effects.\n\n\n\n\n\nNotes\nThe original size is preserved at initialization and remains constant throughout the session, regardless of any size modifications made to the stimulus during animation.",
-    "crumbs": [
-      "Reference",
-      "Utilities",
-      "InfantStimuli"
-    ]
-  },
-  {
-    "objectID": "api/ETracker.start_recording.html",
-    "href": "api/ETracker.start_recording.html",
-    "title": "",
-    "section": "",
-    "text": "Main Eye-tracker ClassControl the RecordingETracker.start_recording",
-    "crumbs": [
-      "Reference",
-      "Main Eye-tracker Class",
-      "Control the Recording",
-      "ETracker.start_recording"
-    ]
-  },
-  {
-    "objectID": "api/ETracker.start_recording.html#parameters",
-    "href": "api/ETracker.start_recording.html#parameters",
-    "title": "",
-    "section": "Parameters",
-    "text": "Parameters\n\n\n\n\n\n\n\n\n\nName\nType\nDescription\nDefault\n\n\n\n\nfilename\nstr\nOutput filename for gaze data. If None, generates timestamp-based name. File extension determines format (.h5/.hdf5 for HDF5, .csv for CSV, defaults to .h5).\nNone\n\n\nraw_format\nbool\nIf True, preserves all original Tobii SDK column names and data. If False (default), uses simplified column names and subset of columns. Raw format is useful for advanced analysis requiring full metadata.\nFalse",
-    "crumbs": [
-      "Reference",
-      "Main Eye-tracker Class",
-      "Control the Recording",
-      "ETracker.start_recording"
-    ]
-  },
-  {
-    "objectID": "api/ETracker.start_recording.html#examples",
-    "href": "api/ETracker.start_recording.html#examples",
-    "title": "",
-    "section": "Examples",
-    "text": "Examples",
-    "crumbs": [
-      "Reference",
-      "Main Eye-tracker Class",
-      "Control the Recording",
-      "ETracker.start_recording"
-    ]
-  },
-  {
-    "objectID": "api/ETracker.save_data.html",
-    "href": "api/ETracker.save_data.html",
-    "title": "",
-    "section": "",
-    "text": "Main Eye-tracker ClassControl the RecordingETracker.save_data\n\n\n\n\n\nETracker.save_data\nETracker.save_data()\nSave buffered gaze and event data to file with optimized processing.\nUses thread-safe buffer swapping to minimize lock time, then processes and saves data in CSV or HDF5 format. Events are merged with gaze data based on timestamp proximity.\n\n\n\n\n\n\n Back to top",
-    "crumbs": [
-      "Reference",
-      "Main Eye-tracker Class",
-      "Control the Recording",
-      "ETracker.save_data"
-    ]
-  },
-  {
-    "objectID": "api/ETracker.record_event.html",
-    "href": "api/ETracker.record_event.html",
-    "title": "",
-    "section": "",
-    "text": "Main Eye-tracker ClassControl the RecordingETracker.record_event",
-    "crumbs": [
-      "Reference",
-      "Main Eye-tracker Class",
-      "Control the Recording",
-      "ETracker.record_event"
-    ]
-  },
-  {
-    "objectID": "api/ETracker.record_event.html#parameters",
-    "href": "api/ETracker.record_event.html#parameters",
-    "title": "",
-    "section": "Parameters",
-    "text": "Parameters\n\n\n\n\n\n\n\n\n\nName\nType\nDescription\nDefault\n\n\n\n\nlabel\nstr\nDescriptive label for the event (e.g., ‘trial_start’, ‘stimulus_onset’).\nrequired",
-    "crumbs": [
-      "Reference",
-      "Main Eye-tracker Class",
-      "Control the Recording",
-      "ETracker.record_event"
-    ]
-  },
-  {
-    "objectID": "api/ETracker.record_event.html#raises",
-    "href": "api/ETracker.record_event.html#raises",
+    "objectID": "api/get_psychopy_pos.html#raises",
+    "href": "api/get_psychopy_pos.html#raises",
     "title": "",
     "section": "Raises",
-    "text": "Raises\n\n\n\nName\nType\nDescription\n\n\n\n\n\nRuntimeWarning\nIf called when recording is not active.",
+    "text": "Raises\n\n\n\n\n\n\n\n\nName\nType\nDescription\n\n\n\n\n\nValueError\nIf the provided units are not supported by PsychoPy.",
     "crumbs": [
       "Reference",
-      "Main Eye-tracker Class",
-      "Control the Recording",
-      "ETracker.record_event"
+      "Coordinate Conversion",
+      "get_psychopy_pos"
     ]
   },
   {
-    "objectID": "api/ETracker.record_event.html#examples",
-    "href": "api/ETracker.record_event.html#examples",
+    "objectID": "api/get_psychopy_pos.html#examples",
+    "href": "api/get_psychopy_pos.html#examples",
     "title": "",
     "section": "Examples",
-    "text": "Examples\ntracker.record_event(‘trial_1_start’) # … present stimulus … tracker.record_event(‘stimulus_offset’)",
+    "text": "Examples\n&gt;&gt;&gt; # Single coordinate\n&gt;&gt;&gt; pos = get_psychopy_pos(win, (0.5, 0.5))  # Returns (0, 0) in most units\n&gt;&gt;&gt; # Multiple coordinates (vectorized)\n&gt;&gt;&gt; coords = np.array([[0.5, 0.5], [0.0, 0.0], [1.0, 1.0]])\n&gt;&gt;&gt; positions = get_psychopy_pos(win, coords)  # Returns (N, 2) array",
     "crumbs": [
       "Reference",
-      "Main Eye-tracker Class",
-      "Control the Recording",
-      "ETracker.record_event"
+      "Coordinate Conversion",
+      "get_psychopy_pos"
     ]
   },
   {
-    "objectID": "api/ETracker.load_calibration.html",
-    "href": "api/ETracker.load_calibration.html",
+    "objectID": "api/TobiiCalibrationSession.html",
+    "href": "api/TobiiCalibrationSession.html",
     "title": "",
     "section": "",
-    "text": "Main Eye-tracker ClassCalibrationETracker.load_calibration",
-    "crumbs": [
-      "Reference",
-      "Main Eye-tracker Class",
-      "Calibration",
-      "ETracker.load_calibration"
-    ]
-  },
-  {
-    "objectID": "api/ETracker.load_calibration.html#parameters",
-    "href": "api/ETracker.load_calibration.html#parameters",
-    "title": "",
-    "section": "Parameters",
-    "text": "Parameters\n\n\n\n\n\n\n\n\n\nName\nType\nDescription\nDefault\n\n\n\n\nfilename\nstr\nThe path to the calibration data file (e.g., “subject_01_calib.dat”). If use_gui is True, this path is used as the default suggestion in the file dialog. If use_gui is False, this parameter is required.\nNone\n\n\nuse_gui\nbool\nIf True, a graphical file-open dialog is displayed for the user to select the calibration file. Defaults to False.\nFalse",
-    "crumbs": [
-      "Reference",
-      "Main Eye-tracker Class",
-      "Calibration",
-      "ETracker.load_calibration"
-    ]
-  },
-  {
-    "objectID": "api/ETracker.load_calibration.html#returns",
-    "href": "api/ETracker.load_calibration.html#returns",
-    "title": "",
-    "section": "Returns",
-    "text": "Returns\n\n\n\n\n\n\n\n\nName\nType\nDescription\n\n\n\n\n\nbool\nReturns True if the calibration was successfully loaded and applied, and False otherwise (e.g., user cancelled the dialog, file not found, or data was invalid).",
-    "crumbs": [
-      "Reference",
-      "Main Eye-tracker Class",
-      "Calibration",
-      "ETracker.load_calibration"
-    ]
-  },
-  {
-    "objectID": "api/ETracker.load_calibration.html#raises",
-    "href": "api/ETracker.load_calibration.html#raises",
-    "title": "",
-    "section": "Raises",
-    "text": "Raises\n\n\n\n\n\n\n\n\nName\nType\nDescription\n\n\n\n\n\nRuntimeError\nIf the method is called while the ETracker is in simulation mode.\n\n\n\nValueError\nIf use_gui is False and filename is not provided.",
-    "crumbs": [
-      "Reference",
-      "Main Eye-tracker Class",
-      "Calibration",
-      "ETracker.load_calibration"
-    ]
-  },
-  {
-    "objectID": "api/ETracker.gaze_contingent.html",
-    "href": "api/ETracker.gaze_contingent.html",
-    "title": "",
-    "section": "",
-    "text": "Main Eye-tracker ClassGaze ContingentETracker.gaze_contingent\n\n\n\n\n\nETracker.gaze_contingent\nETracker.gaze_contingent(N=5)\nInitialize real-time gaze buffer for contingent applications.\n\n\n\n\n\n\n Back to top",
-    "crumbs": [
-      "Reference",
-      "Main Eye-tracker Class",
-      "Gaze Contingent",
-      "ETracker.gaze_contingent"
-    ]
-  },
-  {
-    "objectID": "api/ETSettings.UIElementSizes.html",
-    "href": "api/ETSettings.UIElementSizes.html",
-    "title": "",
-    "section": "",
-    "text": "Configuration SettingsETSettings.UIElementSizes",
-    "crumbs": [
-      "Reference",
-      "Configuration Settings",
-      "ETSettings.UIElementSizes"
-    ]
-  },
-  {
-    "objectID": "api/ETSettings.UIElementSizes.html#attributes",
-    "href": "api/ETSettings.UIElementSizes.html#attributes",
-    "title": "",
-    "section": "Attributes",
-    "text": "Attributes\n\n\n\n\n\n\n\n\nName\nType\nDescription\n\n\n\n\nhighlight\nfloat\nRadius of circles highlighting selected calibration points for retry. Default is 0.04 (4% of screen height).\n\n\nline_width\nfloat\nThickness of lines drawn in calibration visualizations. Default is 0.003 (0.3% of screen height).\n\n\nmarker\nfloat\nSize of markers indicating data collection points. Default is 0.02 (2% of screen height).\n\n\nborder\nfloat\nThickness of the red calibration mode border around the screen. Default is 0.005 (0.5% of screen height).\n\n\nplot_line\nfloat\nWidth of lines in calibration result plots connecting targets to samples. Default is 0.002 (0.2% of screen height).\n\n\ntext\nfloat\nBase text height for all text displays in the calibration interface. Default is 0.025 (2.5% of screen height).\n\n\ntarget_circle\nfloat\nRadius of target circles drawn in calibration result visualizations. Default is 0.012 (1.2% of screen height).\n\n\ntarget_circle_width\nfloat\nLine width for target circle outlines in result visualizations. Default is 0.006 (0.6% of screen height).",
-    "crumbs": [
-      "Reference",
-      "Configuration Settings",
-      "ETSettings.UIElementSizes"
-    ]
-  },
-  {
-    "objectID": "api/ETSettings.UIElementSizes.html#notes",
-    "href": "api/ETSettings.UIElementSizes.html#notes",
-    "title": "",
-    "section": "Notes",
-    "text": "Notes\nHeight units provide consistent visual appearance across different screen sizes and aspect ratios. The conversion to pixels or other units is handled automatically by the coordinate conversion functions.",
-    "crumbs": [
-      "Reference",
-      "Configuration Settings",
-      "ETSettings.UIElementSizes"
-    ]
-  },
-  {
-    "objectID": "api/ETSettings.UIElementSizes.html#examples",
-    "href": "api/ETSettings.UIElementSizes.html#examples",
-    "title": "",
-    "section": "Examples",
-    "text": "Examples\n&gt;&gt;&gt; ui_sizes = UIElementSizes()\n&gt;&gt;&gt; ui_sizes.highlight = 0.06  # Larger highlight circles\n&gt;&gt;&gt; ui_sizes.text = 0.035  # Larger text",
-    "crumbs": [
-      "Reference",
-      "Configuration Settings",
-      "ETSettings.UIElementSizes"
-    ]
-  },
-  {
-    "objectID": "api/ETSettings.CalibrationColors.html",
-    "href": "api/ETSettings.CalibrationColors.html",
-    "title": "",
-    "section": "",
-    "text": "Configuration SettingsETSettings.CalibrationColors",
-    "crumbs": [
-      "Reference",
-      "Configuration Settings",
-      "ETSettings.CalibrationColors"
-    ]
-  },
-  {
-    "objectID": "api/ETSettings.CalibrationColors.html#attributes",
-    "href": "api/ETSettings.CalibrationColors.html#attributes",
-    "title": "",
-    "section": "Attributes",
-    "text": "Attributes\n\n\n\n\n\n\n\n\nName\nType\nDescription\n\n\n\n\nleft_eye\ntuple of int\nRGBA color for Tobii left eye gaze samples (R, G, B, A). Default is (0, 255, 0, 255) - bright green.\n\n\nright_eye\ntuple of int\nRGBA color for Tobii right eye gaze samples (R, G, B, A). Default is (255, 0, 0, 255) - bright red.\n\n\nmouse\ntuple of int\nRGBA color for simulated mouse position samples (R, G, B, A). Default is (255, 128, 0, 255) - orange.\n\n\ntarget_outline\ntuple of int\nRGBA color for calibration target circle outlines (R, G, B, A). Default is (24, 24, 24, 255) - dark gray/black.\n\n\nhighlight\ntuple of int\nRGBA color for highlighting selected calibration points (R, G, B, A). Default is (255, 255, 0, 255) - bright yellow.",
-    "crumbs": [
-      "Reference",
-      "Configuration Settings",
-      "ETSettings.CalibrationColors"
-    ]
-  },
-  {
-    "objectID": "api/ETSettings.CalibrationColors.html#notes",
-    "href": "api/ETSettings.CalibrationColors.html#notes",
-    "title": "",
-    "section": "Notes",
-    "text": "Notes\nAll color values use 8-bit channels (0-255 range) in RGBA format. The alpha channel (A) controls opacity where 255 is fully opaque.",
-    "crumbs": [
-      "Reference",
-      "Configuration Settings",
-      "ETSettings.CalibrationColors"
-    ]
-  },
-  {
-    "objectID": "api/ETSettings.CalibrationColors.html#examples",
-    "href": "api/ETSettings.CalibrationColors.html#examples",
-    "title": "",
-    "section": "Examples",
-    "text": "Examples\n&gt;&gt;&gt; colors = CalibrationColors()\n&gt;&gt;&gt; colors.highlight = (0, 255, 255, 255)  # Change to cyan\n&gt;&gt;&gt; colors.left_eye = (0, 200, 0, 200)  # Semi-transparent green",
-    "crumbs": [
-      "Reference",
-      "Configuration Settings",
-      "ETSettings.CalibrationColors"
-    ]
-  },
-  {
-    "objectID": "api/BaseCalibrationSession.html",
-    "href": "api/BaseCalibrationSession.html",
-    "title": "",
-    "section": "",
-    "text": "Internal CalibrationBaseCalibrationSession",
+    "text": "Internal CalibrationTobiiCalibrationSession",
     "crumbs": [
       "Reference",
       "Internal Calibration",
-      "BaseCalibrationSession"
+      "TobiiCalibrationSession"
     ]
   },
   {
-    "objectID": "api/BaseCalibrationSession.html#methods",
-    "href": "api/BaseCalibrationSession.html#methods",
+    "objectID": "api/TobiiCalibrationSession.html#methods",
+    "href": "api/TobiiCalibrationSession.html#methods",
     "title": "",
     "section": "Methods",
-    "text": "Methods\n\n\n\nName\nDescription\n\n\n\n\ncheck_points\nEnsure number of calibration points is within allowed range.\n\n\nshow_message_and_wait\nDisplay a message on screen and in console, then wait for keypress.\n\n\n\n\ncheck_points\nBaseCalibrationSession.check_points(calibration_points)\nEnsure number of calibration points is within allowed range.\nValidates that the provided calibration points fall within the supported range for infant calibration protocols. Both Tobii and simulation modes support 2-9 calibration points.\n\nParameters\n\n\n\n\n\n\n\n\n\nName\nType\nDescription\nDefault\n\n\n\n\ncalibration_points\nlist\nList of calibration point coordinates to validate.\nrequired\n\n\n\n\n\nRaises\n\n\n\n\n\n\n\n\nName\nType\nDescription\n\n\n\n\n\nValueError\nIf number of points is less than 2 or greater than 9.\n\n\n\n\n\n\nshow_message_and_wait\nBaseCalibrationSession.show_message_and_wait(body, title='', pos=(0, -0.15))\nDisplay a message on screen and in console, then wait for keypress.\nShows formatted message both in the PsychoPy window and console output, then pauses execution until any key is pressed. Useful for instructions and status messages during calibration.\n\nParameters\n\n\n\n\n\n\n\n\n\nName\nType\nDescription\nDefault\n\n\n\n\nbody\nstr\nThe main message text to display. Will be formatted with box-drawing characters via NicePrint.\nrequired\n\n\ntitle\nstr\nTitle for the message box. Appears at the top of the formatted box. Default empty string.\n''\n\n\npos\ntuple\nPosition of the message box center on screen in window units. Default (0, -0.15) places message slightly below center.\n(0, -0.15)\n\n\n\n\n\nReturns\n\n\n\nName\nType\nDescription\n\n\n\n\n\nNone",
+    "text": "Methods\n\n\n\nName\nDescription\n\n\n\n\nrun\nMain routine to run the full Tobii calibration workflow.\n\n\n\n\nrun\nTobiiCalibrationSession.run(calibration_points)\nMain routine to run the full Tobii calibration workflow.\nThis function presents each calibration target, collects gaze data via the eye tracker, shows the results, and allows the user to retry any subset of points until satisfied.\n\nParameters\n\n\n\n\n\n\n\n\n\nName\nType\nDescription\nDefault\n\n\n\n\ncalibration_points\nlist of (float, float)\nList of calibration points in NORMALIZED coordinates [-1, 1]. Will be converted to window units and then to Tobii ADCS format.\nrequired\n\n\n\n\n\nReturns\n\n\n\n\n\n\n\n\nName\nType\nDescription\n\n\n\n\n\nbool\nTrue if calibration was successful and accepted by user, False if aborted via escape key or if calibration computation failed.",
     "crumbs": [
       "Reference",
       "Internal Calibration",
-      "BaseCalibrationSession"
+      "TobiiCalibrationSession"
     ]
   },
   {
-    "objectID": "api/ETSettings.AnimationSettings.html",
-    "href": "api/ETSettings.AnimationSettings.html",
+    "objectID": "api/MouseCalibrationSession.html",
+    "href": "api/MouseCalibrationSession.html",
     "title": "",
     "section": "",
-    "text": "Configuration SettingsETSettings.AnimationSettings",
+    "text": "Internal CalibrationMouseCalibrationSession",
     "crumbs": [
       "Reference",
-      "Configuration Settings",
-      "ETSettings.AnimationSettings"
+      "Internal Calibration",
+      "MouseCalibrationSession"
     ]
   },
   {
-    "objectID": "api/ETSettings.AnimationSettings.html#attributes",
-    "href": "api/ETSettings.AnimationSettings.html#attributes",
+    "objectID": "api/MouseCalibrationSession.html#methods",
+    "href": "api/MouseCalibrationSession.html#methods",
     "title": "",
-    "section": "Attributes",
-    "text": "Attributes\n\n\n\n\n\n\n\n\nName\nType\nDescription\n\n\n\n\nfocus_time\nfloat\nWait time in seconds before collecting calibration data at each point. Allows participant to fixate on the target. Default is 0.5 seconds.\n\n\nzoom_speed\nfloat\nSpeed multiplier for the zoom animation. Higher values make the size oscillation faster. Default is 6.0.\n\n\nmax_zoom_size\nfloat\nMaximum size for zoom animation as percentage of screen height. Default is 0.11 (11% of screen height).\n\n\nmin_zoom_size\nfloat\nMinimum size for zoom animation as percentage of screen height. Default is 0.05 (5% of screen height).\n\n\ntrill_size\nfloat\nFixed size for trill animation as percentage of screen height. Default is 0.075 (7.5% of screen height).\n\n\ntrill_rotation_range\nfloat\nMaximum rotation angle in degrees for trill animation. Default is 20 degrees.\n\n\ntrill_cycle_duration\nfloat\nTotal cycle time for trill animation in seconds (active + pause). Default is 1.5 seconds.\n\n\ntrill_active_duration\nfloat\nDuration of active trill rotation in seconds, within each cycle. Default is 1.1 seconds (leaves 0.4s pause).\n\n\ntrill_frequency\nfloat\nNumber of back-and-forth rotation oscillations per second during active trill phase. Default is 3.0 oscillations/second.",
+    "section": "Methods",
+    "text": "Methods\n\n\n\nName\nDescription\n\n\n\n\nrun\nMain function to run the mouse-based calibration routine.\n\n\n\n\nrun\nMouseCalibrationSession.run(calibration_points)\nMain function to run the mouse-based calibration routine.\nExecutes the complete calibration workflow using mouse position as a proxy for gaze data. Follows the same interaction pattern as Tobii calibration to ensure consistency across modes.\n\nParameters\n\n\n\n\n\n\n\n\n\nName\nType\nDescription\nDefault\n\n\n\n\ncalibration_points\nlist of (float, float)\nList of calibration points in NORMALIZED coordinates [-1, 1]. Will be converted to window units automatically.\nrequired\n\n\n\n\n\nReturns\n\n\n\n\n\n\n\n\nName\nType\nDescription\n\n\n\n\n\nbool\nTrue if calibration finished successfully and was accepted by user, False if the user exits early via escape key.",
     "crumbs": [
       "Reference",
-      "Configuration Settings",
-      "ETSettings.AnimationSettings"
+      "Internal Calibration",
+      "MouseCalibrationSession"
     ]
   },
   {
-    "objectID": "api/ETSettings.AnimationSettings.html#examples",
-    "href": "api/ETSettings.AnimationSettings.html#examples",
-    "title": "",
-    "section": "Examples",
-    "text": "Examples\n&gt;&gt;&gt; settings = AnimationSettings()\n&gt;&gt;&gt; settings.max_zoom_size = 0.15  # Increase max size to 15%\n&gt;&gt;&gt; settings.trill_frequency = 5.0  # Faster trill",
-    "crumbs": [
-      "Reference",
-      "Configuration Settings",
-      "ETSettings.AnimationSettings"
-    ]
-  },
-  {
-    "objectID": "api/ETSettings.FontSizeMultipliers.html",
-    "href": "api/ETSettings.FontSizeMultipliers.html",
+    "objectID": "api/ETracker.show_status.html",
+    "href": "api/ETracker.show_status.html",
     "title": "",
     "section": "",
-    "text": "Configuration SettingsETSettings.FontSizeMultipliers",
-    "crumbs": [
-      "Reference",
-      "Configuration Settings",
-      "ETSettings.FontSizeMultipliers"
-    ]
-  },
-  {
-    "objectID": "api/ETSettings.FontSizeMultipliers.html#attributes",
-    "href": "api/ETSettings.FontSizeMultipliers.html#attributes",
-    "title": "",
-    "section": "Attributes",
-    "text": "Attributes\n\n\n\n\n\n\n\n\nName\nType\nDescription\n\n\n\n\ninstruction_text\nfloat\nMultiplier for instruction text displayed during calibration. Default is 1.5 (150% of base text size).\n\n\nmessage_text\nfloat\nMultiplier for general message text. Default is 1.3 (130% of base text size).\n\n\ntitle_text\nfloat\nMultiplier for title text in message boxes. Default is 1.4 (140% of base text size).",
-    "crumbs": [
-      "Reference",
-      "Configuration Settings",
-      "ETSettings.FontSizeMultipliers"
-    ]
-  },
-  {
-    "objectID": "api/ETSettings.FontSizeMultipliers.html#notes",
-    "href": "api/ETSettings.FontSizeMultipliers.html#notes",
-    "title": "",
-    "section": "Notes",
-    "text": "Notes\nThe final text size is calculated as: base_text_size * multiplier where base_text_size comes from UIElementSizes.text.",
-    "crumbs": [
-      "Reference",
-      "Configuration Settings",
-      "ETSettings.FontSizeMultipliers"
-    ]
-  },
-  {
-    "objectID": "api/ETSettings.FontSizeMultipliers.html#examples",
-    "href": "api/ETSettings.FontSizeMultipliers.html#examples",
-    "title": "",
-    "section": "Examples",
-    "text": "Examples\n&gt;&gt;&gt; font_sizes = FontSizeMultipliers()\n&gt;&gt;&gt; font_sizes.instruction_text = 2.0  # Larger instructions\n&gt;&gt;&gt; font_sizes.title_text = 1.8  # Larger titles",
-    "crumbs": [
-      "Reference",
-      "Configuration Settings",
-      "ETSettings.FontSizeMultipliers"
-    ]
-  },
-  {
-    "objectID": "api/ETracker.calibrate.html",
-    "href": "api/ETracker.calibrate.html",
-    "title": "",
-    "section": "",
-    "text": "Main Eye-tracker ClassCalibrationETracker.calibrate",
+    "text": "Main Eye-tracker ClassCalibrationETracker.show_status",
     "crumbs": [
       "Reference",
       "Main Eye-tracker Class",
       "Calibration",
-      "ETracker.calibrate"
+      "ETracker.show_status"
     ]
   },
   {
-    "objectID": "api/ETracker.calibrate.html#parameters",
-    "href": "api/ETracker.calibrate.html#parameters",
+    "objectID": "api/ETracker.show_status.html#parameters",
+    "href": "api/ETracker.show_status.html#parameters",
     "title": "",
     "section": "Parameters",
-    "text": "Parameters\n\n\n\n\n\n\n\n\n\nName\nType\nDescription\nDefault\n\n\n\n\ncalibration_points\nlist[tuple[float, float]]\nTarget locations in PsychoPy coordinates (e.g., height units). Typically 5�9 points distributed across the screen.\nrequired\n\n\ninfant_stims\nlist[str]\nPaths to engaging image files for calibration targets (e.g., animated characters, colorful objects).\nrequired\n\n\nshuffle\nbool\nWhether to randomize stimulus presentation order. Default True.\nTrue\n\n\naudio\npsychopy.sound.Sound | None\nAttention-getting sound to play during calibration. Default None.\nNone\n\n\nanim_type\n(zoom, trill)\nAnimation style for the stimuli. Default ‘zoom’.\n'zoom'\n\n\nsave_calib\nbool | str\nControls saving of calibration after a successful run: - False: do not save (default) - True: save using default naming (timestamped) - str: save to this filename; if it has no extension, ‘.dat’ is added.\nFalse\n\n\nnum_samples\nint\nSamples per point in simulation mode. Default 5.\n5",
+    "text": "Parameters\n\n\n\n\n\n\n\n\n\nName\nType\nDescription\nDefault\n\n\n\n\ndecision_key\nstr\nKey to press to exit visualization. Default ‘space’.\n'space'\n\n\nvideo_help\nbool or visual.MovieStim\nControls background video display: - True: Uses built-in instructional video (default) - False: No video displayed - visual.MovieStim: Uses your pre-loaded custom video. You are responsible for scaling (size) and positioning (pos) the MovieStim to fit your desired layout. Default True.\nTrue",
     "crumbs": [
       "Reference",
       "Main Eye-tracker Class",
       "Calibration",
-      "ETracker.calibrate"
+      "ETracker.show_status"
     ]
   },
   {
-    "objectID": "api/ETracker.calibrate.html#returns",
-    "href": "api/ETracker.calibrate.html#returns",
-    "title": "",
-    "section": "Returns",
-    "text": "Returns\n\n\n\n\n\n\n\n\nName\nType\nDescription\n\n\n\n\n\nbool\nTrue if calibration completed successfully, False otherwise.",
-    "crumbs": [
-      "Reference",
-      "Main Eye-tracker Class",
-      "Calibration",
-      "ETracker.calibrate"
-    ]
-  },
-  {
-    "objectID": "api/ETracker.calibrate.html#notes",
-    "href": "api/ETracker.calibrate.html#notes",
+    "objectID": "api/ETracker.show_status.html#notes",
+    "href": "api/ETracker.show_status.html#notes",
     "title": "",
     "section": "Notes",
-    "text": "Notes\n\nReal mode uses Tobii’s calibration with result visualization.\nSimulation mode uses mouse position to approximate the process.\nIf in simulation mode, any save request is safely skipped with a warning.",
+    "text": "Notes\nIn simulation mode, use scroll wheel to adjust simulated distance. Eye positions shown as green (left) and red (right) circles.\nThe built-in video (when video_help=True) is sized at (1.06, 0.6) in height units and positioned at (0, -0.08) to avoid covering the track box.",
     "crumbs": [
       "Reference",
       "Main Eye-tracker Class",
       "Calibration",
-      "ETracker.calibrate"
+      "ETracker.show_status"
+    ]
+  },
+  {
+    "objectID": "api/ETracker.show_status.html#examples",
+    "href": "api/ETracker.show_status.html#examples",
+    "title": "",
+    "section": "Examples",
+    "text": "Examples\n&gt;&gt;&gt; # Use built-in video\n&gt;&gt;&gt; tracker.show_status()\n&gt;&gt;&gt; # No video\n&gt;&gt;&gt; tracker.show_status(video_help=False)\n&gt;&gt;&gt; # Custom video\n&gt;&gt;&gt; my_video = visual.MovieStim(win, 'custom.mp4', size=0.5, pos=(0, -0.2))\n&gt;&gt;&gt; tracker.show_status(video_help=my_video)",
+    "crumbs": [
+      "Reference",
+      "Main Eye-tracker Class",
+      "Calibration",
+      "ETracker.show_status"
+    ]
+  },
+  {
+    "objectID": "api/ETracker.html",
+    "href": "api/ETracker.html",
+    "title": "",
+    "section": "",
+    "text": "Main Eye-tracker ClassETracker",
+    "crumbs": [
+      "Reference",
+      "Main Eye-tracker Class",
+      "ETracker"
+    ]
+  },
+  {
+    "objectID": "api/ETracker.html#methods",
+    "href": "api/ETracker.html#methods",
+    "title": "",
+    "section": "Methods",
+    "text": "Methods\n\n\n\nName\nDescription\n\n\n\n\ncalibrate\nRun infant-friendly calibration procedure.\n\n\ngaze_contingent\nInitialize real-time gaze buffer for contingent applications.\n\n\nget_gaze_position\nGet current gaze position from rolling buffer.\n\n\nload_calibration\nLoads calibration data from a file and applies it to the eye tracker.\n\n\nrecord_event\nRecord timestamped experimental event during data collection.\n\n\nsave_calibration\nSave the current calibration data to a file.\n\n\nsave_data\nSave buffered gaze and event data to file with optimized processing.\n\n\nset_eyetracking_settings\nConfigure and apply Tobii eye tracker settings.\n\n\nshow_status\nReal-time visualization of participant’s eye position in track box.\n\n\nstart_recording\nBegin gaze data recording session.\n\n\nstop_recording\nStop gaze data recording and finalize session.\n\n\n\n\ncalibrate\nETracker.calibrate(\n    calibration_points,\n    infant_stims=None,\n    shuffle=True,\n    audio=True,\n    anim_type='zoom',\n    visualization_style='circles',\n)\nRun infant-friendly calibration procedure.\nPerforms eye tracker calibration using animated stimuli to engage infant participants. The calibration establishes the mapping between eye position and screen coordinates, which is essential for accurate gaze data collection. Automatically selects the appropriate calibration method based on operating mode (real eye tracker vs. mouse simulation).\n\nParameters\n\n\n\n\n\n\n\n\n\nName\nType\nDescription\nDefault\n\n\n\n\ncalibration_points\nint or list of tuple\nCalibration pattern specification: - 5: Standard 5-point pattern (4 corners + center). Default. - 9: Comprehensive 9-point pattern (3�3 grid). - list: Custom points in normalized coordinates [-1, 1]. Example: [(-0.4, 0.4), (0.4, 0.4), (0.0, 0.0)]\nrequired\n\n\ninfant_stims\nlist of str or True\nPaths to engaging image files for calibration targets (e.g., colorful characters, animated objects). If True (default), uses built-in stimuli from the package. If fewer stimuli than calibration points are provided, stimuli are automatically repeated in sequence to cover all points (e.g., 3 stimuli for 7 points becomes [s1, s2, s3, s1, s2, s3, s1]).\nNone\n\n\nshuffle\nbool\nWhether to randomize stimulus presentation order. When True (default), stimuli are shuffled after any necessary repetition and before assignment to calibration points. Set to False if you want deterministic stimulus-to-point mapping or specific stimulus ordering. Default True.\nTrue\n\n\naudio\nbool or psychopy.sound.Sound or None\nControls attention-getting audio during calibration: - True: Uses built-in calibration sound (default). Sound loops continuously while stimulus is selected. - False or None: No audio feedback. - psychopy.sound.Sound: Uses your pre-loaded custom sound object. You are responsible for setting the sound parameters (e.g., loops=-1 for continuous looping). The audio provides auditory feedback when the experimenter selects a calibration point by pressing a number key. Default True.\nTrue\n\n\nanim_type\n(zoom, trill)\nAnimation style for the calibration stimuli: - ‘zoom’: Smooth size oscillation (default) - ‘trill’: Rapid rotation with pauses\n'zoom'\n\n\nvisualization_style\n(lines, circles)\nHow to display calibration results: - ‘lines’: Draw lines from targets to gaze samples - ‘circles’: Draw small filled circles at gaze sample positions Default ‘circles’.\n'lines'\n\n\n\n\n\nReturns\n\n\n\n\n\n\n\n\nName\nType\nDescription\n\n\n\n\n\nbool\nTrue if calibration completed successfully and was accepted by the user, False if calibration was aborted or failed.\n\n\n\n\n\nExamples\n&gt;&gt;&gt; # Standard 5-point calibration with default audio\n&gt;&gt;&gt; controller.calibrate(5)\n&gt;&gt;&gt; # Calibration without audio\n&gt;&gt;&gt; controller.calibrate(5, audio=False)\n&gt;&gt;&gt; # Custom audio\n&gt;&gt;&gt; from psychopy import sound\n&gt;&gt;&gt; my_sound = sound.Sound('custom_beep.wav', loops=-1)\n&gt;&gt;&gt; controller.calibrate(5, audio=my_sound)\n&gt;&gt;&gt; # 9-point calibration with custom stimuli and trill animation\n&gt;&gt;&gt; controller.calibrate(9, infant_stims=['stim1.png', 'stim2.png'], \n...                      anim_type='trill')\n\n\n\ngaze_contingent\nETracker.gaze_contingent(N=5)\nInitialize real-time gaze buffer for contingent applications.\n\n\nget_gaze_position\nETracker.get_gaze_position(fallback_offscreen=True, method='median')\nGet current gaze position from rolling buffer.\nAggregates recent gaze samples from both eyes to provide a stable, real-time gaze estimate. Handles missing or invalid data gracefully.\n\nParameters\n\n\n\n\n\n\n\n\n\nName\nType\nDescription\nDefault\n\n\n\n\nfallback_offscreen\nbool\nIf True (default), returns an offscreen position (3x screen dimensions) when no valid gaze data is available. If False, returns None.\nTrue\n\n\nmethod\nstr\nAggregation method for combining samples and eyes. - “median” (default): Robust to outliers, good for noisy data - “mean”: Smoother but sensitive to outliers - “last”: Lowest latency, uses only most recent sample\n'median'\n\n\n\n\n\nReturns\n\n\n\n\n\n\n\n\nName\nType\nDescription\n\n\n\n\n\ntuple or None\nGaze position (x, y) in PsychoPy coordinates (current window units), or None if no valid data and fallback_offscreen=False.\n\n\n\n\n\nRaises\n\n\n\n\n\n\n\n\nName\nType\nDescription\n\n\n\n\n\nRuntimeError\nIf gaze_contingent() was not called to initialize the buffer.\n\n\n\n\n\nExamples\n&gt;&gt;&gt; # Basic usage (median aggregation)\n&gt;&gt;&gt; pos = tracker.get_gaze_position()\n&gt;&gt;&gt; if pos is not None:\n...     circle.pos = pos\n&gt;&gt;&gt; # Use mean for smoother tracking\n&gt;&gt;&gt; pos = tracker.get_gaze_position(method=\"mean\")\n&gt;&gt;&gt; # Lowest latency (last sample only)\n&gt;&gt;&gt; pos = tracker.get_gaze_position(method=\"last\")\n&gt;&gt;&gt; # Return None instead of offscreen position\n&gt;&gt;&gt; pos = tracker.get_gaze_position(fallback_offscreen=False)\n&gt;&gt;&gt; if pos is None:\n...     print(\"No valid gaze data\")\n\n\n\nload_calibration\nETracker.load_calibration(filename=None, use_gui=False)\nLoads calibration data from a file and applies it to the eye tracker.\nThis method allows reusing a previously saved calibration, which can save significant time for participants, especially in multi-session studies. The calibration data must be a binary file generated by a Tobii eye tracker, typically via the save_calibration() method. This operation is only available when connected to a physical eye tracker.\n\nParameters\n\n\n\n\n\n\n\n\n\nName\nType\nDescription\nDefault\n\n\n\n\nfilename\nstr\nThe path to the calibration data file (e.g., “subject_01_calib.dat”). If use_gui is True, this path is used as the default suggestion in the file dialog. If use_gui is False, this parameter is required.\nNone\n\n\nuse_gui\nbool\nIf True, a graphical file-open dialog is displayed for the user to select the calibration file. Defaults to False.\nFalse\n\n\n\n\n\nReturns\n\n\n\n\n\n\n\n\nName\nType\nDescription\n\n\n\n\n\nbool\nReturns True if the calibration was successfully loaded and applied, and False otherwise (e.g., user cancelled the dialog, file not found, or data was invalid).\n\n\n\n\n\nRaises\n\n\n\n\n\n\n\n\nName\nType\nDescription\n\n\n\n\n\nRuntimeError\nIf the method is called while the ETracker is in simulation mode.\n\n\n\nValueError\nIf use_gui is False and filename is not provided.\n\n\n\n\n\n\nrecord_event\nETracker.record_event(label)\nRecord timestamped experimental event during data collection.\nEvents are merged with gaze data based on timestamp proximity during save operations. Uses appropriate timing source for simulation vs. real eye tracker modes.\n\nParameters\n\n\n\n\n\n\n\n\n\nName\nType\nDescription\nDefault\n\n\n\n\nlabel\nstr\nDescriptive label for the event (e.g., ‘trial_start’, ‘stimulus_onset’).\nrequired\n\n\n\n\n\nRaises\n\n\n\nName\nType\nDescription\n\n\n\n\n\nRuntimeWarning\nIf called when recording is not active.\n\n\n\n\n\nExamples\ntracker.record_event(‘trial_1_start’) # … present stimulus … tracker.record_event(‘stimulus_offset’)\n\n\n\nsave_calibration\nETracker.save_calibration(filename=None, use_gui=False)\nSave the current calibration data to a file.\nRetrieves the active calibration data from the connected Tobii eye tracker and saves it as a binary file. This can be reloaded later with load_calibration() to avoid re-calibrating the same participant.\n\nParameters\n\n\n\n\n\n\n\n\n\nName\nType\nDescription\nDefault\n\n\n\n\nfilename\nstr | None\nDesired output path. If None and use_gui is False, a timestamped default name is used (e.g., ‘YYYY-mm-dd_HH-MM-SS_calibration.dat’). If provided without an extension, ‘.dat’ is appended. If an extension is already present, it is left unchanged.\nNone\n\n\nuse_gui\nbool\nIf True, opens a file-save dialog (Psychopy) where the user chooses the path. The suggested name respects the logic above. Default False.\nFalse\n\n\n\n\n\nReturns\n\n\n\n\n\n\n\n\nName\nType\nDescription\n\n\n\n\n\nbool\nTrue if saved successfully; False if cancelled, no data available, in simulation mode, or on error.\n\n\n\n\n\nNotes\n\nIn simulation mode, saving is skipped and a warning is issued.\nIf use_gui is True and the dialog is cancelled, returns False.\n\n\n\n\nsave_data\nETracker.save_data()\nSave buffered gaze and event data to file with optimized processing.\nUses thread-safe buffer swapping to minimize lock time, then processes and saves data in CSV or HDF5 format. Events are merged with gaze data based on timestamp proximity.\n\n\nset_eyetracking_settings\nETracker.set_eyetracking_settings(\n    desired_fps=None,\n    desired_illumination_mode=None,\n    use_gui=False,\n)\nConfigure and apply Tobii eye tracker settings.\nThis method updates the eye tracker’s sampling frequency (FPS) and illumination mode, either programmatically or via a graphical interface. It ensures that configuration changes are only made when the device is idle and connected.\n\nParameters\n\n\n\n\n\n\n\n\n\nName\nType\nDescription\nDefault\n\n\n\n\ndesired_fps\nint\nDesired sampling frequency in Hz (e.g., 60, 120, 300). If None, the current frequency is retained.\nNone\n\n\ndesired_illumination_mode\nstr\nDesired illumination mode (e.g., ‘Auto’, ‘Bright’, ‘Dark’). If None, the current illumination mode is retained.\nNone\n\n\nuse_gui\nbool\nIf True, opens a PsychoPy GUI dialog that allows users to select settings interactively. Defaults to False.\nFalse\n\n\n\n\n\nRaises\n\n\n\n\n\n\n\n\nName\nType\nDescription\n\n\n\n\n\nRuntimeError\nIf no physical eye tracker is connected or if the function is called in simulation mode.\n\n\n\nValueError\nIf the specified FPS or illumination mode is not supported by the connected device.\n\n\n\n\n\nNotes\n\nSettings cannot be changed during active recording. If an ongoing recording is detected, a non-blocking warning is issued and the function exits safely.\nWhen use_gui=True, a PsychoPy dialog window appears. It must be closed manually before the program continues.\nAfter successfully applying new settings, the internal attributes self.fps and self.illum_mode are updated to reflect the current device configuration.\n\n\n\n\nshow_status\nETracker.show_status(decision_key='space', video_help=True)\nReal-time visualization of participant’s eye position in track box.\nCreates interactive display showing left/right eye positions and distance from screen. Useful for positioning participants before data collection. Updates continuously until exit key is pressed.\nOptionally displays an instructional video in the background to help guide participant positioning. You can use the built-in video, disable the video, or provide your own custom MovieStim object.\n\nParameters\n\n\n\n\n\n\n\n\n\nName\nType\nDescription\nDefault\n\n\n\n\ndecision_key\nstr\nKey to press to exit visualization. Default ‘space’.\n'space'\n\n\nvideo_help\nbool or visual.MovieStim\nControls background video display: - True: Uses built-in instructional video (default) - False: No video displayed - visual.MovieStim: Uses your pre-loaded custom video. You are responsible for scaling (size) and positioning (pos) the MovieStim to fit your desired layout. Default True.\nTrue\n\n\n\n\n\nNotes\nIn simulation mode, use scroll wheel to adjust simulated distance. Eye positions shown as green (left) and red (right) circles.\nThe built-in video (when video_help=True) is sized at (1.06, 0.6) in height units and positioned at (0, -0.08) to avoid covering the track box.\n\n\nExamples\n&gt;&gt;&gt; # Use built-in video\n&gt;&gt;&gt; tracker.show_status()\n&gt;&gt;&gt; # No video\n&gt;&gt;&gt; tracker.show_status(video_help=False)\n&gt;&gt;&gt; # Custom video\n&gt;&gt;&gt; my_video = visual.MovieStim(win, 'custom.mp4', size=0.5, pos=(0, -0.2))\n&gt;&gt;&gt; tracker.show_status(video_help=my_video)\n\n\n\nstart_recording\nETracker.start_recording(filename=None, raw_format=False)\nBegin gaze data recording session.\nInitializes file structure, clears any existing buffers, and starts data collection from either the eye tracker or simulation mode. Creates HDF5 or CSV files based on filename extension.\n\nParameters\n\n\n\n\n\n\n\n\n\nName\nType\nDescription\nDefault\n\n\n\n\nfilename\nstr\nOutput filename for gaze data. If None, generates timestamp-based name. File extension determines format (.h5/.hdf5 for HDF5, .csv for CSV, defaults to .h5).\nNone\n\n\nraw_format\nbool\nIf True, preserves all original Tobii SDK column names and data. If False (default), uses simplified column names and subset of columns. Raw format is useful for advanced analysis requiring full metadata.\nFalse\n\n\n\n\n\nExamples",
+    "crumbs": [
+      "Reference",
+      "Main Eye-tracker Class",
+      "ETracker"
     ]
   },
   {
@@ -868,27 +496,312 @@
     ]
   },
   {
-    "objectID": "api/ETracker.html",
-    "href": "api/ETracker.html",
+    "objectID": "api/ETracker.calibrate.html",
+    "href": "api/ETracker.calibrate.html",
     "title": "",
     "section": "",
-    "text": "Main Eye-tracker ClassETracker",
+    "text": "Main Eye-tracker ClassCalibrationETracker.calibrate",
     "crumbs": [
       "Reference",
       "Main Eye-tracker Class",
-      "ETracker"
+      "Calibration",
+      "ETracker.calibrate"
     ]
   },
   {
-    "objectID": "api/ETracker.html#methods",
-    "href": "api/ETracker.html#methods",
+    "objectID": "api/ETracker.calibrate.html#parameters",
+    "href": "api/ETracker.calibrate.html#parameters",
     "title": "",
-    "section": "Methods",
-    "text": "Methods\n\n\n\nName\nDescription\n\n\n\n\ncalibrate\nRun the infant-friendly calibration procedure.\n\n\ngaze_contingent\nInitialize real-time gaze buffer for contingent applications.\n\n\nget_gaze_position\nGet current gaze position from rolling buffer.\n\n\nload_calibration\nLoads calibration data from a file and applies it to the eye tracker.\n\n\nrecord_event\nRecord timestamped experimental event during data collection.\n\n\nsave_calibration\nSave the current calibration data to a file.\n\n\nsave_data\nSave buffered gaze and event data to file with optimized processing.\n\n\nset_eyetracking_settings\nConfigure and apply Tobii eye tracker settings.\n\n\nshow_status\nReal-time visualization of participant’s eye position in track box.\n\n\nstart_recording\nBegin gaze data recording session.\n\n\nstop_recording\nStop gaze data recording and finalize session.\n\n\n\n\ncalibrate\nETracker.calibrate(\n    calibration_points,\n    infant_stims,\n    shuffle=True,\n    audio=None,\n    anim_type='zoom',\n    save_calib=False,\n    num_samples=5,\n)\nRun the infant-friendly calibration procedure.\nAutomatically selects the calibration method based on operating mode (real eye tracker vs. simulation). Uses animated stimuli and optional audio to engage infants during calibration.\n\nParameters\n\n\n\n\n\n\n\n\n\nName\nType\nDescription\nDefault\n\n\n\n\ncalibration_points\nlist[tuple[float, float]]\nTarget locations in PsychoPy coordinates (e.g., height units). Typically 5�9 points distributed across the screen.\nrequired\n\n\ninfant_stims\nlist[str]\nPaths to engaging image files for calibration targets (e.g., animated characters, colorful objects).\nrequired\n\n\nshuffle\nbool\nWhether to randomize stimulus presentation order. Default True.\nTrue\n\n\naudio\npsychopy.sound.Sound | None\nAttention-getting sound to play during calibration. Default None.\nNone\n\n\nanim_type\n(zoom, trill)\nAnimation style for the stimuli. Default ‘zoom’.\n'zoom'\n\n\nsave_calib\nbool | str\nControls saving of calibration after a successful run: - False: do not save (default) - True: save using default naming (timestamped) - str: save to this filename; if it has no extension, ‘.dat’ is added.\nFalse\n\n\nnum_samples\nint\nSamples per point in simulation mode. Default 5.\n5\n\n\n\n\n\nReturns\n\n\n\n\n\n\n\n\nName\nType\nDescription\n\n\n\n\n\nbool\nTrue if calibration completed successfully, False otherwise.\n\n\n\n\n\nNotes\n\nReal mode uses Tobii’s calibration with result visualization.\nSimulation mode uses mouse position to approximate the process.\nIf in simulation mode, any save request is safely skipped with a warning.\n\n\n\n\ngaze_contingent\nETracker.gaze_contingent(N=5)\nInitialize real-time gaze buffer for contingent applications.\n\n\nget_gaze_position\nETracker.get_gaze_position(fallback_offscreen=True, method='median')\nGet current gaze position from rolling buffer.\nAggregates recent gaze samples from both eyes to provide a stable, real-time gaze estimate. Handles missing or invalid data gracefully.\n\nParameters\n\n\n\n\n\n\n\n\n\nName\nType\nDescription\nDefault\n\n\n\n\nfallback_offscreen\nbool\nIf True (default), returns an offscreen position (3x screen dimensions) when no valid gaze data is available. If False, returns None.\nTrue\n\n\nmethod\nstr\nAggregation method for combining samples and eyes. - “median” (default): Robust to outliers, good for noisy data - “mean”: Smoother but sensitive to outliers - “last”: Lowest latency, uses only most recent sample\n'median'\n\n\n\n\n\nReturns\n\n\n\n\n\n\n\n\nName\nType\nDescription\n\n\n\n\n\ntuple or None\nGaze position (x, y) in PsychoPy coordinates (current window units), or None if no valid data and fallback_offscreen=False.\n\n\n\n\n\nRaises\n\n\n\n\n\n\n\n\nName\nType\nDescription\n\n\n\n\n\nRuntimeError\nIf gaze_contingent() was not called to initialize the buffer.\n\n\n\n\n\nExamples\n&gt;&gt;&gt; # Basic usage (median aggregation)\n&gt;&gt;&gt; pos = tracker.get_gaze_position()\n&gt;&gt;&gt; if pos is not None:\n...     circle.pos = pos\n&gt;&gt;&gt; # Use mean for smoother tracking\n&gt;&gt;&gt; pos = tracker.get_gaze_position(method=\"mean\")\n&gt;&gt;&gt; # Lowest latency (last sample only)\n&gt;&gt;&gt; pos = tracker.get_gaze_position(method=\"last\")\n&gt;&gt;&gt; # Return None instead of offscreen position\n&gt;&gt;&gt; pos = tracker.get_gaze_position(fallback_offscreen=False)\n&gt;&gt;&gt; if pos is None:\n...     print(\"No valid gaze data\")\n\n\n\nload_calibration\nETracker.load_calibration(filename=None, use_gui=False)\nLoads calibration data from a file and applies it to the eye tracker.\nThis method allows reusing a previously saved calibration, which can save significant time for participants, especially in multi-session studies. The calibration data must be a binary file generated by a Tobii eye tracker, typically via the save_calibration() method. This operation is only available when connected to a physical eye tracker.\n\nParameters\n\n\n\n\n\n\n\n\n\nName\nType\nDescription\nDefault\n\n\n\n\nfilename\nstr\nThe path to the calibration data file (e.g., “subject_01_calib.dat”). If use_gui is True, this path is used as the default suggestion in the file dialog. If use_gui is False, this parameter is required.\nNone\n\n\nuse_gui\nbool\nIf True, a graphical file-open dialog is displayed for the user to select the calibration file. Defaults to False.\nFalse\n\n\n\n\n\nReturns\n\n\n\n\n\n\n\n\nName\nType\nDescription\n\n\n\n\n\nbool\nReturns True if the calibration was successfully loaded and applied, and False otherwise (e.g., user cancelled the dialog, file not found, or data was invalid).\n\n\n\n\n\nRaises\n\n\n\n\n\n\n\n\nName\nType\nDescription\n\n\n\n\n\nRuntimeError\nIf the method is called while the ETracker is in simulation mode.\n\n\n\nValueError\nIf use_gui is False and filename is not provided.\n\n\n\n\n\n\nrecord_event\nETracker.record_event(label)\nRecord timestamped experimental event during data collection.\nEvents are merged with gaze data based on timestamp proximity during save operations. Uses appropriate timing source for simulation vs. real eye tracker modes.\n\nParameters\n\n\n\n\n\n\n\n\n\nName\nType\nDescription\nDefault\n\n\n\n\nlabel\nstr\nDescriptive label for the event (e.g., ‘trial_start’, ‘stimulus_onset’).\nrequired\n\n\n\n\n\nRaises\n\n\n\nName\nType\nDescription\n\n\n\n\n\nRuntimeWarning\nIf called when recording is not active.\n\n\n\n\n\nExamples\ntracker.record_event(‘trial_1_start’) # … present stimulus … tracker.record_event(‘stimulus_offset’)\n\n\n\nsave_calibration\nETracker.save_calibration(filename=None, use_gui=False)\nSave the current calibration data to a file.\nRetrieves the active calibration data from the connected Tobii eye tracker and saves it as a binary file. This can be reloaded later with load_calibration() to avoid re-calibrating the same participant.\n\nParameters\n\n\n\n\n\n\n\n\n\nName\nType\nDescription\nDefault\n\n\n\n\nfilename\nstr | None\nDesired output path. If None and use_gui is False, a timestamped default name is used (e.g., ‘YYYY-mm-dd_HH-MM-SS_calibration.dat’). If provided without an extension, ‘.dat’ is appended. If an extension is already present, it is left unchanged.\nNone\n\n\nuse_gui\nbool\nIf True, opens a file-save dialog (Psychopy) where the user chooses the path. The suggested name respects the logic above. Default False.\nFalse\n\n\n\n\n\nReturns\n\n\n\n\n\n\n\n\nName\nType\nDescription\n\n\n\n\n\nbool\nTrue if saved successfully; False if cancelled, no data available, in simulation mode, or on error.\n\n\n\n\n\nNotes\n\nIn simulation mode, saving is skipped and a warning is issued.\nIf use_gui is True and the dialog is cancelled, returns False.\n\n\n\n\nsave_data\nETracker.save_data()\nSave buffered gaze and event data to file with optimized processing.\nUses thread-safe buffer swapping to minimize lock time, then processes and saves data in CSV or HDF5 format. Events are merged with gaze data based on timestamp proximity.\n\n\nset_eyetracking_settings\nETracker.set_eyetracking_settings(\n    desired_fps=None,\n    desired_illumination_mode=None,\n    use_gui=False,\n)\nConfigure and apply Tobii eye tracker settings.\nThis method updates the eye tracker’s sampling frequency (FPS) and illumination mode, either programmatically or via a graphical interface. It ensures that configuration changes are only made when the device is idle and connected.\n\nParameters\n\n\n\n\n\n\n\n\n\nName\nType\nDescription\nDefault\n\n\n\n\ndesired_fps\nint\nDesired sampling frequency in Hz (e.g., 60, 120, 300). If None, the current frequency is retained.\nNone\n\n\ndesired_illumination_mode\nstr\nDesired illumination mode (e.g., ‘Auto’, ‘Bright’, ‘Dark’). If None, the current illumination mode is retained.\nNone\n\n\nuse_gui\nbool\nIf True, opens a PsychoPy GUI dialog that allows users to select settings interactively. Defaults to False.\nFalse\n\n\n\n\n\nRaises\n\n\n\n\n\n\n\n\nName\nType\nDescription\n\n\n\n\n\nRuntimeError\nIf no physical eye tracker is connected or if the function is called in simulation mode.\n\n\n\nValueError\nIf the specified FPS or illumination mode is not supported by the connected device.\n\n\n\n\n\nNotes\n\nSettings cannot be changed during active recording. If an ongoing recording is detected, a non-blocking warning is issued and the function exits safely.\nWhen use_gui=True, a PsychoPy dialog window appears. It must be closed manually before the program continues.\nAfter successfully applying new settings, the internal attributes self.fps and self.illum_mode are updated to reflect the current device configuration.\n\n\n\n\nshow_status\nETracker.show_status(decision_key='space')\nReal-time visualization of participant’s eye position in track box.\nCreates interactive display showing left/right eye positions and distance from screen. Useful for positioning participants before data collection. Updates continuously until exit key is pressed.\n\nParameters\n\n\n\n\n\n\n\n\n\nName\nType\nDescription\nDefault\n\n\n\n\ndecision_key\nstr\nKey to press to exit visualization. Default ‘space’.\n'space'\n\n\n\n\n\nNotes\nIn simulation mode, use scroll wheel to adjust simulated distance. Eye positions shown as green (left) and red (right) circles.\n\n\n\nstart_recording\nETracker.start_recording(filename=None, raw_format=False)\nBegin gaze data recording session.\nInitializes file structure, clears any existing buffers, and starts data collection from either the eye tracker or simulation mode. Creates HDF5 or CSV files based on filename extension.\n\nParameters\n\n\n\n\n\n\n\n\n\nName\nType\nDescription\nDefault\n\n\n\n\nfilename\nstr\nOutput filename for gaze data. If None, generates timestamp-based name. File extension determines format (.h5/.hdf5 for HDF5, .csv for CSV, defaults to .h5).\nNone\n\n\nraw_format\nbool\nIf True, preserves all original Tobii SDK column names and data. If False (default), uses simplified column names and subset of columns. Raw format is useful for advanced analysis requiring full metadata.\nFalse\n\n\n\n\n\nExamples",
+    "section": "Parameters",
+    "text": "Parameters\n\n\n\n\n\n\n\n\n\nName\nType\nDescription\nDefault\n\n\n\n\ncalibration_points\nint or list of tuple\nCalibration pattern specification: - 5: Standard 5-point pattern (4 corners + center). Default. - 9: Comprehensive 9-point pattern (3�3 grid). - list: Custom points in normalized coordinates [-1, 1]. Example: [(-0.4, 0.4), (0.4, 0.4), (0.0, 0.0)]\nrequired\n\n\ninfant_stims\nlist of str or True\nPaths to engaging image files for calibration targets (e.g., colorful characters, animated objects). If True (default), uses built-in stimuli from the package. If fewer stimuli than calibration points are provided, stimuli are automatically repeated in sequence to cover all points (e.g., 3 stimuli for 7 points becomes [s1, s2, s3, s1, s2, s3, s1]).\nNone\n\n\nshuffle\nbool\nWhether to randomize stimulus presentation order. When True (default), stimuli are shuffled after any necessary repetition and before assignment to calibration points. Set to False if you want deterministic stimulus-to-point mapping or specific stimulus ordering. Default True.\nTrue\n\n\naudio\nbool or psychopy.sound.Sound or None\nControls attention-getting audio during calibration: - True: Uses built-in calibration sound (default). Sound loops continuously while stimulus is selected. - False or None: No audio feedback. - psychopy.sound.Sound: Uses your pre-loaded custom sound object. You are responsible for setting the sound parameters (e.g., loops=-1 for continuous looping). The audio provides auditory feedback when the experimenter selects a calibration point by pressing a number key. Default True.\nTrue\n\n\nanim_type\n(zoom, trill)\nAnimation style for the calibration stimuli: - ‘zoom’: Smooth size oscillation (default) - ‘trill’: Rapid rotation with pauses\n'zoom'\n\n\nvisualization_style\n(lines, circles)\nHow to display calibration results: - ‘lines’: Draw lines from targets to gaze samples - ‘circles’: Draw small filled circles at gaze sample positions Default ‘circles’.\n'lines'",
     "crumbs": [
       "Reference",
       "Main Eye-tracker Class",
-      "ETracker"
+      "Calibration",
+      "ETracker.calibrate"
+    ]
+  },
+  {
+    "objectID": "api/ETracker.calibrate.html#returns",
+    "href": "api/ETracker.calibrate.html#returns",
+    "title": "",
+    "section": "Returns",
+    "text": "Returns\n\n\n\n\n\n\n\n\nName\nType\nDescription\n\n\n\n\n\nbool\nTrue if calibration completed successfully and was accepted by the user, False if calibration was aborted or failed.",
+    "crumbs": [
+      "Reference",
+      "Main Eye-tracker Class",
+      "Calibration",
+      "ETracker.calibrate"
+    ]
+  },
+  {
+    "objectID": "api/ETracker.calibrate.html#examples",
+    "href": "api/ETracker.calibrate.html#examples",
+    "title": "",
+    "section": "Examples",
+    "text": "Examples\n&gt;&gt;&gt; # Standard 5-point calibration with default audio\n&gt;&gt;&gt; controller.calibrate(5)\n&gt;&gt;&gt; # Calibration without audio\n&gt;&gt;&gt; controller.calibrate(5, audio=False)\n&gt;&gt;&gt; # Custom audio\n&gt;&gt;&gt; from psychopy import sound\n&gt;&gt;&gt; my_sound = sound.Sound('custom_beep.wav', loops=-1)\n&gt;&gt;&gt; controller.calibrate(5, audio=my_sound)\n&gt;&gt;&gt; # 9-point calibration with custom stimuli and trill animation\n&gt;&gt;&gt; controller.calibrate(9, infant_stims=['stim1.png', 'stim2.png'], \n...                      anim_type='trill')",
+    "crumbs": [
+      "Reference",
+      "Main Eye-tracker Class",
+      "Calibration",
+      "ETracker.calibrate"
+    ]
+  },
+  {
+    "objectID": "api/ETSettings.CalibrationPatterns.html",
+    "href": "api/ETSettings.CalibrationPatterns.html",
+    "title": "",
+    "section": "",
+    "text": "Configuration SettingsETSettings.CalibrationPatterns",
+    "crumbs": [
+      "Reference",
+      "Configuration Settings",
+      "ETSettings.CalibrationPatterns"
+    ]
+  },
+  {
+    "objectID": "api/ETSettings.CalibrationPatterns.html#attributes",
+    "href": "api/ETSettings.CalibrationPatterns.html#attributes",
+    "title": "",
+    "section": "Attributes",
+    "text": "Attributes\n\n\n\n\n\n\n\n\nName\nType\nDescription\n\n\n\n\npoints_5\nlist of tuple\n5-point calibration pattern (4 corners + center). Standard for quick calibrations with good coverage. Pattern: corners at �0.4 from edges to avoid screen boundaries.\n\n\npoints_9\nlist of tuple\n9-point calibration pattern (3�3 grid). Standard for comprehensive calibrations requiring high accuracy. Pattern: 3 rows � 3 columns with �0.4 positioning.\n\n\nnum_samples_mouse\nint\nNumber of mouse position samples to collect per calibration point in simulation mode. Default 5.",
+    "crumbs": [
+      "Reference",
+      "Configuration Settings",
+      "ETSettings.CalibrationPatterns"
+    ]
+  },
+  {
+    "objectID": "api/ETSettings.CalibrationPatterns.html#examples",
+    "href": "api/ETSettings.CalibrationPatterns.html#examples",
+    "title": "",
+    "section": "Examples",
+    "text": "Examples\n&gt;&gt;&gt; from DeToX import ETSettings as cfg\n&gt;&gt;&gt; from DeToX.Coords import norm_to_window_units\n&gt;&gt;&gt; \n&gt;&gt;&gt; # Change number of mouse samples collected per point\n&gt;&gt;&gt; cfg.calibration.num_samples_mouse = 10",
+    "crumbs": [
+      "Reference",
+      "Configuration Settings",
+      "ETSettings.CalibrationPatterns"
+    ]
+  },
+  {
+    "objectID": "api/ETSettings.AnimationSettings.html",
+    "href": "api/ETSettings.AnimationSettings.html",
+    "title": "",
+    "section": "",
+    "text": "Configuration SettingsETSettings.AnimationSettings",
+    "crumbs": [
+      "Reference",
+      "Configuration Settings",
+      "ETSettings.AnimationSettings"
+    ]
+  },
+  {
+    "objectID": "api/ETSettings.AnimationSettings.html#attributes",
+    "href": "api/ETSettings.AnimationSettings.html#attributes",
+    "title": "",
+    "section": "Attributes",
+    "text": "Attributes\n\n\n\n\n\n\n\n\nName\nType\nDescription\n\n\n\n\nfocus_time\nfloat\nWait time in seconds before collecting calibration data at each point. Allows participant to fixate on the target. Default is 0.5 seconds.\n\n\nzoom_speed\nfloat\nSpeed multiplier for the zoom animation. Higher values make the size oscillation faster. Default is 6.0.\n\n\nmax_zoom_size\nfloat\nMaximum size for zoom animation as percentage of screen height. Default is 0.11 (11% of screen height).\n\n\nmin_zoom_size\nfloat\nMinimum size for zoom animation as percentage of screen height. Default is 0.05 (5% of screen height).\n\n\ntrill_size\nfloat\nFixed size for trill animation as percentage of screen height. Default is 0.075 (7.5% of screen height).\n\n\ntrill_rotation_range\nfloat\nMaximum rotation angle in degrees for trill animation. Default is 20 degrees.\n\n\ntrill_cycle_duration\nfloat\nTotal cycle time for trill animation in seconds (active + pause). Default is 1.5 seconds.\n\n\ntrill_active_duration\nfloat\nDuration of active trill rotation in seconds, within each cycle. Default is 1.1 seconds (leaves 0.4s pause).\n\n\ntrill_frequency\nfloat\nNumber of back-and-forth rotation oscillations per second during active trill phase. Default is 3.0 oscillations/second.",
+    "crumbs": [
+      "Reference",
+      "Configuration Settings",
+      "ETSettings.AnimationSettings"
+    ]
+  },
+  {
+    "objectID": "api/ETSettings.AnimationSettings.html#examples",
+    "href": "api/ETSettings.AnimationSettings.html#examples",
+    "title": "",
+    "section": "Examples",
+    "text": "Examples\n&gt;&gt;&gt; settings = AnimationSettings()\n&gt;&gt;&gt; settings.max_zoom_size = 0.15  # Increase max size to 15%\n&gt;&gt;&gt; settings.trill_frequency = 5.0  # Faster trill",
+    "crumbs": [
+      "Reference",
+      "Configuration Settings",
+      "ETSettings.AnimationSettings"
+    ]
+  },
+  {
+    "objectID": "api/BaseCalibrationSession.html",
+    "href": "api/BaseCalibrationSession.html",
+    "title": "",
+    "section": "",
+    "text": "Internal CalibrationBaseCalibrationSession",
+    "crumbs": [
+      "Reference",
+      "Internal Calibration",
+      "BaseCalibrationSession"
+    ]
+  },
+  {
+    "objectID": "api/BaseCalibrationSession.html#methods",
+    "href": "api/BaseCalibrationSession.html#methods",
+    "title": "",
+    "section": "Methods",
+    "text": "Methods\n\n\n\nName\nDescription\n\n\n\n\ncheck_points\nEnsure number of calibration points is within allowed range.\n\n\nshow_message_and_wait\nDisplay a message on screen and in console, then wait for keypress.\n\n\n\n\ncheck_points\nBaseCalibrationSession.check_points(calibration_points)\nEnsure number of calibration points is within allowed range.\nValidates that the provided calibration points fall within the supported range for infant calibration protocols. Both Tobii and simulation modes support 2-9 calibration points.\n\nParameters\n\n\n\n\n\n\n\n\n\nName\nType\nDescription\nDefault\n\n\n\n\ncalibration_points\nlist\nList of calibration point coordinates to validate.\nrequired\n\n\n\n\n\nRaises\n\n\n\n\n\n\n\n\nName\nType\nDescription\n\n\n\n\n\nValueError\nIf number of points is less than 2 or greater than 9.\n\n\n\n\n\n\nshow_message_and_wait\nBaseCalibrationSession.show_message_and_wait(body, title='', pos=(0, -0.15))\nDisplay a message on screen and in console, then wait for keypress.\nShows formatted message both in the PsychoPy window and console output, enforces a minimum display time for readability and system stabilization, then pauses execution until any key is pressed.\n\nParameters\n\n\n\n\n\n\n\n\n\nName\nType\nDescription\nDefault\n\n\n\n\nbody\nstr\nThe main message text to display.\nrequired\n\n\ntitle\nstr\nTitle for the message box. Default empty string.\n''\n\n\npos\ntuple\nPosition of the message box center on screen. Default (0, -0.15).\n(0, -0.15)",
+    "crumbs": [
+      "Reference",
+      "Internal Calibration",
+      "BaseCalibrationSession"
+    ]
+  },
+  {
+    "objectID": "api/ETSettings.CalibrationColors.html",
+    "href": "api/ETSettings.CalibrationColors.html",
+    "title": "",
+    "section": "",
+    "text": "Configuration SettingsETSettings.CalibrationColors",
+    "crumbs": [
+      "Reference",
+      "Configuration Settings",
+      "ETSettings.CalibrationColors"
+    ]
+  },
+  {
+    "objectID": "api/ETSettings.CalibrationColors.html#attributes",
+    "href": "api/ETSettings.CalibrationColors.html#attributes",
+    "title": "",
+    "section": "Attributes",
+    "text": "Attributes\n\n\n\n\n\n\n\n\nName\nType\nDescription\n\n\n\n\nleft_eye\ntuple of int\nRGBA color for Tobii left eye gaze samples (R, G, B, A). Default is (0, 255, 0, 255) - bright green.\n\n\nright_eye\ntuple of int\nRGBA color for Tobii right eye gaze samples (R, G, B, A). Default is (255, 0, 0, 255) - bright red.\n\n\nmouse\ntuple of int\nRGBA color for simulated mouse position samples (R, G, B, A). Default is (255, 128, 0, 255) - orange.\n\n\ntarget_outline\ntuple of int\nRGBA color for calibration target circle outlines (R, G, B, A). Default is (24, 24, 24, 255) - dark gray/black.\n\n\nhighlight\ntuple of int\nRGBA color for highlighting selected calibration points (R, G, B, A). Default is (255, 255, 0, 255) - bright yellow.",
+    "crumbs": [
+      "Reference",
+      "Configuration Settings",
+      "ETSettings.CalibrationColors"
+    ]
+  },
+  {
+    "objectID": "api/ETSettings.CalibrationColors.html#notes",
+    "href": "api/ETSettings.CalibrationColors.html#notes",
+    "title": "",
+    "section": "Notes",
+    "text": "Notes\nAll color values use 8-bit channels (0-255 range) in RGBA format. The alpha channel (A) controls opacity where 255 is fully opaque.",
+    "crumbs": [
+      "Reference",
+      "Configuration Settings",
+      "ETSettings.CalibrationColors"
+    ]
+  },
+  {
+    "objectID": "api/ETSettings.CalibrationColors.html#examples",
+    "href": "api/ETSettings.CalibrationColors.html#examples",
+    "title": "",
+    "section": "Examples",
+    "text": "Examples\n&gt;&gt;&gt; colors = CalibrationColors()\n&gt;&gt;&gt; colors.highlight = (0, 255, 255, 255)  # Change to cyan\n&gt;&gt;&gt; colors.left_eye = (0, 200, 0, 200)  # Semi-transparent green",
+    "crumbs": [
+      "Reference",
+      "Configuration Settings",
+      "ETSettings.CalibrationColors"
+    ]
+  },
+  {
+    "objectID": "api/ETSettings.UIElementSizes.html",
+    "href": "api/ETSettings.UIElementSizes.html",
+    "title": "",
+    "section": "",
+    "text": "Configuration SettingsETSettings.UIElementSizes",
+    "crumbs": [
+      "Reference",
+      "Configuration Settings",
+      "ETSettings.UIElementSizes"
+    ]
+  },
+  {
+    "objectID": "api/ETSettings.UIElementSizes.html#attributes",
+    "href": "api/ETSettings.UIElementSizes.html#attributes",
+    "title": "",
+    "section": "Attributes",
+    "text": "Attributes\n\n\n\n\n\n\n\n\nName\nType\nDescription\n\n\n\n\nhighlight\nfloat\nRadius of circles highlighting selected calibration points for retry. Default is 0.02 (2% of screen height).\n\n\nline_width\nfloat\nThickness of lines drawn in calibration visualizations. Default is 0.003 (0.3% of screen height).\n\n\nmarker\nfloat\nSize of markers indicating data collection points. Default is 0.02 (2% of screen height).\n\n\nborder\nfloat\nThickness of the red calibration mode border around the screen. Default is 0.005 (0.5% of screen height).\n\n\nplot_line\nfloat\nWidth of lines in calibration result plots connecting targets to samples. Default is 0.002 (0.2% of screen height).\n\n\ntext\nfloat\nBase text height (deprecated - use specific text sizes below). Default is 0.025 (2.5% of screen height).\n\n\ntarget_circle\nfloat\nRadius of target circles drawn in calibration result visualizations. Default is 0.012 (1.2% of screen height).\n\n\ntarget_circle_width\nfloat\nLine width for target circle outlines in result visualizations. Default is 0.003 (0.3% of screen height).\n\n\nsample_marker\nfloat\nRadius of sample markers in circle visualization style. Default is 0.005 (0.5% of screen height).\n\n\ninstruction_text\nfloat\nText height for instruction displays during calibration. Default is 0.019 (1.9% of screen height).\n\n\nmessage_text\nfloat\nText height for general message displays. Default is 0.016 (1.6% of screen height).\n\n\ntitle_text\nfloat\nText height for title text in message boxes. Default is 0.018 (1.8% of screen height).\n\n\nlegend_text\nfloat\nText height for legend labels showing eye color coding. Default is 0.015 (1.5% of screen height).",
+    "crumbs": [
+      "Reference",
+      "Configuration Settings",
+      "ETSettings.UIElementSizes"
+    ]
+  },
+  {
+    "objectID": "api/ETSettings.UIElementSizes.html#notes",
+    "href": "api/ETSettings.UIElementSizes.html#notes",
+    "title": "",
+    "section": "Notes",
+    "text": "Notes\nHeight units provide consistent visual appearance across different screen sizes and aspect ratios. The conversion to pixels or other units is handled automatically by the coordinate conversion functions.",
+    "crumbs": [
+      "Reference",
+      "Configuration Settings",
+      "ETSettings.UIElementSizes"
+    ]
+  },
+  {
+    "objectID": "api/ETSettings.UIElementSizes.html#examples",
+    "href": "api/ETSettings.UIElementSizes.html#examples",
+    "title": "",
+    "section": "Examples",
+    "text": "Examples\n&gt;&gt;&gt; ui_sizes = UIElementSizes()\n&gt;&gt;&gt; ui_sizes.highlight = 0.06  # Larger highlight circles\n&gt;&gt;&gt; ui_sizes.instruction_text = 0.025  # Larger instructions",
+    "crumbs": [
+      "Reference",
+      "Configuration Settings",
+      "ETSettings.UIElementSizes"
+    ]
+  },
+  {
+    "objectID": "api/ETracker.gaze_contingent.html",
+    "href": "api/ETracker.gaze_contingent.html",
+    "title": "",
+    "section": "",
+    "text": "Main Eye-tracker ClassGaze ContingentETracker.gaze_contingent\n\n\n\n\n\nETracker.gaze_contingent\nETracker.gaze_contingent(N=5)\nInitialize real-time gaze buffer for contingent applications.\n\n\n\n\n\n\n Back to top",
+    "crumbs": [
+      "Reference",
+      "Main Eye-tracker Class",
+      "Gaze Contingent",
+      "ETracker.gaze_contingent"
+    ]
+  },
+  {
+    "objectID": "api/ETracker.load_calibration.html",
+    "href": "api/ETracker.load_calibration.html",
+    "title": "",
+    "section": "",
+    "text": "Main Eye-tracker ClassCalibrationETracker.load_calibration",
+    "crumbs": [
+      "Reference",
+      "Main Eye-tracker Class",
+      "Calibration",
+      "ETracker.load_calibration"
+    ]
+  },
+  {
+    "objectID": "api/ETracker.load_calibration.html#parameters",
+    "href": "api/ETracker.load_calibration.html#parameters",
+    "title": "",
+    "section": "Parameters",
+    "text": "Parameters\n\n\n\n\n\n\n\n\n\nName\nType\nDescription\nDefault\n\n\n\n\nfilename\nstr\nThe path to the calibration data file (e.g., “subject_01_calib.dat”). If use_gui is True, this path is used as the default suggestion in the file dialog. If use_gui is False, this parameter is required.\nNone\n\n\nuse_gui\nbool\nIf True, a graphical file-open dialog is displayed for the user to select the calibration file. Defaults to False.\nFalse",
+    "crumbs": [
+      "Reference",
+      "Main Eye-tracker Class",
+      "Calibration",
+      "ETracker.load_calibration"
+    ]
+  },
+  {
+    "objectID": "api/ETracker.load_calibration.html#returns",
+    "href": "api/ETracker.load_calibration.html#returns",
+    "title": "",
+    "section": "Returns",
+    "text": "Returns\n\n\n\n\n\n\n\n\nName\nType\nDescription\n\n\n\n\n\nbool\nReturns True if the calibration was successfully loaded and applied, and False otherwise (e.g., user cancelled the dialog, file not found, or data was invalid).",
+    "crumbs": [
+      "Reference",
+      "Main Eye-tracker Class",
+      "Calibration",
+      "ETracker.load_calibration"
+    ]
+  },
+  {
+    "objectID": "api/ETracker.load_calibration.html#raises",
+    "href": "api/ETracker.load_calibration.html#raises",
+    "title": "",
+    "section": "Raises",
+    "text": "Raises\n\n\n\n\n\n\n\n\nName\nType\nDescription\n\n\n\n\n\nRuntimeError\nIf the method is called while the ETracker is in simulation mode.\n\n\n\nValueError\nIf use_gui is False and filename is not provided.",
+    "crumbs": [
+      "Reference",
+      "Main Eye-tracker Class",
+      "Calibration",
+      "ETracker.load_calibration"
     ]
   },
   {
@@ -944,366 +857,339 @@
     ]
   },
   {
-    "objectID": "api/ETracker.show_status.html",
-    "href": "api/ETracker.show_status.html",
+    "objectID": "api/InfantStimuli.html",
+    "href": "api/InfantStimuli.html",
     "title": "",
     "section": "",
-    "text": "Main Eye-tracker ClassCalibrationETracker.show_status",
+    "text": "UtilitiesInfantStimuli",
     "crumbs": [
       "Reference",
-      "Main Eye-tracker Class",
-      "Calibration",
-      "ETracker.show_status"
+      "Utilities",
+      "InfantStimuli"
     ]
   },
   {
-    "objectID": "api/ETracker.show_status.html#parameters",
-    "href": "api/ETracker.show_status.html#parameters",
+    "objectID": "api/InfantStimuli.html#attributes",
+    "href": "api/InfantStimuli.html#attributes",
     "title": "",
-    "section": "Parameters",
-    "text": "Parameters\n\n\n\n\n\n\n\n\n\nName\nType\nDescription\nDefault\n\n\n\n\ndecision_key\nstr\nKey to press to exit visualization. Default ‘space’.\n'space'",
+    "section": "Attributes",
+    "text": "Attributes\n\n\n\n\n\n\n\n\nName\nType\nDescription\n\n\n\n\nwin\npsychopy.visual.Window\nThe PsychoPy window used for rendering.\n\n\nstims\ndict\nDictionary mapping indices to ImageStim objects.\n\n\nstim_size\ndict\nDictionary mapping indices to original stimulus sizes.\n\n\npresent_order\nlist\nList defining the presentation sequence of stimuli.",
     "crumbs": [
       "Reference",
-      "Main Eye-tracker Class",
-      "Calibration",
-      "ETracker.show_status"
+      "Utilities",
+      "InfantStimuli"
     ]
   },
   {
-    "objectID": "api/ETracker.show_status.html#notes",
-    "href": "api/ETracker.show_status.html#notes",
-    "title": "",
-    "section": "Notes",
-    "text": "Notes\nIn simulation mode, use scroll wheel to adjust simulated distance. Eye positions shown as green (left) and red (right) circles.",
-    "crumbs": [
-      "Reference",
-      "Main Eye-tracker Class",
-      "Calibration",
-      "ETracker.show_status"
-    ]
-  },
-  {
-    "objectID": "api/ETracker.stop_recording.html",
-    "href": "api/ETracker.stop_recording.html",
-    "title": "",
-    "section": "",
-    "text": "Main Eye-tracker ClassControl the RecordingETracker.stop_recording",
-    "crumbs": [
-      "Reference",
-      "Main Eye-tracker Class",
-      "Control the Recording",
-      "ETracker.stop_recording"
-    ]
-  },
-  {
-    "objectID": "api/ETracker.stop_recording.html#raises",
-    "href": "api/ETracker.stop_recording.html#raises",
-    "title": "",
-    "section": "Raises",
-    "text": "Raises\n\n\n\nName\nType\nDescription\n\n\n\n\n\nUserWarning\nIf recording is not currently active.",
-    "crumbs": [
-      "Reference",
-      "Main Eye-tracker Class",
-      "Control the Recording",
-      "ETracker.stop_recording"
-    ]
-  },
-  {
-    "objectID": "api/ETracker.stop_recording.html#notes",
-    "href": "api/ETracker.stop_recording.html#notes",
-    "title": "",
-    "section": "Notes",
-    "text": "Notes\nAll pending data in buffers is automatically saved before completion. Recording duration is measured from start_recording() call.",
-    "crumbs": [
-      "Reference",
-      "Main Eye-tracker Class",
-      "Control the Recording",
-      "ETracker.stop_recording"
-    ]
-  },
-  {
-    "objectID": "api/MouseCalibrationSession.html",
-    "href": "api/MouseCalibrationSession.html",
-    "title": "",
-    "section": "",
-    "text": "Internal CalibrationMouseCalibrationSession",
-    "crumbs": [
-      "Reference",
-      "Internal Calibration",
-      "MouseCalibrationSession"
-    ]
-  },
-  {
-    "objectID": "api/MouseCalibrationSession.html#methods",
-    "href": "api/MouseCalibrationSession.html#methods",
+    "objectID": "api/InfantStimuli.html#methods",
+    "href": "api/InfantStimuli.html#methods",
     "title": "",
     "section": "Methods",
-    "text": "Methods\n\n\n\nName\nDescription\n\n\n\n\nrun\nMain function to run the mouse-based calibration routine.\n\n\n\n\nrun\nMouseCalibrationSession.run(calibration_points, num_samples=5)\nMain function to run the mouse-based calibration routine.\nExecutes the complete calibration workflow using mouse position as a proxy for gaze data. Follows the same interaction pattern as Tobii calibration to ensure consistency across modes.\n\nParameters\n\n\n\n\n\n\n\n\n\nName\nType\nDescription\nDefault\n\n\n\n\ncalibration_points\nlist of (float, float)\nList of target positions in PsychoPy coordinates. Typically 5-9 points distributed across the screen.\nrequired\n\n\nnum_samples\nint\nHow many mouse position samples to collect at each calibration point. More samples provide smoother averaging. Default 5.\n5\n\n\n\n\n\nReturns\n\n\n\n\n\n\n\n\nName\nType\nDescription\n\n\n\n\n\nbool\nTrue if calibration finished successfully and was accepted by user, False if the user exits early via escape key.",
+    "text": "Methods\n\n\n\nName\nDescription\n\n\n\n\nget_stim\nGet the stimulus by presentation order.\n\n\nget_stim_original_size\nGet the original size of the stimulus by presentation order.\n\n\n\n\nget_stim\nInfantStimuli.get_stim(idx)\nGet the stimulus by presentation order.\nRetrieves a stimulus based on its position in the presentation sequence. Uses modulo arithmetic to wrap around when the index exceeds the number of available stimuli, enabling circular access patterns.\n\nParameters\n\n\n\n\n\n\n\n\n\nName\nType\nDescription\nDefault\n\n\n\n\nidx\nint\nThe index of the stimulus in the presentation order. Can be any non-negative integer; values beyond the stimulus count will wrap around using modulo operation.\nrequired\n\n\n\n\n\nReturns\n\n\n\n\n\n\n\n\nName\nType\nDescription\n\n\n\n\n\npsychopy.visual.ImageStim\nThe stimulus corresponding to the given index in the presentation order. The returned stimulus is ready for positioning, animation, and drawing operations.\n\n\n\n\n\nExamples\n&gt;&gt;&gt; stim_manager = InfantStimuli(win, ['img1.png', 'img2.png'])\n&gt;&gt;&gt; stim = stim_manager.get_stim(0)  # Get first stimulus\n&gt;&gt;&gt; stim = stim_manager.get_stim(5)  # Wraps around if only 2 stimuli\n\n\n\nget_stim_original_size\nInfantStimuli.get_stim_original_size(idx)\nGet the original size of the stimulus by presentation order.\nReturns the original dimensions of a stimulus as loaded from the image file. This is useful for animation calculations where you need to know the base size before applying scaling transformations.\n\nParameters\n\n\n\n\n\n\n\n\n\nName\nType\nDescription\nDefault\n\n\n\n\nidx\nint\nThe index of the stimulus in the presentation order. Can be any non-negative integer; values beyond the stimulus count will wrap around using modulo operation.\nrequired\n\n\n\n\n\nReturns\n\n\n\n\n\n\n\n\nName\nType\nDescription\n\n\n\n\n\ntuple\nThe original size of the stimulus as (width, height) in the units specified during stimulus creation. These values represent the stimulus dimensions before any scaling or animation effects.\n\n\n\n\n\nNotes\nThe original size is preserved at initialization and remains constant throughout the session, regardless of any size modifications made to the stimulus during animation.",
     "crumbs": [
       "Reference",
-      "Internal Calibration",
-      "MouseCalibrationSession"
+      "Utilities",
+      "InfantStimuli"
     ]
   },
   {
-    "objectID": "api/TobiiCalibrationSession.html",
-    "href": "api/TobiiCalibrationSession.html",
+    "objectID": "api/NicePrint.html",
+    "href": "api/NicePrint.html",
     "title": "",
     "section": "",
-    "text": "Internal CalibrationTobiiCalibrationSession",
+    "text": "UtilitiesNicePrint",
     "crumbs": [
       "Reference",
-      "Internal Calibration",
-      "TobiiCalibrationSession"
+      "Utilities",
+      "NicePrint"
     ]
   },
   {
-    "objectID": "api/TobiiCalibrationSession.html#methods",
-    "href": "api/TobiiCalibrationSession.html#methods",
-    "title": "",
-    "section": "Methods",
-    "text": "Methods\n\n\n\nName\nDescription\n\n\n\n\nrun\nMain routine to run the full Tobii calibration workflow.\n\n\n\n\nrun\nTobiiCalibrationSession.run(calibration_points)\nMain routine to run the full Tobii calibration workflow.\nThis function presents each calibration target, collects gaze data via the eye tracker, shows the results, and allows the user to retry any subset of points until satisfied.\n\nParameters\n\n\n\n\n\n\n\n\n\nName\nType\nDescription\nDefault\n\n\n\n\ncalibration_points\nlist of (float, float)\nList of PsychoPy (x, y) positions for calibration targets. Typically 5-9 points distributed across the screen for comprehensive coverage.\nrequired\n\n\n\n\n\nReturns\n\n\n\n\n\n\n\n\nName\nType\nDescription\n\n\n\n\n\nbool\nTrue if calibration was successful and accepted by user, False if aborted via escape key or if calibration computation failed.",
-    "crumbs": [
-      "Reference",
-      "Internal Calibration",
-      "TobiiCalibrationSession"
-    ]
-  },
-  {
-    "objectID": "api/get_psychopy_pos.html",
-    "href": "api/get_psychopy_pos.html",
-    "title": "",
-    "section": "",
-    "text": "Coordinate Conversionget_psychopy_pos",
-    "crumbs": [
-      "Reference",
-      "Coordinate Conversion",
-      "get_psychopy_pos"
-    ]
-  },
-  {
-    "objectID": "api/get_psychopy_pos.html#parameters",
-    "href": "api/get_psychopy_pos.html#parameters",
+    "objectID": "api/NicePrint.html#parameters",
+    "href": "api/NicePrint.html#parameters",
     "title": "",
     "section": "Parameters",
-    "text": "Parameters\n\n\n\n\n\n\n\n\n\nName\nType\nDescription\nDefault\n\n\n\n\nwin\npsychopy.visual.Window\nThe PsychoPy window which provides information about units and size. Window properties determine the target coordinate system.\nrequired\n\n\np\ntuple or array - like\nThe Tobii ADCS coordinates to convert. Can be: - Single coordinate: (x, y) tuple - Multiple coordinates: (N, 2) array where N is number of samples Values should be in range [0, 1] where (0, 0) is top-left and (1, 1) is bottom-right.\nrequired\n\n\nunits\nstr\nThe target units for the PsychoPy coordinates. If None, uses the window’s default units. Supported: ‘norm’, ‘height’, ‘pix’, ‘cm’, ‘deg’, ‘degFlat’, ‘degFlatPos’.\nNone",
+    "text": "Parameters\n\n\n\n\n\n\n\n\n\nName\nType\nDescription\nDefault\n\n\n\n\nbody\nstr\nThe string to print inside the box. Can contain multiple lines separated by newline characters. Each line will be padded to align within the box.\nrequired\n\n\ntitle\nstr\nA title to print on the top border of the box. The title will be centered within the top border. If empty string or not provided, the top border will be solid. Default empty string.\n''\n\n\nverbose\nbool\nIf True, the formatted box will be printed to the console. Default is True.\nTrue",
     "crumbs": [
       "Reference",
-      "Coordinate Conversion",
-      "get_psychopy_pos"
+      "Utilities",
+      "NicePrint"
     ]
   },
   {
-    "objectID": "api/get_psychopy_pos.html#returns",
-    "href": "api/get_psychopy_pos.html#returns",
+    "objectID": "api/NicePrint.html#returns",
+    "href": "api/NicePrint.html#returns",
     "title": "",
     "section": "Returns",
-    "text": "Returns\n\n\n\n\n\n\n\n\nName\nType\nDescription\n\n\n\n\n\ntuple or ndarray\nThe converted PsychoPy coordinates in the specified unit system. - Single input: returns (x, y) tuple - Array input: returns (N, 2) array Origin is at screen center for most unit systems.",
+    "text": "Returns\n\n\n\n\n\n\n\n\nName\nType\nDescription\n\n\n\n\n\nstr\nThe formatted text with box characters, ready for display in console or use with PsychoPy TextStim objects. Includes all box-drawing characters and proper spacing.",
     "crumbs": [
       "Reference",
-      "Coordinate Conversion",
-      "get_psychopy_pos"
+      "Utilities",
+      "NicePrint"
     ]
   },
   {
-    "objectID": "api/get_psychopy_pos.html#raises",
-    "href": "api/get_psychopy_pos.html#raises",
-    "title": "",
-    "section": "Raises",
-    "text": "Raises\n\n\n\n\n\n\n\n\nName\nType\nDescription\n\n\n\n\n\nValueError\nIf the provided units are not supported by PsychoPy.",
-    "crumbs": [
-      "Reference",
-      "Coordinate Conversion",
-      "get_psychopy_pos"
-    ]
-  },
-  {
-    "objectID": "api/get_psychopy_pos.html#examples",
-    "href": "api/get_psychopy_pos.html#examples",
-    "title": "",
-    "section": "Examples",
-    "text": "Examples\n&gt;&gt;&gt; # Single coordinate\n&gt;&gt;&gt; pos = get_psychopy_pos(win, (0.5, 0.5))  # Returns (0, 0) in most units\n&gt;&gt;&gt; # Multiple coordinates (vectorized)\n&gt;&gt;&gt; coords = np.array([[0.5, 0.5], [0.0, 0.0], [1.0, 1.0]])\n&gt;&gt;&gt; positions = get_psychopy_pos(win, coords)  # Returns (N, 2) array",
-    "crumbs": [
-      "Reference",
-      "Coordinate Conversion",
-      "get_psychopy_pos"
-    ]
-  },
-  {
-    "objectID": "api/get_tobii_pos.html",
-    "href": "api/get_tobii_pos.html",
+    "objectID": "api/convert_height_to_units.html",
+    "href": "api/convert_height_to_units.html",
     "title": "",
     "section": "",
-    "text": "Coordinate Conversionget_tobii_pos",
+    "text": "Coordinate Conversionconvert_height_to_units",
     "crumbs": [
       "Reference",
       "Coordinate Conversion",
-      "get_tobii_pos"
+      "convert_height_to_units"
     ]
   },
   {
-    "objectID": "api/get_tobii_pos.html#parameters",
-    "href": "api/get_tobii_pos.html#parameters",
+    "objectID": "api/convert_height_to_units.html#parameters",
+    "href": "api/convert_height_to_units.html#parameters",
     "title": "",
     "section": "Parameters",
-    "text": "Parameters\n\n\n\n\n\n\n\n\n\nName\nType\nDescription\nDefault\n\n\n\n\nwin\npsychopy.visual.Window\nThe PsychoPy window which provides information about units and size. Window properties determine the source coordinate system.\nrequired\n\n\np\ntuple\nThe PsychoPy coordinates to convert as (x, y) in specified units.\nrequired\n\n\nunits\nstr\nThe units of the input PsychoPy coordinates. If None, uses the window’s default units. Supported: ‘norm’, ‘height’, ‘pix’, ‘cm’, ‘deg’, ‘degFlat’, ‘degFlatPos’.\nNone",
+    "text": "Parameters\n\n\n\n\n\n\n\n\n\nName\nType\nDescription\nDefault\n\n\n\n\nwin\npsychopy.visual.Window\nThe PsychoPy window which provides information about units and size. The window’s current unit system determines the conversion method.\nrequired\n\n\nheight_value\nfloat\nSize in height units (fraction of screen height). For example, 0.1 represents 10% of the screen height.\nrequired",
     "crumbs": [
       "Reference",
       "Coordinate Conversion",
-      "get_tobii_pos"
+      "convert_height_to_units"
     ]
   },
   {
-    "objectID": "api/get_tobii_pos.html#returns",
-    "href": "api/get_tobii_pos.html#returns",
+    "objectID": "api/convert_height_to_units.html#returns",
+    "href": "api/convert_height_to_units.html#returns",
     "title": "",
     "section": "Returns",
-    "text": "Returns\n\n\n\n\n\n\n\n\nName\nType\nDescription\n\n\n\n\n\ntuple\nThe converted Tobii ADCS coordinates as (x, y) where both values are in range [0, 1]. (0, 0) is top-left, (1, 1) is bottom-right.",
+    "text": "Returns\n\n\n\n\n\n\n\n\nName\nType\nDescription\n\n\n\n\n\nfloat\nSize converted to current window units. The returned value maintains the same visual size on screen as the original height specification.",
     "crumbs": [
       "Reference",
       "Coordinate Conversion",
-      "get_tobii_pos"
+      "convert_height_to_units"
     ]
   },
   {
-    "objectID": "api/get_tobii_pos.html#raises",
-    "href": "api/get_tobii_pos.html#raises",
+    "objectID": "api/convert_height_to_units.html#notes",
+    "href": "api/convert_height_to_units.html#notes",
+    "title": "",
+    "section": "Notes",
+    "text": "Notes\nHeight units are PsychoPy’s recommended unit system for maintaining consistent appearance across different screen sizes and aspect ratios. This function enables that consistency when working with other unit systems.\nSupported unit conversions: - height: No conversion needed (identity transform) - norm: Scales by 2.0 to match normalized coordinate range - pix: Multiplies by screen height in pixels - cm/deg: Converts through pixels using monitor calibration",
+    "crumbs": [
+      "Reference",
+      "Coordinate Conversion",
+      "convert_height_to_units"
+    ]
+  },
+  {
+    "objectID": "api/get_psychopy_pos_from_trackbox.html",
+    "href": "api/get_psychopy_pos_from_trackbox.html",
+    "title": "",
+    "section": "",
+    "text": "Coordinate Conversionget_psychopy_pos_from_trackbox",
+    "crumbs": [
+      "Reference",
+      "Coordinate Conversion",
+      "get_psychopy_pos_from_trackbox"
+    ]
+  },
+  {
+    "objectID": "api/get_psychopy_pos_from_trackbox.html#parameters",
+    "href": "api/get_psychopy_pos_from_trackbox.html#parameters",
+    "title": "",
+    "section": "Parameters",
+    "text": "Parameters\n\n\n\n\n\n\n\n\n\nName\nType\nDescription\nDefault\n\n\n\n\nwin\npsychopy.visual.Window\nThe PsychoPy window which provides information about units and size. Window properties determine the target coordinate system.\nrequired\n\n\np\ntuple\nThe Tobii TBCS coordinates to convert as (x, y). Values are in range [0, 1] representing position within the track box from the tracker’s perspective.\nrequired\n\n\nunits\nstr\nThe target units for the PsychoPy coordinates. If None, uses the window’s default units. Supported: ‘norm’, ‘height’, ‘pix’, ‘cm’, ‘deg’, ‘degFlat’, ‘degFlatPos’.\nNone",
+    "crumbs": [
+      "Reference",
+      "Coordinate Conversion",
+      "get_psychopy_pos_from_trackbox"
+    ]
+  },
+  {
+    "objectID": "api/get_psychopy_pos_from_trackbox.html#returns",
+    "href": "api/get_psychopy_pos_from_trackbox.html#returns",
+    "title": "",
+    "section": "Returns",
+    "text": "Returns\n\n\n\n\n\n\n\n\nName\nType\nDescription\n\n\n\n\n\ntuple\nThe converted PsychoPy coordinates in the specified unit system. Suitable for positioning visual feedback about user position.",
+    "crumbs": [
+      "Reference",
+      "Coordinate Conversion",
+      "get_psychopy_pos_from_trackbox"
+    ]
+  },
+  {
+    "objectID": "api/get_psychopy_pos_from_trackbox.html#raises",
+    "href": "api/get_psychopy_pos_from_trackbox.html#raises",
     "title": "",
     "section": "Raises",
     "text": "Raises\n\n\n\nName\nType\nDescription\n\n\n\n\n\nValueError\nIf the provided units are not supported.",
     "crumbs": [
       "Reference",
       "Coordinate Conversion",
-      "get_tobii_pos"
+      "get_psychopy_pos_from_trackbox"
     ]
   },
   {
-    "objectID": "api/get_tobii_pos.html#notes",
-    "href": "api/get_tobii_pos.html#notes",
+    "objectID": "api/get_psychopy_pos_from_trackbox.html#notes",
+    "href": "api/get_psychopy_pos_from_trackbox.html#notes",
     "title": "",
     "section": "Notes",
-    "text": "Notes\nThis function is the inverse of get_psychopy_pos() and is primarily used during calibration to inform the eye tracker where calibration targets are displayed on screen.",
+    "text": "Notes\nTBCS coordinates are primarily used in the show_status() method to provide visual feedback about participant positioning. The X-axis is reversed compared to ADCS because TBCS uses the tracker’s perspective.\nThis function handles the perspective reversal and transforms to PsychoPy’s coordinate conventions for proper visualization.",
     "crumbs": [
       "Reference",
       "Coordinate Conversion",
-      "get_tobii_pos"
+      "get_psychopy_pos_from_trackbox"
     ]
   },
   {
-    "objectID": "api/pix2tobii.html",
-    "href": "api/pix2tobii.html",
+    "objectID": "api/index.html#main-eye-tracker-class",
+    "href": "api/index.html#main-eye-tracker-class",
+    "title": "",
+    "section": "Main Eye-tracker Class",
+    "text": "Main Eye-tracker Class\nThe central class of the DeToX package, responsible for connecting to and managing the Tobii eye tracker. This class must be instantiated before any other functionality can be used. It provides access to calibration, recording control, and gaze-contingent presentation methods. Below are the main methods and properties of this class:\n\n\n\nETracker\nA high-level controller for running eye-tracking experiments with Tobii Pro and PsychoPy.\n\n\n\n\nCalibration\nMethods for running and managing eye tracker calibration. These include displaying calibration status, initiating calibration routines, and saving or loading calibration settings to ensure accurate gaze data.\n\n\n\nETracker.show_status\nReal-time visualization of participant’s eye position in track box.\n\n\nETracker.calibrate\nRun infant-friendly calibration procedure.\n\n\nETracker.save_calibration\nSave the current calibration data to a file.\n\n\nETracker.load_calibration\nLoads calibration data from a file and applies it to the eye tracker.\n\n\n\n\n\nGaze Contingent\nTools for running gaze-contingent experiments, where visual presentation adapts dynamically to a participants gaze position. Includes functionality for live gaze-contingent control and methods to compute average gaze positions for experimental logic.\n\n\n\nETracker.gaze_contingent\nInitialize real-time gaze buffer for contingent applications.\n\n\nETracker.get_gaze_position\nGet current gaze position from rolling buffer.",
+    "crumbs": [
+      "Reference"
+    ]
+  },
+  {
+    "objectID": "api/index.html#internal-calibration",
+    "href": "api/index.html#internal-calibration",
+    "title": "",
+    "section": "Internal Calibration",
+    "text": "Internal Calibration\nClasses for running eye-tracker calibration. These get called internally by the ETracker class, and are reported here only for completeness. They are comprise of a base calibration class that set the common interface, and the specific implementations for Tobii and Mouse calibration.\n\n\n\nBaseCalibrationSession\nBase class with common functionality for both calibration types.\n\n\nTobiiCalibrationSession\nTobii-based calibration session for real eye tracking.\n\n\nMouseCalibrationSession\nMouse-based calibration session for simulation mode.",
+    "crumbs": [
+      "Reference"
+    ]
+  },
+  {
+    "objectID": "api/index.html#coordinate-conversion",
+    "href": "api/index.html#coordinate-conversion",
+    "title": "",
+    "section": "Coordinate Conversion",
+    "text": "Coordinate Conversion\nA collection of utility functions designed to help the conversion of the data from different formats. These are called internally by the ETracker class, but can be used independently if needed.\n\n\n\nconvert_height_to_units\nConvert a size from height units to the current window units.\n\n\nget_psychopy_pos\nConvert Tobii ADCS coordinates to PsychoPy coordinates.\n\n\npsychopy_to_pixels\nConvert PsychoPy coordinates to pixel coordinates.\n\n\nget_tobii_pos\nConvert PsychoPy coordinates to Tobii ADCS coordinates.\n\n\npix2tobii\nConvert PsychoPy pixel coordinates to Tobii ADCS coordinates.\n\n\ntobii2pix\nConvert Tobii ADCS coordinates to PsychoPy pixel coordinates.\n\n\nget_psychopy_pos_from_trackbox\nConvert Tobii TBCS coordinates to PsychoPy coordinates.",
+    "crumbs": [
+      "Reference"
+    ]
+  },
+  {
+    "objectID": "api/index.html#utilities",
+    "href": "api/index.html#utilities",
+    "title": "",
+    "section": "Utilities",
+    "text": "Utilities\nA set of utility classes and functions for presenting stimuli and formatted text. These are called internally by the ETracker class.\n\n\n\nNicePrint\nPrint a message in a box with an optional title AND return the formatted text.\n\n\nInfantStimuli\nStimuli manager for infant-friendly calibration procedures.",
+    "crumbs": [
+      "Reference"
+    ]
+  },
+  {
+    "objectID": "api/index.html#configuration-settings",
+    "href": "api/index.html#configuration-settings",
+    "title": "",
+    "section": "Configuration Settings",
+    "text": "Configuration Settings\nConfiguration classes and module-level instances for customizing the behavior and appearance of the DeToX eye-tracking system. These settings control animation parameters, colors, UI element sizes, and data formats. Note: These settings should generally not be changed unless you have specific requirements. However, they can be modified through the module-level instances (e.g., ETSettings.animation) for easy configuration of your experiments.\n\n\n\nETSettings.AnimationSettings\nAnimation parameters for calibration stimuli.\n\n\nETSettings.CalibrationPatterns\nStandard calibration point patterns in normalized coordinates.\n\n\nETSettings.CalibrationColors\nColor settings for calibration visual elements.\n\n\nETSettings.UIElementSizes\nSize settings for user interface elements.",
+    "crumbs": [
+      "Reference"
+    ]
+  },
+  {
+    "objectID": "api/psychopy_to_pixels.html",
+    "href": "api/psychopy_to_pixels.html",
     "title": "",
     "section": "",
-    "text": "Coordinate Conversionpix2tobii",
+    "text": "Coordinate Conversionpsychopy_to_pixels",
     "crumbs": [
       "Reference",
       "Coordinate Conversion",
-      "pix2tobii"
+      "psychopy_to_pixels"
     ]
   },
   {
-    "objectID": "api/pix2tobii.html#parameters",
-    "href": "api/pix2tobii.html#parameters",
+    "objectID": "api/psychopy_to_pixels.html#parameters",
+    "href": "api/psychopy_to_pixels.html#parameters",
     "title": "",
     "section": "Parameters",
-    "text": "Parameters\n\n\n\n\n\n\n\n\n\nName\nType\nDescription\nDefault\n\n\n\n\nwin\npsychopy.visual.Window\nThe PsychoPy window which provides screen dimensions for normalization.\nrequired\n\n\np\ntuple\nThe PsychoPy pixel coordinates to convert as (x, y). Origin is at screen center, x increases rightward, y increases upward.\nrequired",
+    "text": "Parameters\n\n\n\n\n\n\n\n\n\nName\nType\nDescription\nDefault\n\n\n\n\nwin\npsychopy.visual.Window\nThe PsychoPy window which provides information about units and size. Window units and dimensions determine the conversion method.\nrequired\n\n\npos\ntuple\nThe PsychoPy coordinates to convert as (x, y) in current window units.\nrequired",
     "crumbs": [
       "Reference",
       "Coordinate Conversion",
-      "pix2tobii"
+      "psychopy_to_pixels"
     ]
   },
   {
-    "objectID": "api/pix2tobii.html#returns",
-    "href": "api/pix2tobii.html#returns",
+    "objectID": "api/psychopy_to_pixels.html#returns",
+    "href": "api/psychopy_to_pixels.html#returns",
     "title": "",
     "section": "Returns",
-    "text": "Returns\n\n\n\n\n\n\n\n\nName\nType\nDescription\n\n\n\n\n\ntuple\nThe converted Tobii ADCS coordinates as (x, y) in range [0, 1]. Origin is top-left, x increases rightward, y increases downward.",
+    "text": "Returns\n\n\n\n\n\n\n\n\nName\nType\nDescription\n\n\n\n\n\ntuple\nThe converted pixel coordinates as (int, int) with origin at top-left. Values are rounded to nearest integer for pixel alignment.",
     "crumbs": [
       "Reference",
       "Coordinate Conversion",
-      "pix2tobii"
+      "psychopy_to_pixels"
     ]
   },
   {
-    "objectID": "api/pix2tobii.html#notes",
-    "href": "api/pix2tobii.html#notes",
+    "objectID": "api/psychopy_to_pixels.html#notes",
+    "href": "api/psychopy_to_pixels.html#notes",
     "title": "",
     "section": "Notes",
-    "text": "Notes\nThe conversion involves: 1. Translating the origin from center to top-left (+0.5 offset) 2. Normalizing by screen dimensions to get [0, 1] range 3. Inverting the Y-axis to match Tobii’s top-down convention\nThis function assumes PsychoPy’s pixel coordinate convention where (0, 0) is at screen center.",
+    "text": "Notes\nThis function handles the main PsychoPy coordinate systems: - ‘height’: Screen height = 1, width adjusted by aspect ratio, centered origin - ‘norm’: Screen ranges from -1 to 1 in both dimensions, centered origin - Other units: Assumes coordinates are already close to pixel values\nThe output uses standard image coordinates where (0,0) is top-left and y increases downward, suitable for PIL and similar libraries.",
     "crumbs": [
       "Reference",
       "Coordinate Conversion",
-      "pix2tobii"
+      "psychopy_to_pixels"
     ]
   },
   {
-    "objectID": "api/tobii2pix.html",
-    "href": "api/tobii2pix.html",
-    "title": "",
+    "objectID": "Vignettes/Installation.html",
+    "href": "Vignettes/Installation.html",
+    "title": "Installation",
     "section": "",
-    "text": "Coordinate Conversiontobii2pix",
+    "text": "So you’re interested in using DeToX? Awesome! Let’s get you set up quickly.\nDeToX is designed as a lightweight wrapper around PsychoPy and tobii_research. Here’s the good news: tobii_research usually comes bundled with PsychoPy, which means the only real hurdle is installing PsychoPy itself. And yes, PsychoPy can be a bit tricky to install due to its many dependencies—but don’t worry, we’ll walk you through it. Once PsychoPy is up and running, adding DeToX is a breeze.",
     "crumbs": [
-      "Reference",
-      "Coordinate Conversion",
-      "tobii2pix"
+      "Installation"
     ]
   },
   {
-    "objectID": "api/tobii2pix.html#parameters",
-    "href": "api/tobii2pix.html#parameters",
-    "title": "",
-    "section": "Parameters",
-    "text": "Parameters\n\n\n\n\n\n\n\n\n\nName\nType\nDescription\nDefault\n\n\n\n\nwin\npsychopy.visual.Window\nThe PsychoPy window which provides screen dimensions for scaling.\nrequired\n\n\np\ntuple\nThe Tobii ADCS coordinates to convert as (x, y) in range [0, 1]. Origin is top-left, x increases rightward, y increases downward.\nrequired",
+    "objectID": "Vignettes/Installation.html#installing-psychopy",
+    "href": "Vignettes/Installation.html#installing-psychopy",
+    "title": "Installation",
+    "section": "Installing PsychoPy",
+    "text": "Installing PsychoPy\nSince PsychoPy is the main challenge, let’s tackle that first. You have two main options:\n\nPackage Installation\nInstall PsychoPy like any other Python package using pip. This approach is flexible and ideal if you prefer working in an IDE (like Positron, VS Code, PyCharm, or Spyder) where you have full control over your Python environment.\nStandalone Installation\nUse the PsychoPy standalone installer, which bundles PsychoPy and all its dependencies into a single, ready-to-use application. This is often the easiest way to get started, especially if you’re not familiar with managing Python environments or just want to hit the ground running.\n\nWe like installing psychopy as a package but you do you!\n\nPackageStandalone\n\n\nThis method is ideal if you prefer working in an IDE (like Positron, VS Code, PyCharm, or Spyder) and want full control over your Python environment.\n\nStep 1: Create a Virtual Environment\nWe like to use miniforge to handle our environments and Python installations. Any other method would work as well, but for simplicity we’ll show you how we prefer to do it.\nWe recommend using Python 3.10 for the best compatibility:\nmamba create -n detox_env python=3.10\nThis will create an environment called detox_env with python 3.10. Exactly what we need!\nYou will probably need to confirm by pressing y, and after a few seconds you’ll have your environment with Python 3.10! Great!\n\n\nStep 2: Activate Environment and Install PsychoPy\nNow let’s activate this environment (making sure we’re using it) and then install PsychoPy:\nmamba activate detox_env\npip install psychopy\nthis will take some time but if you are lucky you will have psychopy in your enviroment\nAgain, confirm if needed and you’re done! Amazing!\n\n\n\nPsychoPy is a large package with many dependencies, and sometimes (depending on your operating system) installing it can be quite tricky! For this reason, the PsychoPy website suggests using the standalone installation method. This is like installing regular software on your computer - it will install PsychoPy and all its dependencies in one go.\n\nStep 1: Install PsychoPy Standalone\n\nGo to the PsychoPy download page\nDownload the standalone installer for your operating system\nRun the installer and follow the setup instructions\n\nYou are done!!! Great!",
     "crumbs": [
-      "Reference",
-      "Coordinate Conversion",
-      "tobii2pix"
+      "Installation"
     ]
   },
   {
-    "objectID": "api/tobii2pix.html#returns",
-    "href": "api/tobii2pix.html#returns",
-    "title": "",
-    "section": "Returns",
-    "text": "Returns\n\n\n\n\n\n\n\n\nName\nType\nDescription\n\n\n\n\n\ntuple\nThe converted PsychoPy pixel coordinates as (x, y) with origin at screen center. Values are rounded to nearest integer for pixel alignment.",
+    "objectID": "Vignettes/Installation.html#installing-detox",
+    "href": "Vignettes/Installation.html#installing-detox",
+    "title": "Installation",
+    "section": "Installing DeToX",
+    "text": "Installing DeToX\nOnce PsychoPy is installed, we can look at DeToX. Let’s gets our hand dirty! The installation is the same for both the Package and Standalone PsychoPy installations but some steps differ.\n\n\n\n\n\n\nDeToX is Still in Development\n\n\n\nDeToX isn’t yet available on PyPI, so you’ll need to install it directly from our GitHub repository. Don’t worry—it’s straightforward, and we’ll guide you through it!\nOne requirement: You need Git installed on your system.\n📥 Don’t have Git? Download it from git-scm.com—installation takes just a minute.\n\n\n\nPackageStandalone\n\n\nAgain make sure to be in the correct environment if you installed PsychoPy as a package. with the following command:\nmamba activate detox_env\nThen simply run:\npip install git+https://github.com/DevStart-Hub/DeToX.git\nWait a few seconds, confirm if needed, and you are done!\n\n\n\nOpen PsychoPy\nGo to Coder View (the interface with the code editor)\nOpen the Tools menu\nSelect “Plugins/package manager…”\nClick on “Packages” in the top tabs\nClick the “Open PIP terminal” button\nType the following command: pip install git+https://github.com/DevStart-Hub/DeToX.git\n\nThat’s it! You now have both PsychoPy and DeToX installed and ready to use.\n\n\n\n\n\n\n\n\n\nImportant: DeToX requires coding\n\n\n\nDeToX is a code-based library that works with PsychoPy’s Coder interface. If you typically use PsychoPy’s Builder (the drag-and-drop visual interface), you’ll need to switch to the Coder interface to use DeToX. Don’t worry - we provide plenty of code examples to get you started!",
     "crumbs": [
-      "Reference",
-      "Coordinate Conversion",
-      "tobii2pix"
+      "Installation"
     ]
   },
   {
-    "objectID": "api/tobii2pix.html#notes",
-    "href": "api/tobii2pix.html#notes",
-    "title": "",
-    "section": "Notes",
-    "text": "Notes\nThe conversion involves: 1. Shifting origin from top-left to center (-0.5 offset) 2. Scaling by screen dimensions to get pixel values 3. Inverting the Y-axis to match PsychoPy’s bottom-up convention\nOutput coordinates follow PsychoPy’s pixel convention where (0, 0) is at screen center.",
-    "crumbs": [
-      "Reference",
-      "Coordinate Conversion",
-      "tobii2pix"
-    ]
-  },
-  {
-    "objectID": "index.html",
-    "href": "index.html",
-    "title": "DeToX",
+    "objectID": "Vignettes/Calibration.html",
+    "href": "Vignettes/Calibration.html",
+    "title": "Calibration",
     "section": "",
-    "text": "This package was created out of the need to run eye-tracking experiments using tobii_research. The Tobii SDK provides a powerful way to interact with Tobii eye trackers in Python, offering many advanced features. However, certain aspects of its implementation can be complex and unintuitive for routine research tasks. Since we often run experiments using PsychoPy, we developed this lightweight wrapper around PsychoPy and tobii_research to simplify the process. The goal is to make it easy to run infant-friendly eye-tracking studies while handling the more technical aspects of eye tracker integration behind the scenes.\nThe beauty of DeToX lies in its simplicity - if you already have PsychoPy installed, you only need to add DeToX and you’re ready to go. No additional dependencies, no complex setup procedures. It’s just a clean, intuitive wrapper that makes eye-tracking accessible.\nThis project didn’t start from scratch—it builds upon an existing repository that we have used in the past: psychopy_tobii_infant\nWhile this repository provided solid solutions for integrating Tobii eye trackers with PsychoPy, we added features and improvements that we found useful for running infant-friendly eye-tracking studies. Our goal was to simplify some of the more technical aspects while keeping the flexibility needed for research."
+    "text": "Good eye tracking data starts long before you present your first stimulus—it begins with proper setup and calibration. Even the most carefully designed experiment will produce noisy, unusable data if the eye tracker isn’t configured correctly. This is particularly critical when testing infants and children, where data quality can be challenging even under ideal conditions. In this tutorial, we’ll walk through how to use DeToX to ensure the best possible data quality from the start.\nWe’ll focus on two essential steps:\nGet these right, and everything else falls into place."
   },
   {
-    "objectID": "index.html#simplicity",
-    "href": "index.html#simplicity",
-    "title": "DeToX",
-    "section": "Simplicity",
-    "text": "Simplicity\nWhile the eye-tracking landscape offers many excellent tools—from PsychoPy’s built-in Tobii integration to comprehensive packages like Titta—DeToX carves out its own niche through thoughtful simplicity. We’ve prioritized clarity and ease-of-use without sacrificing the flexibility researchers need. When your codebase is straightforward and well-documented, it becomes a platform for innovation rather than an obstacle to overcome."
+    "objectID": "Vignettes/Calibration.html#part-1-positioning-your-participant",
+    "href": "Vignettes/Calibration.html#part-1-positioning-your-participant",
+    "title": "Calibration",
+    "section": "Part 1: Positioning Your Participant",
+    "text": "Part 1: Positioning Your Participant\n\nUnderstanding the Track Box\nEvery eye tracker has a track box—an invisible 3D zone where it can accurately detect eyes. Step outside this zone, and tracking quality drops fast! While we try to seat everyone consistently, even small differences in posture or chair height can matter. The good news? DeToX makes checking position as easy as calling a single method.\n\n\n\n\n\n\nWarning\n\n\n\nThis tutorial assumes you’ve completed Getting started. If not, start there first!!!\n\n\n\n\nSetup Code\nLet’s begin with our standard setup:\n\nfrom psychopy import visual, core\nfrom DeToX import ETracker\n\n\n## Creat the window\nwin = visual.Window(\n    size=[1920, 1080],  # Window dimensions in pixels\n    fullscr=True,       # Expand to fill the entire screen\n    units='pix'         # Use pixels as the measurement unit\n)\n\n\n## Connect to the eyetracker\nET_controller = ETracker(win)\n\nWe’re following the same steps from the previous tutorial. First, we import the libraries we need—psychopy.visual for creating our display window and DeToX.ETracker for controlling the eye tracker.\nNext, we create a PsychoPy window where all our stimuli will appear.\nFinally, we connect to the Tobii eye tracker by creating an ETracker object. This automatically searches for connected devices, establishes communication, and links the tracker to our window. You’ll see connection info printed to confirm everything’s working. Now the ET_controller object is ready to control all eye-tracking operations!\n\n\nChecking Position in Real-Time\nNow for the magic—visualizing where your participant’s eyes are in the track box:\n\nEt_controller.show_status()\n\n\n\nWhat You’ll See\nWhen you call show_status(), an animated video of animals appears to keep infants engaged. Overlaid on the video are two colored circles—🔵 light blue and 🔴 pink —showing where the tracker detects your participant’s eyes in real-time. A black rectangle marks the track box boundaries where tracking works best.\nBelow the rectangle, a green bar with a moving black line indicates distance from the screen. The line should be centered on the bar (about 65 cm distance).\n\n\n\n\n\n\n\n\n\n\n\nSimulation Mode\n\n\n\nIf you’re running with simulate=True, the positioning interface uses your mouse instead of real eye tracker data. Move the mouse around to see the eye circles follow, and use the scroll wheel to simulate moving closer to or further from the screen.\n\n\nCenter both colored circles within the black rectangle. If they’re drifting toward the edges, ask the participant to lean in the needed direction, or adjust the eye tracker mount if possible.\nFor distance, watch the black line on the green bar. Too far left means too close (move back), too far right means too far (move forward). Aim for the center.\nPress SPACE when positioning looks good—you’re ready for calibration!\n\n\n\n\n\n\nAdvanced\n\n\n\n\n\nCustomizing the Positioning Display\nBy default, show_status() displays an animated video of animals to keep infants engaged while you adjust their position. However, you can customize this behavior using the video_help parameter:\nvideo_help=True: Uses the built-in instructional video included with DeToX (default). This is the easiest option and works well for most studies.\nvideo_help=False: Disables the video entirely, showing only the eye position circles and track box. Useful if you prefer a minimal display or if video playback causes performance issues.\nvideo_help=visual.MovieStim(...): Uses your own custom video. You’ll need to pre-load and configure the MovieStim object yourself, including setting the appropriate size and position for your display layout."
   },
   {
-    "objectID": "index.html#documentation",
-    "href": "index.html#documentation",
-    "title": "DeToX",
-    "section": "Documentation",
-    "text": "Documentation\nWe believe that good software is only as valuable as its documentation. Too often, researchers encounter powerful packages that become frustrating to use due to unclear or incomplete documentation. When you’re left wondering what a function does or how to modify basic settings, the package becomes more of a hindrance than a help. A package should empower users, not confuse them. That’s why we’ve prioritized creating clear, comprehensive documentation with practical examples and step-by-step tutorials. Our goal is documentation that helps you understand not just what to do, but why—so you can confidently adapt the code to your specific experimental needs.\n\nVignettes\nOur vignettes offer hands-on explanations of DeToX’s settings and features through practical examples. Each vignette focuses on specific functionality, walking you through the implementation details and configuration options you’ll need to effectively integrate these features into your research workflow.\n\n\nTutorial\nWhile vignettes dive deep into individual features, our tutorial take a different approach - it demonstrate a complete working experiment from start to finish. Rather than explaining every parameter in detail it shows you how all the pieces fit together in real research scenarios."
+    "objectID": "Vignettes/Calibration.html#part-2-calibration",
+    "href": "Vignettes/Calibration.html#part-2-calibration",
+    "title": "Calibration",
+    "section": "Part 2: Calibration",
+    "text": "Part 2: Calibration\nWith your participant positioned correctly, you’re ready for calibration. But what exactly is calibration, and why do we need it?\n\nUnderstanding Calibration\nCalibration teaches the eye tracker how to interpret each participant’s unique eye characteristics. Everyone’s eyes are slightly different—different sizes, shapes, reflection patterns—so the tracker needs a personalized model to accurately estimate where someone is looking.\nThe process is straightforward: you present targets at known locations on the screen, the participant looks at each one, and the tracker records the relationship between eye features and screen coordinates. This creates a custom mapping for that individual.\n\n\n\nImage from tobii website\n\n\nSounds complex, right? It is—but DeToX handles the complexity for you. Here’s how simple it becomes:\n\n\nLaunching Calibration with DeToX\n\nET_controller.calibrate(\n    calibration_points = 5,\n    shuffle=True,\n    audio=True,\n    anim_type='zoom',\n    visualization_style='circles'\n)\n\nLet’s break down what’s happening here:\ncalibration_points=5: Uses a standard 5-point calibration pattern (corners plus center). This is the default and works well for most studies. You can also choose 9 points for higher precision, or pass a custom list of coordinates in height units for specialized configurations.\nshuffle=True: Randomizes which image appears at each calibration point. This prevents habituation and keeps participants engaged throughout the procedure.\naudio=True: Plays an attention-getting sound along with the visual stimulus to help capture and maintain the participant’s focus. anim_type='zoom': Makes the stimuli gently pulse in size to attract attention. You can also use 'trill' for a rotating animation.\nvisualization_style='circles': Displays the calibration results using dots at each point. You can also choose 'lines' to show lines connecting the target to where the gaze landed.\n\n\n\n\n\n\nAdvanced\n\n\n\n\n\nCustomizing Calibration Parameters\nBeyond the basic configuration, you can customize several aspects of the calibration procedure to match your experimental needs:\ninfant_stims: By default (infant_stims=True), DeToX uses a set of engaging animal cartoons included with the package. These work well for most infant studies, but you can provide a list of file paths to your own images if you prefer custom stimuli that better match your study’s theme or participant age group.\naudio: By default (audio=True), an attention-getting sound included with DeToX plays automatically when stimuli appear. Set this to None to disable audio entirely, or pass your own pre-loaded psychopy.sound.Sound object to use custom sounds that fit your experimental context.\ncalibration_points: By default uses a 5-point pattern (corners plus center). You can specify 9 for higher precision, or pass a custom list of coordinates in height units for specialized configurations tailored to your stimulus regions.\n\n\n\n\n\nThe Calibration Process\n\nStep 1: Instructions\nFirst, you’ll see instructions explaining the controls:\n┌──────────────────── Calibration Setup ─────────────────────┐\n│Mouse-Based Calibration Setup:                              │\n│                                                            │\n│    - Press number keys (1-5) to select calibration points  │\n│    - Move your mouse to the animated stimulus              │\n│    - Press SPACE to collect samples at the selected point  │\n│    - Press ENTER to finish collecting and see results      │\n│    - Press ESCAPE to exit calibration                      │\n│                                                            │\n│    Any key will start calibration immediately!             │\n└────────────────────────────────────────────────────────────┘\nthese instructions will tell you how to control the calibration using your keyboard.\nPress any key when you’re ready to begin.\n\n\nData Collection\nThe calibration screen appears with a thin red border indicating you’re in calibration mode. Press a number key (1-5) to display an animated stimulus at the corresponding calibration point. The participant should look at the stimulus while it animates. When you’re confident they’re fixating on the target, press SPACE to collect gaze samples. The system waits briefly (0.25 seconds) to ensure stable fixation, then records the eye tracking data for that point. Repeat this process for all calibration points. You don’t need to go in order.\n\n\nStep 3: Review Results\nOnce you’ve collected data for all points (or whenever you’re satisfied), press ENTER to compute and visualize the calibration results. You’ll see a display showing the calibration targets and dots (or lines if you selected them in the visualization_style) to where the gaze samples actually landed.\nAt this stage, you have several options:\n┌────────────── Calibration Results ───────────────┐\n│Review calibration results above.                 │\n│                                                  │\n│    - Press ENTER to accept calibration           │\n│    - Press Numbers → SPACE to retry some points  │\n│    - Press ESCAPE to restart calibration         │\n│                                                  │\n└──────────────────────────────────────────────────┘\nAccept the calibration: If the results look good across all points, press SPACE to accept and move forward with your experiment.\nRetry specific points: Notice one or two points with poor accuracy? Press the number keys corresponding to those points—they’ll highlight in yellow to confirm your selection. You can select multiple points if needed. Once you’ve marked all points for retry, press SPACE again to recollect data for just those points. This targeted approach is especially valuable with infants and children, where you might get excellent data at most points but struggle with one or two locations.\nStart over: If the overall quality is poor or you want a fresh start, press ESCAPE to discard all data and restart the entire calibration procedure from the beginning.\n\n\n\n\n\n\nSimulation Mode\n\n\n\nWhen running with simulate=True, the calibration procedure uses mouse position instead of real eye tracker data. Press number keys to display stimuli at calibration points, move your mouse to each target location, and press SPACE to “collect” samples. This allows you to test your entire experiment workflow without needing physical eye tracking hardware.\n\n\n\n\n\nCalibration Complete!\nCongratulations! You’ve successfully positioned your participant and completed the calibration procedure using DeToX. With accurate calibration in place, you’re now ready to present your experimental stimuli and collect high-quality eye tracking data.\nHere’s a video demonstrating the entire calibration workflow from start to finish:"
+  },
+  {
+    "objectID": "Vignettes/Calibration.html#save-and-load-calibration",
+    "href": "Vignettes/Calibration.html#save-and-load-calibration",
+    "title": "Calibration",
+    "section": "Save and Load calibration",
+    "text": "Save and Load calibration\nWhile we recommend performing calibration at the start of each session to ensure optimal accuracy, DeToX also allows you to save and load calibration data for convenience. In our opinion, this should only be used in special circumstances where there is a headrest and little to no chance of movement between sessions. However, if you need to save and reuse calibration data, here’s how:\n\nSaving Calibration\nAfter completing a successful calibration, you can save the calibration data to a file:\n# Save with custom filename\nET_controller.save_calibration(filename=\"S01_calibration.dat\")\n┌────── Calibration Saved ─────┐\n│Calibration data saved to:    │\n│S01_calibration.dat           │\n└──────────────────────────────┘\nThe calibration data is saved as a binary file (.dat format) that can be reloaded in future sessions. If you don’t specify a filename, DeToX automatically generates a timestamped name like 2024-01-15_14-30-00_calibration.dat.\nyou can also choose to use a GUI file dialog to select the save location:\n# Save with GUI file dialog\nET.save_calibration(use_gui=True)\n\n\nLoading Calibration\nTo reuse a previously saved calibration in a new session:\n# Load from specific file\nET.load_calibration(filename=\"S01_calibration.dat\")\n┌───── Calibration Loaded ──────┐\n│Calibration data loaded from:  │\n│S01_calibration.dat            │\n└───────────────────────────────┘\nor again, use a GUI file dialog to select the file:\n# Load with GUI file dialog\nET.load_calibration(use_gui=True)"
   }
 ]

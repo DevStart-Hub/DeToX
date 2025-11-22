@@ -208,7 +208,7 @@ Congratulations! You've successfully positioned your participant and completed t
 
 Here's a video demonstrating the entire calibration workflow from start to finish:
 
-{{< video resources/Vids/CalibrationVid.mp4 >}}
+{{< video \resources\Vids\CalibrationVid.mp4 >}}
 
 
 ## Save and Load calibration

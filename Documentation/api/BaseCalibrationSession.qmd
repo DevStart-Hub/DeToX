@@ -4,9 +4,9 @@
 BaseCalibrationSession(
     win,
     infant_stims,
-    shuffle=True,
     audio=None,
     anim_type='zoom',
+    visualization_style='lines',
 )
 ```
 
@@ -62,19 +62,13 @@ BaseCalibrationSession.show_message_and_wait(body, title='', pos=(0, -0.15))
 Display a message on screen and in console, then wait for keypress.
 
 Shows formatted message both in the PsychoPy window and console output,
-then pauses execution until any key is pressed. Useful for instructions
-and status messages during calibration.
+enforces a minimum display time for readability and system stabilization,
+then pauses execution until any key is pressed.
 
 #### Parameters {.doc-section .doc-section-parameters}
 
-| Name   | Type   | Description                                                                                                            | Default      |
-|--------|--------|------------------------------------------------------------------------------------------------------------------------|--------------|
-| body   | str    | The main message text to display. Will be formatted with box-drawing characters via NicePrint.                         | _required_   |
-| title  | str    | Title for the message box. Appears at the top of the formatted box. Default empty string.                              | `''`         |
-| pos    | tuple  | Position of the message box center on screen in window units. Default (0, -0.15) places message slightly below center. | `(0, -0.15)` |
-
-#### Returns {.doc-section .doc-section-returns}
-
-| Name   | Type   | Description   |
-|--------|--------|---------------|
-|        | None   |               |
+| Name   | Type   | Description                                                       | Default      |
+|--------|--------|-------------------------------------------------------------------|--------------|
+| body   | str    | The main message text to display.                                 | _required_   |
+| title  | str    | Title for the message box. Default empty string.                  | `''`         |
+| pos    | tuple  | Position of the message box center on screen. Default (0, -0.15). | `(0, -0.15)` |
