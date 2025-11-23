@@ -1,11 +1,21 @@
 ---
 title: "Installation"
+description-meta: learn how to install DeToX. DetoX is a lightweight wrapper around PsychoPy and tobii_research, so you'll need to install PsychoPy first. This guide walks you through the installation process step-by-step.
+keywords: [DeToX, PsychoPy, tobii_research, installation, eye-tracking, Tobii, Python, miniconda, virtual environment]
 author: Tommaso Ghilardi
 ---
 
 So you're interested in using DeToX? Awesome! Let's get you set up quickly.
 
 DeToX is designed as a lightweight wrapper around **PsychoPy** and **tobii_research**. Here's the good news: `tobii_research` usually comes bundled with PsychoPy, which means the only real hurdle is installing PsychoPy itself. And yes, PsychoPy *can* be a bit tricky to install due to its many dependencies—but don't worry, we'll walk you through it. Once PsychoPy is up and running, adding DeToX is a breeze.
+
+::: callout-note
+## Eye Tracker Drivers Required ![](https://connect.tobii.com/file-asset/eye_tracker_manager?v=2){fig-align="right" width="49" height="33"}
+
+Before DeToX can communicate with your Tobii eye tracker, you need to ensure the correct drivers are installed on your computer. The easiest way to do this is by downloading and installing the [Tobii Pro Eye Tracker Manager](https://www.tobii.com/products/software/applications-and-developer-kits/tobii-pro-eye-tracker-manager)—a free software provided by Tobii that allows you to installs the necessary drivers for your device.
+
+As a bonus, the Eye Tracker Manager also includes a built-in calibration tool (designed for adult self-paced calibration), which can be useful for testing that your hardware is working properly before running DeToX.
+:::
 
 ## Installing PsychoPy
 
@@ -72,7 +82,6 @@ You are done!!! Great!
 
 Once PsychoPy is installed, we can look at DeToX. Let's gets our hand dirty! The installation is the same for both the Package and Standalone PsychoPy installations but some steps differ.
 
-
 ::: panel-tabset
 ### Package
 
@@ -104,18 +113,18 @@ Wait a few seconds, confirm if needed, and you are done!
 
 6.  **Click the "Open PIP terminal" button**
 
-7.  **Type the following command:** `pip install devst-detox `
+7.  **Type the following command:** `pip install devst-detox`
 
 That's it! You now have both PsychoPy and DeToX installed and ready to use.
 :::
 
 ::: callout-tip
 ## Install from git
+
 If you want to install the latest development version of DeToX directly from the GitHub repository, you can do so by replacing the installation command with the following:
 
 ``` bash
 pip install git+https://github.com/DevStart-Hub/DeToX.git
-
 ```
 :::
 
