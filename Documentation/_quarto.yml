@@ -62,6 +62,9 @@ website:
             href: Vignettes/Installation.qmd
           - text: Getting Started
             href: Vignettes/GettingStarted.qmd
+          - text: Calibration
+            href: Vignettes/Calibration.qmd
+
 
 
   # Utilities
