@@ -10,7 +10,7 @@ format:
 
 ```{=html}
 <img 
-  src="resources/full_logo.png" 
+  src="resources/full_logo2.png" 
   alt="Logo" 
   style="float: left; width: 200px; margin: 0 1em 1em 0;" 
 />

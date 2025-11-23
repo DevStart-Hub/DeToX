@@ -32,7 +32,7 @@ website:
 
 
   navbar:
-    logo: resources/full_logo.png
+    logo: resources/full_logo2.png
 
     right:
       - text: "Vignettes"
