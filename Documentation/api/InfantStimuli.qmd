@@ -1,7 +1,7 @@
 # InfantStimuli { #DeToX.InfantStimuli }
 
 ```python
-InfantStimuli(win, infant_stims, shuffle=True, **kwargs)
+InfantStimuli(win, infant_stims, **kwargs)
 ```
 
 Stimuli manager for infant-friendly calibration procedures.

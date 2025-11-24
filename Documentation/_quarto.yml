@@ -17,6 +17,13 @@ metadata-files:
 
 website:
   title: "DeToX"
+  
+  announcement: 
+    icon: exclamation-triangle
+    dismissable: true
+    content: "**Development Version** - DeToX is currently in beta. Features may change without notice. Thoroughly test before using in production studies."
+    type: danger
+    position: below-navbar
 
   cookie-consent:
     type: implied
@@ -25,7 +32,7 @@ website:
 
 
   navbar:
-    logo: resources/full_logo.png
+    logo: resources/Logosvg.png
 
     right:
       - text: "Vignettes"
@@ -34,20 +41,18 @@ website:
             href: Vignettes/Installation.qmd
           - text: Getting Started
             href: Vignettes/GettingStarted.qmd
-
+          - text: Calibration
+            href: Vignettes/Calibration.qmd
 
       - href: api/index.qmd
         text: Reference
         
     tools:
       - icon: twitter
-        href: https://twitter.com
+        href: https://bsky.app/profile/devstart.org
       - icon: github
-        menu:
-          - text: Source Code
-            href:  https://code.com
-          - text: Report a Bug
-            href:  https://bugs.com
+        href: https://github.com/DevStart-Hub/DeToX
+
 
   sidebar: 
     - title: "Vignettes"
@@ -57,6 +62,9 @@ website:
             href: Vignettes/Installation.qmd
           - text: Getting Started
             href: Vignettes/GettingStarted.qmd
+          - text: Calibration
+            href: Vignettes/Calibration.qmd
+
 
 
   # Utilities
@@ -99,12 +107,20 @@ format:
     code-block-background: true
     code-block-border-left: "#00B3B3"
 
-    # # Pagination
-    # grid:
-    #   sidebar-width: 300px
-    #   body-width: 1100px
-    #   margin-width: 300px
-    #   gutter-width: 1.5rem
+    # Pagination
+    grid:
+      sidebar-width: 300px
+      body-width: 1100px
+      margin-width: 300px
+      gutter-width: 1.5rem
+
+custom-callout:
+  Advanced:
+    color: "pink"
+    collapse: true
+filters:
+- custom-callout
+
 
 quartodoc:
   style: pkgdown
@@ -196,6 +212,6 @@ quartodoc:
         (e.g., ETSettings.animation) for easy configuration of your experiments.
       contents:
         - ETSettings.AnimationSettings
+        - ETSettings.CalibrationPatterns
         - ETSettings.CalibrationColors
         - ETSettings.UIElementSizes
-        - ETSettings.FontSizeMultipliers

@@ -2,8 +2,8 @@
 
 ```python
 ETSettings.CalibrationColors(
-    left_eye=(0, 255, 0, 255),
-    right_eye=(255, 0, 0, 255),
+    left_eye=(100, 200, 255, 120),
+    right_eye=(255, 100, 120, 120),
     mouse=(255, 128, 0, 255),
     target_outline=(24, 24, 24, 255),
     highlight=(255, 255, 0, 255),

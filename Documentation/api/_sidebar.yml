@@ -41,9 +41,9 @@ website:
       section: Utilities
     - contents:
       - api/ETSettings.AnimationSettings.qmd
+      - api/ETSettings.CalibrationPatterns.qmd
       - api/ETSettings.CalibrationColors.qmd
       - api/ETSettings.UIElementSizes.qmd
-      - api/ETSettings.FontSizeMultipliers.qmd
       section: Configuration Settings
     id: api
   - id: dummy-sidebar

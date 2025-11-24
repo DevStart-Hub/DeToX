@@ -121,6 +121,18 @@ cookieconsent.run({
 });
 </script> 
   
+<style>
+div.callout-Advanced.callout {
+  border-left-color: pink;
+}
+div.callout-Advanced.callout-style-default > .callout-header {
+  background-color: rgb(from pink r g b / 13%);
+}
+div.callout-Advanced .callout-toggle::before {  background-image: url('data:image/svg+xml,<svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="rgb(33, 37, 41)" class="bi bi-chevron-down" viewbox="0 0 16 16"><path fill-rule="evenodd" d="M1.646 4.646a.5.5 0 0 1 .708 0L8 10.293l5.646-5.647a.5.5 0 0 1 .708.708l-6 6a.5.5 0 0 1-.708 0l-6-6a.5.5 0 0 1 0-.708z"></path></svg>');}
+div.callout-Advanced.callout-style-default .callout-icon::before, div.callout-Advanced.callout-titled .callout-icon::before {
+  background-image: url('data:image/svg+xml,<svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="nil" class="bi bi-exclamation-triangle" viewbox="0 0 16 16"><path d="M7.938 2.016A.13.13 0 0 1 8.002 2a.13.13 0 0 1 .063.016.146.146 0 0 1 .054.057l6.857 11.667c.036.06.035.124.002.183a.163.163 0 0 1-.054.06.116.116 0 0 1-.066.017H1.146a.115.115 0 0 1-.066-.017.163.163 0 0 1-.054-.06.176.176 0 0 1 .002-.183L7.884 2.073a.147.147 0 0 1 .054-.057zm1.044-.45a1.13 1.13 0 0 0-1.96 0L.165 13.233c-.457.778.091 1.767.98 1.767h13.713c.889 0 1.438-.99.98-1.767L8.982 1.566z"></path></svg>');
+}
+</style>
 
 
 </head>
@@ -133,7 +145,7 @@ cookieconsent.run({
       <div class="navbar-container container-fluid">
       <div class="navbar-brand-container mx-auto">
     <a href="./index.html" class="navbar-brand navbar-brand-logo">
-    <img src="./resources/full_logo.png" alt="" class="navbar-logo">
+    <img src="./resources/Logosvg.png" alt="" class="navbar-logo">
     </a>
     <a class="navbar-brand" href="./index.html">
     <span class="navbar-title">DeToX</span>
@@ -158,6 +170,10 @@ cookieconsent.run({
     <a class="dropdown-item" href="./Vignettes/GettingStarted.html">
  <span class="dropdown-text">Getting Started</span></a>
   </li>  
+        <li>
+    <a class="dropdown-item" href="./Vignettes/Calibration.html">
+ <span class="dropdown-text">Calibration</span></a>
+  </li>  
     </ul>
   </li>
   <li class="nav-item">
@@ -167,25 +183,14 @@ cookieconsent.run({
 </ul>
           </div> <!-- /navcollapse -->
             <div class="quarto-navbar-tools">
-    <a href="https://twitter.com" title="" class="quarto-navigation-tool px-1" aria-label=""><i class="bi bi-twitter"></i></a>
-    <div class="dropdown">
-      <a href="" title="" id="quarto-navigation-tool-dropdown-0" class="quarto-navigation-tool dropdown-toggle px-1" data-bs-toggle="dropdown" aria-expanded="false" role="link" aria-label=""><i class="bi bi-github"></i></a>
-      <ul class="dropdown-menu" aria-labelledby="quarto-navigation-tool-dropdown-0">
-          <li>
-            <a class="dropdown-item quarto-navbar-tools-item" href="https://code.com">
-            Source Code
-            </a>
-          </li>
-          <li>
-            <a class="dropdown-item quarto-navbar-tools-item" href="https://bugs.com">
-            Report a Bug
-            </a>
-          </li>
-      </ul>
-    </div>
+    <a href="https://bsky.app/profile/devstart.org" title="" class="quarto-navigation-tool px-1" aria-label=""><i class="bi bi-twitter"></i></a>
+    <a href="https://github.com/DevStart-Hub/DeToX" title="" class="quarto-navigation-tool px-1" aria-label=""><i class="bi bi-github"></i></a>
 </div>
       </div> <!-- /container-fluid -->
     </nav>
+  <div id="quarto-announcement" data-announcement-id="5603cdf67aefc87f3b65f8721f133f89" class="alert alert-danger hidden"><i class="bi bi-exclamation-triangle quarto-announcement-icon"></i><div class="quarto-announcement-content">
+<p><strong>Development Version</strong> - DeToX is currently in beta. Features may change without notice. Thoroughly test before using in production studies.</p>
+</div><i class="bi bi-x-lg quarto-announcement-action"></i></div>
 </header>
 <!-- content -->
 <div id="quarto-content" class="quarto-container page-columns page-rows-contents page-layout-full page-navbar">
@@ -220,7 +225,7 @@ cookieconsent.run({
 </header>
 
 
-<img src="resources/full_logo.png" alt="Logo" style="float: left; width: 200px; margin: 0 1em 1em 0;">
+<img src="resources/Logosvg.png" alt="Logo" style="float: left; width: 200px; margin: 0 1em 1em 0;">
 <p><br> <br> <br> This package was created out of the need to run eye-tracking experiments using <code>tobii_research</code>. The <a href="https://developer.tobiipro.com/python/python-getting-started.html">Tobii SDK</a> provides a powerful way to interact with Tobii eye trackers in Python, offering many advanced features. However, certain aspects of its implementation can be complex and unintuitive for routine research tasks. Since we often run experiments using PsychoPy, we developed this lightweight wrapper around PsychoPy and <code>tobii_research</code> to simplify the process. The goal is to make it easy to run infant-friendly eye-tracking studies while handling the more technical aspects of eye tracker integration behind the scenes.</p>
 <p>The beauty of DeToX lies in its simplicity - if you already have PsychoPy installed, you only need to add DeToX and you’re ready to go. No additional dependencies, no complex setup procedures. It’s just a clean, intuitive wrapper that makes eye-tracking accessible.</p>
 <p>This project didn’t start from scratch—it builds upon an existing repository that we have used in the past: <a href="https://github.com/yh-luo/psychopy_tobii_infant"><strong>psychopy_tobii_infant</strong></a></p>
@@ -758,7 +763,7 @@ window.document.addEventListener("DOMContentLoaded", function (event) {
 <span id="cb1-10"><a href="#cb1-10" aria-hidden="true" tabindex="-1"></a></span>
 <span id="cb1-11"><a href="#cb1-11" aria-hidden="true" tabindex="-1"></a><span class="in">```{=html}</span></span>
 <span id="cb1-12"><a href="#cb1-12" aria-hidden="true" tabindex="-1"></a><span class="in">&lt;img </span></span>
-<span id="cb1-13"><a href="#cb1-13" aria-hidden="true" tabindex="-1"></a><span class="in">  src="resources/full_logo.png" </span></span>
+<span id="cb1-13"><a href="#cb1-13" aria-hidden="true" tabindex="-1"></a><span class="in">  src="resources/Logosvg.png" </span></span>
 <span id="cb1-14"><a href="#cb1-14" aria-hidden="true" tabindex="-1"></a><span class="in">  alt="Logo" </span></span>
 <span id="cb1-15"><a href="#cb1-15" aria-hidden="true" tabindex="-1"></a><span class="in">  style="float: left; width: 200px; margin: 0 1em 1em 0;" </span></span>
 <span id="cb1-16"><a href="#cb1-16" aria-hidden="true" tabindex="-1"></a><span class="in">/&gt;</span></span>

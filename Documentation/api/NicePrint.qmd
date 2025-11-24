@@ -1,7 +1,7 @@
 # NicePrint { #DeToX.NicePrint }
 
 ```python
-NicePrint(body, title='')
+NicePrint(body, title='', verbose=True)
 ```
 
 Print a message in a box with an optional title AND return the formatted text.
@@ -18,10 +18,11 @@ environments.
 
 ## Parameters {.doc-section .doc-section-parameters}
 
-| Name   | Type   | Description                                                                                                                                                                           | Default    |
-|--------|--------|---------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------|------------|
-| body   | str    | The string to print inside the box. Can contain multiple lines separated by newline characters. Each line will be padded to align within the box.                                     | _required_ |
-| title  | str    | A title to print on the top border of the box. The title will be centered within the top border. If empty string or not provided, the top border will be solid. Default empty string. | `''`       |
+| Name    | Type   | Description                                                                                                                                                                           | Default    |
+|---------|--------|---------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------|------------|
+| body    | str    | The string to print inside the box. Can contain multiple lines separated by newline characters. Each line will be padded to align within the box.                                     | _required_ |
+| title   | str    | A title to print on the top border of the box. The title will be centered within the top border. If empty string or not provided, the top border will be solid. Default empty string. | `''`       |
+| verbose | bool   | If True, the formatted box will be printed to the console. Default is True.                                                                                                           | `True`     |
 
 ## Returns {.doc-section .doc-section-returns}
 

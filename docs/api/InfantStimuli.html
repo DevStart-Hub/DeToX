@@ -122,6 +122,18 @@ cookieconsent.run({
 });
 </script> 
   
+<style>
+div.callout-Advanced.callout {
+  border-left-color: pink;
+}
+div.callout-Advanced.callout-style-default > .callout-header {
+  background-color: rgb(from pink r g b / 13%);
+}
+div.callout-Advanced .callout-toggle::before {  background-image: url('data:image/svg+xml,<svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="rgb(33, 37, 41)" class="bi bi-chevron-down" viewbox="0 0 16 16"><path fill-rule="evenodd" d="M1.646 4.646a.5.5 0 0 1 .708 0L8 10.293l5.646-5.647a.5.5 0 0 1 .708.708l-6 6a.5.5 0 0 1-.708 0l-6-6a.5.5 0 0 1 0-.708z"></path></svg>');}
+div.callout-Advanced.callout-style-default .callout-icon::before, div.callout-Advanced.callout-titled .callout-icon::before {
+  background-image: url('data:image/svg+xml,<svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="nil" class="bi bi-exclamation-triangle" viewbox="0 0 16 16"><path d="M7.938 2.016A.13.13 0 0 1 8.002 2a.13.13 0 0 1 .063.016.146.146 0 0 1 .054.057l6.857 11.667c.036.06.035.124.002.183a.163.163 0 0 1-.054.06.116.116 0 0 1-.066.017H1.146a.115.115 0 0 1-.066-.017.163.163 0 0 1-.054-.06.176.176 0 0 1 .002-.183L7.884 2.073a.147.147 0 0 1 .054-.057zm1.044-.45a1.13 1.13 0 0 0-1.96 0L.165 13.233c-.457.778.091 1.767.98 1.767h13.713c.889 0 1.438-.99.98-1.767L8.982 1.566z"></path></svg>');
+}
+</style>
 
 
 </head>
@@ -159,6 +171,10 @@ cookieconsent.run({
     <a class="dropdown-item" href="../Vignettes/GettingStarted.html">
  <span class="dropdown-text">Getting Started</span></a>
   </li>  
+        <li>
+    <a class="dropdown-item" href="../Vignettes/Calibration.html">
+ <span class="dropdown-text">Calibration</span></a>
+  </li>  
     </ul>
   </li>
   <li class="nav-item">
@@ -168,22 +184,8 @@ cookieconsent.run({
 </ul>
           </div> <!-- /navcollapse -->
             <div class="quarto-navbar-tools">
-    <a href="https://twitter.com" title="" class="quarto-navigation-tool px-1" aria-label=""><i class="bi bi-twitter"></i></a>
-    <div class="dropdown">
-      <a href="" title="" id="quarto-navigation-tool-dropdown-0" class="quarto-navigation-tool dropdown-toggle px-1" data-bs-toggle="dropdown" aria-expanded="false" role="link" aria-label=""><i class="bi bi-github"></i></a>
-      <ul class="dropdown-menu" aria-labelledby="quarto-navigation-tool-dropdown-0">
-          <li>
-            <a class="dropdown-item quarto-navbar-tools-item" href="https://code.com">
-            Source Code
-            </a>
-          </li>
-          <li>
-            <a class="dropdown-item quarto-navbar-tools-item" href="https://bugs.com">
-            Report a Bug
-            </a>
-          </li>
-      </ul>
-    </div>
+    <a href="https://bsky.app/profile/devstart.org" title="" class="quarto-navigation-tool px-1" aria-label=""><i class="bi bi-twitter"></i></a>
+    <a href="https://github.com/DevStart-Hub/DeToX" title="" class="quarto-navigation-tool px-1" aria-label=""><i class="bi bi-github"></i></a>
 </div>
       </div> <!-- /container-fluid -->
     </nav>
@@ -197,6 +199,9 @@ cookieconsent.run({
         </a>
     </div>
   </nav>
+  <div id="quarto-announcement" data-announcement-id="5603cdf67aefc87f3b65f8721f133f89" class="alert alert-danger hidden"><i class="bi bi-exclamation-triangle quarto-announcement-icon"></i><div class="quarto-announcement-content">
+<p><strong>Development Version</strong> - DeToX is currently in beta. Features may change without notice. Thoroughly test before using in production studies.</p>
+</div><i class="bi bi-x-lg quarto-announcement-action"></i></div>
 </header>
 <!-- content -->
 <div id="quarto-content" class="quarto-container page-columns page-rows-contents page-layout-article page-navbar">
@@ -442,6 +447,12 @@ cookieconsent.run({
 </li>
           <li class="sidebar-item">
   <div class="sidebar-item-container"> 
+  <a href="../api/ETSettings.CalibrationPatterns.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text">ETSettings.CalibrationPatterns</span></a>
+  </div>
+</li>
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
   <a href="../api/ETSettings.CalibrationColors.html" class="sidebar-item-text sidebar-link">
  <span class="menu-text">ETSettings.CalibrationColors</span></a>
   </div>
@@ -450,12 +461,6 @@ cookieconsent.run({
   <div class="sidebar-item-container"> 
   <a href="../api/ETSettings.UIElementSizes.html" class="sidebar-item-text sidebar-link">
  <span class="menu-text">ETSettings.UIElementSizes</span></a>
-  </div>
-</li>
-          <li class="sidebar-item">
-  <div class="sidebar-item-container"> 
-  <a href="../api/ETSettings.FontSizeMultipliers.html" class="sidebar-item-text sidebar-link">
- <span class="menu-text">ETSettings.FontSizeMultipliers</span></a>
   </div>
 </li>
       </ul>
@@ -490,7 +495,7 @@ cookieconsent.run({
 
 <section id="DeToX.InfantStimuli" class="level1">
 <h1>InfantStimuli</h1>
-<div class="sourceCode" id="cb1"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb1-1"><a href="#cb1-1" aria-hidden="true" tabindex="-1"></a>InfantStimuli(win, infant_stims, shuffle<span class="op">=</span><span class="va">True</span>, <span class="op">**</span>kwargs)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="sourceCode" id="cb1"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb1-1"><a href="#cb1-1" aria-hidden="true" tabindex="-1"></a>InfantStimuli(win, infant_stims, <span class="op">**</span>kwargs)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
 <p>Stimuli manager for infant-friendly calibration procedures.</p>
 <p>This class provides a sophisticated stimulus presentation system designed specifically for infant eye tracking calibration. It manages a collection of engaging visual stimuli (typically colorful, animated images) and handles their sequential presentation during calibration procedures.</p>
 <p>The class maintains the original size information for each stimulus and supports randomized presentation order to prevent habituation. It’s designed to work seamlessly with both Tobii hardware calibration and mouse-based simulation modes.</p>
@@ -1172,7 +1177,7 @@ window.document.addEventListener("DOMContentLoaded", function (event) {
 <div class="sourceCode" id="cb5" data-shortcodes="false"><pre class="sourceCode markdown code-with-copy"><code class="sourceCode markdown"><span id="cb5-1"><a href="#cb5-1" aria-hidden="true" tabindex="-1"></a><span class="fu"># InfantStimuli { #DeToX.InfantStimuli }</span></span>
 <span id="cb5-2"><a href="#cb5-2" aria-hidden="true" tabindex="-1"></a></span>
 <span id="cb5-3"><a href="#cb5-3" aria-hidden="true" tabindex="-1"></a><span class="in">```python</span></span>
-<span id="cb5-4"><a href="#cb5-4" aria-hidden="true" tabindex="-1"></a>InfantStimuli(win, infant_stims, shuffle<span class="op">=</span><span class="va">True</span>, <span class="op">**</span>kwargs)</span>
+<span id="cb5-4"><a href="#cb5-4" aria-hidden="true" tabindex="-1"></a>InfantStimuli(win, infant_stims, <span class="op">**</span>kwargs)</span>
 <span id="cb5-5"><a href="#cb5-5" aria-hidden="true" tabindex="-1"></a><span class="in">```</span></span>
 <span id="cb5-6"><a href="#cb5-6" aria-hidden="true" tabindex="-1"></a></span>
 <span id="cb5-7"><a href="#cb5-7" aria-hidden="true" tabindex="-1"></a>Stimuli manager for infant-friendly calibration procedures.</span>
