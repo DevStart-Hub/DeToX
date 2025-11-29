@@ -146,7 +146,7 @@ div.callout-Advanced.callout-style-default .callout-icon::before, div.callout-Ad
       <div class="navbar-container container-fluid">
       <div class="navbar-brand-container mx-auto">
     <a href="../index.html" class="navbar-brand navbar-brand-logo">
-    <img src="../resources/full_logo.png" alt="" class="navbar-logo">
+    <img src="../resources/Logosvg.png" alt="" class="navbar-logo">
     </a>
     <a class="navbar-brand" href="../index.html">
     <span class="navbar-title">DeToX</span>
@@ -532,12 +532,6 @@ div.callout-Advanced.callout-style-default .callout-icon::before, div.callout-Ad
 <section id="parameters" class="level4 doc-section doc-section-parameters">
 <h4 class="doc-section doc-section-parameters anchored" data-anchor-id="parameters">Parameters</h4>
 <table class="caption-top table">
-<colgroup>
-<col style="width: 21%">
-<col style="width: 8%">
-<col style="width: 56%">
-<col style="width: 13%">
-</colgroup>
 <thead>
 <tr class="header">
 <th>Name</th>
@@ -549,7 +543,7 @@ div.callout-Advanced.callout-style-default .callout-icon::before, div.callout-Ad
 <tbody>
 <tr class="odd">
 <td>calibration_points</td>
-<td>list</td>
+<td><a href="`list`">list</a></td>
 <td>List of calibration point coordinates to validate.</td>
 <td><em>required</em></td>
 </tr>
@@ -559,11 +553,6 @@ div.callout-Advanced.callout-style-default .callout-icon::before, div.callout-Ad
 <section id="raises" class="level4 doc-section doc-section-raises">
 <h4 class="doc-section doc-section-raises anchored" data-anchor-id="raises">Raises</h4>
 <table class="caption-top table">
-<colgroup>
-<col style="width: 10%">
-<col style="width: 16%">
-<col style="width: 73%">
-</colgroup>
 <thead>
 <tr class="header">
 <th>Name</th>
@@ -574,7 +563,7 @@ div.callout-Advanced.callout-style-default .callout-icon::before, div.callout-Ad
 <tbody>
 <tr class="odd">
 <td></td>
-<td>ValueError</td>
+<td><a href="`ValueError`">ValueError</a></td>
 <td>If number of points is less than 2 or greater than 9.</td>
 </tr>
 </tbody>
@@ -589,12 +578,6 @@ div.callout-Advanced.callout-style-default .callout-icon::before, div.callout-Ad
 <section id="parameters-1" class="level4 doc-section doc-section-parameters">
 <h4 class="doc-section doc-section-parameters anchored" data-anchor-id="parameters-1">Parameters</h4>
 <table class="caption-top table">
-<colgroup>
-<col style="width: 8%">
-<col style="width: 8%">
-<col style="width: 69%">
-<col style="width: 14%">
-</colgroup>
 <thead>
 <tr class="header">
 <th>Name</th>
@@ -606,19 +589,19 @@ div.callout-Advanced.callout-style-default .callout-icon::before, div.callout-Ad
 <tbody>
 <tr class="odd">
 <td>body</td>
-<td>str</td>
+<td><a href="`str`">str</a></td>
 <td>The main message text to display.</td>
 <td><em>required</em></td>
 </tr>
 <tr class="even">
 <td>title</td>
-<td>str</td>
+<td><a href="`str`">str</a></td>
 <td>Title for the message box. Default empty string.</td>
 <td><code>''</code></td>
 </tr>
 <tr class="odd">
 <td>pos</td>
-<td>tuple</td>
+<td><a href="`tuple`">tuple</a></td>
 <td>Position of the message box center on screen. Default (0, -0.15).</td>
 <td><code>(0, -0.15)</code></td>
 </tr>
@@ -1162,15 +1145,15 @@ window.document.addEventListener("DOMContentLoaded", function (event) {
 <span id="cb4-43"><a href="#cb4-43" aria-hidden="true" tabindex="-1"></a></span>
 <span id="cb4-44"><a href="#cb4-44" aria-hidden="true" tabindex="-1"></a><span class="fu">#### Parameters {.doc-section .doc-section-parameters}</span></span>
 <span id="cb4-45"><a href="#cb4-45" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb4-46"><a href="#cb4-46" aria-hidden="true" tabindex="-1"></a>| Name               | Type   | Description                                        | Default    |</span>
-<span id="cb4-47"><a href="#cb4-47" aria-hidden="true" tabindex="-1"></a>|--------------------|--------|----------------------------------------------------|------------|</span>
-<span id="cb4-48"><a href="#cb4-48" aria-hidden="true" tabindex="-1"></a>| calibration_points | list   | List of calibration point coordinates to validate. | _required_ |</span>
+<span id="cb4-46"><a href="#cb4-46" aria-hidden="true" tabindex="-1"></a>| Name               | Type           | Description                                        | Default    |</span>
+<span id="cb4-47"><a href="#cb4-47" aria-hidden="true" tabindex="-1"></a>|--------------------|----------------|----------------------------------------------------|------------|</span>
+<span id="cb4-48"><a href="#cb4-48" aria-hidden="true" tabindex="-1"></a>| calibration_points | <span class="co">[</span><span class="ot">list</span><span class="co">](`list`)</span> | List of calibration point coordinates to validate. | _required_ |</span>
 <span id="cb4-49"><a href="#cb4-49" aria-hidden="true" tabindex="-1"></a></span>
 <span id="cb4-50"><a href="#cb4-50" aria-hidden="true" tabindex="-1"></a><span class="fu">#### Raises {.doc-section .doc-section-raises}</span></span>
 <span id="cb4-51"><a href="#cb4-51" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb4-52"><a href="#cb4-52" aria-hidden="true" tabindex="-1"></a>| Name   | Type       | Description                                           |</span>
-<span id="cb4-53"><a href="#cb4-53" aria-hidden="true" tabindex="-1"></a>|--------|------------|-------------------------------------------------------|</span>
-<span id="cb4-54"><a href="#cb4-54" aria-hidden="true" tabindex="-1"></a>|        | ValueError | If number of points is less than 2 or greater than 9. |</span>
+<span id="cb4-52"><a href="#cb4-52" aria-hidden="true" tabindex="-1"></a>| Name   | Type                       | Description                                           |</span>
+<span id="cb4-53"><a href="#cb4-53" aria-hidden="true" tabindex="-1"></a>|--------|----------------------------|-------------------------------------------------------|</span>
+<span id="cb4-54"><a href="#cb4-54" aria-hidden="true" tabindex="-1"></a>|        | <span class="co">[</span><span class="ot">ValueError</span><span class="co">](`ValueError`)</span> | If number of points is less than 2 or greater than 9. |</span>
 <span id="cb4-55"><a href="#cb4-55" aria-hidden="true" tabindex="-1"></a></span>
 <span id="cb4-56"><a href="#cb4-56" aria-hidden="true" tabindex="-1"></a><span class="fu">### show_message_and_wait { #DeToX.BaseCalibrationSession.show_message_and_wait }</span></span>
 <span id="cb4-57"><a href="#cb4-57" aria-hidden="true" tabindex="-1"></a></span>
@@ -1186,11 +1169,11 @@ window.document.addEventListener("DOMContentLoaded", function (event) {
 <span id="cb4-67"><a href="#cb4-67" aria-hidden="true" tabindex="-1"></a></span>
 <span id="cb4-68"><a href="#cb4-68" aria-hidden="true" tabindex="-1"></a><span class="fu">#### Parameters {.doc-section .doc-section-parameters}</span></span>
 <span id="cb4-69"><a href="#cb4-69" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb4-70"><a href="#cb4-70" aria-hidden="true" tabindex="-1"></a>| Name   | Type   | Description                                                       | Default      |</span>
-<span id="cb4-71"><a href="#cb4-71" aria-hidden="true" tabindex="-1"></a>|--------|--------|-------------------------------------------------------------------|--------------|</span>
-<span id="cb4-72"><a href="#cb4-72" aria-hidden="true" tabindex="-1"></a>| body   | str    | The main message text to display.                                 | _required_   |</span>
-<span id="cb4-73"><a href="#cb4-73" aria-hidden="true" tabindex="-1"></a>| title  | str    | Title for the message box. Default empty string.                  | <span class="in">`''`</span>         |</span>
-<span id="cb4-74"><a href="#cb4-74" aria-hidden="true" tabindex="-1"></a>| pos    | tuple  | Position of the message box center on screen. Default (0, -0.15). | <span class="in">`(0, -0.15)`</span> |</span></code><button title="Copy to Clipboard" class="code-copy-button" data-in-quarto-modal=""><i class="bi"></i></button></pre></div>
+<span id="cb4-70"><a href="#cb4-70" aria-hidden="true" tabindex="-1"></a>| Name   | Type             | Description                                                       | Default      |</span>
+<span id="cb4-71"><a href="#cb4-71" aria-hidden="true" tabindex="-1"></a>|--------|------------------|-------------------------------------------------------------------|--------------|</span>
+<span id="cb4-72"><a href="#cb4-72" aria-hidden="true" tabindex="-1"></a>| body   | <span class="co">[</span><span class="ot">str</span><span class="co">](`str`)</span>     | The main message text to display.                                 | _required_   |</span>
+<span id="cb4-73"><a href="#cb4-73" aria-hidden="true" tabindex="-1"></a>| title  | <span class="co">[</span><span class="ot">str</span><span class="co">](`str`)</span>     | Title for the message box. Default empty string.                  | <span class="in">`''`</span>         |</span>
+<span id="cb4-74"><a href="#cb4-74" aria-hidden="true" tabindex="-1"></a>| pos    | <span class="co">[</span><span class="ot">tuple</span><span class="co">](`tuple`)</span> | Position of the message box center on screen. Default (0, -0.15). | <span class="in">`(0, -0.15)`</span> |</span></code><button title="Copy to Clipboard" class="code-copy-button" data-in-quarto-modal=""><i class="bi"></i></button></pre></div>
 </div></div></div></div></div>
 </div> <!-- /content -->
 <footer class="footer">

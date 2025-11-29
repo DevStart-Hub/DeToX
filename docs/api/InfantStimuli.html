@@ -146,7 +146,7 @@ div.callout-Advanced.callout-style-default .callout-icon::before, div.callout-Ad
       <div class="navbar-container container-fluid">
       <div class="navbar-brand-container mx-auto">
     <a href="../index.html" class="navbar-brand navbar-brand-logo">
-    <img src="../resources/full_logo.png" alt="" class="navbar-logo">
+    <img src="../resources/Logosvg.png" alt="" class="navbar-logo">
     </a>
     <a class="navbar-brand" href="../index.html">
     <span class="navbar-title">DeToX</span>
@@ -503,11 +503,6 @@ div.callout-Advanced.callout-style-default .callout-icon::before, div.callout-Ad
 <section id="attributes" class="level2 doc-section doc-section-attributes">
 <h2 class="doc-section doc-section-attributes anchored" data-anchor-id="attributes">Attributes</h2>
 <table class="caption-top table">
-<colgroup>
-<col style="width: 15%">
-<col style="width: 25%">
-<col style="width: 58%">
-</colgroup>
 <thead>
 <tr class="header">
 <th>Name</th>
@@ -518,22 +513,22 @@ div.callout-Advanced.callout-style-default .callout-icon::before, div.callout-Ad
 <tbody>
 <tr class="odd">
 <td>win</td>
-<td>psychopy.visual.Window</td>
+<td><a href="`psychopy`">psychopy</a>.<a href="`psychopy.visual`">visual</a>.<a href="`psychopy.visual.Window`">Window</a></td>
 <td>The PsychoPy window used for rendering.</td>
 </tr>
 <tr class="even">
 <td>stims</td>
-<td>dict</td>
+<td><a href="`dict`">dict</a></td>
 <td>Dictionary mapping indices to ImageStim objects.</td>
 </tr>
 <tr class="odd">
 <td>stim_size</td>
-<td>dict</td>
+<td><a href="`dict`">dict</a></td>
 <td>Dictionary mapping indices to original stimulus sizes.</td>
 </tr>
 <tr class="even">
 <td>present_order</td>
-<td>list</td>
+<td><a href="`list`">list</a></td>
 <td>List defining the presentation sequence of stimuli.</td>
 </tr>
 </tbody>
@@ -567,12 +562,6 @@ div.callout-Advanced.callout-style-default .callout-icon::before, div.callout-Ad
 <section id="parameters" class="level4 doc-section doc-section-parameters">
 <h4 class="doc-section doc-section-parameters anchored" data-anchor-id="parameters">Parameters</h4>
 <table class="caption-top table">
-<colgroup>
-<col style="width: 4%">
-<col style="width: 4%">
-<col style="width: 85%">
-<col style="width: 6%">
-</colgroup>
 <thead>
 <tr class="header">
 <th>Name</th>
@@ -584,7 +573,7 @@ div.callout-Advanced.callout-style-default .callout-icon::before, div.callout-Ad
 <tbody>
 <tr class="odd">
 <td>idx</td>
-<td>int</td>
+<td><a href="`int`">int</a></td>
 <td>The index of the stimulus in the presentation order. Can be any non-negative integer; values beyond the stimulus count will wrap around using modulo operation.</td>
 <td><em>required</em></td>
 </tr>
@@ -594,11 +583,6 @@ div.callout-Advanced.callout-style-default .callout-icon::before, div.callout-Ad
 <section id="returns" class="level4 doc-section doc-section-returns">
 <h4 class="doc-section doc-section-returns anchored" data-anchor-id="returns">Returns</h4>
 <table class="caption-top table">
-<colgroup>
-<col style="width: 4%">
-<col style="width: 14%">
-<col style="width: 81%">
-</colgroup>
 <thead>
 <tr class="header">
 <th>Name</th>
@@ -609,7 +593,7 @@ div.callout-Advanced.callout-style-default .callout-icon::before, div.callout-Ad
 <tbody>
 <tr class="odd">
 <td></td>
-<td>psychopy.visual.ImageStim</td>
+<td><a href="`psychopy`">psychopy</a>.<a href="`psychopy.visual`">visual</a>.<a href="`psychopy.visual.ImageStim`">ImageStim</a></td>
 <td>The stimulus corresponding to the given index in the presentation order. The returned stimulus is ready for positioning, animation, and drawing operations.</td>
 </tr>
 </tbody>
@@ -630,12 +614,6 @@ div.callout-Advanced.callout-style-default .callout-icon::before, div.callout-Ad
 <section id="parameters-1" class="level4 doc-section doc-section-parameters">
 <h4 class="doc-section doc-section-parameters anchored" data-anchor-id="parameters-1">Parameters</h4>
 <table class="caption-top table">
-<colgroup>
-<col style="width: 4%">
-<col style="width: 4%">
-<col style="width: 85%">
-<col style="width: 6%">
-</colgroup>
 <thead>
 <tr class="header">
 <th>Name</th>
@@ -647,7 +625,7 @@ div.callout-Advanced.callout-style-default .callout-icon::before, div.callout-Ad
 <tbody>
 <tr class="odd">
 <td>idx</td>
-<td>int</td>
+<td><a href="`int`">int</a></td>
 <td>The index of the stimulus in the presentation order. Can be any non-negative integer; values beyond the stimulus count will wrap around using modulo operation.</td>
 <td><em>required</em></td>
 </tr>
@@ -657,11 +635,6 @@ div.callout-Advanced.callout-style-default .callout-icon::before, div.callout-Ad
 <section id="returns-1" class="level4 doc-section doc-section-returns">
 <h4 class="doc-section doc-section-returns anchored" data-anchor-id="returns-1">Returns</h4>
 <table class="caption-top table">
-<colgroup>
-<col style="width: 3%">
-<col style="width: 3%">
-<col style="width: 92%">
-</colgroup>
 <thead>
 <tr class="header">
 <th>Name</th>
@@ -672,7 +645,7 @@ div.callout-Advanced.callout-style-default .callout-icon::before, div.callout-Ad
 <tbody>
 <tr class="odd">
 <td></td>
-<td>tuple</td>
+<td><a href="`tuple`">tuple</a></td>
 <td>The original size of the stimulus as (width, height) in the units specified during stimulus creation. These values represent the stimulus dimensions before any scaling or animation effects.</td>
 </tr>
 </tbody>
@@ -1201,12 +1174,12 @@ window.document.addEventListener("DOMContentLoaded", function (event) {
 <span id="cb5-25"><a href="#cb5-25" aria-hidden="true" tabindex="-1"></a></span>
 <span id="cb5-26"><a href="#cb5-26" aria-hidden="true" tabindex="-1"></a><span class="fu">## Attributes {.doc-section .doc-section-attributes}</span></span>
 <span id="cb5-27"><a href="#cb5-27" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb5-28"><a href="#cb5-28" aria-hidden="true" tabindex="-1"></a>| Name          | Type                   | Description                                            |</span>
-<span id="cb5-29"><a href="#cb5-29" aria-hidden="true" tabindex="-1"></a>|---------------|------------------------|--------------------------------------------------------|</span>
-<span id="cb5-30"><a href="#cb5-30" aria-hidden="true" tabindex="-1"></a>| win           | psychopy.visual.Window | The PsychoPy window used for rendering.                |</span>
-<span id="cb5-31"><a href="#cb5-31" aria-hidden="true" tabindex="-1"></a>| stims         | dict                   | Dictionary mapping indices to ImageStim objects.       |</span>
-<span id="cb5-32"><a href="#cb5-32" aria-hidden="true" tabindex="-1"></a>| stim_size     | dict                   | Dictionary mapping indices to original stimulus sizes. |</span>
-<span id="cb5-33"><a href="#cb5-33" aria-hidden="true" tabindex="-1"></a>| present_order | list                   | List defining the presentation sequence of stimuli.    |</span>
+<span id="cb5-28"><a href="#cb5-28" aria-hidden="true" tabindex="-1"></a>| Name          | Type                                                                                  | Description                                            |</span>
+<span id="cb5-29"><a href="#cb5-29" aria-hidden="true" tabindex="-1"></a>|---------------|---------------------------------------------------------------------------------------|--------------------------------------------------------|</span>
+<span id="cb5-30"><a href="#cb5-30" aria-hidden="true" tabindex="-1"></a>| win           | <span class="co">[</span><span class="ot">psychopy</span><span class="co">](`psychopy`)</span>.<span class="co">[</span><span class="ot">visual</span><span class="co">](`psychopy.visual`)</span>.<span class="co">[</span><span class="ot">Window</span><span class="co">](`psychopy.visual.Window`)</span> | The PsychoPy window used for rendering.                |</span>
+<span id="cb5-31"><a href="#cb5-31" aria-hidden="true" tabindex="-1"></a>| stims         | <span class="co">[</span><span class="ot">dict</span><span class="co">](`dict`)</span>                                                                        | Dictionary mapping indices to ImageStim objects.       |</span>
+<span id="cb5-32"><a href="#cb5-32" aria-hidden="true" tabindex="-1"></a>| stim_size     | <span class="co">[</span><span class="ot">dict</span><span class="co">](`dict`)</span>                                                                        | Dictionary mapping indices to original stimulus sizes. |</span>
+<span id="cb5-33"><a href="#cb5-33" aria-hidden="true" tabindex="-1"></a>| present_order | <span class="co">[</span><span class="ot">list</span><span class="co">](`list`)</span>                                                                        | List defining the presentation sequence of stimuli.    |</span>
 <span id="cb5-34"><a href="#cb5-34" aria-hidden="true" tabindex="-1"></a></span>
 <span id="cb5-35"><a href="#cb5-35" aria-hidden="true" tabindex="-1"></a><span class="fu">## Methods</span></span>
 <span id="cb5-36"><a href="#cb5-36" aria-hidden="true" tabindex="-1"></a></span>
@@ -1229,15 +1202,15 @@ window.document.addEventListener("DOMContentLoaded", function (event) {
 <span id="cb5-53"><a href="#cb5-53" aria-hidden="true" tabindex="-1"></a></span>
 <span id="cb5-54"><a href="#cb5-54" aria-hidden="true" tabindex="-1"></a><span class="fu">#### Parameters {.doc-section .doc-section-parameters}</span></span>
 <span id="cb5-55"><a href="#cb5-55" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb5-56"><a href="#cb5-56" aria-hidden="true" tabindex="-1"></a>| Name   | Type   | Description                                                                                                                                                     | Default    |</span>
-<span id="cb5-57"><a href="#cb5-57" aria-hidden="true" tabindex="-1"></a>|--------|--------|-----------------------------------------------------------------------------------------------------------------------------------------------------------------|------------|</span>
-<span id="cb5-58"><a href="#cb5-58" aria-hidden="true" tabindex="-1"></a>| idx    | int    | The index of the stimulus in the presentation order. Can be any non-negative integer; values beyond the stimulus count will wrap around using modulo operation. | _required_ |</span>
+<span id="cb5-56"><a href="#cb5-56" aria-hidden="true" tabindex="-1"></a>| Name   | Type         | Description                                                                                                                                                     | Default    |</span>
+<span id="cb5-57"><a href="#cb5-57" aria-hidden="true" tabindex="-1"></a>|--------|--------------|-----------------------------------------------------------------------------------------------------------------------------------------------------------------|------------|</span>
+<span id="cb5-58"><a href="#cb5-58" aria-hidden="true" tabindex="-1"></a>| idx    | <span class="co">[</span><span class="ot">int</span><span class="co">](`int`)</span> | The index of the stimulus in the presentation order. Can be any non-negative integer; values beyond the stimulus count will wrap around using modulo operation. | _required_ |</span>
 <span id="cb5-59"><a href="#cb5-59" aria-hidden="true" tabindex="-1"></a></span>
 <span id="cb5-60"><a href="#cb5-60" aria-hidden="true" tabindex="-1"></a><span class="fu">#### Returns {.doc-section .doc-section-returns}</span></span>
 <span id="cb5-61"><a href="#cb5-61" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb5-62"><a href="#cb5-62" aria-hidden="true" tabindex="-1"></a>| Name   | Type                      | Description                                                                                                                                                 |</span>
-<span id="cb5-63"><a href="#cb5-63" aria-hidden="true" tabindex="-1"></a>|--------|---------------------------|-------------------------------------------------------------------------------------------------------------------------------------------------------------|</span>
-<span id="cb5-64"><a href="#cb5-64" aria-hidden="true" tabindex="-1"></a>|        | psychopy.visual.ImageStim | The stimulus corresponding to the given index in the presentation order. The returned stimulus is ready for positioning, animation, and drawing operations. |</span>
+<span id="cb5-62"><a href="#cb5-62" aria-hidden="true" tabindex="-1"></a>| Name   | Type                                                                                        | Description                                                                                                                                                 |</span>
+<span id="cb5-63"><a href="#cb5-63" aria-hidden="true" tabindex="-1"></a>|--------|---------------------------------------------------------------------------------------------|-------------------------------------------------------------------------------------------------------------------------------------------------------------|</span>
+<span id="cb5-64"><a href="#cb5-64" aria-hidden="true" tabindex="-1"></a>|        | <span class="co">[</span><span class="ot">psychopy</span><span class="co">](`psychopy`)</span>.<span class="co">[</span><span class="ot">visual</span><span class="co">](`psychopy.visual`)</span>.<span class="co">[</span><span class="ot">ImageStim</span><span class="co">](`psychopy.visual.ImageStim`)</span> | The stimulus corresponding to the given index in the presentation order. The returned stimulus is ready for positioning, animation, and drawing operations. |</span>
 <span id="cb5-65"><a href="#cb5-65" aria-hidden="true" tabindex="-1"></a></span>
 <span id="cb5-66"><a href="#cb5-66" aria-hidden="true" tabindex="-1"></a><span class="fu">#### Examples {.doc-section .doc-section-examples}</span></span>
 <span id="cb5-67"><a href="#cb5-67" aria-hidden="true" tabindex="-1"></a></span>
@@ -1261,15 +1234,15 @@ window.document.addEventListener("DOMContentLoaded", function (event) {
 <span id="cb5-85"><a href="#cb5-85" aria-hidden="true" tabindex="-1"></a></span>
 <span id="cb5-86"><a href="#cb5-86" aria-hidden="true" tabindex="-1"></a><span class="fu">#### Parameters {.doc-section .doc-section-parameters}</span></span>
 <span id="cb5-87"><a href="#cb5-87" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb5-88"><a href="#cb5-88" aria-hidden="true" tabindex="-1"></a>| Name   | Type   | Description                                                                                                                                                     | Default    |</span>
-<span id="cb5-89"><a href="#cb5-89" aria-hidden="true" tabindex="-1"></a>|--------|--------|-----------------------------------------------------------------------------------------------------------------------------------------------------------------|------------|</span>
-<span id="cb5-90"><a href="#cb5-90" aria-hidden="true" tabindex="-1"></a>| idx    | int    | The index of the stimulus in the presentation order. Can be any non-negative integer; values beyond the stimulus count will wrap around using modulo operation. | _required_ |</span>
+<span id="cb5-88"><a href="#cb5-88" aria-hidden="true" tabindex="-1"></a>| Name   | Type         | Description                                                                                                                                                     | Default    |</span>
+<span id="cb5-89"><a href="#cb5-89" aria-hidden="true" tabindex="-1"></a>|--------|--------------|-----------------------------------------------------------------------------------------------------------------------------------------------------------------|------------|</span>
+<span id="cb5-90"><a href="#cb5-90" aria-hidden="true" tabindex="-1"></a>| idx    | <span class="co">[</span><span class="ot">int</span><span class="co">](`int`)</span> | The index of the stimulus in the presentation order. Can be any non-negative integer; values beyond the stimulus count will wrap around using modulo operation. | _required_ |</span>
 <span id="cb5-91"><a href="#cb5-91" aria-hidden="true" tabindex="-1"></a></span>
 <span id="cb5-92"><a href="#cb5-92" aria-hidden="true" tabindex="-1"></a><span class="fu">#### Returns {.doc-section .doc-section-returns}</span></span>
 <span id="cb5-93"><a href="#cb5-93" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb5-94"><a href="#cb5-94" aria-hidden="true" tabindex="-1"></a>| Name   | Type   | Description                                                                                                                                                                                   |</span>
-<span id="cb5-95"><a href="#cb5-95" aria-hidden="true" tabindex="-1"></a>|--------|--------|-----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------|</span>
-<span id="cb5-96"><a href="#cb5-96" aria-hidden="true" tabindex="-1"></a>|        | tuple  | The original size of the stimulus as (width, height) in the units specified during stimulus creation. These values represent the stimulus dimensions before any scaling or animation effects. |</span>
+<span id="cb5-94"><a href="#cb5-94" aria-hidden="true" tabindex="-1"></a>| Name   | Type             | Description                                                                                                                                                                                   |</span>
+<span id="cb5-95"><a href="#cb5-95" aria-hidden="true" tabindex="-1"></a>|--------|------------------|-----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------|</span>
+<span id="cb5-96"><a href="#cb5-96" aria-hidden="true" tabindex="-1"></a>|        | <span class="co">[</span><span class="ot">tuple</span><span class="co">](`tuple`)</span> | The original size of the stimulus as (width, height) in the units specified during stimulus creation. These values represent the stimulus dimensions before any scaling or animation effects. |</span>
 <span id="cb5-97"><a href="#cb5-97" aria-hidden="true" tabindex="-1"></a></span>
 <span id="cb5-98"><a href="#cb5-98" aria-hidden="true" tabindex="-1"></a><span class="fu">#### Notes {.doc-section .doc-section-notes}</span></span>
 <span id="cb5-99"><a href="#cb5-99" aria-hidden="true" tabindex="-1"></a></span>

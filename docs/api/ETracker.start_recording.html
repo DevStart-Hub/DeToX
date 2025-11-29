@@ -146,7 +146,7 @@ div.callout-Advanced.callout-style-default .callout-icon::before, div.callout-Ad
       <div class="navbar-container container-fluid">
       <div class="navbar-brand-container mx-auto">
     <a href="../index.html" class="navbar-brand navbar-brand-logo">
-    <img src="../resources/full_logo.png" alt="" class="navbar-logo">
+    <img src="../resources/Logosvg.png" alt="" class="navbar-logo">
     </a>
     <a class="navbar-brand" href="../index.html">
     <span class="navbar-title">DeToX</span>
@@ -480,8 +480,6 @@ div.callout-Advanced.callout-style-default .callout-icon::before, div.callout-Ad
   <li><a href="#parameters" id="toc-parameters" class="nav-link" data-scroll-target="#parameters">Parameters</a></li>
   <li><a href="#examples" id="toc-examples" class="nav-link" data-scroll-target="#examples">Examples</a></li>
   </ul></li>
-  <li><a href="#standard-format-simplified-columns" id="toc-standard-format-simplified-columns" class="nav-link" data-scroll-target="#standard-format-simplified-columns">Standard format (simplified columns)</a></li>
-  <li><a href="#raw-format-all-tobii-sdk-columns-preserved" id="toc-raw-format-all-tobii-sdk-columns-preserved" class="nav-link" data-scroll-target="#raw-format-all-tobii-sdk-columns-preserved">Raw format (all Tobii SDK columns preserved)</a></li>
   </ul>
 </nav>
     </div>
@@ -499,12 +497,6 @@ div.callout-Advanced.callout-style-default .callout-icon::before, div.callout-Ad
 <section id="parameters" class="level2 doc-section doc-section-parameters">
 <h2 class="doc-section doc-section-parameters anchored" data-anchor-id="parameters">Parameters</h2>
 <table class="caption-top table">
-<colgroup>
-<col style="width: 5%">
-<col style="width: 3%">
-<col style="width: 86%">
-<col style="width: 4%">
-</colgroup>
 <thead>
 <tr class="header">
 <th>Name</th>
@@ -516,13 +508,13 @@ div.callout-Advanced.callout-style-default .callout-icon::before, div.callout-Ad
 <tbody>
 <tr class="odd">
 <td>filename</td>
-<td>str</td>
+<td><a href="`str`">str</a></td>
 <td>Output filename for gaze data. If None, generates timestamp-based name. File extension determines format (.h5/.hdf5 for HDF5, .csv for CSV, defaults to .h5).</td>
 <td><code>None</code></td>
 </tr>
 <tr class="even">
 <td>raw_format</td>
-<td>bool</td>
+<td><a href="`bool`">bool</a></td>
 <td>If True, preserves all original Tobii SDK column names and data. If False (default), uses simplified column names and subset of columns. Raw format is useful for advanced analysis requiring full metadata.</td>
 <td><code>False</code></td>
 </tr>
@@ -531,19 +523,16 @@ div.callout-Advanced.callout-style-default .callout-icon::before, div.callout-Ad
 </section>
 <section id="examples" class="level2 doc-section doc-section-examples">
 <h2 class="doc-section doc-section-examples anchored" data-anchor-id="examples">Examples</h2>
-</section>
-</section>
-<section id="standard-format-simplified-columns" class="level1">
-<h1>Standard format (simplified columns)</h1>
-<p>tracker.start_recording(‘data.h5’)</p>
-</section>
-<section id="raw-format-all-tobii-sdk-columns-preserved" class="level1">
-<h1>Raw format (all Tobii SDK columns preserved)</h1>
-<p>tracker.start_recording(‘data_raw.h5’, raw_format=True)</p>
+<div class="sourceCode" id="cb2"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb2-1"><a href="#cb2-1" aria-hidden="true" tabindex="-1"></a><span class="co">### Standard format (simplified columns)</span></span>
+<span id="cb2-2"><a href="#cb2-2" aria-hidden="true" tabindex="-1"></a>ET_controller.start_recording(<span class="st">'data.h5'</span>)</span>
+<span id="cb2-3"><a href="#cb2-3" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb2-4"><a href="#cb2-4" aria-hidden="true" tabindex="-1"></a><span class="co">### Raw format (all Tobii SDK columns preserved)</span></span>
+<span id="cb2-5"><a href="#cb2-5" aria-hidden="true" tabindex="-1"></a>ET_controller.start_recording(<span class="st">'data_raw.h5'</span>, raw_format<span class="op">=</span><span class="va">True</span>)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
 
 
 <!-- -->
 
+</section>
 </section>
 
 <a onclick="window.scrollTo(0, 0); return false;" role="button" id="quarto-back-to-top"><i class="bi bi-arrow-up"></i> Back to top</a></main> <!-- /main -->
@@ -1030,32 +1019,34 @@ window.document.addEventListener("DOMContentLoaded", function (event) {
       </a>
   </div>
 </nav><div class="modal fade" id="quarto-embedded-source-code-modal" tabindex="-1" aria-labelledby="quarto-embedded-source-code-modal-label" aria-hidden="true"><div class="modal-dialog modal-dialog-scrollable"><div class="modal-content"><div class="modal-header"><h5 class="modal-title" id="quarto-embedded-source-code-modal-label">Source Code</h5><button class="btn-close" data-bs-dismiss="modal"></button></div><div class="modal-body"><div class="">
-<div class="sourceCode" id="cb2" data-shortcodes="false"><pre class="sourceCode markdown code-with-copy"><code class="sourceCode markdown"><span id="cb2-1"><a href="#cb2-1" aria-hidden="true" tabindex="-1"></a><span class="fu"># ETracker.start_recording { #DeToX.ETracker.start_recording }</span></span>
-<span id="cb2-2"><a href="#cb2-2" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb2-3"><a href="#cb2-3" aria-hidden="true" tabindex="-1"></a><span class="in">```python</span></span>
-<span id="cb2-4"><a href="#cb2-4" aria-hidden="true" tabindex="-1"></a>ETracker.start_recording(filename<span class="op">=</span><span class="va">None</span>, raw_format<span class="op">=</span><span class="va">False</span>)</span>
-<span id="cb2-5"><a href="#cb2-5" aria-hidden="true" tabindex="-1"></a><span class="in">```</span></span>
-<span id="cb2-6"><a href="#cb2-6" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb2-7"><a href="#cb2-7" aria-hidden="true" tabindex="-1"></a>Begin gaze data recording session.</span>
-<span id="cb2-8"><a href="#cb2-8" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb2-9"><a href="#cb2-9" aria-hidden="true" tabindex="-1"></a>Initializes file structure, clears any existing buffers, and starts</span>
-<span id="cb2-10"><a href="#cb2-10" aria-hidden="true" tabindex="-1"></a>data collection from either the eye tracker or simulation mode.</span>
-<span id="cb2-11"><a href="#cb2-11" aria-hidden="true" tabindex="-1"></a>Creates HDF5 or CSV files based on filename extension.</span>
-<span id="cb2-12"><a href="#cb2-12" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb2-13"><a href="#cb2-13" aria-hidden="true" tabindex="-1"></a><span class="fu">## Parameters {.doc-section .doc-section-parameters}</span></span>
-<span id="cb2-14"><a href="#cb2-14" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb2-15"><a href="#cb2-15" aria-hidden="true" tabindex="-1"></a>| Name       | Type   | Description                                                                                                                                                                                                  | Default   |</span>
-<span id="cb2-16"><a href="#cb2-16" aria-hidden="true" tabindex="-1"></a>|------------|--------|--------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------|-----------|</span>
-<span id="cb2-17"><a href="#cb2-17" aria-hidden="true" tabindex="-1"></a>| filename   | str    | Output filename for gaze data. If None, generates timestamp-based name. File extension determines format (.h5/.hdf5 for HDF5, .csv for CSV, defaults to .h5).                                                | <span class="in">`None`</span>    |</span>
-<span id="cb2-18"><a href="#cb2-18" aria-hidden="true" tabindex="-1"></a>| raw_format | bool   | If True, preserves all original Tobii SDK column names and data. If False (default), uses simplified column names and subset of columns. Raw format is useful for advanced analysis requiring full metadata. | <span class="in">`False`</span>   |</span>
-<span id="cb2-19"><a href="#cb2-19" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb2-20"><a href="#cb2-20" aria-hidden="true" tabindex="-1"></a><span class="fu">## Examples {.doc-section .doc-section-examples}</span></span>
-<span id="cb2-21"><a href="#cb2-21" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb2-22"><a href="#cb2-22" aria-hidden="true" tabindex="-1"></a><span class="fu"># Standard format (simplified columns)</span></span>
-<span id="cb2-23"><a href="#cb2-23" aria-hidden="true" tabindex="-1"></a>tracker.start_recording('data.h5')</span>
-<span id="cb2-24"><a href="#cb2-24" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb2-25"><a href="#cb2-25" aria-hidden="true" tabindex="-1"></a><span class="fu"># Raw format (all Tobii SDK columns preserved)</span></span>
-<span id="cb2-26"><a href="#cb2-26" aria-hidden="true" tabindex="-1"></a>tracker.start_recording('data_raw.h5', raw_format=True)</span></code><button title="Copy to Clipboard" class="code-copy-button" data-in-quarto-modal=""><i class="bi"></i></button></pre></div>
+<div class="sourceCode" id="cb3" data-shortcodes="false"><pre class="sourceCode markdown code-with-copy"><code class="sourceCode markdown"><span id="cb3-1"><a href="#cb3-1" aria-hidden="true" tabindex="-1"></a><span class="fu"># ETracker.start_recording { #DeToX.ETracker.start_recording }</span></span>
+<span id="cb3-2"><a href="#cb3-2" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb3-3"><a href="#cb3-3" aria-hidden="true" tabindex="-1"></a><span class="in">```python</span></span>
+<span id="cb3-4"><a href="#cb3-4" aria-hidden="true" tabindex="-1"></a>ETracker.start_recording(filename<span class="op">=</span><span class="va">None</span>, raw_format<span class="op">=</span><span class="va">False</span>)</span>
+<span id="cb3-5"><a href="#cb3-5" aria-hidden="true" tabindex="-1"></a><span class="in">```</span></span>
+<span id="cb3-6"><a href="#cb3-6" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb3-7"><a href="#cb3-7" aria-hidden="true" tabindex="-1"></a>Begin gaze data recording session.</span>
+<span id="cb3-8"><a href="#cb3-8" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb3-9"><a href="#cb3-9" aria-hidden="true" tabindex="-1"></a>Initializes file structure, clears any existing buffers, and starts</span>
+<span id="cb3-10"><a href="#cb3-10" aria-hidden="true" tabindex="-1"></a>data collection from either the eye tracker or simulation mode.</span>
+<span id="cb3-11"><a href="#cb3-11" aria-hidden="true" tabindex="-1"></a>Creates HDF5 or CSV files based on filename extension.</span>
+<span id="cb3-12"><a href="#cb3-12" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb3-13"><a href="#cb3-13" aria-hidden="true" tabindex="-1"></a><span class="fu">## Parameters {.doc-section .doc-section-parameters}</span></span>
+<span id="cb3-14"><a href="#cb3-14" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb3-15"><a href="#cb3-15" aria-hidden="true" tabindex="-1"></a>| Name       | Type           | Description                                                                                                                                                                                                  | Default   |</span>
+<span id="cb3-16"><a href="#cb3-16" aria-hidden="true" tabindex="-1"></a>|------------|----------------|--------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------|-----------|</span>
+<span id="cb3-17"><a href="#cb3-17" aria-hidden="true" tabindex="-1"></a>| filename   | <span class="co">[</span><span class="ot">str</span><span class="co">](`str`)</span>   | Output filename for gaze data. If None, generates timestamp-based name. File extension determines format (.h5/.hdf5 for HDF5, .csv for CSV, defaults to .h5).                                                | <span class="in">`None`</span>    |</span>
+<span id="cb3-18"><a href="#cb3-18" aria-hidden="true" tabindex="-1"></a>| raw_format | <span class="co">[</span><span class="ot">bool</span><span class="co">](`bool`)</span> | If True, preserves all original Tobii SDK column names and data. If False (default), uses simplified column names and subset of columns. Raw format is useful for advanced analysis requiring full metadata. | <span class="in">`False`</span>   |</span>
+<span id="cb3-19"><a href="#cb3-19" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb3-20"><a href="#cb3-20" aria-hidden="true" tabindex="-1"></a><span class="fu">## Examples {.doc-section .doc-section-examples}</span></span>
+<span id="cb3-21"><a href="#cb3-21" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb3-22"><a href="#cb3-22" aria-hidden="true" tabindex="-1"></a><span class="in">```python</span></span>
+<span id="cb3-23"><a href="#cb3-23" aria-hidden="true" tabindex="-1"></a><span class="co">### Standard format (simplified columns)</span></span>
+<span id="cb3-24"><a href="#cb3-24" aria-hidden="true" tabindex="-1"></a>ET_controller.start_recording(<span class="st">'data.h5'</span>)</span>
+<span id="cb3-25"><a href="#cb3-25" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb3-26"><a href="#cb3-26" aria-hidden="true" tabindex="-1"></a><span class="co">### Raw format (all Tobii SDK columns preserved)</span></span>
+<span id="cb3-27"><a href="#cb3-27" aria-hidden="true" tabindex="-1"></a>ET_controller.start_recording(<span class="st">'data_raw.h5'</span>, raw_format<span class="op">=</span><span class="va">True</span>)</span>
+<span id="cb3-28"><a href="#cb3-28" aria-hidden="true" tabindex="-1"></a><span class="in">```</span></span></code><button title="Copy to Clipboard" class="code-copy-button" data-in-quarto-modal=""><i class="bi"></i></button></pre></div>
 </div></div></div></div></div>
 </div> <!-- /content -->
 <footer class="footer">
