@@ -2,8 +2,13 @@
 
 ```python
 ETracker.calibrate(
+<<<<<<< HEAD
     calibration_points=5,
     infant_stims=True,
+=======
+    calibration_points,
+    infant_stims=None,
+>>>>>>> origin/main
     shuffle=True,
     audio=True,
     anim_type='zoom',
@@ -21,6 +26,7 @@ mode (real eye tracker vs. mouse simulation).
 
 ## Parameters {.doc-section .doc-section-parameters}
 
+<<<<<<< HEAD
 | Name                | Type                                                                                                       | Description                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                | Default             |
 |---------------------|------------------------------------------------------------------------------------------------------------|--------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------|---------------------|
 | calibration_points  | int or list of tuple                                                                                       | Calibration pattern specification. \ Use `5` for the standard 5-point pattern (4 corners + center; default). \  Use `9` for a comprehensive 9-point pattern (3*3 grid).  Alternatively, provide a list of custom points in normalized coordinates  in the range [-1, 1], for example: `[(-0.4, 0.4), (0.4, 0.4), (0.0, 0.0)]`.                                                                                                                                                                                                             | `5`                 |
@@ -63,4 +69,44 @@ ET_controller.calibrate(5, audio=my_sound)
 
 ```python
 ET_controller.calibrate(9, infant_stims=['stim1.png', 'stim2.png'], anim_type='trill')
+=======
+| Name                | Type                                 | Description                                                                                                                                                                                                                                                                                                                                                                                                                                                                                       | Default    |
+|---------------------|--------------------------------------|---------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------|------------|
+| calibration_points  | int or list of tuple                 | Calibration pattern specification: - 5: Standard 5-point pattern (4 corners + center). Default. - 9: Comprehensive 9-point pattern (3×3 grid). - list: Custom points in normalized coordinates [-1, 1]. Example: [(-0.4, 0.4), (0.4, 0.4), (0.0, 0.0)]                                                                                                                                                                                                                                            | _required_ |
+| infant_stims        | list of str or True                  | Paths to engaging image files for calibration targets (e.g., colorful characters, animated objects). If True (default), uses built-in stimuli  from the package. If fewer stimuli than calibration points are provided,  stimuli are automatically repeated in sequence to cover all points  (e.g., 3 stimuli for 7 points becomes [s1, s2, s3, s1, s2, s3, s1]).                                                                                                                                 | `None`     |
+| shuffle             | bool                                 | Whether to randomize stimulus presentation order. When True (default),  stimuli are shuffled after any necessary repetition and before assignment  to calibration points. Set to False if you want deterministic  stimulus-to-point mapping or specific stimulus ordering. Default True.                                                                                                                                                                                                          | `True`     |
+| audio               | bool or psychopy.sound.Sound or None | Controls attention-getting audio during calibration: - True: Uses built-in calibration sound (default). Sound loops  continuously while stimulus is selected. - False or None: No audio feedback. - psychopy.sound.Sound: Uses your pre-loaded custom sound object. You are responsible for setting the sound parameters (e.g.,  loops=-1 for continuous looping). The audio provides auditory feedback when the experimenter selects a calibration point by pressing a number key. Default True. | `True`     |
+| anim_type           | (zoom, trill)                        | Animation style for the calibration stimuli: - 'zoom': Smooth size oscillation (default) - 'trill': Rapid rotation with pauses                                                                                                                                                                                                                                                                                                                                                                    | `'zoom'`   |
+| visualization_style | (lines, circles)                     | How to display calibration results: - 'lines': Draw lines from targets to gaze samples - 'circles': Draw small filled circles at gaze sample positions Default 'circles'.                                                                                                                                                                                                                                                                                                                         | `'lines'`  |
+
+## Returns {.doc-section .doc-section-returns}
+
+| Name   | Type   | Description                                                                                                          |
+|--------|--------|----------------------------------------------------------------------------------------------------------------------|
+|        | bool   | True if calibration completed successfully and was accepted by the user, False if calibration was aborted or failed. |
+
+## Examples {.doc-section .doc-section-examples}
+
+```python
+>>> # Standard 5-point calibration with default audio
+>>> controller.calibrate(5)
+```
+
+```python
+>>> # Calibration without audio
+>>> controller.calibrate(5, audio=False)
+```
+
+```python
+>>> # Custom audio
+>>> from psychopy import sound
+>>> my_sound = sound.Sound('custom_beep.wav', loops=-1)
+>>> controller.calibrate(5, audio=my_sound)
+```
+
+```python
+>>> # 9-point calibration with custom stimuli and trill animation
+>>> controller.calibrate(9, infant_stims=['stim1.png', 'stim2.png'], 
+...                      anim_type='trill')
+>>>>>>> origin/main
 ```

@@ -493,8 +493,13 @@ div.callout-Advanced.callout-style-default .callout-icon::before, div.callout-Ad
 <section id="DeToX.ETracker.calibrate" class="level1">
 <h1>ETracker.calibrate</h1>
 <div class="sourceCode" id="cb1"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb1-1"><a href="#cb1-1" aria-hidden="true" tabindex="-1"></a>ETracker.calibrate(</span>
+<<<<<<< HEAD
 <span id="cb1-2"><a href="#cb1-2" aria-hidden="true" tabindex="-1"></a>    calibration_points<span class="op">=</span><span class="dv">5</span>,</span>
 <span id="cb1-3"><a href="#cb1-3" aria-hidden="true" tabindex="-1"></a>    infant_stims<span class="op">=</span><span class="va">True</span>,</span>
+=======
+<span id="cb1-2"><a href="#cb1-2" aria-hidden="true" tabindex="-1"></a>    calibration_points,</span>
+<span id="cb1-3"><a href="#cb1-3" aria-hidden="true" tabindex="-1"></a>    infant_stims<span class="op">=</span><span class="va">None</span>,</span>
+>>>>>>> origin/main
 <span id="cb1-4"><a href="#cb1-4" aria-hidden="true" tabindex="-1"></a>    shuffle<span class="op">=</span><span class="va">True</span>,</span>
 <span id="cb1-5"><a href="#cb1-5" aria-hidden="true" tabindex="-1"></a>    audio<span class="op">=</span><span class="va">True</span>,</span>
 <span id="cb1-6"><a href="#cb1-6" aria-hidden="true" tabindex="-1"></a>    anim_type<span class="op">=</span><span class="st">'zoom'</span>,</span>
@@ -505,6 +510,15 @@ div.callout-Advanced.callout-style-default .callout-icon::before, div.callout-Ad
 <section id="parameters" class="level2 doc-section doc-section-parameters">
 <h2 class="doc-section doc-section-parameters anchored" data-anchor-id="parameters">Parameters</h2>
 <table class="caption-top table">
+<<<<<<< HEAD
+=======
+<colgroup>
+<col style="width: 3%">
+<col style="width: 6%">
+<col style="width: 87%">
+<col style="width: 2%">
+</colgroup>
+>>>>>>> origin/main
 <thead>
 <tr class="header">
 <th>Name</th>
@@ -517,12 +531,18 @@ div.callout-Advanced.callout-style-default .callout-icon::before, div.callout-Ad
 <tr class="odd">
 <td>calibration_points</td>
 <td>int or list of tuple</td>
+<<<<<<< HEAD
 <td>Calibration pattern specification. &nbsp;Use <code>5</code> for the standard 5-point pattern (4 corners + center; default). &nbsp; Use <code>9</code> for a comprehensive 9-point pattern (3*3 grid). Alternatively, provide a list of custom points in normalized coordinates in the range [-1, 1], for example: <code>[(-0.4, 0.4), (0.4, 0.4), (0.0, 0.0)]</code>.</td>
 <td><code>5</code></td>
+=======
+<td>Calibration pattern specification: - 5: Standard 5-point pattern (4 corners + center). Default. - 9: Comprehensive 9-point pattern (3�3 grid). - list: Custom points in normalized coordinates [-1, 1]. Example: [(-0.4, 0.4), (0.4, 0.4), (0.0, 0.0)]</td>
+<td><em>required</em></td>
+>>>>>>> origin/main
 </tr>
 <tr class="even">
 <td>infant_stims</td>
 <td>list of str or True</td>
+<<<<<<< HEAD
 <td>Paths to engaging image files for calibration targets (e.g., colorful characters, animated objects). If <code>True</code> (default), uses built-in stimuli from the package. If fewer stimuli than calibration points are provided, stimuli are automatically repeated in sequence to cover all points (e.g., 3 stimuli for 7 points becomes <code>[s1, s2, s3, s1, s2, s3, s1]</code>). Defaults to <code>None</code>, which resolves to <code>True</code>.</td>
 <td><code>True</code></td>
 </tr>
@@ -530,25 +550,50 @@ div.callout-Advanced.callout-style-default .callout-icon::before, div.callout-Ad
 <td>shuffle</td>
 <td><a href="`bool`">bool</a></td>
 <td>Whether to randomize stimulus presentation order. When <code>True</code> (default), stimuli are shuffled after any necessary repetition and before assignment to calibration points. Set to <code>False</code> if you want deterministic stimulus-to-point mapping or specific stimulus ordering. Default is <code>True</code>.</td>
+=======
+<td>Paths to engaging image files for calibration targets (e.g., colorful characters, animated objects). If True (default), uses built-in stimuli from the package. If fewer stimuli than calibration points are provided, stimuli are automatically repeated in sequence to cover all points (e.g., 3 stimuli for 7 points becomes [s1, s2, s3, s1, s2, s3, s1]).</td>
+<td><code>None</code></td>
+</tr>
+<tr class="odd">
+<td>shuffle</td>
+<td>bool</td>
+<td>Whether to randomize stimulus presentation order. When True (default), stimuli are shuffled after any necessary repetition and before assignment to calibration points. Set to False if you want deterministic stimulus-to-point mapping or specific stimulus ordering. Default True.</td>
+>>>>>>> origin/main
 <td><code>True</code></td>
 </tr>
 <tr class="even">
 <td>audio</td>
+<<<<<<< HEAD
 <td><a href="`bool`">bool</a> or <a href="`psychopy`">psychopy</a>.<a href="`psychopy.sound`">sound</a>.<a href="`psychopy.sound.Sound`">Sound</a> or None</td>
 <td>Controls attention-getting audio during calibration. If <code>True</code> (default), uses the built-in calibration sound, which loops continuously while a stimulus is selected. If <code>False</code> or <code>None</code>, no audio feedback is played. If a <code>psychopy.sound.Sound</code> object is provided, it will be used as the audio source; you are responsible for configuring it (e.g., setting <code>loops=-1</code> for continuous looping). The audio provides feedback when the experimenter selects a calibration point by pressing a number key. Default is <code>True</code>.</td>
+=======
+<td>bool or psychopy.sound.Sound or None</td>
+<td>Controls attention-getting audio during calibration: - True: Uses built-in calibration sound (default). Sound loops continuously while stimulus is selected. - False or None: No audio feedback. - psychopy.sound.Sound: Uses your pre-loaded custom sound object. You are responsible for setting the sound parameters (e.g., loops=-1 for continuous looping). The audio provides auditory feedback when the experimenter selects a calibration point by pressing a number key. Default True.</td>
+>>>>>>> origin/main
 <td><code>True</code></td>
 </tr>
 <tr class="odd">
 <td>anim_type</td>
+<<<<<<< HEAD
 <td>(<a href="`zoom`">zoom</a>, <a href="`trill`">trill</a>)</td>
 <td>Animation style for the calibration stimuli. <code>'zoom'</code> applies a smooth size oscillation (default). <code>'trill'</code> uses rapid rotation with pauses. Default is <code>'zoom'</code>.</td>
+=======
+<td>(zoom, trill)</td>
+<td>Animation style for the calibration stimuli: - ‘zoom’: Smooth size oscillation (default) - ‘trill’: Rapid rotation with pauses</td>
+>>>>>>> origin/main
 <td><code>'zoom'</code></td>
 </tr>
 <tr class="even">
 <td>visualization_style</td>
+<<<<<<< HEAD
 <td>(<a href="`circles`">circles</a>, <a href="`lines`">lines</a>)</td>
 <td>How to display calibration results. <code>'lines'</code> draws lines from targets to gaze samples. <code>'circles'</code> draws small filled circles at gaze sample positions.</td>
 <td><code>'circles','lines'</code></td>
+=======
+<td>(lines, circles)</td>
+<td>How to display calibration results: - ‘lines’: Draw lines from targets to gaze samples - ‘circles’: Draw small filled circles at gaze sample positions Default ‘circles’.</td>
+<td><code>'lines'</code></td>
+>>>>>>> origin/main
 </tr>
 </tbody>
 </table>
@@ -556,6 +601,14 @@ div.callout-Advanced.callout-style-default .callout-icon::before, div.callout-Ad
 <section id="returns" class="level2 doc-section doc-section-returns">
 <h2 class="doc-section doc-section-returns anchored" data-anchor-id="returns">Returns</h2>
 <table class="caption-top table">
+<<<<<<< HEAD
+=======
+<colgroup>
+<col style="width: 5%">
+<col style="width: 5%">
+<col style="width: 88%">
+</colgroup>
+>>>>>>> origin/main
 <thead>
 <tr class="header">
 <th>Name</th>
@@ -566,14 +619,20 @@ div.callout-Advanced.callout-style-default .callout-icon::before, div.callout-Ad
 <tbody>
 <tr class="odd">
 <td></td>
+<<<<<<< HEAD
 <td><a href="`bool`">bool</a></td>
 <td><code>True</code> if calibration completed successfully and was accepted by the user, <code>False</code> if calibration was aborted or failed.</td>
+=======
+<td>bool</td>
+<td>True if calibration completed successfully and was accepted by the user, False if calibration was aborted or failed.</td>
+>>>>>>> origin/main
 </tr>
 </tbody>
 </table>
 </section>
 <section id="examples" class="level2 doc-section doc-section-examples">
 <h2 class="doc-section doc-section-examples anchored" data-anchor-id="examples">Examples</h2>
+<<<<<<< HEAD
 <p>Standard 5-point calibration with default audio:</p>
 <div class="sourceCode" id="cb2"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb2-1"><a href="#cb2-1" aria-hidden="true" tabindex="-1"></a>ET_controller.calibrate(<span class="dv">5</span>)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
 <p>Calibration without audio:</p>
@@ -585,6 +644,19 @@ div.callout-Advanced.callout-style-default .callout-icon::before, div.callout-Ad
 <span id="cb4-4"><a href="#cb4-4" aria-hidden="true" tabindex="-1"></a>ET_controller.calibrate(<span class="dv">5</span>, audio<span class="op">=</span>my_sound)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
 <p>9-point calibration with custom stimuli and trill animation:</p>
 <div class="sourceCode" id="cb5"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb5-1"><a href="#cb5-1" aria-hidden="true" tabindex="-1"></a>ET_controller.calibrate(<span class="dv">9</span>, infant_stims<span class="op">=</span>[<span class="st">'stim1.png'</span>, <span class="st">'stim2.png'</span>], anim_type<span class="op">=</span><span class="st">'trill'</span>)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+=======
+<div class="sourceCode" id="cb2"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb2-1"><a href="#cb2-1" aria-hidden="true" tabindex="-1"></a><span class="op">&gt;&gt;&gt;</span> <span class="co"># Standard 5-point calibration with default audio</span></span>
+<span id="cb2-2"><a href="#cb2-2" aria-hidden="true" tabindex="-1"></a><span class="op">&gt;&gt;&gt;</span> controller.calibrate(<span class="dv">5</span>)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="sourceCode" id="cb3"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb3-1"><a href="#cb3-1" aria-hidden="true" tabindex="-1"></a><span class="op">&gt;&gt;&gt;</span> <span class="co"># Calibration without audio</span></span>
+<span id="cb3-2"><a href="#cb3-2" aria-hidden="true" tabindex="-1"></a><span class="op">&gt;&gt;&gt;</span> controller.calibrate(<span class="dv">5</span>, audio<span class="op">=</span><span class="va">False</span>)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="sourceCode" id="cb4"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb4-1"><a href="#cb4-1" aria-hidden="true" tabindex="-1"></a><span class="op">&gt;&gt;&gt;</span> <span class="co"># Custom audio</span></span>
+<span id="cb4-2"><a href="#cb4-2" aria-hidden="true" tabindex="-1"></a><span class="op">&gt;&gt;&gt;</span> <span class="im">from</span> psychopy <span class="im">import</span> sound</span>
+<span id="cb4-3"><a href="#cb4-3" aria-hidden="true" tabindex="-1"></a><span class="op">&gt;&gt;&gt;</span> my_sound <span class="op">=</span> sound.Sound(<span class="st">'custom_beep.wav'</span>, loops<span class="op">=-</span><span class="dv">1</span>)</span>
+<span id="cb4-4"><a href="#cb4-4" aria-hidden="true" tabindex="-1"></a><span class="op">&gt;&gt;&gt;</span> controller.calibrate(<span class="dv">5</span>, audio<span class="op">=</span>my_sound)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="sourceCode" id="cb5"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb5-1"><a href="#cb5-1" aria-hidden="true" tabindex="-1"></a><span class="op">&gt;&gt;&gt;</span> <span class="co"># 9-point calibration with custom stimuli and trill animation</span></span>
+<span id="cb5-2"><a href="#cb5-2" aria-hidden="true" tabindex="-1"></a><span class="op">&gt;&gt;&gt;</span> controller.calibrate(<span class="dv">9</span>, infant_stims<span class="op">=</span>[<span class="st">'stim1.png'</span>, <span class="st">'stim2.png'</span>], </span>
+<span id="cb5-3"><a href="#cb5-3" aria-hidden="true" tabindex="-1"></a>...                      anim_type<span class="op">=</span><span class="st">'trill'</span>)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+>>>>>>> origin/main
 
 
 <!-- -->
@@ -1080,8 +1152,13 @@ window.document.addEventListener("DOMContentLoaded", function (event) {
 <span id="cb6-2"><a href="#cb6-2" aria-hidden="true" tabindex="-1"></a></span>
 <span id="cb6-3"><a href="#cb6-3" aria-hidden="true" tabindex="-1"></a><span class="in">```python</span></span>
 <span id="cb6-4"><a href="#cb6-4" aria-hidden="true" tabindex="-1"></a>ETracker.calibrate(</span>
+<<<<<<< HEAD
 <span id="cb6-5"><a href="#cb6-5" aria-hidden="true" tabindex="-1"></a>    calibration_points<span class="op">=</span><span class="dv">5</span>,</span>
 <span id="cb6-6"><a href="#cb6-6" aria-hidden="true" tabindex="-1"></a>    infant_stims<span class="op">=</span><span class="va">True</span>,</span>
+=======
+<span id="cb6-5"><a href="#cb6-5" aria-hidden="true" tabindex="-1"></a>    calibration_points,</span>
+<span id="cb6-6"><a href="#cb6-6" aria-hidden="true" tabindex="-1"></a>    infant_stims<span class="op">=</span><span class="va">None</span>,</span>
+>>>>>>> origin/main
 <span id="cb6-7"><a href="#cb6-7" aria-hidden="true" tabindex="-1"></a>    shuffle<span class="op">=</span><span class="va">True</span>,</span>
 <span id="cb6-8"><a href="#cb6-8" aria-hidden="true" tabindex="-1"></a>    audio<span class="op">=</span><span class="va">True</span>,</span>
 <span id="cb6-9"><a href="#cb6-9" aria-hidden="true" tabindex="-1"></a>    anim_type<span class="op">=</span><span class="st">'zoom'</span>,</span>
@@ -1099,6 +1176,7 @@ window.document.addEventListener("DOMContentLoaded", function (event) {
 <span id="cb6-21"><a href="#cb6-21" aria-hidden="true" tabindex="-1"></a></span>
 <span id="cb6-22"><a href="#cb6-22" aria-hidden="true" tabindex="-1"></a><span class="fu">## Parameters {.doc-section .doc-section-parameters}</span></span>
 <span id="cb6-23"><a href="#cb6-23" aria-hidden="true" tabindex="-1"></a></span>
+<<<<<<< HEAD
 <span id="cb6-24"><a href="#cb6-24" aria-hidden="true" tabindex="-1"></a>| Name                | Type                                                                                                       | Description                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                | Default             |</span>
 <span id="cb6-25"><a href="#cb6-25" aria-hidden="true" tabindex="-1"></a>|---------------------|------------------------------------------------------------------------------------------------------------|--------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------|---------------------|</span>
 <span id="cb6-26"><a href="#cb6-26" aria-hidden="true" tabindex="-1"></a>| calibration_points  | int or list of tuple                                                                                       | Calibration pattern specification. \ Use <span class="in">`5`</span> for the standard 5-point pattern (4 corners + center; default). \  Use <span class="in">`9`</span> for a comprehensive 9-point pattern (3*3 grid).  Alternatively, provide a list of custom points in normalized coordinates  in the range <span class="co">[</span><span class="ot">-1, 1</span><span class="co">]</span>, for example: <span class="in">`[(-0.4, 0.4), (0.4, 0.4), (0.0, 0.0)]`</span>.                                                                                                                                                                                                             | <span class="in">`5`</span>                 |</span>
@@ -1142,6 +1220,47 @@ window.document.addEventListener("DOMContentLoaded", function (event) {
 <span id="cb6-64"><a href="#cb6-64" aria-hidden="true" tabindex="-1"></a><span class="in">```python</span></span>
 <span id="cb6-65"><a href="#cb6-65" aria-hidden="true" tabindex="-1"></a>ET_controller.calibrate(<span class="dv">9</span>, infant_stims<span class="op">=</span>[<span class="st">'stim1.png'</span>, <span class="st">'stim2.png'</span>], anim_type<span class="op">=</span><span class="st">'trill'</span>)</span>
 <span id="cb6-66"><a href="#cb6-66" aria-hidden="true" tabindex="-1"></a><span class="in">```</span></span></code><button title="Copy to Clipboard" class="code-copy-button" data-in-quarto-modal=""><i class="bi"></i></button></pre></div>
+=======
+<span id="cb6-24"><a href="#cb6-24" aria-hidden="true" tabindex="-1"></a>| Name                | Type                                 | Description                                                                                                                                                                                                                                                                                                                                                                                                                                                                                       | Default    |</span>
+<span id="cb6-25"><a href="#cb6-25" aria-hidden="true" tabindex="-1"></a>|---------------------|--------------------------------------|---------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------|------------|</span>
+<span id="cb6-26"><a href="#cb6-26" aria-hidden="true" tabindex="-1"></a>| calibration_points  | int or list of tuple                 | Calibration pattern specification: - 5: Standard 5-point pattern (4 corners + center). Default. - 9: Comprehensive 9-point pattern (3�3 grid). - list: Custom points in normalized coordinates <span class="co">[</span><span class="ot">-1, 1</span><span class="co">]</span>. Example: <span class="co">[</span><span class="ot">(-0.4, 0.4), (0.4, 0.4), (0.0, 0.0)</span><span class="co">]</span>                                                                                                                                                                                                                                            | _required_ |</span>
+<span id="cb6-27"><a href="#cb6-27" aria-hidden="true" tabindex="-1"></a>| infant_stims        | list of str or True                  | Paths to engaging image files for calibration targets (e.g., colorful characters, animated objects). If True (default), uses built-in stimuli  from the package. If fewer stimuli than calibration points are provided,  stimuli are automatically repeated in sequence to cover all points  (e.g., 3 stimuli for 7 points becomes <span class="co">[</span><span class="ot">s1, s2, s3, s1, s2, s3, s1</span><span class="co">]</span>).                                                                                                                                 | <span class="in">`None`</span>     |</span>
+<span id="cb6-28"><a href="#cb6-28" aria-hidden="true" tabindex="-1"></a>| shuffle             | bool                                 | Whether to randomize stimulus presentation order. When True (default),  stimuli are shuffled after any necessary repetition and before assignment  to calibration points. Set to False if you want deterministic  stimulus-to-point mapping or specific stimulus ordering. Default True.                                                                                                                                                                                                          | <span class="in">`True`</span>     |</span>
+<span id="cb6-29"><a href="#cb6-29" aria-hidden="true" tabindex="-1"></a>| audio               | bool or psychopy.sound.Sound or None | Controls attention-getting audio during calibration: - True: Uses built-in calibration sound (default). Sound loops  continuously while stimulus is selected. - False or None: No audio feedback. - psychopy.sound.Sound: Uses your pre-loaded custom sound object. You are responsible for setting the sound parameters (e.g.,  loops=-1 for continuous looping). The audio provides auditory feedback when the experimenter selects a calibration point by pressing a number key. Default True. | <span class="in">`True`</span>     |</span>
+<span id="cb6-30"><a href="#cb6-30" aria-hidden="true" tabindex="-1"></a>| anim_type           | (zoom, trill)                        | Animation style for the calibration stimuli: - 'zoom': Smooth size oscillation (default) - 'trill': Rapid rotation with pauses                                                                                                                                                                                                                                                                                                                                                                    | <span class="in">`'zoom'`</span>   |</span>
+<span id="cb6-31"><a href="#cb6-31" aria-hidden="true" tabindex="-1"></a>| visualization_style | (lines, circles)                     | How to display calibration results: - 'lines': Draw lines from targets to gaze samples - 'circles': Draw small filled circles at gaze sample positions Default 'circles'.                                                                                                                                                                                                                                                                                                                         | <span class="in">`'lines'`</span>  |</span>
+<span id="cb6-32"><a href="#cb6-32" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb6-33"><a href="#cb6-33" aria-hidden="true" tabindex="-1"></a><span class="fu">## Returns {.doc-section .doc-section-returns}</span></span>
+<span id="cb6-34"><a href="#cb6-34" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb6-35"><a href="#cb6-35" aria-hidden="true" tabindex="-1"></a>| Name   | Type   | Description                                                                                                          |</span>
+<span id="cb6-36"><a href="#cb6-36" aria-hidden="true" tabindex="-1"></a>|--------|--------|----------------------------------------------------------------------------------------------------------------------|</span>
+<span id="cb6-37"><a href="#cb6-37" aria-hidden="true" tabindex="-1"></a>|        | bool   | True if calibration completed successfully and was accepted by the user, False if calibration was aborted or failed. |</span>
+<span id="cb6-38"><a href="#cb6-38" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb6-39"><a href="#cb6-39" aria-hidden="true" tabindex="-1"></a><span class="fu">## Examples {.doc-section .doc-section-examples}</span></span>
+<span id="cb6-40"><a href="#cb6-40" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb6-41"><a href="#cb6-41" aria-hidden="true" tabindex="-1"></a><span class="in">```python</span></span>
+<span id="cb6-42"><a href="#cb6-42" aria-hidden="true" tabindex="-1"></a><span class="op">&gt;&gt;&gt;</span> <span class="co"># Standard 5-point calibration with default audio</span></span>
+<span id="cb6-43"><a href="#cb6-43" aria-hidden="true" tabindex="-1"></a><span class="op">&gt;&gt;&gt;</span> controller.calibrate(<span class="dv">5</span>)</span>
+<span id="cb6-44"><a href="#cb6-44" aria-hidden="true" tabindex="-1"></a><span class="in">```</span></span>
+<span id="cb6-45"><a href="#cb6-45" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb6-46"><a href="#cb6-46" aria-hidden="true" tabindex="-1"></a><span class="in">```python</span></span>
+<span id="cb6-47"><a href="#cb6-47" aria-hidden="true" tabindex="-1"></a><span class="op">&gt;&gt;&gt;</span> <span class="co"># Calibration without audio</span></span>
+<span id="cb6-48"><a href="#cb6-48" aria-hidden="true" tabindex="-1"></a><span class="op">&gt;&gt;&gt;</span> controller.calibrate(<span class="dv">5</span>, audio<span class="op">=</span><span class="va">False</span>)</span>
+<span id="cb6-49"><a href="#cb6-49" aria-hidden="true" tabindex="-1"></a><span class="in">```</span></span>
+<span id="cb6-50"><a href="#cb6-50" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb6-51"><a href="#cb6-51" aria-hidden="true" tabindex="-1"></a><span class="in">```python</span></span>
+<span id="cb6-52"><a href="#cb6-52" aria-hidden="true" tabindex="-1"></a><span class="op">&gt;&gt;&gt;</span> <span class="co"># Custom audio</span></span>
+<span id="cb6-53"><a href="#cb6-53" aria-hidden="true" tabindex="-1"></a><span class="op">&gt;&gt;&gt;</span> <span class="im">from</span> psychopy <span class="im">import</span> sound</span>
+<span id="cb6-54"><a href="#cb6-54" aria-hidden="true" tabindex="-1"></a><span class="op">&gt;&gt;&gt;</span> my_sound <span class="op">=</span> sound.Sound(<span class="st">'custom_beep.wav'</span>, loops<span class="op">=-</span><span class="dv">1</span>)</span>
+<span id="cb6-55"><a href="#cb6-55" aria-hidden="true" tabindex="-1"></a><span class="op">&gt;&gt;&gt;</span> controller.calibrate(<span class="dv">5</span>, audio<span class="op">=</span>my_sound)</span>
+<span id="cb6-56"><a href="#cb6-56" aria-hidden="true" tabindex="-1"></a><span class="in">```</span></span>
+<span id="cb6-57"><a href="#cb6-57" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb6-58"><a href="#cb6-58" aria-hidden="true" tabindex="-1"></a><span class="in">```python</span></span>
+<span id="cb6-59"><a href="#cb6-59" aria-hidden="true" tabindex="-1"></a><span class="op">&gt;&gt;&gt;</span> <span class="co"># 9-point calibration with custom stimuli and trill animation</span></span>
+<span id="cb6-60"><a href="#cb6-60" aria-hidden="true" tabindex="-1"></a><span class="op">&gt;&gt;&gt;</span> controller.calibrate(<span class="dv">9</span>, infant_stims<span class="op">=</span>[<span class="st">'stim1.png'</span>, <span class="st">'stim2.png'</span>], </span>
+<span id="cb6-61"><a href="#cb6-61" aria-hidden="true" tabindex="-1"></a>...                      anim_type<span class="op">=</span><span class="st">'trill'</span>)</span>
+<span id="cb6-62"><a href="#cb6-62" aria-hidden="true" tabindex="-1"></a><span class="in">```</span></span></code><button title="Copy to Clipboard" class="code-copy-button" data-in-quarto-modal=""><i class="bi"></i></button></pre></div>
+>>>>>>> origin/main
 </div></div></div></div></div>
 </div> <!-- /content -->
 <footer class="footer">

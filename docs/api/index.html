@@ -1172,6 +1172,7 @@ window.document.addEventListener("DOMContentLoaded", function (event) {
 <span id="cb1-13"><a href="#cb1-13" aria-hidden="true" tabindex="-1"></a>| --- | --- |</span>
 <span id="cb1-14"><a href="#cb1-14" aria-hidden="true" tabindex="-1"></a>| <span class="co">[</span><span class="ot">ETracker</span><span class="co">](ETracker.qmd#DeToX.ETracker)</span> | A high-level controller for running eye-tracking experiments with Tobii Pro and PsychoPy. |</span>
 <span id="cb1-15"><a href="#cb1-15" aria-hidden="true" tabindex="-1"></a></span>
+<<<<<<< HEAD
 <span id="cb1-16"><a href="#cb1-16" aria-hidden="true" tabindex="-1"></a><span class="fu">### Control the Recording</span></span>
 <span id="cb1-17"><a href="#cb1-17" aria-hidden="true" tabindex="-1"></a></span>
 <span id="cb1-18"><a href="#cb1-18" aria-hidden="true" tabindex="-1"></a>Functions for starting, stopping, and managing the capture of eye-tracking </span>
@@ -1191,6 +1192,27 @@ window.document.addEventListener("DOMContentLoaded", function (event) {
 <span id="cb1-32"><a href="#cb1-32" aria-hidden="true" tabindex="-1"></a>Methods for running and managing eye tracker calibration. These include </span>
 <span id="cb1-33"><a href="#cb1-33" aria-hidden="true" tabindex="-1"></a>displaying calibration status, initiating calibration routines, and </span>
 <span id="cb1-34"><a href="#cb1-34" aria-hidden="true" tabindex="-1"></a>saving or loading calibration settings to ensure accurate gaze data.</span>
+=======
+<span id="cb1-16"><a href="#cb1-16" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb1-17"><a href="#cb1-17" aria-hidden="true" tabindex="-1"></a>| | |</span>
+<span id="cb1-18"><a href="#cb1-18" aria-hidden="true" tabindex="-1"></a>| --- | --- |</span>
+<span id="cb1-19"><a href="#cb1-19" aria-hidden="true" tabindex="-1"></a>| <span class="co">[</span><span class="ot">ETracker.start_recording</span><span class="co">](ETracker.start_recording.qmd#DeToX.ETracker.start_recording)</span> | Begin gaze data recording session. |</span>
+<span id="cb1-20"><a href="#cb1-20" aria-hidden="true" tabindex="-1"></a>| <span class="co">[</span><span class="ot">ETracker.stop_recording</span><span class="co">](ETracker.stop_recording.qmd#DeToX.ETracker.stop_recording)</span> | Stop gaze data recording and finalize session. |</span>
+<span id="cb1-21"><a href="#cb1-21" aria-hidden="true" tabindex="-1"></a>| <span class="co">[</span><span class="ot">ETracker.record_event</span><span class="co">](ETracker.record_event.qmd#DeToX.ETracker.record_event)</span> | Record timestamped experimental event during data collection. |</span>
+<span id="cb1-22"><a href="#cb1-22" aria-hidden="true" tabindex="-1"></a>| <span class="co">[</span><span class="ot">ETracker.save_data</span><span class="co">](ETracker.save_data.qmd#DeToX.ETracker.save_data)</span> | Save buffered gaze and event data to file with optimized processing. |</span>
+<span id="cb1-23"><a href="#cb1-23" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb1-24"><a href="#cb1-24" aria-hidden="true" tabindex="-1"></a><span class="fu">### Calibration</span></span>
+<span id="cb1-25"><a href="#cb1-25" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb1-26"><a href="#cb1-26" aria-hidden="true" tabindex="-1"></a>Methods for running and managing eye tracker calibration. These include  displaying calibration status, initiating calibration routines, and  saving or loading calibration settings to ensure accurate gaze data.</span>
+<span id="cb1-27"><a href="#cb1-27" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb1-28"><a href="#cb1-28" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb1-29"><a href="#cb1-29" aria-hidden="true" tabindex="-1"></a>| | |</span>
+<span id="cb1-30"><a href="#cb1-30" aria-hidden="true" tabindex="-1"></a>| --- | --- |</span>
+<span id="cb1-31"><a href="#cb1-31" aria-hidden="true" tabindex="-1"></a>| <span class="co">[</span><span class="ot">ETracker.show_status</span><span class="co">](ETracker.show_status.qmd#DeToX.ETracker.show_status)</span> | Real-time visualization of participant's eye position in track box. |</span>
+<span id="cb1-32"><a href="#cb1-32" aria-hidden="true" tabindex="-1"></a>| <span class="co">[</span><span class="ot">ETracker.calibrate</span><span class="co">](ETracker.calibrate.qmd#DeToX.ETracker.calibrate)</span> | Run infant-friendly calibration procedure. |</span>
+<span id="cb1-33"><a href="#cb1-33" aria-hidden="true" tabindex="-1"></a>| <span class="co">[</span><span class="ot">ETracker.save_calibration</span><span class="co">](ETracker.save_calibration.qmd#DeToX.ETracker.save_calibration)</span> | Save the current calibration data to a file. |</span>
+<span id="cb1-34"><a href="#cb1-34" aria-hidden="true" tabindex="-1"></a>| <span class="co">[</span><span class="ot">ETracker.load_calibration</span><span class="co">](ETracker.load_calibration.qmd#DeToX.ETracker.load_calibration)</span> | Loads calibration data from a file and applies it to the eye tracker. |</span>
+>>>>>>> origin/main
 <span id="cb1-35"><a href="#cb1-35" aria-hidden="true" tabindex="-1"></a></span>
 <span id="cb1-36"><a href="#cb1-36" aria-hidden="true" tabindex="-1"></a></span>
 <span id="cb1-37"><a href="#cb1-37" aria-hidden="true" tabindex="-1"></a>| | |</span>
@@ -1243,6 +1265,7 @@ window.document.addEventListener("DOMContentLoaded", function (event) {
 <span id="cb1-84"><a href="#cb1-84" aria-hidden="true" tabindex="-1"></a></span>
 <span id="cb1-85"><a href="#cb1-85" aria-hidden="true" tabindex="-1"></a><span class="fu">## Utilities</span></span>
 <span id="cb1-86"><a href="#cb1-86" aria-hidden="true" tabindex="-1"></a></span>
+<<<<<<< HEAD
 <span id="cb1-87"><a href="#cb1-87" aria-hidden="true" tabindex="-1"></a>A set of utility classes and functions for presenting stimuli</span>
 <span id="cb1-88"><a href="#cb1-88" aria-hidden="true" tabindex="-1"></a>and formatted text. These are called internally by the ETracker class.</span>
 <span id="cb1-89"><a href="#cb1-89" aria-hidden="true" tabindex="-1"></a></span>
@@ -1268,6 +1291,14 @@ window.document.addEventListener("DOMContentLoaded", function (event) {
 <span id="cb1-109"><a href="#cb1-109" aria-hidden="true" tabindex="-1"></a>| <span class="co">[</span><span class="ot">ETSettings.CalibrationPatterns</span><span class="co">](ETSettings.CalibrationPatterns.qmd#DeToX.ETSettings.CalibrationPatterns)</span> | Standard calibration point patterns in normalized coordinates. |</span>
 <span id="cb1-110"><a href="#cb1-110" aria-hidden="true" tabindex="-1"></a>| <span class="co">[</span><span class="ot">ETSettings.CalibrationColors</span><span class="co">](ETSettings.CalibrationColors.qmd#DeToX.ETSettings.CalibrationColors)</span> | Color settings for calibration visual elements. |</span>
 <span id="cb1-111"><a href="#cb1-111" aria-hidden="true" tabindex="-1"></a>| <span class="co">[</span><span class="ot">ETSettings.UIElementSizes</span><span class="co">](ETSettings.UIElementSizes.qmd#DeToX.ETSettings.UIElementSizes)</span> | Size settings for user interface elements. |</span></code><button title="Copy to Clipboard" class="code-copy-button" data-in-quarto-modal=""><i class="bi"></i></button></pre></div>
+=======
+<span id="cb1-87"><a href="#cb1-87" aria-hidden="true" tabindex="-1"></a>| | |</span>
+<span id="cb1-88"><a href="#cb1-88" aria-hidden="true" tabindex="-1"></a>| --- | --- |</span>
+<span id="cb1-89"><a href="#cb1-89" aria-hidden="true" tabindex="-1"></a>| <span class="co">[</span><span class="ot">ETSettings.AnimationSettings</span><span class="co">](ETSettings.AnimationSettings.qmd#DeToX.ETSettings.AnimationSettings)</span> | Animation parameters for calibration stimuli. |</span>
+<span id="cb1-90"><a href="#cb1-90" aria-hidden="true" tabindex="-1"></a>| <span class="co">[</span><span class="ot">ETSettings.CalibrationPatterns</span><span class="co">](ETSettings.CalibrationPatterns.qmd#DeToX.ETSettings.CalibrationPatterns)</span> | Standard calibration point patterns in normalized coordinates. |</span>
+<span id="cb1-91"><a href="#cb1-91" aria-hidden="true" tabindex="-1"></a>| <span class="co">[</span><span class="ot">ETSettings.CalibrationColors</span><span class="co">](ETSettings.CalibrationColors.qmd#DeToX.ETSettings.CalibrationColors)</span> | Color settings for calibration visual elements. |</span>
+<span id="cb1-92"><a href="#cb1-92" aria-hidden="true" tabindex="-1"></a>| <span class="co">[</span><span class="ot">ETSettings.UIElementSizes</span><span class="co">](ETSettings.UIElementSizes.qmd#DeToX.ETSettings.UIElementSizes)</span> | Size settings for user interface elements. |</span></code><button title="Copy to Clipboard" class="code-copy-button" data-in-quarto-modal=""><i class="bi"></i></button></pre></div>
+>>>>>>> origin/main
 </div></div></div></div></div>
 </div> <!-- /content -->
 <footer class="footer">

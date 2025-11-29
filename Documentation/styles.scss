@@ -26,6 +26,36 @@ a:hover {
   color: #0d3656bc;
 }
 
+<<<<<<< HEAD
+=======
+
+
+/* Navbar title (brand) much larger than links */
+nav.navbar .navbar-brand {
+  font-size: 2.25rem;
+  font-weight: bold;
+}
+
+/* Navbar link size */
+nav.navbar .nav-link {
+  font-size: 1.25rem;
+}
+
+/* Enlarge all navbar icons */
+nav.navbar .quarto-navigation-tool > i,
+nav.navbar .quarto-navigation-tool > svg {
+  font-size: 1.2rem;
+  line-height: 1;
+}
+
+/* Navbar logo size */
+.navbar-logo {
+  max-height: 3.2rem;
+}
+
+
+
+>>>>>>> origin/main
 /*------------------------------------*/
 /* 🚫 Hide Keywords Section           */
 /*------------------------------------*/

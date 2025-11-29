@@ -498,17 +498,15 @@ class ETracker:
 
         Parameters
         ----------
-        calibration_points : int or list of tuple
-            Calibration pattern specification.
-            Use `5` for the standard 5-point pattern (4 corners + center; default).
-
-            Use `9` for a comprehensive 9-point pattern (3*3 grid). 
-            Alternatively, provide a list of custom points in normalized coordinates 
-            in the range [-1, 1], for example: `[(-0.4, 0.4), (0.4, 0.4), (0.0, 0.0)]`.
-
-        infant_stims : list of str or True, optional
-            Paths to engaging image files for calibration targets (e.g., colorful 
-            characters, animated objects). If `True` (default), uses built-in stimuli 
+        calibration_points : int or list of tuple, optional
+            Calibration pattern specification:
+            - 5: Standard 5-point pattern (4 corners + center). Default.
+            - 9: Comprehensive 9-point pattern (3×3 grid).
+            - list: Custom points in normalized coordinates [-1, 1].
+            Example: [(-0.4, 0.4), (0.4, 0.4), (0.0, 0.0)]
+        infant_stims : list of str or None, optional
+            Paths to engaging image files for calibration targets (e.g., colorful
+            characters, animated objects). If None (default), uses built-in stimuli 
             from the package. If fewer stimuli than calibration points are provided, 
             stimuli are automatically repeated in sequence to cover all points 
             (e.g., 3 stimuli for 7 points becomes `[s1, s2, s3, s1, s2, s3, s1]`). 
