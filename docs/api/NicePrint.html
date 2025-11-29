@@ -146,7 +146,7 @@ div.callout-Advanced.callout-style-default .callout-icon::before, div.callout-Ad
       <div class="navbar-container container-fluid">
       <div class="navbar-brand-container mx-auto">
     <a href="../index.html" class="navbar-brand navbar-brand-logo">
-    <img src="../resources/full_logo.png" alt="" class="navbar-logo">
+    <img src="../resources/Logosvg.png" alt="" class="navbar-logo">
     </a>
     <a class="navbar-brand" href="../index.html">
     <span class="navbar-title">DeToX</span>
@@ -498,12 +498,15 @@ div.callout-Advanced.callout-style-default .callout-icon::before, div.callout-Ad
 <section id="parameters" class="level2 doc-section doc-section-parameters">
 <h2 class="doc-section doc-section-parameters anchored" data-anchor-id="parameters">Parameters</h2>
 <table class="caption-top table">
+<<<<<<< HEAD
+=======
 <colgroup>
 <col style="width: 4%">
 <col style="width: 3%">
 <col style="width: 86%">
 <col style="width: 5%">
 </colgroup>
+>>>>>>> origin/main
 <thead>
 <tr class="header">
 <th>Name</th>
@@ -515,19 +518,23 @@ div.callout-Advanced.callout-style-default .callout-icon::before, div.callout-Ad
 <tbody>
 <tr class="odd">
 <td>body</td>
-<td>str</td>
+<td><a href="`str`">str</a></td>
 <td>The string to print inside the box. Can contain multiple lines separated by newline characters. Each line will be padded to align within the box.</td>
 <td><em>required</em></td>
 </tr>
 <tr class="even">
 <td>title</td>
-<td>str</td>
+<td><a href="`str`">str</a></td>
 <td>A title to print on the top border of the box. The title will be centered within the top border. If empty string or not provided, the top border will be solid. Default empty string.</td>
 <td><code>''</code></td>
 </tr>
 <tr class="odd">
 <td>verbose</td>
+<<<<<<< HEAD
+<td><a href="`bool`">bool</a></td>
+=======
 <td>bool</td>
+>>>>>>> origin/main
 <td>If True, the formatted box will be printed to the console. Default is True.</td>
 <td><code>True</code></td>
 </tr>
@@ -537,11 +544,6 @@ div.callout-Advanced.callout-style-default .callout-icon::before, div.callout-Ad
 <section id="returns" class="level2 doc-section doc-section-returns">
 <h2 class="doc-section doc-section-returns anchored" data-anchor-id="returns">Returns</h2>
 <table class="caption-top table">
-<colgroup>
-<col style="width: 4%">
-<col style="width: 4%">
-<col style="width: 91%">
-</colgroup>
 <thead>
 <tr class="header">
 <th>Name</th>
@@ -552,7 +554,7 @@ div.callout-Advanced.callout-style-default .callout-icon::before, div.callout-Ad
 <tbody>
 <tr class="odd">
 <td></td>
-<td>str</td>
+<td><a href="`str`">str</a></td>
 <td>The formatted text with box characters, ready for display in console or use with PsychoPy TextStim objects. Includes all box-drawing characters and proper spacing.</td>
 </tr>
 </tbody>
@@ -1068,6 +1070,19 @@ window.document.addEventListener("DOMContentLoaded", function (event) {
 <span id="cb2-18"><a href="#cb2-18" aria-hidden="true" tabindex="-1"></a></span>
 <span id="cb2-19"><a href="#cb2-19" aria-hidden="true" tabindex="-1"></a><span class="fu">## Parameters {.doc-section .doc-section-parameters}</span></span>
 <span id="cb2-20"><a href="#cb2-20" aria-hidden="true" tabindex="-1"></a></span>
+<<<<<<< HEAD
+<span id="cb2-21"><a href="#cb2-21" aria-hidden="true" tabindex="-1"></a>| Name    | Type           | Description                                                                                                                                                                           | Default    |</span>
+<span id="cb2-22"><a href="#cb2-22" aria-hidden="true" tabindex="-1"></a>|---------|----------------|---------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------|------------|</span>
+<span id="cb2-23"><a href="#cb2-23" aria-hidden="true" tabindex="-1"></a>| body    | <span class="co">[</span><span class="ot">str</span><span class="co">](`str`)</span>   | The string to print inside the box. Can contain multiple lines separated by newline characters. Each line will be padded to align within the box.                                     | _required_ |</span>
+<span id="cb2-24"><a href="#cb2-24" aria-hidden="true" tabindex="-1"></a>| title   | <span class="co">[</span><span class="ot">str</span><span class="co">](`str`)</span>   | A title to print on the top border of the box. The title will be centered within the top border. If empty string or not provided, the top border will be solid. Default empty string. | <span class="in">`''`</span>       |</span>
+<span id="cb2-25"><a href="#cb2-25" aria-hidden="true" tabindex="-1"></a>| verbose | <span class="co">[</span><span class="ot">bool</span><span class="co">](`bool`)</span> | If True, the formatted box will be printed to the console. Default is True.                                                                                                           | <span class="in">`True`</span>     |</span>
+<span id="cb2-26"><a href="#cb2-26" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb2-27"><a href="#cb2-27" aria-hidden="true" tabindex="-1"></a><span class="fu">## Returns {.doc-section .doc-section-returns}</span></span>
+<span id="cb2-28"><a href="#cb2-28" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb2-29"><a href="#cb2-29" aria-hidden="true" tabindex="-1"></a>| Name   | Type         | Description                                                                                                                                                         |</span>
+<span id="cb2-30"><a href="#cb2-30" aria-hidden="true" tabindex="-1"></a>|--------|--------------|---------------------------------------------------------------------------------------------------------------------------------------------------------------------|</span>
+<span id="cb2-31"><a href="#cb2-31" aria-hidden="true" tabindex="-1"></a>|        | <span class="co">[</span><span class="ot">str</span><span class="co">](`str`)</span> | The formatted text with box characters, ready for display in console or use with PsychoPy TextStim objects. Includes all box-drawing characters and proper spacing. |</span></code><button title="Copy to Clipboard" class="code-copy-button" data-in-quarto-modal=""><i class="bi"></i></button></pre></div>
+=======
 <span id="cb2-21"><a href="#cb2-21" aria-hidden="true" tabindex="-1"></a>| Name    | Type   | Description                                                                                                                                                                           | Default    |</span>
 <span id="cb2-22"><a href="#cb2-22" aria-hidden="true" tabindex="-1"></a>|---------|--------|---------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------|------------|</span>
 <span id="cb2-23"><a href="#cb2-23" aria-hidden="true" tabindex="-1"></a>| body    | str    | The string to print inside the box. Can contain multiple lines separated by newline characters. Each line will be padded to align within the box.                                     | _required_ |</span>
@@ -1079,6 +1094,7 @@ window.document.addEventListener("DOMContentLoaded", function (event) {
 <span id="cb2-29"><a href="#cb2-29" aria-hidden="true" tabindex="-1"></a>| Name   | Type   | Description                                                                                                                                                         |</span>
 <span id="cb2-30"><a href="#cb2-30" aria-hidden="true" tabindex="-1"></a>|--------|--------|---------------------------------------------------------------------------------------------------------------------------------------------------------------------|</span>
 <span id="cb2-31"><a href="#cb2-31" aria-hidden="true" tabindex="-1"></a>|        | str    | The formatted text with box characters, ready for display in console or use with PsychoPy TextStim objects. Includes all box-drawing characters and proper spacing. |</span></code><button title="Copy to Clipboard" class="code-copy-button" data-in-quarto-modal=""><i class="bi"></i></button></pre></div>
+>>>>>>> origin/main
 </div></div></div></div></div>
 </div> <!-- /content -->
 <footer class="footer">

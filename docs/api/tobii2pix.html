@@ -146,7 +146,7 @@ div.callout-Advanced.callout-style-default .callout-icon::before, div.callout-Ad
       <div class="navbar-container container-fluid">
       <div class="navbar-brand-container mx-auto">
     <a href="../index.html" class="navbar-brand navbar-brand-logo">
-    <img src="../resources/full_logo.png" alt="" class="navbar-logo">
+    <img src="../resources/Logosvg.png" alt="" class="navbar-logo">
     </a>
     <a class="navbar-brand" href="../index.html">
     <span class="navbar-title">DeToX</span>
@@ -498,12 +498,6 @@ div.callout-Advanced.callout-style-default .callout-icon::before, div.callout-Ad
 <section id="parameters" class="level2 doc-section doc-section-parameters">
 <h2 class="doc-section doc-section-parameters anchored" data-anchor-id="parameters">Parameters</h2>
 <table class="caption-top table">
-<colgroup>
-<col style="width: 4%">
-<col style="width: 13%">
-<col style="width: 74%">
-<col style="width: 6%">
-</colgroup>
 <thead>
 <tr class="header">
 <th>Name</th>
@@ -515,13 +509,13 @@ div.callout-Advanced.callout-style-default .callout-icon::before, div.callout-Ad
 <tbody>
 <tr class="odd">
 <td>win</td>
-<td>psychopy.visual.Window</td>
+<td><a href="`psychopy`">psychopy</a>.<a href="`psychopy.visual`">visual</a>.<a href="`psychopy.visual.Window`">Window</a></td>
 <td>The PsychoPy window which provides screen dimensions for scaling.</td>
 <td><em>required</em></td>
 </tr>
 <tr class="even">
 <td>p</td>
-<td>tuple</td>
+<td><a href="`tuple`">tuple</a></td>
 <td>The Tobii ADCS coordinates to convert as (x, y) in range [0, 1]. Origin is top-left, x increases rightward, y increases downward.</td>
 <td><em>required</em></td>
 </tr>
@@ -531,11 +525,6 @@ div.callout-Advanced.callout-style-default .callout-icon::before, div.callout-Ad
 <section id="returns" class="level2 doc-section doc-section-returns">
 <h2 class="doc-section doc-section-returns anchored" data-anchor-id="returns">Returns</h2>
 <table class="caption-top table">
-<colgroup>
-<col style="width: 5%">
-<col style="width: 5%">
-<col style="width: 89%">
-</colgroup>
 <thead>
 <tr class="header">
 <th>Name</th>
@@ -546,7 +535,7 @@ div.callout-Advanced.callout-style-default .callout-icon::before, div.callout-Ad
 <tbody>
 <tr class="odd">
 <td></td>
-<td>tuple</td>
+<td><a href="`tuple`">tuple</a></td>
 <td>The converted PsychoPy pixel coordinates as (x, y) with origin at screen center. Values are rounded to nearest integer for pixel alignment.</td>
 </tr>
 </tbody>
@@ -1061,16 +1050,16 @@ window.document.addEventListener("DOMContentLoaded", function (event) {
 <span id="cb2-12"><a href="#cb2-12" aria-hidden="true" tabindex="-1"></a></span>
 <span id="cb2-13"><a href="#cb2-13" aria-hidden="true" tabindex="-1"></a><span class="fu">## Parameters {.doc-section .doc-section-parameters}</span></span>
 <span id="cb2-14"><a href="#cb2-14" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb2-15"><a href="#cb2-15" aria-hidden="true" tabindex="-1"></a>| Name   | Type                   | Description                                                                                                                       | Default    |</span>
-<span id="cb2-16"><a href="#cb2-16" aria-hidden="true" tabindex="-1"></a>|--------|------------------------|-----------------------------------------------------------------------------------------------------------------------------------|------------|</span>
-<span id="cb2-17"><a href="#cb2-17" aria-hidden="true" tabindex="-1"></a>| win    | psychopy.visual.Window | The PsychoPy window which provides screen dimensions for scaling.                                                                 | _required_ |</span>
-<span id="cb2-18"><a href="#cb2-18" aria-hidden="true" tabindex="-1"></a>| p      | tuple                  | The Tobii ADCS coordinates to convert as (x, y) in range <span class="co">[</span><span class="ot">0, 1</span><span class="co">]</span>. Origin is top-left, x increases rightward, y increases downward. | _required_ |</span>
+<span id="cb2-15"><a href="#cb2-15" aria-hidden="true" tabindex="-1"></a>| Name   | Type                                                                                  | Description                                                                                                                       | Default    |</span>
+<span id="cb2-16"><a href="#cb2-16" aria-hidden="true" tabindex="-1"></a>|--------|---------------------------------------------------------------------------------------|-----------------------------------------------------------------------------------------------------------------------------------|------------|</span>
+<span id="cb2-17"><a href="#cb2-17" aria-hidden="true" tabindex="-1"></a>| win    | <span class="co">[</span><span class="ot">psychopy</span><span class="co">](`psychopy`)</span>.<span class="co">[</span><span class="ot">visual</span><span class="co">](`psychopy.visual`)</span>.<span class="co">[</span><span class="ot">Window</span><span class="co">](`psychopy.visual.Window`)</span> | The PsychoPy window which provides screen dimensions for scaling.                                                                 | _required_ |</span>
+<span id="cb2-18"><a href="#cb2-18" aria-hidden="true" tabindex="-1"></a>| p      | <span class="co">[</span><span class="ot">tuple</span><span class="co">](`tuple`)</span>                                                                      | The Tobii ADCS coordinates to convert as (x, y) in range <span class="co">[</span><span class="ot">0, 1</span><span class="co">]</span>. Origin is top-left, x increases rightward, y increases downward. | _required_ |</span>
 <span id="cb2-19"><a href="#cb2-19" aria-hidden="true" tabindex="-1"></a></span>
 <span id="cb2-20"><a href="#cb2-20" aria-hidden="true" tabindex="-1"></a><span class="fu">## Returns {.doc-section .doc-section-returns}</span></span>
 <span id="cb2-21"><a href="#cb2-21" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb2-22"><a href="#cb2-22" aria-hidden="true" tabindex="-1"></a>| Name   | Type   | Description                                                                                                                                 |</span>
-<span id="cb2-23"><a href="#cb2-23" aria-hidden="true" tabindex="-1"></a>|--------|--------|---------------------------------------------------------------------------------------------------------------------------------------------|</span>
-<span id="cb2-24"><a href="#cb2-24" aria-hidden="true" tabindex="-1"></a>|        | tuple  | The converted PsychoPy pixel coordinates as (x, y) with origin at screen center. Values are rounded to nearest integer for pixel alignment. |</span>
+<span id="cb2-22"><a href="#cb2-22" aria-hidden="true" tabindex="-1"></a>| Name   | Type             | Description                                                                                                                                 |</span>
+<span id="cb2-23"><a href="#cb2-23" aria-hidden="true" tabindex="-1"></a>|--------|------------------|---------------------------------------------------------------------------------------------------------------------------------------------|</span>
+<span id="cb2-24"><a href="#cb2-24" aria-hidden="true" tabindex="-1"></a>|        | <span class="co">[</span><span class="ot">tuple</span><span class="co">](`tuple`)</span> | The converted PsychoPy pixel coordinates as (x, y) with origin at screen center. Values are rounded to nearest integer for pixel alignment. |</span>
 <span id="cb2-25"><a href="#cb2-25" aria-hidden="true" tabindex="-1"></a></span>
 <span id="cb2-26"><a href="#cb2-26" aria-hidden="true" tabindex="-1"></a><span class="fu">## Notes {.doc-section .doc-section-notes}</span></span>
 <span id="cb2-27"><a href="#cb2-27" aria-hidden="true" tabindex="-1"></a></span>

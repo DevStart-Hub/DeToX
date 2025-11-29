@@ -12,15 +12,17 @@ Creates HDF5 or CSV files based on filename extension.
 
 ## Parameters {.doc-section .doc-section-parameters}
 
-| Name       | Type   | Description                                                                                                                                                                                                  | Default   |
-|------------|--------|--------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------|-----------|
-| filename   | str    | Output filename for gaze data. If None, generates timestamp-based name. File extension determines format (.h5/.hdf5 for HDF5, .csv for CSV, defaults to .h5).                                                | `None`    |
-| raw_format | bool   | If True, preserves all original Tobii SDK column names and data. If False (default), uses simplified column names and subset of columns. Raw format is useful for advanced analysis requiring full metadata. | `False`   |
+| Name       | Type           | Description                                                                                                                                                                                                  | Default   |
+|------------|----------------|--------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------|-----------|
+| filename   | [str](`str`)   | Output filename for gaze data. If None, generates timestamp-based name. File extension determines format (.h5/.hdf5 for HDF5, .csv for CSV, defaults to .h5).                                                | `None`    |
+| raw_format | [bool](`bool`) | If True, preserves all original Tobii SDK column names and data. If False (default), uses simplified column names and subset of columns. Raw format is useful for advanced analysis requiring full metadata. | `False`   |
 
 ## Examples {.doc-section .doc-section-examples}
 
-# Standard format (simplified columns)
-tracker.start_recording('data.h5')
+```python
+### Standard format (simplified columns)
+ET_controller.start_recording('data.h5')
 
-# Raw format (all Tobii SDK columns preserved)
-tracker.start_recording('data_raw.h5', raw_format=True)
+### Raw format (all Tobii SDK columns preserved)
+ET_controller.start_recording('data_raw.h5', raw_format=True)
+```

@@ -5,3 +5,75 @@ ETracker.gaze_contingent(N=5)
 ```
 
 Initialize real-time gaze buffer for contingent applications.
+
+Creates a rolling buffer that stores the most recent N gaze samples,
+enabling real-time gaze-contingent paradigms. Must be called before
+using `get_gaze_position()` for real-time gaze tracking.
+
+The buffer automatically maintains the N most recent samples, discarding
+older data. This provides a stable estimate of current gaze position by
+aggregating across multiple samples.
+
+## Parameters {.doc-section .doc-section-parameters}
+
+| Name   | Type         | Description                                                                                                                                                           | Default   |
+|--------|--------------|-----------------------------------------------------------------------------------------------------------------------------------------------------------------------|-----------|
+| N      | [int](`int`) | Number of recent gaze samples to store in the rolling buffer. Larger values provide smoother estimates but increase latency. Typical values: 3-10 samples. Default 5. | `5`       |
+
+## Raises {.doc-section .doc-section-raises}
+
+| Name   | Type                     | Description             |
+|--------|--------------------------|-------------------------|
+|        | [TypeError](`TypeError`) | If N is not an integer. |
+
+## Notes {.doc-section .doc-section-notes}
+
+- Call this method ONCE before your experimental loop
+- Buffer size trades off stability vs. latency:
+* Smaller N (3-5): Lower latency, more noise
+* Larger N (8-10): Smoother tracking, higher latency
+- For 120 Hz eye tracker with N=5: ~42ms latency
+- For 60 Hz eye tracker with N=5: ~83ms latency
+
+## Examples {.doc-section .doc-section-examples}
+
+```python
+# Basic real-time gaze tracking
+ET_controller.gaze_contingent(N=5)  # Initialize buffer
+ET_controller.start_recording('data.h5')
+
+# Create gaze-contingent stimulus
+circle = visual.Circle(win, radius=0.05, fillColor='red')
+
+for frame in range(600):  # 10 seconds at 60 fps
+    gaze_pos = ET_controller.get_gaze_position()
+    circle.pos = gaze_pos
+    circle.draw()
+    win.flip()
+
+ET_controller.stop_recording()
+
+# Adjust buffer size for your needs
+ET_controller.gaze_contingent(N=3)   # Low latency, more jitter
+ET_controller.gaze_contingent(N=10)  # Smooth, higher latency
+
+# Gaze-contingent window paradigm
+ET_controller.gaze_contingent(N=5)
+ET_controller.start_recording('gaze_window.h5')
+
+stimulus = visual.ImageStim(win, 'image.png')
+window = visual.Circle(win, radius=0.1, fillColor=None, lineColor='white')
+
+for trial in range(20):
+    stimulus.draw()
+    
+    for frame in range(120):  # 2 seconds
+        gaze_pos = ET_controller.get_gaze_position()
+        window.pos = gaze_pos
+        window.draw()
+        win.flip()
+    
+    ET_controller.record_event(f'trial_{trial}_end')
+
+ET_controller.stop_recording()
+```

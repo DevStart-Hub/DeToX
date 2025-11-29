@@ -146,7 +146,7 @@ div.callout-Advanced.callout-style-default .callout-icon::before, div.callout-Ad
       <div class="navbar-container container-fluid">
       <div class="navbar-brand-container mx-auto">
     <a href="../index.html" class="navbar-brand navbar-brand-logo">
-    <img src="../resources/full_logo.png" alt="" class="navbar-logo">
+    <img src="../resources/Logosvg.png" alt="" class="navbar-logo">
     </a>
     <a class="navbar-brand" href="../index.html">
     <span class="navbar-title">DeToX</span>
@@ -507,11 +507,6 @@ div.callout-Advanced.callout-style-default .callout-icon::before, div.callout-Ad
 <section id="attributes" class="level2 doc-section doc-section-attributes">
 <h2 class="doc-section doc-section-attributes anchored" data-anchor-id="attributes">Attributes</h2>
 <table class="caption-top table">
-<colgroup>
-<col style="width: 13%">
-<col style="width: 4%">
-<col style="width: 81%">
-</colgroup>
 <thead>
 <tr class="header">
 <th>Name</th>
@@ -522,47 +517,47 @@ div.callout-Advanced.callout-style-default .callout-icon::before, div.callout-Ad
 <tbody>
 <tr class="odd">
 <td>focus_time</td>
-<td>float</td>
+<td><a href="`float`">float</a></td>
 <td>Wait time in seconds before collecting calibration data at each point. Allows participant to fixate on the target. Default is 0.5 seconds.</td>
 </tr>
 <tr class="even">
 <td>zoom_speed</td>
-<td>float</td>
+<td><a href="`float`">float</a></td>
 <td>Speed multiplier for the zoom animation. Higher values make the size oscillation faster. Default is 6.0.</td>
 </tr>
 <tr class="odd">
 <td>max_zoom_size</td>
-<td>float</td>
+<td><a href="`float`">float</a></td>
 <td>Maximum size for zoom animation as percentage of screen height. Default is 0.11 (11% of screen height).</td>
 </tr>
 <tr class="even">
 <td>min_zoom_size</td>
-<td>float</td>
+<td><a href="`float`">float</a></td>
 <td>Minimum size for zoom animation as percentage of screen height. Default is 0.05 (5% of screen height).</td>
 </tr>
 <tr class="odd">
 <td>trill_size</td>
-<td>float</td>
+<td><a href="`float`">float</a></td>
 <td>Fixed size for trill animation as percentage of screen height. Default is 0.075 (7.5% of screen height).</td>
 </tr>
 <tr class="even">
 <td>trill_rotation_range</td>
-<td>float</td>
+<td><a href="`float`">float</a></td>
 <td>Maximum rotation angle in degrees for trill animation. Default is 20 degrees.</td>
 </tr>
 <tr class="odd">
 <td>trill_cycle_duration</td>
-<td>float</td>
+<td><a href="`float`">float</a></td>
 <td>Total cycle time for trill animation in seconds (active + pause). Default is 1.5 seconds.</td>
 </tr>
 <tr class="even">
 <td>trill_active_duration</td>
-<td>float</td>
+<td><a href="`float`">float</a></td>
 <td>Duration of active trill rotation in seconds, within each cycle. Default is 1.1 seconds (leaves 0.4s pause).</td>
 </tr>
 <tr class="odd">
 <td>trill_frequency</td>
-<td>float</td>
+<td><a href="`float`">float</a></td>
 <td>Number of back-and-forth rotation oscillations per second during active trill phase. Default is 3.0 oscillations/second.</td>
 </tr>
 </tbody>
@@ -1088,17 +1083,17 @@ window.document.addEventListener("DOMContentLoaded", function (event) {
 <span id="cb3-22"><a href="#cb3-22" aria-hidden="true" tabindex="-1"></a></span>
 <span id="cb3-23"><a href="#cb3-23" aria-hidden="true" tabindex="-1"></a><span class="fu">## Attributes {.doc-section .doc-section-attributes}</span></span>
 <span id="cb3-24"><a href="#cb3-24" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb3-25"><a href="#cb3-25" aria-hidden="true" tabindex="-1"></a>| Name                  | Type   | Description                                                                                                                                |</span>
-<span id="cb3-26"><a href="#cb3-26" aria-hidden="true" tabindex="-1"></a>|-----------------------|--------|--------------------------------------------------------------------------------------------------------------------------------------------|</span>
-<span id="cb3-27"><a href="#cb3-27" aria-hidden="true" tabindex="-1"></a>| focus_time            | float  | Wait time in seconds before collecting calibration data at each point. Allows participant to fixate on the target. Default is 0.5 seconds. |</span>
-<span id="cb3-28"><a href="#cb3-28" aria-hidden="true" tabindex="-1"></a>| zoom_speed            | float  | Speed multiplier for the zoom animation. Higher values make the size oscillation faster. Default is 6.0.                                   |</span>
-<span id="cb3-29"><a href="#cb3-29" aria-hidden="true" tabindex="-1"></a>| max_zoom_size         | float  | Maximum size for zoom animation as percentage of screen height. Default is 0.11 (11% of screen height).                                    |</span>
-<span id="cb3-30"><a href="#cb3-30" aria-hidden="true" tabindex="-1"></a>| min_zoom_size         | float  | Minimum size for zoom animation as percentage of screen height. Default is 0.05 (5% of screen height).                                     |</span>
-<span id="cb3-31"><a href="#cb3-31" aria-hidden="true" tabindex="-1"></a>| trill_size            | float  | Fixed size for trill animation as percentage of screen height. Default is 0.075 (7.5% of screen height).                                   |</span>
-<span id="cb3-32"><a href="#cb3-32" aria-hidden="true" tabindex="-1"></a>| trill_rotation_range  | float  | Maximum rotation angle in degrees for trill animation. Default is 20 degrees.                                                              |</span>
-<span id="cb3-33"><a href="#cb3-33" aria-hidden="true" tabindex="-1"></a>| trill_cycle_duration  | float  | Total cycle time for trill animation in seconds (active + pause). Default is 1.5 seconds.                                                  |</span>
-<span id="cb3-34"><a href="#cb3-34" aria-hidden="true" tabindex="-1"></a>| trill_active_duration | float  | Duration of active trill rotation in seconds, within each cycle. Default is 1.1 seconds (leaves 0.4s pause).                               |</span>
-<span id="cb3-35"><a href="#cb3-35" aria-hidden="true" tabindex="-1"></a>| trill_frequency       | float  | Number of back-and-forth rotation oscillations per second during active trill phase. Default is 3.0 oscillations/second.                   |</span>
+<span id="cb3-25"><a href="#cb3-25" aria-hidden="true" tabindex="-1"></a>| Name                  | Type             | Description                                                                                                                                |</span>
+<span id="cb3-26"><a href="#cb3-26" aria-hidden="true" tabindex="-1"></a>|-----------------------|------------------|--------------------------------------------------------------------------------------------------------------------------------------------|</span>
+<span id="cb3-27"><a href="#cb3-27" aria-hidden="true" tabindex="-1"></a>| focus_time            | <span class="co">[</span><span class="ot">float</span><span class="co">](`float`)</span> | Wait time in seconds before collecting calibration data at each point. Allows participant to fixate on the target. Default is 0.5 seconds. |</span>
+<span id="cb3-28"><a href="#cb3-28" aria-hidden="true" tabindex="-1"></a>| zoom_speed            | <span class="co">[</span><span class="ot">float</span><span class="co">](`float`)</span> | Speed multiplier for the zoom animation. Higher values make the size oscillation faster. Default is 6.0.                                   |</span>
+<span id="cb3-29"><a href="#cb3-29" aria-hidden="true" tabindex="-1"></a>| max_zoom_size         | <span class="co">[</span><span class="ot">float</span><span class="co">](`float`)</span> | Maximum size for zoom animation as percentage of screen height. Default is 0.11 (11% of screen height).                                    |</span>
+<span id="cb3-30"><a href="#cb3-30" aria-hidden="true" tabindex="-1"></a>| min_zoom_size         | <span class="co">[</span><span class="ot">float</span><span class="co">](`float`)</span> | Minimum size for zoom animation as percentage of screen height. Default is 0.05 (5% of screen height).                                     |</span>
+<span id="cb3-31"><a href="#cb3-31" aria-hidden="true" tabindex="-1"></a>| trill_size            | <span class="co">[</span><span class="ot">float</span><span class="co">](`float`)</span> | Fixed size for trill animation as percentage of screen height. Default is 0.075 (7.5% of screen height).                                   |</span>
+<span id="cb3-32"><a href="#cb3-32" aria-hidden="true" tabindex="-1"></a>| trill_rotation_range  | <span class="co">[</span><span class="ot">float</span><span class="co">](`float`)</span> | Maximum rotation angle in degrees for trill animation. Default is 20 degrees.                                                              |</span>
+<span id="cb3-33"><a href="#cb3-33" aria-hidden="true" tabindex="-1"></a>| trill_cycle_duration  | <span class="co">[</span><span class="ot">float</span><span class="co">](`float`)</span> | Total cycle time for trill animation in seconds (active + pause). Default is 1.5 seconds.                                                  |</span>
+<span id="cb3-34"><a href="#cb3-34" aria-hidden="true" tabindex="-1"></a>| trill_active_duration | <span class="co">[</span><span class="ot">float</span><span class="co">](`float`)</span> | Duration of active trill rotation in seconds, within each cycle. Default is 1.1 seconds (leaves 0.4s pause).                               |</span>
+<span id="cb3-35"><a href="#cb3-35" aria-hidden="true" tabindex="-1"></a>| trill_frequency       | <span class="co">[</span><span class="ot">float</span><span class="co">](`float`)</span> | Number of back-and-forth rotation oscillations per second during active trill phase. Default is 3.0 oscillations/second.                   |</span>
 <span id="cb3-36"><a href="#cb3-36" aria-hidden="true" tabindex="-1"></a></span>
 <span id="cb3-37"><a href="#cb3-37" aria-hidden="true" tabindex="-1"></a><span class="fu">## Examples {.doc-section .doc-section-examples}</span></span>
 <span id="cb3-38"><a href="#cb3-38" aria-hidden="true" tabindex="-1"></a></span>

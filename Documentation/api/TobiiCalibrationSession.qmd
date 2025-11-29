@@ -50,6 +50,6 @@ any subset of points until satisfied.
 
 #### Returns {.doc-section .doc-section-returns}
 
-| Name   | Type   | Description                                                                                                                    |
-|--------|--------|--------------------------------------------------------------------------------------------------------------------------------|
-|        | bool   | True if calibration was successful and accepted by user, False if aborted via escape key or if calibration computation failed. |
+| Name   | Type           | Description                                                                                                                    |
+|--------|----------------|--------------------------------------------------------------------------------------------------------------------------------|
+|        | [bool](`bool`) | True if calibration was successful and accepted by user, False if aborted via escape key or if calibration computation failed. |

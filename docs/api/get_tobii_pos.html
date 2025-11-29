@@ -146,7 +146,7 @@ div.callout-Advanced.callout-style-default .callout-icon::before, div.callout-Ad
       <div class="navbar-container container-fluid">
       <div class="navbar-brand-container mx-auto">
     <a href="../index.html" class="navbar-brand navbar-brand-logo">
-    <img src="../resources/full_logo.png" alt="" class="navbar-logo">
+    <img src="../resources/Logosvg.png" alt="" class="navbar-logo">
     </a>
     <a class="navbar-brand" href="../index.html">
     <span class="navbar-title">DeToX</span>
@@ -500,12 +500,6 @@ div.callout-Advanced.callout-style-default .callout-icon::before, div.callout-Ad
 <section id="parameters" class="level2 doc-section doc-section-parameters">
 <h2 class="doc-section doc-section-parameters anchored" data-anchor-id="parameters">Parameters</h2>
 <table class="caption-top table">
-<colgroup>
-<col style="width: 3%">
-<col style="width: 11%">
-<col style="width: 78%">
-<col style="width: 5%">
-</colgroup>
 <thead>
 <tr class="header">
 <th>Name</th>
@@ -517,19 +511,19 @@ div.callout-Advanced.callout-style-default .callout-icon::before, div.callout-Ad
 <tbody>
 <tr class="odd">
 <td>win</td>
-<td>psychopy.visual.Window</td>
+<td><a href="`psychopy`">psychopy</a>.<a href="`psychopy.visual`">visual</a>.<a href="`psychopy.visual.Window`">Window</a></td>
 <td>The PsychoPy window which provides information about units and size. Window properties determine the source coordinate system.</td>
 <td><em>required</em></td>
 </tr>
 <tr class="even">
 <td>p</td>
-<td>tuple</td>
+<td><a href="`tuple`">tuple</a></td>
 <td>The PsychoPy coordinates to convert as (x, y) in specified units.</td>
 <td><em>required</em></td>
 </tr>
 <tr class="odd">
 <td>units</td>
-<td>str</td>
+<td><a href="`str`">str</a></td>
 <td>The units of the input PsychoPy coordinates. If None, uses the window’s default units. Supported: ‘norm’, ‘height’, ‘pix’, ‘cm’, ‘deg’, ‘degFlat’, ‘degFlatPos’.</td>
 <td><code>None</code></td>
 </tr>
@@ -539,11 +533,6 @@ div.callout-Advanced.callout-style-default .callout-icon::before, div.callout-Ad
 <section id="returns" class="level2 doc-section doc-section-returns">
 <h2 class="doc-section doc-section-returns anchored" data-anchor-id="returns">Returns</h2>
 <table class="caption-top table">
-<colgroup>
-<col style="width: 5%">
-<col style="width: 5%">
-<col style="width: 89%">
-</colgroup>
 <thead>
 <tr class="header">
 <th>Name</th>
@@ -554,7 +543,7 @@ div.callout-Advanced.callout-style-default .callout-icon::before, div.callout-Ad
 <tbody>
 <tr class="odd">
 <td></td>
-<td>tuple</td>
+<td><a href="`tuple`">tuple</a></td>
 <td>The converted Tobii ADCS coordinates as (x, y) where both values are in range [0, 1]. (0, 0) is top-left, (1, 1) is bottom-right.</td>
 </tr>
 </tbody>
@@ -573,7 +562,7 @@ div.callout-Advanced.callout-style-default .callout-icon::before, div.callout-Ad
 <tbody>
 <tr class="odd">
 <td></td>
-<td>ValueError</td>
+<td><a href="`ValueError`">ValueError</a></td>
 <td>If the provided units are not supported.</td>
 </tr>
 </tbody>
@@ -1092,23 +1081,23 @@ window.document.addEventListener("DOMContentLoaded", function (event) {
 <span id="cb2-17"><a href="#cb2-17" aria-hidden="true" tabindex="-1"></a></span>
 <span id="cb2-18"><a href="#cb2-18" aria-hidden="true" tabindex="-1"></a><span class="fu">## Parameters {.doc-section .doc-section-parameters}</span></span>
 <span id="cb2-19"><a href="#cb2-19" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb2-20"><a href="#cb2-20" aria-hidden="true" tabindex="-1"></a>| Name   | Type                   | Description                                                                                                                                                      | Default    |</span>
-<span id="cb2-21"><a href="#cb2-21" aria-hidden="true" tabindex="-1"></a>|--------|------------------------|------------------------------------------------------------------------------------------------------------------------------------------------------------------|------------|</span>
-<span id="cb2-22"><a href="#cb2-22" aria-hidden="true" tabindex="-1"></a>| win    | psychopy.visual.Window | The PsychoPy window which provides information about units and size. Window properties determine the source coordinate system.                                   | _required_ |</span>
-<span id="cb2-23"><a href="#cb2-23" aria-hidden="true" tabindex="-1"></a>| p      | tuple                  | The PsychoPy coordinates to convert as (x, y) in specified units.                                                                                                | _required_ |</span>
-<span id="cb2-24"><a href="#cb2-24" aria-hidden="true" tabindex="-1"></a>| units  | str                    | The units of the input PsychoPy coordinates. If None, uses the window's default units. Supported: 'norm', 'height', 'pix', 'cm', 'deg', 'degFlat', 'degFlatPos'. | <span class="in">`None`</span>     |</span>
+<span id="cb2-20"><a href="#cb2-20" aria-hidden="true" tabindex="-1"></a>| Name   | Type                                                                                  | Description                                                                                                                                                      | Default    |</span>
+<span id="cb2-21"><a href="#cb2-21" aria-hidden="true" tabindex="-1"></a>|--------|---------------------------------------------------------------------------------------|------------------------------------------------------------------------------------------------------------------------------------------------------------------|------------|</span>
+<span id="cb2-22"><a href="#cb2-22" aria-hidden="true" tabindex="-1"></a>| win    | <span class="co">[</span><span class="ot">psychopy</span><span class="co">](`psychopy`)</span>.<span class="co">[</span><span class="ot">visual</span><span class="co">](`psychopy.visual`)</span>.<span class="co">[</span><span class="ot">Window</span><span class="co">](`psychopy.visual.Window`)</span> | The PsychoPy window which provides information about units and size. Window properties determine the source coordinate system.                                   | _required_ |</span>
+<span id="cb2-23"><a href="#cb2-23" aria-hidden="true" tabindex="-1"></a>| p      | <span class="co">[</span><span class="ot">tuple</span><span class="co">](`tuple`)</span>                                                                      | The PsychoPy coordinates to convert as (x, y) in specified units.                                                                                                | _required_ |</span>
+<span id="cb2-24"><a href="#cb2-24" aria-hidden="true" tabindex="-1"></a>| units  | <span class="co">[</span><span class="ot">str</span><span class="co">](`str`)</span>                                                                          | The units of the input PsychoPy coordinates. If None, uses the window's default units. Supported: 'norm', 'height', 'pix', 'cm', 'deg', 'degFlat', 'degFlatPos'. | <span class="in">`None`</span>     |</span>
 <span id="cb2-25"><a href="#cb2-25" aria-hidden="true" tabindex="-1"></a></span>
 <span id="cb2-26"><a href="#cb2-26" aria-hidden="true" tabindex="-1"></a><span class="fu">## Returns {.doc-section .doc-section-returns}</span></span>
 <span id="cb2-27"><a href="#cb2-27" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb2-28"><a href="#cb2-28" aria-hidden="true" tabindex="-1"></a>| Name   | Type   | Description                                                                                                                       |</span>
-<span id="cb2-29"><a href="#cb2-29" aria-hidden="true" tabindex="-1"></a>|--------|--------|-----------------------------------------------------------------------------------------------------------------------------------|</span>
-<span id="cb2-30"><a href="#cb2-30" aria-hidden="true" tabindex="-1"></a>|        | tuple  | The converted Tobii ADCS coordinates as (x, y) where both values are in range <span class="co">[</span><span class="ot">0, 1</span><span class="co">]</span>. (0, 0) is top-left, (1, 1) is bottom-right. |</span>
+<span id="cb2-28"><a href="#cb2-28" aria-hidden="true" tabindex="-1"></a>| Name   | Type             | Description                                                                                                                       |</span>
+<span id="cb2-29"><a href="#cb2-29" aria-hidden="true" tabindex="-1"></a>|--------|------------------|-----------------------------------------------------------------------------------------------------------------------------------|</span>
+<span id="cb2-30"><a href="#cb2-30" aria-hidden="true" tabindex="-1"></a>|        | <span class="co">[</span><span class="ot">tuple</span><span class="co">](`tuple`)</span> | The converted Tobii ADCS coordinates as (x, y) where both values are in range <span class="co">[</span><span class="ot">0, 1</span><span class="co">]</span>. (0, 0) is top-left, (1, 1) is bottom-right. |</span>
 <span id="cb2-31"><a href="#cb2-31" aria-hidden="true" tabindex="-1"></a></span>
 <span id="cb2-32"><a href="#cb2-32" aria-hidden="true" tabindex="-1"></a><span class="fu">## Raises {.doc-section .doc-section-raises}</span></span>
 <span id="cb2-33"><a href="#cb2-33" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb2-34"><a href="#cb2-34" aria-hidden="true" tabindex="-1"></a>| Name   | Type       | Description                              |</span>
-<span id="cb2-35"><a href="#cb2-35" aria-hidden="true" tabindex="-1"></a>|--------|------------|------------------------------------------|</span>
-<span id="cb2-36"><a href="#cb2-36" aria-hidden="true" tabindex="-1"></a>|        | ValueError | If the provided units are not supported. |</span>
+<span id="cb2-34"><a href="#cb2-34" aria-hidden="true" tabindex="-1"></a>| Name   | Type                       | Description                              |</span>
+<span id="cb2-35"><a href="#cb2-35" aria-hidden="true" tabindex="-1"></a>|--------|----------------------------|------------------------------------------|</span>
+<span id="cb2-36"><a href="#cb2-36" aria-hidden="true" tabindex="-1"></a>|        | <span class="co">[</span><span class="ot">ValueError</span><span class="co">](`ValueError`)</span> | If the provided units are not supported. |</span>
 <span id="cb2-37"><a href="#cb2-37" aria-hidden="true" tabindex="-1"></a></span>
 <span id="cb2-38"><a href="#cb2-38" aria-hidden="true" tabindex="-1"></a><span class="fu">## Notes {.doc-section .doc-section-notes}</span></span>
 <span id="cb2-39"><a href="#cb2-39" aria-hidden="true" tabindex="-1"></a></span>

@@ -2,7 +2,11 @@
 
 ## Main Eye-tracker Class
 
-The central class of the DeToX package, responsible for connecting to  and managing the Tobii eye tracker. This class must be instantiated  before any other functionality can be used. It provides access to  calibration, recording control, and gaze-contingent presentation methods. Below are the main methods and properties of this class:
+The central class of the DeToX package, responsible for connecting to 
+and managing the Tobii eye tracker. This class must be instantiated 
+before any other functionality can be used. It provides access to 
+calibration, recording control, and gaze-contingent presentation methods.
+Below are the main methods and properties of this class:
 
 
 | | |
@@ -11,7 +15,9 @@ The central class of the DeToX package, responsible for connecting to  and manag
 
 ### Control the Recording
 
-Functions for starting, stopping, and managing the capture of eye-tracking  data. These methods allow you to initiate and terminate recordings,  mark events of interest, and save collected data to disk.
+Functions for starting, stopping, and managing the capture of eye-tracking 
+data. These methods allow you to initiate and terminate recordings, 
+mark events of interest, and save collected data to disk.
 
 
 | | |
@@ -23,7 +29,9 @@ Functions for starting, stopping, and managing the capture of eye-tracking  data
 
 ### Calibration
 
-Methods for running and managing eye tracker calibration. These include  displaying calibration status, initiating calibration routines, and  saving or loading calibration settings to ensure accurate gaze data.
+Methods for running and managing eye tracker calibration. These include 
+displaying calibration status, initiating calibration routines, and 
+saving or loading calibration settings to ensure accurate gaze data.
 
 
 | | |
@@ -35,7 +43,10 @@ Methods for running and managing eye tracker calibration. These include  display
 
 ### Gaze Contingent
 
-Tools for running gaze-contingent experiments, where visual presentation  adapts dynamically to a participants gaze position. Includes functionality  for live gaze-contingent control and methods to compute average gaze  positions for experimental logic.
+Tools for running gaze-contingent experiments, where visual presentation 
+adapts dynamically to a participants gaze position. Includes functionality 
+for live gaze-contingent control and methods to compute average gaze 
+positions for experimental logic.
 
 
 | | |
@@ -45,7 +56,8 @@ Tools for running gaze-contingent experiments, where visual presentation  adapts
 
 ## Internal Calibration
 
-Classes for running eye-tracker calibration. These get called internally by the ETracker class, and are reported here only for completeness. They are comprise of a base calibration class that set the common interface, and the specific implementations for Tobii and Mouse calibration.
+Classes for running eye-tracker calibration. These get called internally by the ETracker class, and are reported here only for completeness.
+They are comprise of a base calibration class that set the common interface, and the specific implementations for Tobii and Mouse calibration.
 
 
 | | |
@@ -56,7 +68,8 @@ Classes for running eye-tracker calibration. These get called internally by the 
 
 ## Coordinate Conversion
 
-A collection of utility functions designed to help the conversion of the data from different formats. These are called internally by the ETracker class, but can be used independently if needed.
+A collection of utility functions designed to help the conversion of the data from different formats.
+These are called internally by the ETracker class, but can be used independently if needed.
 
 
 | | |
@@ -71,7 +84,8 @@ A collection of utility functions designed to help the conversion of the data fr
 
 ## Utilities
 
-A set of utility classes and functions for presenting stimuli and formatted text. These are called internally by the ETracker class.
+A set of utility classes and functions for presenting stimuli
+and formatted text. These are called internally by the ETracker class.
 
 
 | | |
@@ -81,7 +95,12 @@ A set of utility classes and functions for presenting stimuli and formatted text
 
 ## Configuration Settings
 
-Configuration classes and module-level instances for customizing the  behavior and appearance of the DeToX eye-tracking system. These settings  control animation parameters, colors, UI element sizes, and data formats. Note: These settings should generally not be changed unless you have specific requirements. However, they can be modified through the module-level instances  (e.g., ETSettings.animation) for easy configuration of your experiments.
+Configuration classes and module-level instances for customizing the 
+behavior and appearance of the DeToX eye-tracking system. These settings 
+control animation parameters, colors, UI element sizes, and data formats.
+Note: These settings should generally not be changed unless you have specific
+requirements. However, they can be modified through the module-level instances 
+(e.g., ETSettings.animation) for easy configuration of your experiments.
 
 
 | | |

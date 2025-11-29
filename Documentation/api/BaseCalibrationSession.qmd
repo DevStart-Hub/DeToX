@@ -7,6 +7,7 @@ BaseCalibrationSession(
     audio=None,
     anim_type='zoom',
     visualization_style='lines',
+    visualization_style='lines',
 )
 ```
 
@@ -43,15 +44,15 @@ simulation modes support 2-9 calibration points.
 
 #### Parameters {.doc-section .doc-section-parameters}
 
-| Name               | Type   | Description                                        | Default    |
-|--------------------|--------|----------------------------------------------------|------------|
-| calibration_points | list   | List of calibration point coordinates to validate. | _required_ |
+| Name               | Type           | Description                                        | Default    |
+|--------------------|----------------|----------------------------------------------------|------------|
+| calibration_points | [list](`list`) | List of calibration point coordinates to validate. | _required_ |
 
 #### Raises {.doc-section .doc-section-raises}
 
-| Name   | Type       | Description                                           |
-|--------|------------|-------------------------------------------------------|
-|        | ValueError | If number of points is less than 2 or greater than 9. |
+| Name   | Type                       | Description                                           |
+|--------|----------------------------|-------------------------------------------------------|
+|        | [ValueError](`ValueError`) | If number of points is less than 2 or greater than 9. |
 
 ### show_message_and_wait { #DeToX.BaseCalibrationSession.show_message_and_wait }
 
@@ -67,8 +68,14 @@ then pauses execution until any key is pressed.
 
 #### Parameters {.doc-section .doc-section-parameters}
 
-| Name   | Type   | Description                                                       | Default      |
-|--------|--------|-------------------------------------------------------------------|--------------|
-| body   | str    | The main message text to display.                                 | _required_   |
-| title  | str    | Title for the message box. Default empty string.                  | `''`         |
-| pos    | tuple  | Position of the message box center on screen. Default (0, -0.15). | `(0, -0.15)` |
+| Name   | Type   | Description                                                                                                            | Default      |
+|--------|--------|------------------------------------------------------------------------------------------------------------------------|--------------|
+| body   | str    | The main message text to display. Will be formatted with box-drawing characters via NicePrint.                         | _required_   |
+| title  | str    | Title for the message box. Appears at the top of the formatted box. Default empty string.                              | `''`         |
+| pos    | tuple  | Position of the message box center on screen in window units. Default (0, -0.15) places message slightly below center. | `(0, -0.15)` |
+
+#### Returns {.doc-section .doc-section-returns}
+
+| Name   | Type   | Description   |
+|--------|--------|---------------|
+|        | None   |               |

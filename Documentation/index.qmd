@@ -28,19 +28,50 @@ While this repository provided solid solutions for integrating Tobii eye tracker
 
 ## Simplicity
 
-While the eye-tracking landscape offers many excellent tools—from [PsychoPy](https://psychopy.org/hardware/eyeTracking.html)'s built-in Tobii integration to comprehensive packages like [Titta](https://github.com/marcus-nystrom/Titta)—DeToX carves out its own niche through thoughtful simplicity. We've prioritized clarity and ease-of-use without sacrificing the flexibility researchers need. When your codebase is straightforward and well-documented, it becomes a platform for innovation rather than an obstacle to overcome.
+While the eye-tracking landscape offers many exc llent tools—from [PsychoPy](https://psychopy.org/hardware/eyeTracking.html)'s built-in Tobii integration to comprehensive packages like [Titta](https://github.com/marcus-nystrom/Titta)—DeToX carves out its own niche through thoughtful simplicity. We've prioritized clarity and ease-of-use without sacrificing the flexibility researchers need. When your codebase is straightforward and well-documented, it becomes a platform for innovation rather than an obstacle to overcome.
 
 ## Documentation
 
 We believe that good software is only as valuable as its documentation. Too often, researchers encounter powerful packages that become frustrating to use due to unclear or incomplete documentation. When you're left wondering what a function does or how to modify basic settings, the package becomes more of a hindrance than a help. A package should empower users, not confuse them. That's why we've prioritized creating clear, comprehensive documentation with practical examples and step-by-step tutorials. Our goal is documentation that helps you understand not just **what** to do, but **why**—so you can confidently adapt the code to your specific experimental needs.
 
-
 ### Vignettes
+
 Our vignettes offer hands-on explanations of DeToX's settings and features through practical examples. Each vignette focuses on specific functionality, walking you through the implementation details and configuration options you'll need to effectively integrate these features into your research workflow.
 
 ### Tutorial
 
 While vignettes dive deep into individual features, our tutorial take a different approach - it demonstrate a complete working experiment from start to finish. Rather than explaining every parameter in detail it shows you how all the pieces fit together in real research scenarios.
+
+<!-- # Features -->
+<!--  -->
+<!-- ### Calibration
+::: {.accordion}
+
+<details name="calibration-accordion">
+<summary>Track Box Visualization</summary>
+Display the Tobii track box to help experimenters center participants within the optimal tracking area.
+</details>
+
+<details name="calibration-accordion">
+<summary>Experimenter-Paced Calibration</summary>
+Full experimenter control over calibration stimuli presentation with customizable animations including `trill` or `zoom` effects.
+</details>
+
+<details name="calibration-accordion">
+<summary>Visual Calibration Results</summary>
+Display calibration accuracy with dots or connecting lines showing gaze offset at each calibration point for immediate quality assessment.
+</details>
+
+<details name="calibration-accordion">
+<summary>Flexible Stimuli</summary>
+Bundled stimuli provided for quick setup (available in next release), while allowing users to supply their own custom calibration targets for specialized research needs.
+</details>
+
+<details name="calibration-accordion">
+<summary>Save/Load Calibration Results</summary>
+Calibration data can be saved to or loaded from file, with support for both GUI and programmatic operations.
+</details>
+::: -->
 
 # Questions?
 
