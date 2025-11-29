@@ -128,7 +128,9 @@ Let's break down what's happening here:
 
 **`shuffle=True`**: Randomizes which image appears at each calibration point. This prevents habituation and keeps participants engaged throughout the procedure.
 
-**`audio=True`**: Plays an attention-getting sound along with the visual stimulus to help capture and maintain the participant's focus. **`anim_type='zoom'`**: Makes the stimuli gently pulse in size to attract attention. You can also use `'trill'` for a rotating animation.
+**`audio=True`**: Plays an attention-getting sound along with the visual stimulus to help capture and maintain the participant's focus.
+
+**`anim_type='zoom'`**: Makes the stimuli gently pulse in size to attract attention. You can also use `'trill'` for a rotating animation.
 
 **`visualization_style='circles'`**: Displays the calibration results using dots at each point. You can also choose `'lines'` to show lines connecting the target to where the gaze landed.
 

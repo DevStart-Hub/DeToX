@@ -86,7 +86,7 @@ website:
 format:
   html:
     theme:
-      - pulse
+      - sandstone
       - styles.scss  # your custom SCSS file
     toc: true
     toc-expand: 4   
@@ -123,15 +123,22 @@ filters:
 
 
 quartodoc:
-  style: pkgdown
   title: Reference
   package: DeToX
+
+  style: pkgdown
+  parser: numpy
+  renderer:
+    style: markdown
+    table_style: table
+  render_interlinks: true
+
   dir: api
   sidebar: api/_sidebar.yml
 
   sections:
     - title: Main Eye-tracker Class
-      desc: >
+      desc: |
         The central class of the DeToX package, responsible for connecting to 
         and managing the Tobii eye tracker. This class must be instantiated 
         before any other functionality can be used. It provides access to 
@@ -141,7 +148,7 @@ quartodoc:
         - ETracker
 
     - subtitle: Control the Recording
-      desc: >
+      desc: |
         Functions for starting, stopping, and managing the capture of eye-tracking 
         data. These methods allow you to initiate and terminate recordings, 
         mark events of interest, and save collected data to disk.
@@ -152,7 +159,7 @@ quartodoc:
         - ETracker.save_data
 
     - subtitle: Calibration
-      desc: >
+      desc: |
         Methods for running and managing eye tracker calibration. These include 
         displaying calibration status, initiating calibration routines, and 
         saving or loading calibration settings to ensure accurate gaze data.
@@ -163,7 +170,7 @@ quartodoc:
         - ETracker.load_calibration
 
     - subtitle: Gaze Contingent
-      desc: >
+      desc: |
         Tools for running gaze-contingent experiments, where visual presentation 
         adapts dynamically to a participants gaze position. Includes functionality 
         for live gaze-contingent control and methods to compute average gaze 
@@ -173,7 +180,7 @@ quartodoc:
         - ETracker.get_gaze_position
 
     - title: Internal Calibration 
-      desc: >
+      desc: |
         Classes for running eye-tracker calibration. These get called internally by the ETracker class, and are reported here only for completeness.
         They are comprise of a base calibration class that set the common interface, and the specific implementations for Tobii and Mouse calibration.
       contents:
@@ -182,7 +189,7 @@ quartodoc:
         - MouseCalibrationSession
 
     - title: Coordinate Conversion
-      desc: >
+      desc: |
         A collection of utility functions designed to help the conversion of the data from different formats.
         These are called internally by the ETracker class, but can be used independently if needed.
       contents:
@@ -195,7 +202,7 @@ quartodoc:
         - get_psychopy_pos_from_trackbox
 
     - title: Utilities
-      desc: >
+      desc: |
         A set of utility classes and functions for presenting stimuli
         and formatted text. These are called internally by the ETracker class.
       contents:
@@ -203,7 +210,7 @@ quartodoc:
         - InfantStimuli
       
     - title: Configuration Settings
-      desc: >
+      desc: |
         Configuration classes and module-level instances for customizing the 
         behavior and appearance of the DeToX eye-tracking system. These settings 
         control animation parameters, colors, UI element sizes, and data formats.

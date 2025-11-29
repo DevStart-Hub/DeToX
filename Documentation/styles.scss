@@ -4,10 +4,15 @@
     Bootstrap variable overrides (must come before Bootstrap loads)
 ----------------------------------------- */
 
-/* Primary brand color */
-$primary: #269a9eff; // new color
-$navbar-bg: $primary; // navbar background
+// /* Primary brand color */
+// $primary: #2e5576; // new color
+// $navbar-bg: $primary; // navbar background
+
+$navbar-bg: #2e5576;; // navbar background
 $navbar-fg: #ffffff; // navbar text color
+
+$success: #2e5576; // new color
+
 
 /*-- scss:rules --*/
 
@@ -21,33 +26,6 @@ a:hover {
   color: #0d3656bc;
 }
 
-
-
-/* Navbar title (brand) much larger than links */
-nav.navbar .navbar-brand {
-  font-size: 2.25rem;
-  font-weight: bold;
-}
-
-/* Navbar link size */
-nav.navbar .nav-link {
-  font-size: 1.25rem;
-}
-
-/* Enlarge all navbar icons */
-nav.navbar .quarto-navigation-tool > i,
-nav.navbar .quarto-navigation-tool > svg {
-  font-size: 1.2rem;
-  line-height: 1;
-}
-
-/* Navbar logo size */
-.navbar-logo {
-  max-height: 3.2rem;
-}
-
-
-
 /*------------------------------------*/
 /* 🚫 Hide Keywords Section           */
 /*------------------------------------*/
@@ -58,42 +36,79 @@ body main > header div.keywords {
 
 
 
+ul.mt-1 > li > .sidebar-item-container > a > .menu-text {
+  font-weight: bold !important;
+}
+
 /*------------------------------------*/
-/* 💻 Code Block and Output Styling   */
+/* Card and accordion                 */
 /*------------------------------------*/
 
-// Inline Code Styling
-p code:not(.sourceCode), 
-li code:not(.sourceCode), 
-td code:not(.sourceCode) {
-    background-color: var(--bs-code-bg);
-    color: var(--bs-code-color);
-    padding: .2em;
-    border-radius: 3px;
+// Card styling
+.card {
+  background-color: #2e5576;
+  border-radius: 8px;
+  margin: 20px;
+  box-shadow: 0 4px 6px rgba(0, 0, 0, 0.3);
+  padding: 0;
+  overflow: hidden;
+  
+  // Style headings directly in card (for header)
+  > h1, > h2, > h3, > h4, > h5, > h6 {
+    background-color: #1c3952;
+    padding: 15px 20px;
+    margin: 0;
+    border-bottom: 2px solid #ffffff;
+    color: #ffffff;
+  }
+  
+  // Width variants (optional)
+  &.w-30 { max-width: 30rem; }
+  &.w-40 { max-width: 40rem; }
+  &.w-50 { max-width: 50rem; }
+  &.w-60 { max-width: 60rem; }
 }
 
-// Code Output Block Styling
-.cell-output.cell-output-stdout {
-    background-color: #f0f2f4;
-    color: #2d2d2d;
-    padding: 1px 4px;
-    margin-bottom: 5px;
-    border-left: 2px solid #A9C3C6;
-    border-radius: 1px;
-    overflow: auto;
-}
-
-
-// Preformatted Text Styling
-pre {
-    border: none;
-    background: transparent;
-    padding: 0;
-}
-
-pre code {
-    border: none;
-    background: transparent;
-    padding: 0;
-    color: inherit;
+// Accordion styling
+.accordion {
+  padding: 15px;
+  
+  details {
+    color: #ffffff;
+    background-color: #1c3952;
+    margin-bottom: 10px;
+    border-radius: 4px;
+    font-size: .8em;
+    filter: drop-shadow(5px 5px 0px #0A0A0A);
+    
+    &:hover {
+      filter: drop-shadow(5px 5px 4px #0A0A0A);
+    }
+    
+    &:last-child {
+      margin-bottom: 0;
+    }
+    
+    > summary {
+      color: #ffffff;
+      padding: 10px 15px;
+      font-size: 1em;
+      cursor: pointer;
+      border-radius: 4px;
+      
+      &:hover {
+        background-color: rgba(255, 255, 255, 0.1);
+      }
+    }
+    
+    // Add padding when details is open to create space for text
+    &[open] {
+      padding: 0 15px 15px 15px; // Add horizontal and bottom padding
+    }
+    
+    // Target all text content inside details
+    p, div, span, code, strong, em {
+      color: #ffffff !important;
+    }
+  }
 }

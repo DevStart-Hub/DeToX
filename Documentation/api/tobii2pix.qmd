@@ -12,16 +12,16 @@ and is essential for displaying gaze data in PsychoPy windows.
 
 ## Parameters {.doc-section .doc-section-parameters}
 
-| Name   | Type                   | Description                                                                                                                       | Default    |
-|--------|------------------------|-----------------------------------------------------------------------------------------------------------------------------------|------------|
-| win    | psychopy.visual.Window | The PsychoPy window which provides screen dimensions for scaling.                                                                 | _required_ |
-| p      | tuple                  | The Tobii ADCS coordinates to convert as (x, y) in range [0, 1]. Origin is top-left, x increases rightward, y increases downward. | _required_ |
+| Name   | Type                                                                                  | Description                                                                                                                       | Default    |
+|--------|---------------------------------------------------------------------------------------|-----------------------------------------------------------------------------------------------------------------------------------|------------|
+| win    | [psychopy](`psychopy`).[visual](`psychopy.visual`).[Window](`psychopy.visual.Window`) | The PsychoPy window which provides screen dimensions for scaling.                                                                 | _required_ |
+| p      | [tuple](`tuple`)                                                                      | The Tobii ADCS coordinates to convert as (x, y) in range [0, 1]. Origin is top-left, x increases rightward, y increases downward. | _required_ |
 
 ## Returns {.doc-section .doc-section-returns}
 
-| Name   | Type   | Description                                                                                                                                 |
-|--------|--------|---------------------------------------------------------------------------------------------------------------------------------------------|
-|        | tuple  | The converted PsychoPy pixel coordinates as (x, y) with origin at screen center. Values are rounded to nearest integer for pixel alignment. |
+| Name   | Type             | Description                                                                                                                                 |
+|--------|------------------|---------------------------------------------------------------------------------------------------------------------------------------------|
+|        | [tuple](`tuple`) | The converted PsychoPy pixel coordinates as (x, y) with origin at screen center. Values are rounded to nearest integer for pixel alignment. |
 
 ## Notes {.doc-section .doc-section-notes}
 

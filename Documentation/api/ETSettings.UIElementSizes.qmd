@@ -27,21 +27,21 @@ PsychoPy window configuration.
 
 ## Attributes {.doc-section .doc-section-attributes}
 
-| Name                | Type   | Description                                                                                                         |
-|---------------------|--------|---------------------------------------------------------------------------------------------------------------------|
-| highlight           | float  | Radius of circles highlighting selected calibration points for retry. Default is 0.02 (2% of screen height).        |
-| line_width          | float  | Thickness of lines drawn in calibration visualizations. Default is 0.003 (0.3% of screen height).                   |
-| marker              | float  | Size of markers indicating data collection points. Default is 0.02 (2% of screen height).                           |
-| border              | float  | Thickness of the red calibration mode border around the screen. Default is 0.005 (0.5% of screen height).           |
-| plot_line           | float  | Width of lines in calibration result plots connecting targets to samples. Default is 0.002 (0.2% of screen height). |
-| text                | float  | Base text height (deprecated - use specific text sizes below). Default is 0.025 (2.5% of screen height).            |
-| target_circle       | float  | Radius of target circles drawn in calibration result visualizations. Default is 0.012 (1.2% of screen height).      |
-| target_circle_width | float  | Line width for target circle outlines in result visualizations. Default is 0.003 (0.3% of screen height).           |
-| sample_marker       | float  | Radius of sample markers in circle visualization style. Default is 0.005 (0.5% of screen height).                   |
-| instruction_text    | float  | Text height for instruction displays during calibration. Default is 0.019 (1.9% of screen height).                  |
-| message_text        | float  | Text height for general message displays. Default is 0.016 (1.6% of screen height).                                 |
-| title_text          | float  | Text height for title text in message boxes. Default is 0.018 (1.8% of screen height).                              |
-| legend_text         | float  | Text height for legend labels showing eye color coding. Default is 0.015 (1.5% of screen height).                   |
+| Name                | Type             | Description                                                                                                         |
+|---------------------|------------------|---------------------------------------------------------------------------------------------------------------------|
+| highlight           | [float](`float`) | Radius of circles highlighting selected calibration points for retry. Default is 0.02 (2% of screen height).        |
+| line_width          | [float](`float`) | Thickness of lines drawn in calibration visualizations. Default is 0.003 (0.3% of screen height).                   |
+| marker              | [float](`float`) | Size of markers indicating data collection points. Default is 0.02 (2% of screen height).                           |
+| border              | [float](`float`) | Thickness of the red calibration mode border around the screen. Default is 0.005 (0.5% of screen height).           |
+| plot_line           | [float](`float`) | Width of lines in calibration result plots connecting targets to samples. Default is 0.002 (0.2% of screen height). |
+| text                | [float](`float`) | Base text height (deprecated - use specific text sizes below). Default is 0.025 (2.5% of screen height).            |
+| target_circle       | [float](`float`) | Radius of target circles drawn in calibration result visualizations. Default is 0.012 (1.2% of screen height).      |
+| target_circle_width | [float](`float`) | Line width for target circle outlines in result visualizations. Default is 0.003 (0.3% of screen height).           |
+| sample_marker       | [float](`float`) | Radius of sample markers in circle visualization style. Default is 0.005 (0.5% of screen height).                   |
+| instruction_text    | [float](`float`) | Text height for instruction displays during calibration. Default is 0.019 (1.9% of screen height).                  |
+| message_text        | [float](`float`) | Text height for general message displays. Default is 0.016 (1.6% of screen height).                                 |
+| title_text          | [float](`float`) | Text height for title text in message boxes. Default is 0.018 (1.8% of screen height).                              |
+| legend_text         | [float](`float`) | Text height for legend labels showing eye color coding. Default is 0.015 (1.5% of screen height).                   |
 
 ## Notes {.doc-section .doc-section-notes}
 

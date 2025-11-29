@@ -22,17 +22,17 @@ in height units (percentage of screen height).
 
 ## Attributes {.doc-section .doc-section-attributes}
 
-| Name                  | Type   | Description                                                                                                                                |
-|-----------------------|--------|--------------------------------------------------------------------------------------------------------------------------------------------|
-| focus_time            | float  | Wait time in seconds before collecting calibration data at each point. Allows participant to fixate on the target. Default is 0.5 seconds. |
-| zoom_speed            | float  | Speed multiplier for the zoom animation. Higher values make the size oscillation faster. Default is 6.0.                                   |
-| max_zoom_size         | float  | Maximum size for zoom animation as percentage of screen height. Default is 0.11 (11% of screen height).                                    |
-| min_zoom_size         | float  | Minimum size for zoom animation as percentage of screen height. Default is 0.05 (5% of screen height).                                     |
-| trill_size            | float  | Fixed size for trill animation as percentage of screen height. Default is 0.075 (7.5% of screen height).                                   |
-| trill_rotation_range  | float  | Maximum rotation angle in degrees for trill animation. Default is 20 degrees.                                                              |
-| trill_cycle_duration  | float  | Total cycle time for trill animation in seconds (active + pause). Default is 1.5 seconds.                                                  |
-| trill_active_duration | float  | Duration of active trill rotation in seconds, within each cycle. Default is 1.1 seconds (leaves 0.4s pause).                               |
-| trill_frequency       | float  | Number of back-and-forth rotation oscillations per second during active trill phase. Default is 3.0 oscillations/second.                   |
+| Name                  | Type             | Description                                                                                                                                |
+|-----------------------|------------------|--------------------------------------------------------------------------------------------------------------------------------------------|
+| focus_time            | [float](`float`) | Wait time in seconds before collecting calibration data at each point. Allows participant to fixate on the target. Default is 0.5 seconds. |
+| zoom_speed            | [float](`float`) | Speed multiplier for the zoom animation. Higher values make the size oscillation faster. Default is 6.0.                                   |
+| max_zoom_size         | [float](`float`) | Maximum size for zoom animation as percentage of screen height. Default is 0.11 (11% of screen height).                                    |
+| min_zoom_size         | [float](`float`) | Minimum size for zoom animation as percentage of screen height. Default is 0.05 (5% of screen height).                                     |
+| trill_size            | [float](`float`) | Fixed size for trill animation as percentage of screen height. Default is 0.075 (7.5% of screen height).                                   |
+| trill_rotation_range  | [float](`float`) | Maximum rotation angle in degrees for trill animation. Default is 20 degrees.                                                              |
+| trill_cycle_duration  | [float](`float`) | Total cycle time for trill animation in seconds (active + pause). Default is 1.5 seconds.                                                  |
+| trill_active_duration | [float](`float`) | Duration of active trill rotation in seconds, within each cycle. Default is 1.1 seconds (leaves 0.4s pause).                               |
+| trill_frequency       | [float](`float`) | Number of back-and-forth rotation oscillations per second during active trill phase. Default is 3.0 oscillations/second.                   |
 
 ## Examples {.doc-section .doc-section-examples}
 

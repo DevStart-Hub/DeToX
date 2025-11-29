@@ -24,7 +24,7 @@ norm_to_window_units() function from the Coords module.
 |-------------------|---------------|-----------------------------------------------------------------------------------------------------------------------------------------------------------------------|
 | points_5          | list of tuple | 5-point calibration pattern (4 corners + center). Standard for quick calibrations with good coverage. Pattern: corners at ±0.4 from edges to avoid screen boundaries. |
 | points_9          | list of tuple | 9-point calibration pattern (3×3 grid). Standard for comprehensive calibrations requiring high accuracy. Pattern: 3 rows × 3 columns with ±0.4 positioning.           |
-| num_samples_mouse | int           | Number of mouse position samples to collect per calibration point in simulation mode. Default 5.                                                                      |
+| num_samples_mouse | [int](`int`)  | Number of mouse position samples to collect per calibration point in simulation mode. Default 5.                                                                      |
 
 ## Examples {.doc-section .doc-section-examples}
 

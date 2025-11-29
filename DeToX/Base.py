@@ -157,11 +157,27 @@ class ETracker:
         Notes
         -----
         - Settings cannot be changed during active recording. If an ongoing recording 
-          is detected, a non-blocking warning is issued and the function exits safely.
+        is detected, a non-blocking warning is issued and the function exits safely.
         - When `use_gui=True`, a PsychoPy dialog window appears. It must be closed 
-          manually before the program continues.
+        manually before the program continues.
         - After successfully applying new settings, the internal attributes `self.fps` 
-          and `self.illum_mode` are updated to reflect the current device configuration.
+        and `self.illum_mode` are updated to reflect the current device configuration.
+        
+        Examples
+        --------
+        ```python
+        # Set frequency to 120 Hz programmatically
+        ET_controller.set_eyetracking_settings(desired_fps=120)
+        
+        # Set illumination mode to 'Bright'
+        ET_controller.set_eyetracking_settings(desired_illumination_mode='Bright')
+        
+        # Set both frequency and illumination mode
+        ET_controller.set_eyetracking_settings(desired_fps=120, desired_illumination_mode='Bright')
+        
+        # Use GUI to select settings interactively
+        ET_controller.set_eyetracking_settings(use_gui=True)
+        ```
         """
         # Pre-condition Check 
 
@@ -279,15 +295,32 @@ class ETracker:
         
         Examples
         --------
-        >>> # Use built-in video
-        >>> tracker.show_status()
+        ```python
+        # Basic usage with built-in video
+        ET_controller.show_status()
         
-        >>> # No video
-        >>> tracker.show_status(video_help=False)
+        # No background video
+        ET_controller.show_status(video_help=False)
         
-        >>> # Custom video
-        >>> my_video = visual.MovieStim(win, 'custom.mp4', size=0.5, pos=(0, -0.2))
-        >>> tracker.show_status(video_help=my_video)
+        # Custom exit key
+        ET_controller.show_status(decision_key='return')
+        
+        # Use custom video
+        from psychopy import visual
+        my_video = visual.MovieStim(
+            win, 
+            'instructions.mp4', 
+            size=(0.8, 0.6), 
+            pos=(0, -0.1)
+        )
+        ET_controller.show_status(video_help=my_video)
+        
+        # Complete workflow: position participant before calibration
+        ET_controller.show_status()  # Position participant
+        success = ET_controller.calibrate(5)  # Run calibration
+        if success:
+            ET_controller.start_recording('data.h5')  # Start recording
+        ```
         """
 
         # --- 1. Instruction Display ---
@@ -447,12 +480,12 @@ class ETracker:
 
 
     def calibrate(self,
-            calibration_points,
-            infant_stims=None,
-            shuffle=True,
-            audio=True,
-            anim_type='zoom',
-            visualization_style='circles'
+                calibration_points=5,
+                infant_stims=True,
+                shuffle=True,
+                audio=True,
+                anim_type='zoom',
+                visualization_style='circles'
     ):
         """
         Run infant-friendly calibration procedure.
@@ -465,68 +498,122 @@ class ETracker:
 
         Parameters
         ----------
-        calibration_points : int or list of tuple, optional
-            Calibration pattern specification:
-            - 5: Standard 5-point pattern (4 corners + center). Default.
-            - 9: Comprehensive 9-point pattern (3×3 grid).
-            - list: Custom points in normalized coordinates [-1, 1].
-            Example: [(-0.4, 0.4), (0.4, 0.4), (0.0, 0.0)]
+        calibration_points : int or list of tuple
+            Calibration pattern specification.
+            Use `5` for the standard 5-point pattern (4 corners + center; default).
+
+            Use `9` for a comprehensive 9-point pattern (3*3 grid). 
+            Alternatively, provide a list of custom points in normalized coordinates 
+            in the range [-1, 1], for example: `[(-0.4, 0.4), (0.4, 0.4), (0.0, 0.0)]`.
+
         infant_stims : list of str or True, optional
-            Paths to engaging image files for calibration targets (e.g., colorful
-            characters, animated objects). If True (default), uses built-in stimuli 
+            Paths to engaging image files for calibration targets (e.g., colorful 
+            characters, animated objects). If `True` (default), uses built-in stimuli 
             from the package. If fewer stimuli than calibration points are provided, 
             stimuli are automatically repeated in sequence to cover all points 
-            (e.g., 3 stimuli for 7 points becomes [s1, s2, s3, s1, s2, s3, s1]).
+            (e.g., 3 stimuli for 7 points becomes `[s1, s2, s3, s1, s2, s3, s1]`). 
+            Defaults to `None`, which resolves to `True`.
+<div class="accordion" id="accordionExample">
+  <div class="accordion-item">
+    <h2 class="accordion-header" id="headingOne">
+      <button class="accordion-button collapsed" type="button" data-bs-toggle="collapse" data-bs-target="#collapseOne" aria-expanded="false" aria-controls="collapseOne">
+        Accordion Item #1
+      </button>
+    </h2>
+    <div id="collapseOne" class="accordion-collapse collapse" aria-labelledby="headingOne" data-bs-parent="#accordionExample" style="">
+      <div class="accordion-body">
+        <strong>This is the first item's accordion body.</strong> It is shown by default, until the collapse plugin adds the appropriate classes that we use to style each element. These classes control the overall appearance, as well as the showing and hiding via CSS transitions. You can modify any of this with custom CSS or overriding our default variables. It's also worth noting that just about any HTML can go within the <code>.accordion-body</code>, though the transition does limit overflow.
+      </div>
+    </div>
+  </div>
+  <div class="accordion-item">
+    <h2 class="accordion-header" id="headingTwo">
+      <button class="accordion-button collapsed" type="button" data-bs-toggle="collapse" data-bs-target="#collapseTwo" aria-expanded="false" aria-controls="collapseTwo">
+        Accordion Item #2
+      </button>
+    </h2>
+    <div id="collapseTwo" class="accordion-collapse collapse" aria-labelledby="headingTwo" data-bs-parent="#accordionExample" style="">
+      <div class="accordion-body">
+        <strong>This is the second item's accordion body.</strong> It is hidden by default, until the collapse plugin adds the appropriate classes that we use to style each element. These classes control the overall appearance, as well as the showing and hiding via CSS transitions. You can modify any of this with custom CSS or overriding our default variables. It's also worth noting that just about any HTML can go within the <code>.accordion-body</code>, though the transition does limit overflow.
+      </div>
+    </div>
+  </div>
+  <div class="accordion-item">
+    <h2 class="accordion-header" id="headingThree">
+      <button class="accordion-button collapsed" type="button" data-bs-toggle="collapse" data-bs-target="#collapseThree" aria-expanded="false" aria-controls="collapseThree">
+        Accordion Item #3
+      </button>
+    </h2>
+    <div id="collapseThree" class="accordion-collapse collapse" aria-labelledby="headingThree" data-bs-parent="#accordionExample">
+      <div class="accordion-body">
+        <strong>This is the third item's accordion body.</strong> It is hidden by default, until the collapse plugin adds the appropriate classes that we use to style each element. These classes control the overall appearance, as well as the showing and hiding via CSS transitions. You can modify any of this with custom CSS or overriding our default variables. It's also worth noting that just about any HTML can go within the <code>.accordion-body</code>, though the transition does limit overflow.
+      </div>
+    </div>
+  </div>
+</div>
         shuffle : bool, optional
-            Whether to randomize stimulus presentation order. When True (default), 
+            Whether to randomize stimulus presentation order. When `True` (default), 
             stimuli are shuffled after any necessary repetition and before assignment 
-            to calibration points. Set to False if you want deterministic 
-            stimulus-to-point mapping or specific stimulus ordering. Default True.
+            to calibration points. Set to `False` if you want deterministic 
+            stimulus-to-point mapping or specific stimulus ordering. Default is `True`.
+
         audio : bool or psychopy.sound.Sound or None, optional
-            Controls attention-getting audio during calibration:
-            - True: Uses built-in calibration sound (default). Sound loops 
-            continuously while stimulus is selected.
-            - False or None: No audio feedback.
-            - psychopy.sound.Sound: Uses your pre-loaded custom sound object.
-            You are responsible for setting the sound parameters (e.g., 
-            loops=-1 for continuous looping).
-            The audio provides auditory feedback when the experimenter selects
-            a calibration point by pressing a number key.
-            Default True.
+            Controls attention-getting audio during calibration. 
+            If `True` (default), uses the built-in calibration sound, which loops 
+            continuously while a stimulus is selected. 
+            If `False` or `None`, no audio feedback is played. 
+            If a `psychopy.sound.Sound` object is provided, it will be used as the 
+            audio source; you are responsible for configuring it (e.g., setting 
+            `loops=-1` for continuous looping). 
+            The audio provides feedback when the experimenter selects a calibration 
+            point by pressing a number key. Default is `True`.
+
         anim_type : {'zoom', 'trill'}, optional
-            Animation style for the calibration stimuli:
-            - 'zoom': Smooth size oscillation (default)
-            - 'trill': Rapid rotation with pauses
-        visualization_style : {'lines', 'circles'}, optional
-            How to display calibration results:
-            - 'lines': Draw lines from targets to gaze samples
-            - 'circles': Draw small filled circles at gaze sample positions
-            Default 'circles'.
+            Animation style for the calibration stimuli. 
+            `'zoom'` applies a smooth size oscillation (default). 
+            `'trill'` uses rapid rotation with pauses. 
+            Default is `'zoom'`.
+
+        visualization_style : {'circles','lines'}, optional
+            How to display calibration results. 
+            `'lines'` draws lines from targets to gaze samples. 
+            `'circles'` draws small filled circles at gaze sample positions.
 
         Returns
         -------
         bool
-            True if calibration completed successfully and was accepted by the user,
-            False if calibration was aborted or failed.
+            `True` if calibration completed successfully and was accepted by the user, 
+            `False` if calibration was aborted or failed.
 
         Examples
         --------
-        >>> # Standard 5-point calibration with default audio
-        >>> controller.calibrate(5)
-        
-        >>> # Calibration without audio
-        >>> controller.calibrate(5, audio=False)
-        
-        >>> # Custom audio
-        >>> from psychopy import sound
-        >>> my_sound = sound.Sound('custom_beep.wav', loops=-1)
-        >>> controller.calibrate(5, audio=my_sound)
-        
-        >>> # 9-point calibration with custom stimuli and trill animation
-        >>> controller.calibrate(9, infant_stims=['stim1.png', 'stim2.png'], 
-        ...                      anim_type='trill')
-        """
+        Standard 5-point calibration with default audio:
 
+        ```python
+        ET_controller.calibrate(5)
+        ```
+
+        Calibration without audio:
+
+        ```python
+        ET_controller.calibrate(5, audio=False)
+        ```
+
+        Custom audio:
+
+        ```python
+        from psychopy import sound
+        # Load custom sound and set to loop indefinitely
+        my_sound = sound.Sound('custom_beep.wav', loops=-1)
+        ET_controller.calibrate(5, audio=my_sound)
+        ```
+
+        9-point calibration with custom stimuli and trill animation:
+
+        ```python
+        ET_controller.calibrate(9, infant_stims=['stim1.png', 'stim2.png'], anim_type='trill')
+        ```
+        """
         # --- Visualization Style Validation ---
         valid_styles = ['lines', 'circles']
         if visualization_style not in valid_styles:
@@ -669,6 +756,16 @@ class ETracker:
         -----
         - In simulation mode, saving is skipped and a warning is issued.
         - If `use_gui` is True and the dialog is cancelled, returns False.
+
+        Examples
+        --------
+        ```python
+        # Save with default timestamped name
+        ET_controller.save_calibration()
+
+        ### Save with specified filename
+        ET_controller.save_calibration('subject_01_calib.dat')
+        ```
         """
         # --- Simulation guard ---
         if self.simulate:
@@ -751,6 +848,7 @@ class ETracker:
         use_gui : bool, optional
             If `True`, a graphical file-open dialog is displayed for the user to
             select the calibration file. Defaults to `False`.
+        
         Returns
         -------
         bool
@@ -764,6 +862,32 @@ class ETracker:
             If the method is called while the ETracker is in simulation mode.
         ValueError
             If `use_gui` is `False` and `filename` is not provided.
+        
+        Examples
+        --------
+        ```python
+        # Load calibration from specific file
+        success = ET_controller.load_calibration('subject_01_calib.dat')
+        if success:
+            ET_controller.start_recording('subject_01_data.h5')
+        
+        # Use GUI to select file
+        success = ET_controller.load_calibration(use_gui=True)
+        
+        # Multi-session workflow
+        # Session 1: Calibrate and save
+        ET_controller.calibrate(5)
+        ET_controller.save_calibration('participant_123.dat')
+        ET_controller.start_recording('session_1.h5')
+        # ... run experiment ...
+        ET_controller.stop_recording()
+        
+        # Session 2: Load previous calibration
+        ET_controller.load_calibration('participant_123.dat')
+        ET_controller.start_recording('session_2.h5')
+        # ... run experiment ...
+        ET_controller.stop_recording()
+        ```
         """
         # --- Pre-condition Check: Ensure not in simulation mode ---
         # Calibration can only be applied to a physical eye tracker.
@@ -862,11 +986,13 @@ class ETracker:
             
         Examples
         --------
-        # Standard format (simplified columns)
-        tracker.start_recording('data.h5')
+        ```python
+        ### Standard format (simplified columns)
+        ET_controller.start_recording('data.h5')
         
-        # Raw format (all Tobii SDK columns preserved)
-        tracker.start_recording('data_raw.h5', raw_format=True)
+        ### Raw format (all Tobii SDK columns preserved)
+        ET_controller.start_recording('data_raw.h5', raw_format=True)
+        ```
         """
         # --- State validation ---
         # Check current recording status and handle conflicts
@@ -1007,9 +1133,11 @@ class ETracker:
             
         Examples
         --------
-        tracker.record_event('trial_1_start')
-        # ... present stimulus ...
-        tracker.record_event('stimulus_offset')
+        ```python
+        ET_controller.record_event('trial_1_start')
+        #  present stimulus 
+        ET_controller.record_event('stimulus_offset')
+        ```
         """
         # --- State validation ---
         # Ensure recording is active before logging events
@@ -1044,6 +1172,61 @@ class ETracker:
         Uses thread-safe buffer swapping to minimize lock time, then processes
         and saves data in CSV or HDF5 format. Events are merged with gaze data
         based on timestamp proximity.
+        
+        This method is typically called automatically by `stop_recording()`, but
+        can be called manually during recording to periodically save data and
+        clear buffers. This is useful for long experiments to avoid memory buildup
+        and ensure data is saved even if the program crashes.
+        
+        Notes
+        -----
+        - Automatically called by `stop_recording()`
+        - Safe to call during active recording
+        - Clears buffers after saving
+        - Events are matched to nearest gaze sample by timestamp
+        
+        Examples
+        --------
+        ```python
+        # Automatic saving (most common)
+        ET_controller.start_recording('data.h5')
+        # ... run experiment ...
+        ET_controller.stop_recording()  # Automatically calls save_data()
+        
+        # Manual periodic saves for long experiments
+        ET_controller.start_recording('long_experiment.h5')
+        
+        for trial in range(100):
+            ET_controller.record_event(f'trial_{trial}_start')
+            # ... present stimuli ...
+            ET_controller.record_event(f'trial_{trial}_end')
+            
+            # Save data every 10 trials to prevent memory buildup
+            if (trial + 1) % 10 == 0:
+                ET_controller.save_data()  # Saves and clears buffers
+        
+        ET_controller.stop_recording()
+        
+        # Save data at natural break points
+        ET_controller.start_recording('session.h5')
+        
+        # Block 1
+        for trial in range(20):
+            # ... run trial ...
+            pass
+        ET_controller.save_data()  # Save after block 1
+        
+        # Short break
+        core.wait(30)
+        
+        # Block 2
+        for trial in range(20):
+            # ... run trial ...
+            pass
+        ET_controller.save_data()  # Save after block 2
+        
+        ET_controller.stop_recording()
+        ```
         """
         # --- Performance monitoring ---
         start_saving = core.getTime()
@@ -1109,6 +1292,78 @@ class ETracker:
     def gaze_contingent(self, N=5):
         """
         Initialize real-time gaze buffer for contingent applications.
+        
+        Creates a rolling buffer that stores the most recent N gaze samples,
+        enabling real-time gaze-contingent paradigms. Must be called before
+        using `get_gaze_position()` for real-time gaze tracking.
+        
+        The buffer automatically maintains the N most recent samples, discarding
+        older data. This provides a stable estimate of current gaze position by
+        aggregating across multiple samples.
+        
+        Parameters
+        ----------
+        N : int, optional
+            Number of recent gaze samples to store in the rolling buffer.
+            Larger values provide smoother estimates but increase latency.
+            Typical values: 3-10 samples. Default 5.
+        
+        Raises
+        ------
+        TypeError
+            If N is not an integer.
+        
+        Notes
+        -----
+        - Call this method ONCE before your experimental loop
+        - Buffer size trades off stability vs. latency:
+        * Smaller N (3-5): Lower latency, more noise
+        * Larger N (8-10): Smoother tracking, higher latency
+        - For 120 Hz eye tracker with N=5: ~42ms latency
+        - For 60 Hz eye tracker with N=5: ~83ms latency
+        
+        Examples
+        --------
+        ```python
+        # Basic real-time gaze tracking
+        ET_controller.gaze_contingent(N=5)  # Initialize buffer
+        ET_controller.start_recording('data.h5')
+        
+        # Create gaze-contingent stimulus
+        circle = visual.Circle(win, radius=0.05, fillColor='red')
+        
+        for frame in range(600):  # 10 seconds at 60 fps
+            gaze_pos = ET_controller.get_gaze_position()
+            circle.pos = gaze_pos
+            circle.draw()
+            win.flip()
+        
+        ET_controller.stop_recording()
+        
+        # Adjust buffer size for your needs
+        ET_controller.gaze_contingent(N=3)   # Low latency, more jitter
+        ET_controller.gaze_contingent(N=10)  # Smooth, higher latency
+        
+        # Gaze-contingent window paradigm
+        ET_controller.gaze_contingent(N=5)
+        ET_controller.start_recording('gaze_window.h5')
+        
+        stimulus = visual.ImageStim(win, 'image.png')
+        window = visual.Circle(win, radius=0.1, fillColor=None, lineColor='white')
+        
+        for trial in range(20):
+            stimulus.draw()
+            
+            for frame in range(120):  # 2 seconds
+                gaze_pos = ET_controller.get_gaze_position()
+                window.pos = gaze_pos
+                window.draw()
+                win.flip()
+            
+            ET_controller.record_event(f'trial_{trial}_end')
+        
+        ET_controller.stop_recording()
+        ```
         """
         # --- Input validation ---
         if not isinstance(N, int):
@@ -1161,21 +1416,23 @@ class ETracker:
             
         Examples
         --------
-        >>> # Basic usage (median aggregation)
-        >>> pos = tracker.get_gaze_position()
-        >>> if pos is not None:
-        ...     circle.pos = pos
+        ```python
+        # Basic usage (median aggregation)
+        pos = ET_controller.get_gaze_position()
+        if pos is not None:
+             circle.pos = pos
         
-        >>> # Use mean for smoother tracking
-        >>> pos = tracker.get_gaze_position(method="mean")
+        # Use mean for smoother tracking
+        pos = ET_controller.get_gaze_position(method="mean")
         
-        >>> # Lowest latency (last sample only)
-        >>> pos = tracker.get_gaze_position(method="last")
+        # Lowest latency (last sample only)
+        pos = ET_controller.get_gaze_position(method="last")
         
-        >>> # Return None instead of offscreen position
-        >>> pos = tracker.get_gaze_position(fallback_offscreen=False)
-        >>> if pos is None:
-        ...     print("No valid gaze data")
+        # Return None instead of offscreen position
+        pos = ET_controller.get_gaze_position(fallback_offscreen=False)
+        if pos is None:
+             print("No valid gaze data")
+        ```
         """
         # --- Buffer validation ---
         if self.gaze_contingent_buffer is None:
@@ -1746,7 +2003,7 @@ if success:
 
     # Record events during experiment
     controller.record_event('trial_1_start')
-    # Run trial 1...
+    # Run trial 1
     controller.record_event('trial_1_end')
     controller.save_data()  # Save and clear buffer after trial 1
 

@@ -17,16 +17,16 @@ elements appear at the intended size on screen.
 
 ## Parameters {.doc-section .doc-section-parameters}
 
-| Name         | Type                   | Description                                                                                                                             | Default    |
-|--------------|------------------------|-----------------------------------------------------------------------------------------------------------------------------------------|------------|
-| win          | psychopy.visual.Window | The PsychoPy window which provides information about units and size. The window's current unit system determines the conversion method. | _required_ |
-| height_value | float                  | Size in height units (fraction of screen height). For example, 0.1 represents 10% of the screen height.                                 | _required_ |
+| Name         | Type                                                                                  | Description                                                                                                                             | Default    |
+|--------------|---------------------------------------------------------------------------------------|-----------------------------------------------------------------------------------------------------------------------------------------|------------|
+| win          | [psychopy](`psychopy`).[visual](`psychopy.visual`).[Window](`psychopy.visual.Window`) | The PsychoPy window which provides information about units and size. The window's current unit system determines the conversion method. | _required_ |
+| height_value | [float](`float`)                                                                      | Size in height units (fraction of screen height). For example, 0.1 represents 10% of the screen height.                                 | _required_ |
 
 ## Returns {.doc-section .doc-section-returns}
 
-| Name   | Type   | Description                                                                                                                               |
-|--------|--------|-------------------------------------------------------------------------------------------------------------------------------------------|
-|        | float  | Size converted to current window units. The returned value maintains the same visual size on screen as the original height specification. |
+| Name   | Type             | Description                                                                                                                               |
+|--------|------------------|-------------------------------------------------------------------------------------------------------------------------------------------|
+|        | [float](`float`) | Size converted to current window units. The returned value maintains the same visual size on screen as the original height specification. |
 
 ## Notes {.doc-section .doc-section-notes}
 

@@ -12,18 +12,20 @@ simulation vs. real eye tracker modes.
 
 ## Parameters {.doc-section .doc-section-parameters}
 
-| Name   | Type   | Description                                                              | Default    |
-|--------|--------|--------------------------------------------------------------------------|------------|
-| label  | str    | Descriptive label for the event (e.g., 'trial_start', 'stimulus_onset'). | _required_ |
+| Name   | Type         | Description                                                              | Default    |
+|--------|--------------|--------------------------------------------------------------------------|------------|
+| label  | [str](`str`) | Descriptive label for the event (e.g., 'trial_start', 'stimulus_onset'). | _required_ |
 
 ## Raises {.doc-section .doc-section-raises}
 
-| Name   | Type           | Description                             |
-|--------|----------------|-----------------------------------------|
-|        | RuntimeWarning | If called when recording is not active. |
+| Name   | Type                               | Description                             |
+|--------|------------------------------------|-----------------------------------------|
+|        | [RuntimeWarning](`RuntimeWarning`) | If called when recording is not active. |
 
 ## Examples {.doc-section .doc-section-examples}
 
-tracker.record_event('trial_1_start')
-# ... present stimulus ...
-tracker.record_event('stimulus_offset')
+```python
+ET_controller.record_event('trial_1_start')
+#  present stimulus 
+ET_controller.record_event('stimulus_offset')
+```

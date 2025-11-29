@@ -10,7 +10,7 @@ So you're interested in using DeToX? Awesome! Let's get you set up quickly.
 DeToX is designed as a lightweight wrapper around **PsychoPy** and **tobii_research**. Here's the good news: `tobii_research` usually comes bundled with PsychoPy, which means the only real hurdle is installing PsychoPy itself. And yes, PsychoPy *can* be a bit tricky to install due to its many dependencies—but don't worry, we'll walk you through it. Once PsychoPy is up and running, adding DeToX is a breeze.
 
 ::: callout-note
-## Eye Tracker Drivers Required ![](https://connect.tobii.com/file-asset/eye_tracker_manager?v=2){fig-align="right" width="49" height="33"}
+## Eye Tracker Drivers Required ![](/resources/ETManager.jpg){fig-align="right" width="49" height="33"}
 
 Before DeToX can communicate with your Tobii eye tracker, you need to ensure the correct drivers are installed on your computer. The easiest way to do this is by downloading and installing the [Tobii Pro Eye Tracker Manager](https://www.tobii.com/products/software/applications-and-developer-kits/tobii-pro-eye-tracker-manager)—a free software provided by Tobii that allows you to installs the necessary drivers for your device.
 

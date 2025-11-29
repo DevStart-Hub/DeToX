@@ -15,16 +15,16 @@ to a top-left origin system used by image libraries like PIL.
 
 ## Parameters {.doc-section .doc-section-parameters}
 
-| Name   | Type                   | Description                                                                                                                       | Default    |
-|--------|------------------------|-----------------------------------------------------------------------------------------------------------------------------------|------------|
-| win    | psychopy.visual.Window | The PsychoPy window which provides information about units and size. Window units and dimensions determine the conversion method. | _required_ |
-| pos    | tuple                  | The PsychoPy coordinates to convert as (x, y) in current window units.                                                            | _required_ |
+| Name   | Type                                                                                  | Description                                                                                                                       | Default    |
+|--------|---------------------------------------------------------------------------------------|-----------------------------------------------------------------------------------------------------------------------------------|------------|
+| win    | [psychopy](`psychopy`).[visual](`psychopy.visual`).[Window](`psychopy.visual.Window`) | The PsychoPy window which provides information about units and size. Window units and dimensions determine the conversion method. | _required_ |
+| pos    | [tuple](`tuple`)                                                                      | The PsychoPy coordinates to convert as (x, y) in current window units.                                                            | _required_ |
 
 ## Returns {.doc-section .doc-section-returns}
 
-| Name   | Type   | Description                                                                                                                       |
-|--------|--------|-----------------------------------------------------------------------------------------------------------------------------------|
-|        | tuple  | The converted pixel coordinates as (int, int) with origin at top-left. Values are rounded to nearest integer for pixel alignment. |
+| Name   | Type             | Description                                                                                                                       |
+|--------|------------------|-----------------------------------------------------------------------------------------------------------------------------------|
+|        | [tuple](`tuple`) | The converted pixel coordinates as (int, int) with origin at top-left. Values are rounded to nearest integer for pixel alignment. |
 
 ## Notes {.doc-section .doc-section-notes}
 

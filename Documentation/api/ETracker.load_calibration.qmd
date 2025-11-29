@@ -14,20 +14,46 @@ available when connected to a physical eye tracker.
 
 ## Parameters {.doc-section .doc-section-parameters}
 
-| Name     | Type   | Description                                                                                                                                                                                                        | Default   |
-|----------|--------|--------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------|-----------|
-| filename | str    | The path to the calibration data file (e.g., "subject_01_calib.dat"). If `use_gui` is `True`, this path is used as the default suggestion in the file dialog. If `use_gui` is `False`, this parameter is required. | `None`    |
-| use_gui  | bool   | If `True`, a graphical file-open dialog is displayed for the user to select the calibration file. Defaults to `False`.                                                                                             | `False`   |
+| Name     | Type           | Description                                                                                                                                                                                                        | Default   |
+|----------|----------------|--------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------|-----------|
+| filename | [str](`str`)   | The path to the calibration data file (e.g., "subject_01_calib.dat"). If `use_gui` is `True`, this path is used as the default suggestion in the file dialog. If `use_gui` is `False`, this parameter is required. | `None`    |
+| use_gui  | [bool](`bool`) | If `True`, a graphical file-open dialog is displayed for the user to select the calibration file. Defaults to `False`.                                                                                             | `False`   |
 
 ## Returns {.doc-section .doc-section-returns}
 
-| Name   | Type   | Description                                                                                                                                                          |
-|--------|--------|----------------------------------------------------------------------------------------------------------------------------------------------------------------------|
-|        | bool   | Returns `True` if the calibration was successfully loaded and applied, and `False` otherwise (e.g., user cancelled the dialog, file not found, or data was invalid). |
+| Name   | Type           | Description                                                                                                                                                          |
+|--------|----------------|----------------------------------------------------------------------------------------------------------------------------------------------------------------------|
+|        | [bool](`bool`) | Returns `True` if the calibration was successfully loaded and applied, and `False` otherwise (e.g., user cancelled the dialog, file not found, or data was invalid). |
 
 ## Raises {.doc-section .doc-section-raises}
 
-| Name   | Type         | Description                                                       |
-|--------|--------------|-------------------------------------------------------------------|
-|        | RuntimeError | If the method is called while the ETracker is in simulation mode. |
-|        | ValueError   | If `use_gui` is `False` and `filename` is not provided.           |
+| Name   | Type                           | Description                                                       |
+|--------|--------------------------------|-------------------------------------------------------------------|
+|        | [RuntimeError](`RuntimeError`) | If the method is called while the ETracker is in simulation mode. |
+|        | [ValueError](`ValueError`)     | If `use_gui` is `False` and `filename` is not provided.           |
+
+## Examples {.doc-section .doc-section-examples}
+
+```python
+# Load calibration from specific file
+success = ET_controller.load_calibration('subject_01_calib.dat')
+if success:
+    ET_controller.start_recording('subject_01_data.h5')
+
+# Use GUI to select file
+success = ET_controller.load_calibration(use_gui=True)
+
+# Multi-session workflow
+# Session 1: Calibrate and save
+ET_controller.calibrate(5)
+ET_controller.save_calibration('participant_123.dat')
+ET_controller.start_recording('session_1.h5')
+# ... run experiment ...
+ET_controller.stop_recording()
+
+# Session 2: Load previous calibration
+ET_controller.load_calibration('participant_123.dat')
+ET_controller.start_recording('session_2.h5')
+# ... run experiment ...
+ET_controller.stop_recording()
+```

@@ -9,3 +9,58 @@ Save buffered gaze and event data to file with optimized processing.
 Uses thread-safe buffer swapping to minimize lock time, then processes
 and saves data in CSV or HDF5 format. Events are merged with gaze data
 based on timestamp proximity.
+
+This method is typically called automatically by `stop_recording()`, but
+can be called manually during recording to periodically save data and
+clear buffers. This is useful for long experiments to avoid memory buildup
+and ensure data is saved even if the program crashes.
+
+## Notes {.doc-section .doc-section-notes}
+
+- Automatically called by `stop_recording()`
+- Safe to call during active recording
+- Clears buffers after saving
+- Events are matched to nearest gaze sample by timestamp
+
+## Examples {.doc-section .doc-section-examples}
+
+```python
+# Automatic saving (most common)
+ET_controller.start_recording('data.h5')
+# ... run experiment ...
+ET_controller.stop_recording()  # Automatically calls save_data()
+
+# Manual periodic saves for long experiments
+ET_controller.start_recording('long_experiment.h5')
+
+for trial in range(100):
+    ET_controller.record_event(f'trial_{trial}_start')
+    # ... present stimuli ...
+    ET_controller.record_event(f'trial_{trial}_end')
+    
+    # Save data every 10 trials to prevent memory buildup
+    if (trial + 1) % 10 == 0:
+        ET_controller.save_data()  # Saves and clears buffers
+
+ET_controller.stop_recording()
+
+# Save data at natural break points
+ET_controller.start_recording('session.h5')
+
+# Block 1
+for trial in range(20):
+    # ... run trial ...
+    pass
+ET_controller.save_data()  # Save after block 1
+
+# Short break
+core.wait(30)
+
+# Block 2
+for trial in range(20):
+    # ... run trial ...
+    pass
+ET_controller.save_data()  # Save after block 2
+
+ET_controller.stop_recording()
+```

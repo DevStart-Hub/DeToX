@@ -25,12 +25,12 @@ Key features include:
 
 ## Attributes {.doc-section .doc-section-attributes}
 
-| Name          | Type                   | Description                                            |
-|---------------|------------------------|--------------------------------------------------------|
-| win           | psychopy.visual.Window | The PsychoPy window used for rendering.                |
-| stims         | dict                   | Dictionary mapping indices to ImageStim objects.       |
-| stim_size     | dict                   | Dictionary mapping indices to original stimulus sizes. |
-| present_order | list                   | List defining the presentation sequence of stimuli.    |
+| Name          | Type                                                                                  | Description                                            |
+|---------------|---------------------------------------------------------------------------------------|--------------------------------------------------------|
+| win           | [psychopy](`psychopy`).[visual](`psychopy.visual`).[Window](`psychopy.visual.Window`) | The PsychoPy window used for rendering.                |
+| stims         | [dict](`dict`)                                                                        | Dictionary mapping indices to ImageStim objects.       |
+| stim_size     | [dict](`dict`)                                                                        | Dictionary mapping indices to original stimulus sizes. |
+| present_order | [list](`list`)                                                                        | List defining the presentation sequence of stimuli.    |
 
 ## Methods
 
@@ -53,15 +53,15 @@ of available stimuli, enabling circular access patterns.
 
 #### Parameters {.doc-section .doc-section-parameters}
 
-| Name   | Type   | Description                                                                                                                                                     | Default    |
-|--------|--------|-----------------------------------------------------------------------------------------------------------------------------------------------------------------|------------|
-| idx    | int    | The index of the stimulus in the presentation order. Can be any non-negative integer; values beyond the stimulus count will wrap around using modulo operation. | _required_ |
+| Name   | Type         | Description                                                                                                                                                     | Default    |
+|--------|--------------|-----------------------------------------------------------------------------------------------------------------------------------------------------------------|------------|
+| idx    | [int](`int`) | The index of the stimulus in the presentation order. Can be any non-negative integer; values beyond the stimulus count will wrap around using modulo operation. | _required_ |
 
 #### Returns {.doc-section .doc-section-returns}
 
-| Name   | Type                      | Description                                                                                                                                                 |
-|--------|---------------------------|-------------------------------------------------------------------------------------------------------------------------------------------------------------|
-|        | psychopy.visual.ImageStim | The stimulus corresponding to the given index in the presentation order. The returned stimulus is ready for positioning, animation, and drawing operations. |
+| Name   | Type                                                                                        | Description                                                                                                                                                 |
+|--------|---------------------------------------------------------------------------------------------|-------------------------------------------------------------------------------------------------------------------------------------------------------------|
+|        | [psychopy](`psychopy`).[visual](`psychopy.visual`).[ImageStim](`psychopy.visual.ImageStim`) | The stimulus corresponding to the given index in the presentation order. The returned stimulus is ready for positioning, animation, and drawing operations. |
 
 #### Examples {.doc-section .doc-section-examples}
 
@@ -85,15 +85,15 @@ the base size before applying scaling transformations.
 
 #### Parameters {.doc-section .doc-section-parameters}
 
-| Name   | Type   | Description                                                                                                                                                     | Default    |
-|--------|--------|-----------------------------------------------------------------------------------------------------------------------------------------------------------------|------------|
-| idx    | int    | The index of the stimulus in the presentation order. Can be any non-negative integer; values beyond the stimulus count will wrap around using modulo operation. | _required_ |
+| Name   | Type         | Description                                                                                                                                                     | Default    |
+|--------|--------------|-----------------------------------------------------------------------------------------------------------------------------------------------------------------|------------|
+| idx    | [int](`int`) | The index of the stimulus in the presentation order. Can be any non-negative integer; values beyond the stimulus count will wrap around using modulo operation. | _required_ |
 
 #### Returns {.doc-section .doc-section-returns}
 
-| Name   | Type   | Description                                                                                                                                                                                   |
-|--------|--------|-----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------|
-|        | tuple  | The original size of the stimulus as (width, height) in the units specified during stimulus creation. These values represent the stimulus dimensions before any scaling or animation effects. |
+| Name   | Type             | Description                                                                                                                                                                                   |
+|--------|------------------|-----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------|
+|        | [tuple](`tuple`) | The original size of the stimulus as (width, height) in the units specified during stimulus creation. These values represent the stimulus dimensions before any scaling or animation effects. |
 
 #### Notes {.doc-section .doc-section-notes}
 

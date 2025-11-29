@@ -392,13 +392,6 @@ class BaseCalibrationSession:
         -----
         The sound is automatically stopped after the fade completes, and volume
         is reset to 1.0 (maximum) so it's ready for the next playback at full volume.
-        
-        Examples
-        --------
-        >>> # Fade out calibration audio when point is collected
-        >>> self._fade_sound(self.audio, fade_duration=0.5)
-        >>> # Next play() will start at full volume
-        >>> self.audio.play()
         """
         # --- Fade-out Loop ---
         # Gradually decrease volume from current level to 0
