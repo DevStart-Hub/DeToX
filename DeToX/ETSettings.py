@@ -41,6 +41,10 @@ class AnimationSettings:
     including zoom and trill animations. All size parameters are specified
     in height units (percentage of screen height).
     
+    Two size presets are available:
+    - **big**: Larger stimuli recommended for infants/children (default)
+    - **small**: Smaller stimuli recommended for adults
+    
     Attributes
     ----------
     focus_time : float
@@ -49,15 +53,24 @@ class AnimationSettings:
     zoom_speed : float
         Speed multiplier for the zoom animation. Higher values make the
         size oscillation faster. Default is 6.0.
-    max_zoom_size : float
-        Maximum size for zoom animation as percentage of screen height.
-        Default is 0.11 (11% of screen height).
-    min_zoom_size : float
-        Minimum size for zoom animation as percentage of screen height.
+    max_zoom_size_big : float
+        Maximum size for zoom animation (big preset) as percentage of screen height.
+        Recommended for infants/children. Default is 0.16 (16% of screen height).
+    min_zoom_size_big : float
+        Minimum size for zoom animation (big preset) as percentage of screen height.
         Default is 0.05 (5% of screen height).
-    trill_size : float
-        Fixed size for trill animation as percentage of screen height.
-        Default is 0.075 (7.5% of screen height).
+    trill_size_big : float
+        Fixed size for trill animation (big preset) as percentage of screen height.
+        Default is 0.14 (14% of screen height).
+    max_zoom_size_small : float
+        Maximum size for zoom animation (small preset) as percentage of screen height.
+        Recommended for adults. Default is 0.06 (6% of screen height).
+    min_zoom_size_small : float
+        Minimum size for zoom animation (small preset) as percentage of screen height.
+        Default is 0.01 (1% of screen height).
+    trill_size_small : float
+        Fixed size for trill animation (small preset) as percentage of screen height.
+        Default is 0.04 (4% of screen height).
     trill_rotation_range : float
         Maximum rotation angle in degrees for trill animation.
         Default is 20 degrees.
@@ -74,15 +87,23 @@ class AnimationSettings:
     Examples
     --------
     >>> settings = AnimationSettings()
-    >>> settings.max_zoom_size = 0.15  # Increase max size to 15%
+    >>> settings.max_zoom_size_big = 0.18  # Increase big max size to 18%
     >>> settings.trill_frequency = 5.0  # Faster trill
     """
     
     focus_time: float = 0.5
     zoom_speed: float = 6.0
-    max_zoom_size: float = 0.16
-    min_zoom_size: float = 0.05
-    trill_size: float = 0.14
+    
+    # Big size preset (infants/children - default)
+    max_zoom_size_big: float = 0.16
+    min_zoom_size_big: float = 0.05
+    trill_size_big: float = 0.14
+    
+    # Small size preset (adults)
+    max_zoom_size_small: float = 0.06
+    min_zoom_size_small: float = 0.01
+    trill_size_small: float = 0.04
+    
     trill_rotation_range: float = 20
     trill_cycle_duration: float = 1.5
     trill_active_duration: float = 1.1

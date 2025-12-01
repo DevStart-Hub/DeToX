@@ -11,7 +11,7 @@ from psychopy import core, event, visual
 
 # Local imports
 from . import ETSettings as cfg
-from .Utils import InfantStimuli, NicePrint
+from .Utils import NicePrint
 from .Coords import get_tobii_pos, psychopy_to_pixels, tobii2pix, convert_height_to_units, norm_to_window_units, get_psychopy_pos
 
 
@@ -36,6 +36,7 @@ class BaseCalibrationSession:
         infant_stims,
         audio=None,
         anim_type='zoom',
+        stim_size='big',
         visualization_style='lines'
     ):
         """
@@ -50,18 +51,35 @@ class BaseCalibrationSession:
         win : psychopy.visual.Window
             PsychoPy window for rendering stimuli and instructions. Used for
             all visual presentation and coordinate system conversions.
-        infant_stims : list of str
-            List of image file paths for attention-getting stimuli. These should
-            be engaging images suitable for infant participants (e.g., cartoon
-            characters, colorful objects).
+        infant_stims : list of psychopy.visual or list of str
+            Calibration target stimuli. Can be:
+            - List of PsychoPy visual objects (ImageStim, Circle, Rect, Polygon, ShapeStim)
+            - List of image file paths (strings)
+            - Single visual object (will be wrapped in list)
+            - Single file path string (will be wrapped in list)
+            These should be engaging stimuli suitable for the target population.
         audio : psychopy.sound.Sound, optional
             Sound to play when user selects a calibration point. Provides auditory
-            feedback during the calibration process. Default None.
-        anim_type : str, optional
+            feedback during the calibration process. Default None (no sound).
+        anim_type : {'zoom', 'trill'}, optional
             Animation style for calibration targets:
             - 'zoom': Smooth size oscillation using cosine function
             - 'trill': Rapid rotation with intermittent stops
             Default 'zoom'.
+        stim_size : {'big', 'small'}, optional
+            Size preset for calibration stimuli:
+            - 'big': Larger stimuli recommended for infants/children (default)
+            * Zoom animation: 5-16% of screen height
+            * Trill animation: 14% of screen height
+            - 'small': Smaller stimuli recommended for adults
+            * Zoom animation: 3-8% of screen height
+            * Trill animation: 6% of screen height
+            Default 'big'.
+        visualization_style : {'lines', 'circles'}, optional
+            Style for calibration result visualization:
+            - 'lines': Draw lines from targets to gaze samples (default)
+            - 'circles': Draw circles at sample positions
+            Default 'lines'.
         """
         # --- Core Attributes ---
         # Store window and stimulus configuration
@@ -70,11 +88,12 @@ class BaseCalibrationSession:
         self.audio = audio
         self.focus_time = cfg.animation.focus_time
         self.anim_type = anim_type
+        self.stim_size = stim_size  # ← Store stim_size
         self.visualization_style = visualization_style
         
         # --- State Management ---
         # Initialize calibration state variables
-        self.targets = None
+        self.stim_objects = None
         self.remaining_points = []  # Track which points still need calibration
         
         # --- Visual Setup ---
@@ -240,15 +259,15 @@ class BaseCalibrationSession:
         """
         if not (2 <= len(calibration_points) <= 9):
             raise ValueError("Calibration points must be between 2 and 9")
-    
-    
+
+
     def _prepare_session(self, calibration_points):
         """
         Initialize stimuli sequence and remaining points list.
         
         Sets up the stimulus presentation system and initializes tracking
-        of which calibration points still need data collection. Called at
-        the start of each calibration attempt.
+        of which calibration points still need data collection. Handles both
+        file paths (strings) and pre-loaded PsychoPy shape stimuli.
         
         Parameters
         ----------
@@ -256,115 +275,77 @@ class BaseCalibrationSession:
             List of calibration point coordinates for this session.
         """
         # --- Stimulus System Initialization ---
-        self.targets = InfantStimuli(
-            self.win,
-            self.infant_stims,
-        )
+        # Check if stimuli are already PsychoPy visual objects or need to be loaded
+        if self.infant_stims and hasattr(self.infant_stims[0], 'draw'):
+            # Validate that it's an allowed stimulus type
+            allowed_types = (visual.ImageStim, visual.Circle, visual.Rect, 
+                            visual.Polygon, visual.ShapeStim)
+            
+            if not isinstance(self.infant_stims[0], allowed_types):
+                raise TypeError(
+                    f"Pre-loaded stimuli must be ImageStim, Circle, Rect, Polygon, or ShapeStim. "
+                    f"Got: {type(self.infant_stims[0]).__name__}"
+                )
+            
+            # Already PsychoPy shape stimuli - use directly
+            self.stim_objects = self.infant_stims
+        else:
+            # File paths - load as ImageStim
+            self.stim_objects = [
+                visual.ImageStim(self.win, image=path, units='height', interpolate=True) 
+                for path in self.infant_stims
+            ]
 
         # --- Store Calibration Points for Visualization ---
-        self.calibration_points = calibration_points  # ← ADDED
+        self.calibration_points = calibration_points  
         
         # --- Point Tracking Setup ---
-        # Initialize remaining points to all points
         self.remaining_points = list(range(len(calibration_points)))
     
         
     def _animate(self, stim, clock, point_idx):
-        """
-        Animate a stimulus with zoom or rotation ('trill') effects.
-        
-        Uses height-based settings that are automatically converted to current window units
-        for consistent visual appearance across different screen configurations. Supports
-        two animation types designed to maintain infant attention during calibration.
-        
-        Parameters
-        ----------
-        stim : psychopy.visual stimulus
-            The stimulus object to animate. Must support setSize() and setOri() methods.
-        clock : psychopy.core.Clock
-            Clock object for timing animations. Used to calculate animation phase
-            and control oscillation speed.
-            
-        Notes
-        -----
-        Animation timing is controlled by cfg.ANIMATION_SETTINGS.
-        Size settings are defined in height units and automatically converted to window units.
-        Supported animation types: 'zoom' (cosine oscillation), 'trill' (discrete rotation pulses).
-        """
+        """..."""
         
         if self.anim_type == 'zoom':
             # --- Zoom Animation: Smooth Size Oscillation ---
-            # Calculate elapsed time with zoom-specific speed multiplier
             elapsed_time = clock.getTime() * cfg.animation.zoom_speed
             
-            # Retrieve and convert size settings from height units to current window units
-            min_size_height = cfg.animation.min_zoom_size
-            max_size_height = cfg.animation.max_zoom_size
+            # Select size settings based on stim_size preset
+            if self.stim_size == 'big':
+                min_size = convert_height_to_units(self.win, cfg.animation.min_zoom_size_big)
+                max_size = convert_height_to_units(self.win, cfg.animation.max_zoom_size_big)
+            else:  # 'small'
+                min_size = convert_height_to_units(self.win, cfg.animation.min_zoom_size_small)
+                max_size = convert_height_to_units(self.win, cfg.animation.max_zoom_size_small)
             
-            min_size = convert_height_to_units(self.win, min_size_height)
-            max_size = convert_height_to_units(self.win, max_size_height)
-            
-            # Calculate smooth oscillation between min and max sizes using cosine
-            # Cosine provides smooth acceleration/deceleration at size extremes
+            # Calculate smooth oscillation
             size_range = max_size - min_size
             normalized_oscillation = (np.cos(elapsed_time) + 1) / 2.0
             current_size = min_size + (normalized_oscillation * size_range)
             
-            # Get original aspect ratio
-            original_size = self.targets.get_stim_original_size(point_idx)
-            aspect_ratio = original_size[0] / original_size[1]  # width / height
-            
-            # Apply size while maintaining aspect ratio
-            if aspect_ratio >= 1.0:
-                # Landscape or square: scale based on width
-                stim.setSize([current_size, current_size / aspect_ratio])
-            else:
-                # Portrait: scale based on height
-                stim.setSize([current_size * aspect_ratio, current_size])
+            stim.setSize(current_size)
             
         elif self.anim_type == 'trill':
             # --- Trill Animation: Rapid Rotation with Pauses ---
-            # Set fixed size for trill animation from configuration
-            trill_size_height = cfg.animation.trill_size
-            trill_size = convert_height_to_units(self.win, trill_size_height)
+            # Select size setting based on stim_size preset
+            if self.stim_size == 'big':
+                trill_size = convert_height_to_units(self.win, cfg.animation.trill_size_big)
+            else:  # 'small'
+                trill_size = convert_height_to_units(self.win, cfg.animation.trill_size_small)
             
-            # Get original aspect ratio
-            original_size = self.targets.get_stim_original_size(point_idx)
-            aspect_ratio = original_size[0] / original_size[1]
-            
-            # Apply size while maintaining aspect ratio
-            if aspect_ratio >= 1.0:
-                stim.setSize([trill_size, trill_size / aspect_ratio])
-            else:
-                stim.setSize([trill_size * aspect_ratio, trill_size])
+            stim.setSize(trill_size)
             
             # Rotation logic (unchanged)
             elapsed_time = clock.getTime()
-            trill_cycle_duration = cfg.animation.trill_cycle_duration
-            trill_active_duration = cfg.animation.trill_active_duration
+            cycle_position = elapsed_time % cfg.animation.trill_cycle_duration
             
-            # Determine position in the cycle
-            cycle_position = elapsed_time % trill_cycle_duration
-            
-            if cycle_position < trill_active_duration:
-                # --- TRILL PHASE: Rapid back-and-forth oscillations ---
-                
-                # Create rapid oscillations using high-frequency sine wave
-                trill_frequency = cfg.animation.trill_frequency  # Oscillations per second
-                trill_time = cycle_position * trill_frequency * 2 * np.pi
-                
-                # Create sharp, rapid back-and-forth movement
-                rotation_base = np.sin(trill_time)
-                
-                # Apply rotation range
-                rotation_angle = rotation_base * cfg.animation.trill_rotation_range
+            if cycle_position < cfg.animation.trill_active_duration:
+                trill_time = cycle_position * cfg.animation.trill_frequency * 2 * np.pi
+                rotation_angle = np.sin(trill_time) * cfg.animation.trill_rotation_range
                 stim.setOri(rotation_angle)
-                
             else:
-                # --- STOP PHASE: No rotation ---
                 stim.setOri(0)
         
-        # --- Render Animated Stimulus ---
         stim.draw()
     
 
@@ -645,7 +626,8 @@ class BaseCalibrationSession:
             # --- Stimulus Presentation ---
             # Show stimulus at selected point (only if it's in remaining points)
             if point_idx in self.remaining_points:
-                stim = self.targets.get_stim(point_idx)
+                stim_idx = point_idx % len(self.stim_objects)
+                stim = self.stim_objects[stim_idx]
                 stim.setPos(calibration_points[point_idx])
                 self._animate(stim, clock, point_idx)
             
@@ -768,7 +750,8 @@ class TobiiCalibrationSession(BaseCalibrationSession):
         infant_stims,
         audio=None,
         anim_type='zoom',
-        visualization_style='lines', 
+        stim_size='big',
+        visualization_style='lines',
         verbose=True
     ):
         """
@@ -782,18 +765,49 @@ class TobiiCalibrationSession(BaseCalibrationSession):
         ----------
         win : psychopy.visual.Window
             PsychoPy window for stimulus presentation and coordinate conversions.
+            All visual elements are rendered in this window.
         calibration_api : tobii_research.ScreenBasedCalibration
             Tobii's calibration interface object, pre-configured for the connected
-            eye tracker. This handles the low-level calibration data collection.
-        infant_stims : list of str
-            Paths to engaging image files for calibration targets.
+            eye tracker. This handles the low-level calibration data collection
+            and computation. Typically created via:
+            `tr.ScreenBasedCalibration(eyetracker)`.
+        infant_stims : list of psychopy.visual or list of str
+            Calibration target stimuli. Can be:
+            - List of PsychoPy visual objects (ImageStim, Circle, Rect, etc.)
+            - List of image file paths (strings)
+            - Single visual object (will be wrapped in list)
+            - Single file path string (will be wrapped in list)
         audio : psychopy.sound.Sound, optional
-            Attention-getting sound for point selection feedback. Default None.
-        anim_type : str, optional
-            Animation style: 'zoom' or 'trill'. Default 'zoom'.
+            Attention-getting sound to play when user selects a calibration point.
+            Provides auditory feedback during the calibration process. If None,
+            no sound is played. Default None.
+        anim_type : {'zoom', 'trill'}, optional
+            Animation style for calibration targets:
+            - 'zoom': Smooth size oscillation using cosine function
+            - 'trill': Rapid rotation with intermittent stops
+            Default 'zoom'.
+        stim_size : {'big', 'small'}, optional
+            Size preset for calibration stimuli:
+            - 'big': Larger stimuli for infants/children (zoom: 5-16%, trill: 14%)
+            - 'small': Smaller stimuli for adults (zoom: 3-8%, trill: 6%)
+            Default 'big'.
+        visualization_style : {'lines', 'circles'}, optional
+            Style for calibration result visualization:
+            - 'lines': Draw lines from targets to gaze samples
+            - 'circles': Draw circles at sample positions
+            Default 'lines'.
+        verbose : bool, optional
+            If True, print status messages during calibration (e.g., point collection,
+            computation results). If False, suppress informational output. Default True.
         """
+        # --- Base Class Initialization ---
         super().__init__(
-            win, infant_stims, audio, anim_type, visualization_style  # \u2190 ADD PARAM
+            win=win,
+            infant_stims=infant_stims,
+            audio=audio,
+            anim_type=anim_type,
+            stim_size=stim_size,
+            visualization_style=visualization_style
         )
         
         # --- Tobii-Specific Setup ---
@@ -1017,6 +1031,7 @@ class TobiiCalibrationSession(BaseCalibrationSession):
         return self._create_calibration_result_image(sample_data)
 
 
+
 class MouseCalibrationSession(BaseCalibrationSession):
     """
     Mouse-based calibration session for simulation mode.
@@ -1039,7 +1054,8 @@ class MouseCalibrationSession(BaseCalibrationSession):
         mouse,
         audio=None,
         anim_type='zoom',
-        visualization_style='lines', 
+        stim_size='big',
+        visualization_style='lines',
         verbose=True
     ):
         """
@@ -1053,19 +1069,48 @@ class MouseCalibrationSession(BaseCalibrationSession):
         ----------
         win : psychopy.visual.Window
             PsychoPy window for stimulus presentation and coordinate conversions.
-        infant_stims : list of str
-            Paths to engaging image files for calibration targets.
+            All visual elements are rendered in this window.
+        infant_stims : list of psychopy.visual or list of str
+            Calibration target stimuli. Can be:
+            - List of PsychoPy visual objects (ImageStim, Circle, Rect, etc.)
+            - List of image file paths (strings)
+            - Single visual object (will be wrapped in list)
+            - Single file path string (will be wrapped in list)
         mouse : psychopy.event.Mouse
             Mouse object for getting position samples. Should be configured
-            for the same window used for display.
+            for the same window used for display. Typically created via:
+            `event.Mouse(win=win)`.
         audio : psychopy.sound.Sound, optional
-            Attention-getting sound for point selection feedback. Default None.
-        anim_type : str, optional
-            Animation style: 'zoom' or 'trill'. Default 'zoom'.
+            Attention-getting sound to play when user selects a calibration point.
+            Provides auditory feedback during the calibration process. If None,
+            no sound is played. Default None.
+        anim_type : {'zoom', 'trill'}, optional
+            Animation style for calibration targets:
+            - 'zoom': Smooth size oscillation using cosine function
+            - 'trill': Rapid rotation with intermittent stops
+            Default 'zoom'.
+        stim_size : {'big', 'small'}, optional
+            Size preset for calibration stimuli:
+            - 'big': Larger stimuli for infants/children (zoom: 5-16%, trill: 14%)
+            - 'small': Smaller stimuli for adults (zoom: 3-8%, trill: 6%)
+            Default 'big'.
+        visualization_style : {'lines', 'circles'}, optional
+            Style for calibration result visualization:
+            - 'lines': Draw lines from targets to gaze samples
+            - 'circles': Draw circles at sample positions
+            Default 'lines'.
+        verbose : bool, optional
+            If True, print status messages during calibration (e.g., point collection,
+            sample counts). If False, suppress informational output. Default True.
         """
         # --- Base Class Initialization ---
         super().__init__(
-            win, infant_stims, audio, anim_type, visualization_style  # \u2190 ADD PARAM
+            win=win,
+            infant_stims=infant_stims,
+            audio=audio,
+            anim_type=anim_type,
+            stim_size=stim_size,
+            visualization_style=visualization_style
         )
         
         # --- Mouse-Specific Setup ---

@@ -485,6 +485,7 @@ class ETracker:
                 shuffle=True,
                 audio=True,
                 anim_type='zoom',
+                stim_size='big',
                 visualization_style='circles'
     ):
         """
@@ -499,118 +500,167 @@ class ETracker:
         Parameters
         ----------
         calibration_points : int or list of tuple, optional
-            Calibration pattern specification:
-            - 5: Standard 5-point pattern (4 corners + center). Default.
-            - 9: Comprehensive 9-point pattern (3×3 grid).
-            - list: Custom points in normalized coordinates [-1, 1].
-            Example: [(-0.4, 0.4), (0.4, 0.4), (0.0, 0.0)]
-        infant_stims : list of str or None, optional
-            Paths to engaging image files for calibration targets (e.g., colorful
-            characters, animated objects). If None (default), uses built-in stimuli 
-            from the package. If fewer stimuli than calibration points are provided, 
-            stimuli are automatically repeated in sequence to cover all points 
-            (e.g., 3 stimuli for 7 points becomes `[s1, s2, s3, s1, s2, s3, s1]`). 
-            Defaults to `None`, which resolves to `True`.
-<div class="accordion" id="accordionExample">
-  <div class="accordion-item">
-    <h2 class="accordion-header" id="headingOne">
-      <button class="accordion-button collapsed" type="button" data-bs-toggle="collapse" data-bs-target="#collapseOne" aria-expanded="false" aria-controls="collapseOne">
-        Accordion Item #1
-      </button>
-    </h2>
-    <div id="collapseOne" class="accordion-collapse collapse" aria-labelledby="headingOne" data-bs-parent="#accordionExample" style="">
-      <div class="accordion-body">
-        <strong>This is the first item's accordion body.</strong> It is shown by default, until the collapse plugin adds the appropriate classes that we use to style each element. These classes control the overall appearance, as well as the showing and hiding via CSS transitions. You can modify any of this with custom CSS or overriding our default variables. It's also worth noting that just about any HTML can go within the <code>.accordion-body</code>, though the transition does limit overflow.
-      </div>
-    </div>
-  </div>
-  <div class="accordion-item">
-    <h2 class="accordion-header" id="headingTwo">
-      <button class="accordion-button collapsed" type="button" data-bs-toggle="collapse" data-bs-target="#collapseTwo" aria-expanded="false" aria-controls="collapseTwo">
-        Accordion Item #2
-      </button>
-    </h2>
-    <div id="collapseTwo" class="accordion-collapse collapse" aria-labelledby="headingTwo" data-bs-parent="#accordionExample" style="">
-      <div class="accordion-body">
-        <strong>This is the second item's accordion body.</strong> It is hidden by default, until the collapse plugin adds the appropriate classes that we use to style each element. These classes control the overall appearance, as well as the showing and hiding via CSS transitions. You can modify any of this with custom CSS or overriding our default variables. It's also worth noting that just about any HTML can go within the <code>.accordion-body</code>, though the transition does limit overflow.
-      </div>
-    </div>
-  </div>
-  <div class="accordion-item">
-    <h2 class="accordion-header" id="headingThree">
-      <button class="accordion-button collapsed" type="button" data-bs-toggle="collapse" data-bs-target="#collapseThree" aria-expanded="false" aria-controls="collapseThree">
-        Accordion Item #3
-      </button>
-    </h2>
-    <div id="collapseThree" class="accordion-collapse collapse" aria-labelledby="headingThree" data-bs-parent="#accordionExample">
-      <div class="accordion-body">
-        <strong>This is the third item's accordion body.</strong> It is hidden by default, until the collapse plugin adds the appropriate classes that we use to style each element. These classes control the overall appearance, as well as the showing and hiding via CSS transitions. You can modify any of this with custom CSS or overriding our default variables. It's also worth noting that just about any HTML can go within the <code>.accordion-body</code>, though the transition does limit overflow.
-      </div>
-    </div>
-  </div>
-</div>
-        shuffle : bool, optional
-            Whether to randomize stimulus presentation order. When `True` (default), 
-            stimuli are shuffled after any necessary repetition and before assignment 
-            to calibration points. Set to `False` if you want deterministic 
-            stimulus-to-point mapping or specific stimulus ordering. Default is `True`.
+            Calibration pattern specification. 
+            Use **5** for the standard 5-point pattern (4 corners + center; default). 
+            Use **9** for a comprehensive 9-point pattern (3x3 grid). 
+            Alternatively, provide a **list of tuples** with custom points in normalized 
+            coordinates [-1, 1]. Example: ``[(-0.4, 0.4), (0.4, 0.4), (0.0, 0.0)]``.
 
-        audio : bool or psychopy.sound.Sound or None, optional
+        infant_stims : True or str or list or visual stimulus, optional
+            Calibration stimulus specification. Accepts multiple formats: 
+            **True** uses built-in stimuli from the package (default); 
+            **False** uses a default blue square; 
+            a **str** specifies a single image file path (e.g., ``'stimulus.png'``); 
+            a **list of str** provides multiple image paths; 
+            a **PsychoPy visual stimulus** (e.g., Circle, Rect, Polygon, ImageStim, ShapeStim) 
+            can be used as a single object; 
+            or a **list of visual stimuli** may be provided. 
+            If fewer stimuli than calibration points are given, they are automatically 
+            repeated and optionally shuffled to cover all points. 
+            Supported types: ImageStim, Circle, Rect, Polygon, ShapeStim. 
+            TextStim and MovieStim are not supported.
+
+        shuffle : bool, optional
+            Whether to randomize stimulus presentation order after any necessary 
+            repetition. Helps prevent habituation to stimulus sequence. Default is True.
+
+        audio : True or False or None or psychopy.sound.Sound, optional
             Controls attention-getting audio during calibration. 
-            If `True` (default), uses the built-in calibration sound, which loops 
-            continuously while a stimulus is selected. 
-            If `False` or `None`, no audio feedback is played. 
-            If a `psychopy.sound.Sound` object is provided, it will be used as the 
-            audio source; you are responsible for configuring it (e.g., setting 
-            `loops=-1` for continuous looping). 
-            The audio provides feedback when the experimenter selects a calibration 
-            point by pressing a number key. Default is `True`.
+            **True** uses the built-in looping calibration sound (default). 
+            **False** or **None** disables audio. 
+            A **psychopy.sound.Sound** object may be provided for custom audio 
+            (ensure it is configured appropriately, e.g., ``loops=-1`` for continuous looping). 
+            Audio plays when a calibration point is selected and fades out during data collection.
 
         anim_type : {'zoom', 'trill'}, optional
-            Animation style for the calibration stimuli. 
-            `'zoom'` applies a smooth size oscillation (default). 
-            `'trill'` uses rapid rotation with pauses. 
-            Default is `'zoom'`.
+            Animation style for calibration stimuli. 
+            **'zoom'** applies smooth size oscillation using a cosine function (default). 
+            **'trill'** uses rapid rotation with intermittent pauses.
 
-        visualization_style : {'circles','lines'}, optional
+        stim_size : {'big', 'small'}, optional
+            Size preset for calibration stimuli. 
+            **'big'** uses larger stimuli recommended for infants and children (default). 
+            **'small'** uses smaller stimuli for adults.
+
+        visualization_style : {'circles', 'lines'}, optional
             How to display calibration results. 
-            `'lines'` draws lines from targets to gaze samples. 
-            `'circles'` draws small filled circles at gaze sample positions.
+            **'circles'** shows small filled circles at each gaze sample position. 
+            **'lines'** draws lines from targets to gaze samples. 
+            In Tobii mode, green indicates the left eye and red the right eye; 
+            in simulation mode, orange represents mouse position.
 
         Returns
         -------
         bool
-            `True` if calibration completed successfully and was accepted by the user, 
-            `False` if calibration was aborted or failed.
+            True if calibration completed successfully and was accepted by the user. 
+            False if calibration was aborted (e.g., via ESC key) or failed.
+
+        Raises
+        ------
+        ValueError
+            If `calibration_points` is not 5, 9, or a valid list of coordinate tuples; 
+            if `visualization_style` is not 'circles' or 'lines'; 
+            or if `infant_stims` format is unrecognized.
+        TypeError
+            If pre-loaded stimuli include unsupported types (e.g., TextStim, MovieStim).
 
         Examples
         --------
-        Standard 5-point calibration with default audio:
-
+        Basic usage with built-in stimuli:
         ```python
-        ET_controller.calibrate(5)
+        controller.calibrate(5)
         ```
 
-        Calibration without audio:
-
+        9-point calibration:
         ```python
-        ET_controller.calibrate(5, audio=False)
+        controller.calibrate(9)
+        ```
+
+        Custom calibration points:
+        ```python
+        custom_points = [
+            (0.0, 0.0),      # Center
+            (-0.5, 0.5),     # Top-left
+            (0.5, 0.5),      # Top-right
+            (-0.5, -0.5),    # Bottom-left
+            (0.5, -0.5)      # Bottom-right
+        ]
+        controller.calibrate(custom_points)
+        ```
+
+        Single image file:
+        ```python
+        controller.calibrate(5, infant_stims='my_stimulus.png')
+        ```
+
+        Multiple image files:
+        ```python
+        controller.calibrate(5, infant_stims=['stim1.png', 'stim2.png', 'stim3.png'])
+        ```
+
+        Single shape stimulus:
+        ```python
+        red_square = visual.Rect(win, size=0.08, fillColor='red', units='height')
+        controller.calibrate(5, infant_stims=red_square)
+        ```
+
+        Multiple shape stimuli:
+        ```python
+        shapes = [
+            visual.Circle(win, radius=0.04, fillColor='red', units='height'),
+            visual.Rect(win, size=0.08, fillColor='blue', units='height'),
+            visual.Polygon(win, edges=6, radius=0.04, fillColor='green', units='height')
+        ]
+        controller.calibrate(5, infant_stims=shapes, shuffle=True)
         ```
 
         Custom audio:
-
         ```python
         from psychopy import sound
-        # Load custom sound and set to loop indefinitely
         my_sound = sound.Sound('custom_beep.wav', loops=-1)
-        ET_controller.calibrate(5, audio=my_sound)
+        controller.calibrate(5, audio=my_sound)
         ```
 
-        9-point calibration with custom stimuli and trill animation:
-
+        No audio with trill animation:
         ```python
-        ET_controller.calibrate(9, infant_stims=['stim1.png', 'stim2.png'], anim_type='trill')
+        controller.calibrate(5, audio=False, anim_type='trill')
         ```
+
+        Lines visualization style:
+        ```python
+        controller.calibrate(5, visualization_style='lines')
+        ```
+
+        Complete custom workflow:
+        ```python
+        # Position participant
+        controller.show_status()
+
+        # Custom calibration
+        success = controller.calibrate(
+            calibration_points=9,
+            infant_stims=['stim1.png', 'stim2.png'],
+            shuffle=True,
+            audio=True,
+            anim_type='zoom',
+            visualization_style='circles'
+        )
+
+        if success:
+            controller.start_recording('data.h5')
+            # ... run experiment ...
+            controller.stop_recording()
+        ```
+
+        Notes
+        -----
+        - Calibration uses normalized coordinates [-1, 1] where (0, 0) is screen center.
+        - Stimuli are automatically repeated if fewer than calibration points.
+        - Animation preserves stimulus aspect ratio automatically.
+        - In simulation mode, use mouse to simulate gaze position.
+        - Press number keys (1–9) to select points, SPACE to collect data.
+        - Press ENTER to view results, ESC to abort.
+        - After viewing results: ENTER accepts, numbers + SPACE retries selected points.
         """
         # --- Visualization Style Validation ---
         valid_styles = ['lines', 'circles']
@@ -652,9 +702,37 @@ class ETracker:
             )
         
         num_points = len(norm_points)
+
+
+        # --- Stimulus Size Validation ---
+        valid_sizes = ['big', 'small']
+        if stim_size not in valid_sizes:
+            raise ValueError(
+                f"Invalid stim_size: '{stim_size}'. "
+                f"Must be one of {valid_sizes}."
+            )
         
-        # --- Stimuli Loading ---
-        if infant_stims is True:
+        # --- Stimuli Processing ---
+        # Handle single stimulus or list of stimuli
+        if infant_stims is False:
+            # Create default square stimulus
+            default_square = visual.Rect(
+                self.win,
+                size=0.08,  # 8% of screen height
+                fillColor='#2e5576',  # Deep blue color
+                lineColor=None,
+                units='height'
+            )
+            stim_list = [default_square]
+            
+        elif isinstance(infant_stims, list):
+            # Already a list - use as is
+            if len(infant_stims) > 0:
+                stim_list = infant_stims
+            else:
+                raise ValueError("infant_stims list cannot be empty.")
+                
+        elif infant_stims is True:
             # Load default stimuli from package
             import glob
             
@@ -662,49 +740,54 @@ class ETracker:
             stimuli_dir = os.path.join(package_dir, 'stimuli')
             
             # Get all PNG files
-            infant_stims = glob.glob(os.path.join(stimuli_dir, '*.png'))
-            infant_stims.sort()  # Consistent ordering
+            stim_list = glob.glob(os.path.join(stimuli_dir, '*.png'))
+            stim_list.sort()  # Consistent ordering
+            
+        elif hasattr(infant_stims, 'draw') or isinstance(infant_stims, str):
+            # Single stimulus (shape object or file path) - wrap in list
+            stim_list = [infant_stims]
+            
+        else:
+            raise ValueError(
+                f"infant_stims must be True, False, a stimulus object, a file path string, "
+                f"or a list of stimuli. Got: {type(infant_stims).__name__}"
+            )
         
         # --- Repeat stimuli if needed to cover all calibration points ---
-        num_stims = len(infant_stims)
+        num_stims = len(stim_list)
         if num_stims < num_points:
             repetitions = (num_points // num_stims) + 1
-            infant_stims = infant_stims * repetitions
+            stim_list = stim_list * repetitions
         
         # --- Shuffle if requested ---
         if shuffle:
             import random
-            random.shuffle(infant_stims)
+            random.shuffle(stim_list)
         
         # --- Subset to exact number needed ---
-        infant_stims = infant_stims[:num_points]
-
+        stim_list = stim_list[:num_points]
 
         # --- Setup audio stimulus ---
         audio_stim = None
 
         if audio is not None and audio is not False:
-            # Only import sound when needed
             from psychopy import sound
             
             if isinstance(audio, sound.Sound):
-                # audio is already a loaded Sound object, just use it
                 audio_stim = audio
-                
             elif audio is True:
-                # audio is True, create new Sound from default file
                 audio_path = os.path.join(os.path.dirname(__file__), 'stimuli', 'CalibrationSound.wav')
                 audio_stim = sound.Sound(audio_path, loops=-1)
-            
         
         # --- Mode-specific calibration setup ---
         if self.simulate:
             session = MouseCalibrationSession(
                 win=self.win,
-                infant_stims=infant_stims,
+                infant_stims=stim_list,
                 mouse=self.mouse,
                 audio=audio_stim,
                 anim_type=anim_type,
+                stim_size=stim_size,  
                 visualization_style=visualization_style,
                 verbose=self.verbose
             )
@@ -712,9 +795,10 @@ class ETracker:
             session = TobiiCalibrationSession(
                 win=self.win,
                 calibration_api=self.calibration,
-                infant_stims=infant_stims,
+                infant_stims=stim_list,
                 audio=audio_stim,
                 anim_type=anim_type,
+                stim_size=stim_size,  
                 visualization_style=visualization_style,
                 verbose=self.verbose
             )
@@ -723,7 +807,6 @@ class ETracker:
         success = session.run(norm_points)
         
         return success
-
 
     def save_calibration(self, filename=None, use_gui=False):
         """
