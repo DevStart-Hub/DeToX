@@ -84,14 +84,13 @@ These are called internally by the ETracker class, but can be used independently
 
 ## Utilities
 
-A set of utility classes and functions for presenting stimuli
+A functions for presenting stimuli
 and formatted text. These are called internally by the ETracker class.
 
 
 | | |
 | --- | --- |
 | [NicePrint](NicePrint.qmd#DeToX.NicePrint) | Print a message in a box with an optional title AND return the formatted text. |
-| [InfantStimuli](InfantStimuli.qmd#DeToX.InfantStimuli) | Stimuli manager for infant-friendly calibration procedures. |
 
 ## Configuration Settings
 

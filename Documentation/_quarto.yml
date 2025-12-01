@@ -203,11 +203,10 @@ quartodoc:
 
     - title: Utilities
       desc: |
-        A set of utility classes and functions for presenting stimuli
+        A functions for presenting stimuli
         and formatted text. These are called internally by the ETracker class.
       contents:
         - NicePrint
-        - InfantStimuli
       
     - title: Configuration Settings
       desc: |

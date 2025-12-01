@@ -16,17 +16,10 @@ or provide your own custom MovieStim object.
 
 ## Parameters {.doc-section .doc-section-parameters}
 
-<<<<<<< HEAD
 | Name         | Type                                                                                   | Description                                                                                                                                                                                                                                                                                    | Default   |
 |--------------|----------------------------------------------------------------------------------------|------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------|-----------|
 | decision_key | [str](`str`)                                                                           | Key to press to exit visualization. Default 'space'.                                                                                                                                                                                                                                           | `'space'` |
 | video_help   | [bool](`bool`) or [visual](`psychopy.visual`).[MovieStim](`psychopy.visual.MovieStim`) | Controls background video display: - True: Uses built-in instructional video (default) - False: No video displayed - visual.MovieStim: Uses your pre-loaded custom video. You are responsible for scaling (size) and positioning (pos) the MovieStim to fit your desired layout. Default True. | `True`    |
-=======
-| Name         | Type                     | Description                                                                                                                                                                                                                                                                                    | Default   |
-|--------------|--------------------------|------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------|-----------|
-| decision_key | str                      | Key to press to exit visualization. Default 'space'.                                                                                                                                                                                                                                           | `'space'` |
-| video_help   | bool or visual.MovieStim | Controls background video display: - True: Uses built-in instructional video (default) - False: No video displayed - visual.MovieStim: Uses your pre-loaded custom video. You are responsible for scaling (size) and positioning (pos) the MovieStim to fit your desired layout. Default True. | `True`    |
->>>>>>> origin/main
 
 ## Notes {.doc-section .doc-section-notes}
 
@@ -39,7 +32,6 @@ height units and positioned at (0, -0.08) to avoid covering the track box.
 ## Examples {.doc-section .doc-section-examples}
 
 ```python
-<<<<<<< HEAD
 # Basic usage with built-in video
 ET_controller.show_status()
 
@@ -64,19 +56,4 @@ ET_controller.show_status()  # Position participant
 success = ET_controller.calibrate(5)  # Run calibration
 if success:
     ET_controller.start_recording('data.h5')  # Start recording
-=======
->>> # Use built-in video
->>> tracker.show_status()
-```
-
-```python
->>> # No video
->>> tracker.show_status(video_help=False)
-```
-
-```python
->>> # Custom video
->>> my_video = visual.MovieStim(win, 'custom.mp4', size=0.5, pos=(0, -0.2))
->>> tracker.show_status(video_help=my_video)
->>>>>>> origin/main
 ```

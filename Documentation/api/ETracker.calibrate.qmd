@@ -2,16 +2,12 @@
 
 ```python
 ETracker.calibrate(
-<<<<<<< HEAD
     calibration_points=5,
     infant_stims=True,
-=======
-    calibration_points,
-    infant_stims=None,
->>>>>>> origin/main
     shuffle=True,
     audio=True,
     anim_type='zoom',
+    stim_size='big',
     visualization_style='circles',
 )
 ```
@@ -26,87 +22,129 @@ mode (real eye tracker vs. mouse simulation).
 
 ## Parameters {.doc-section .doc-section-parameters}
 
-<<<<<<< HEAD
-| Name                | Type                                                                                                       | Description                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                | Default             |
-|---------------------|------------------------------------------------------------------------------------------------------------|--------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------|---------------------|
-| calibration_points  | int or list of tuple                                                                                       | Calibration pattern specification. \ Use `5` for the standard 5-point pattern (4 corners + center; default). \  Use `9` for a comprehensive 9-point pattern (3*3 grid).  Alternatively, provide a list of custom points in normalized coordinates  in the range [-1, 1], for example: `[(-0.4, 0.4), (0.4, 0.4), (0.0, 0.0)]`.                                                                                                                                                                                                             | `5`                 |
-| infant_stims        | list of str or True                                                                                        | Paths to engaging image files for calibration targets (e.g., colorful  characters, animated objects). If `True` (default), uses built-in stimuli  from the package. If fewer stimuli than calibration points are provided,  stimuli are automatically repeated in sequence to cover all points  (e.g., 3 stimuli for 7 points becomes `[s1, s2, s3, s1, s2, s3, s1]`).  Defaults to `None`, which resolves to `True`.                                                                                                                      | `True`              |
-| shuffle             | [bool](`bool`)                                                                                             | Whether to randomize stimulus presentation order. When `True` (default),  stimuli are shuffled after any necessary repetition and before assignment  to calibration points. Set to `False` if you want deterministic  stimulus-to-point mapping or specific stimulus ordering. Default is `True`.                                                                                                                                                                                                                                          | `True`              |
-| audio               | [bool](`bool`) or [psychopy](`psychopy`).[sound](`psychopy.sound`).[Sound](`psychopy.sound.Sound`) or None | Controls attention-getting audio during calibration.  If `True` (default), uses the built-in calibration sound, which loops  continuously while a stimulus is selected.  If `False` or `None`, no audio feedback is played.  If a `psychopy.sound.Sound` object is provided, it will be used as the  audio source; you are responsible for configuring it (e.g., setting  `loops=-1` for continuous looping).  The audio provides feedback when the experimenter selects a calibration  point by pressing a number key. Default is `True`. | `True`              |
-| anim_type           | ([zoom](`zoom`), [trill](`trill`))                                                                         | Animation style for the calibration stimuli.  `'zoom'` applies a smooth size oscillation (default).  `'trill'` uses rapid rotation with pauses.  Default is `'zoom'`.                                                                                                                                                                                                                                                                                                                                                                      | `'zoom'`            |
-| visualization_style | ([circles](`circles`), [lines](`lines`))                                                                   | How to display calibration results.  `'lines'` draws lines from targets to gaze samples.  `'circles'` draws small filled circles at gaze sample positions.                                                                                                                                                                                                                                                                                                                                                                                 | `'circles','lines'` |
+| Name                | Type                                                                                                      | Description                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                      | Default     |
+|---------------------|-----------------------------------------------------------------------------------------------------------|------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------|-------------|
+| calibration_points  | int or list of tuple                                                                                      | Calibration pattern specification.  Use **5** for the standard 5-point pattern (4 corners + center; default).  Use **9** for a comprehensive 9-point pattern (3x3 grid).  Alternatively, provide a **list of tuples** with custom points in normalized  coordinates [-1, 1]. Example: ``[(-0.4, 0.4), (0.4, 0.4), (0.0, 0.0)]``.                                                                                                                                                                                                                                                                                                                                                                                 | `5`         |
+| infant_stims        | True or str or list or visual stimulus                                                                    | Calibration stimulus specification. Accepts multiple formats:  **True** uses built-in stimuli from the package (default);  **False** uses a default blue square;  a **str** specifies a single image file path (e.g., ``'stimulus.png'``);  a **list of str** provides multiple image paths;  a **PsychoPy visual stimulus** (e.g., Circle, Rect, Polygon, ImageStim, ShapeStim)  can be used as a single object;  or a **list of visual stimuli** may be provided.  If fewer stimuli than calibration points are given, they are automatically  repeated and optionally shuffled to cover all points.  Supported types: ImageStim, Circle, Rect, Polygon, ShapeStim.  TextStim and MovieStim are not supported. | `True`      |
+| shuffle             | [bool](`bool`)                                                                                            | Whether to randomize stimulus presentation order after any necessary  repetition. Helps prevent habituation to stimulus sequence. Default is True.                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                               | `True`      |
+| audio               | True or False or None or [psychopy](`psychopy`).[sound](`psychopy.sound`).[Sound](`psychopy.sound.Sound`) | Controls attention-getting audio during calibration.  **True** uses the built-in looping calibration sound (default).  **False** or **None** disables audio.  A **psychopy.sound.Sound** object may be provided for custom audio  (ensure it is configured appropriately, e.g., ``loops=-1`` for continuous looping).  Audio plays when a calibration point is selected and fades out during data collection.                                                                                                                                                                                                                                                                                                    | `True`      |
+| anim_type           | ([zoom](`zoom`), [trill](`trill`))                                                                        | Animation style for calibration stimuli.  **'zoom'** applies smooth size oscillation using a cosine function (default).  **'trill'** uses rapid rotation with intermittent pauses.                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                               | `'zoom'`    |
+| stim_size           | ([big](`big`), [small](`small`))                                                                          | Size preset for calibration stimuli.  **'big'** uses larger stimuli recommended for infants and children (default):  zoom animation ranges from 5–16% screen height, trill uses 14%.  **'small'** uses smaller stimuli for adults:  zoom ranges from 3–8%, trill uses 6%.                                                                                                                                                                                                                                                                                                                                                                                                                                        | `'big'`     |
+| visualization_style | ([circles](`circles`), [lines](`lines`))                                                                  | How to display calibration results.  **'circles'** shows small filled circles at each gaze sample position.  **'lines'** draws lines from targets to gaze samples (default).  In Tobii mode, green indicates the left eye and red the right eye;  in simulation mode, orange represents mouse position.                                                                                                                                                                                                                                                                                                                                                                                                          | `'circles'` |
 
 ## Returns {.doc-section .doc-section-returns}
 
-| Name   | Type           | Description                                                                                                               |
-|--------|----------------|---------------------------------------------------------------------------------------------------------------------------|
-|        | [bool](`bool`) | `True` if calibration completed successfully and was accepted by the user,  `False` if calibration was aborted or failed. |
+| Name   | Type           | Description                                                                                                                               |
+|--------|----------------|-------------------------------------------------------------------------------------------------------------------------------------------|
+|        | [bool](`bool`) | True if calibration completed successfully and was accepted by the user.  False if calibration was aborted (e.g., via ESC key) or failed. |
+
+## Raises {.doc-section .doc-section-raises}
+
+| Name   | Type                       | Description                                                                                                                                                                     |
+|--------|----------------------------|---------------------------------------------------------------------------------------------------------------------------------------------------------------------------------|
+|        | [ValueError](`ValueError`) | If `calibration_points` is not 5, 9, or a valid list of coordinate tuples;  if `visualization_style` is not 'circles' or 'lines';  or if `infant_stims` format is unrecognized. |
+|        | [TypeError](`TypeError`)   | If pre-loaded stimuli include unsupported types (e.g., TextStim, MovieStim).                                                                                                    |
 
 ## Examples {.doc-section .doc-section-examples}
 
-Standard 5-point calibration with default audio:
-
+Basic usage with built-in stimuli:
 ```python
-ET_controller.calibrate(5)
+controller.calibrate(5)
 ```
 
-Calibration without audio:
-
+9-point calibration:
 ```python
-ET_controller.calibrate(5, audio=False)
+controller.calibrate(9)
+```
+
+Custom calibration points:
+```python
+custom_points = [
+    (0.0, 0.0),      # Center
+    (-0.5, 0.5),     # Top-left
+    (0.5, 0.5),      # Top-right
+    (-0.5, -0.5),    # Bottom-left
+    (0.5, -0.5)      # Bottom-right
+]
+controller.calibrate(custom_points)
+```
+
+Single image file:
+```python
+controller.calibrate(5, infant_stims='my_stimulus.png')
+```
+
+Multiple image files:
+```python
+controller.calibrate(5, infant_stims=['stim1.png', 'stim2.png', 'stim3.png'])
+```
+
+Single shape stimulus:
+```python
+red_square = visual.Rect(win, size=0.08, fillColor='red', units='height')
+controller.calibrate(5, infant_stims=red_square)
+```
+
+Multiple shape stimuli:
+```python
+shapes = [
+    visual.Circle(win, radius=0.04, fillColor='red', units='height'),
+    visual.Rect(win, size=0.08, fillColor='blue', units='height'),
+    visual.Polygon(win, edges=6, radius=0.04, fillColor='green', units='height')
+]
+controller.calibrate(5, infant_stims=shapes, shuffle=True)
 ```
 
 Custom audio:
-
 ```python
 from psychopy import sound
-# Load custom sound and set to loop indefinitely
 my_sound = sound.Sound('custom_beep.wav', loops=-1)
-ET_controller.calibrate(5, audio=my_sound)
+controller.calibrate(5, audio=my_sound)
 ```
 
-9-point calibration with custom stimuli and trill animation:
-
+No audio with trill animation:
 ```python
-ET_controller.calibrate(9, infant_stims=['stim1.png', 'stim2.png'], anim_type='trill')
-=======
-| Name                | Type                                 | Description                                                                                                                                                                                                                                                                                                                                                                                                                                                                                       | Default    |
-|---------------------|--------------------------------------|---------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------|------------|
-| calibration_points  | int or list of tuple                 | Calibration pattern specification: - 5: Standard 5-point pattern (4 corners + center). Default. - 9: Comprehensive 9-point pattern (3×3 grid). - list: Custom points in normalized coordinates [-1, 1]. Example: [(-0.4, 0.4), (0.4, 0.4), (0.0, 0.0)]                                                                                                                                                                                                                                            | _required_ |
-| infant_stims        | list of str or True                  | Paths to engaging image files for calibration targets (e.g., colorful characters, animated objects). If True (default), uses built-in stimuli  from the package. If fewer stimuli than calibration points are provided,  stimuli are automatically repeated in sequence to cover all points  (e.g., 3 stimuli for 7 points becomes [s1, s2, s3, s1, s2, s3, s1]).                                                                                                                                 | `None`     |
-| shuffle             | bool                                 | Whether to randomize stimulus presentation order. When True (default),  stimuli are shuffled after any necessary repetition and before assignment  to calibration points. Set to False if you want deterministic  stimulus-to-point mapping or specific stimulus ordering. Default True.                                                                                                                                                                                                          | `True`     |
-| audio               | bool or psychopy.sound.Sound or None | Controls attention-getting audio during calibration: - True: Uses built-in calibration sound (default). Sound loops  continuously while stimulus is selected. - False or None: No audio feedback. - psychopy.sound.Sound: Uses your pre-loaded custom sound object. You are responsible for setting the sound parameters (e.g.,  loops=-1 for continuous looping). The audio provides auditory feedback when the experimenter selects a calibration point by pressing a number key. Default True. | `True`     |
-| anim_type           | (zoom, trill)                        | Animation style for the calibration stimuli: - 'zoom': Smooth size oscillation (default) - 'trill': Rapid rotation with pauses                                                                                                                                                                                                                                                                                                                                                                    | `'zoom'`   |
-| visualization_style | (lines, circles)                     | How to display calibration results: - 'lines': Draw lines from targets to gaze samples - 'circles': Draw small filled circles at gaze sample positions Default 'circles'.                                                                                                                                                                                                                                                                                                                         | `'lines'`  |
-
-## Returns {.doc-section .doc-section-returns}
-
-| Name   | Type   | Description                                                                                                          |
-|--------|--------|----------------------------------------------------------------------------------------------------------------------|
-|        | bool   | True if calibration completed successfully and was accepted by the user, False if calibration was aborted or failed. |
-
-## Examples {.doc-section .doc-section-examples}
-
-```python
->>> # Standard 5-point calibration with default audio
->>> controller.calibrate(5)
+controller.calibrate(5, audio=False, anim_type='trill')
 ```
 
+Lines visualization style:
 ```python
->>> # Calibration without audio
->>> controller.calibrate(5, audio=False)
+controller.calibrate(5, visualization_style='lines')
 ```
 
+Complete custom workflow:
 ```python
->>> # Custom audio
->>> from psychopy import sound
->>> my_sound = sound.Sound('custom_beep.wav', loops=-1)
->>> controller.calibrate(5, audio=my_sound)
+# Position participant
+controller.show_status()
+
+# Custom calibration
+success = controller.calibrate(
+    calibration_points=9,
+    infant_stims=['stim1.png', 'stim2.png'],
+    shuffle=True,
+    audio=True,
+    anim_type='zoom',
+    visualization_style='circles'
+)
+
+if success:
+    controller.start_recording('data.h5')
+    # ... run experiment ...
+    controller.stop_recording()
 ```
 
-```python
->>> # 9-point calibration with custom stimuli and trill animation
->>> controller.calibrate(9, infant_stims=['stim1.png', 'stim2.png'], 
-...                      anim_type='trill')
->>>>>>> origin/main
-```
+## Notes {.doc-section .doc-section-notes}
+
+- Calibration uses normalized coordinates [-1, 1] where (0, 0) is screen center.
+- Stimuli are automatically repeated if fewer than calibration points.
+- Animation preserves stimulus aspect ratio automatically.
+- In simulation mode, use mouse to simulate gaze position.
+- Press number keys (1–9) to select points, SPACE to collect data.
+- Press ENTER to view results, ESC to abort.
+- After viewing results: ENTER accepts, numbers + SPACE retries selected points.
+
+## See Also {.doc-section .doc-section-see-also}
+
+show_status : Position participant before calibration
+save_calibration : Save calibration for later sessions
+load_calibration : Load previously saved calibration

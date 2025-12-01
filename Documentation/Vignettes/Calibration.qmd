@@ -128,27 +128,31 @@ Let's break down what's happening here:
 
 **`shuffle=True`**: Randomizes which image appears at each calibration point. This prevents habituation and keeps participants engaged throughout the procedure.
 
-<<<<<<< HEAD
 **`audio=True`**: Plays an attention-getting sound along with the visual stimulus to help capture and maintain the participant's focus.
 
 **`anim_type='zoom'`**: Makes the stimuli gently pulse in size to attract attention. You can also use `'trill'` for a rotating animation.
-=======
-**`audio=True`**: Plays an attention-getting sound along with the visual stimulus to help capture and maintain the participant's focus. **`anim_type='zoom'`**: Makes the stimuli gently pulse in size to attract attention. You can also use `'trill'` for a rotating animation.
->>>>>>> origin/main
 
 **`visualization_style='circles'`**: Displays the calibration results using dots at each point. You can also choose `'lines'` to show lines connecting the target to where the gaze landed.
 
-::: Advanced
-### Customizing Calibration Parameters
+::: {.Advanced title="Customize calibration"}
 
-Beyond the basic configuration, you can customize several aspects of the calibration procedure to match your experimental needs:
+You can customize several aspects of the calibration procedure to match your experimental needs, let's explore some of the key parameters:
+
+**`calibration_points`**: By default uses a 5-point pattern (corners plus center). You can specify `9` for higher precision, or pass a custom list of coordinates in height units for specialized configurations tailored to your stimulus regions.
 
 **`infant_stims`**: By default (`infant_stims=True`), DeToX uses a set of engaging animal cartoons included with the package. These work well for most infant studies, but you can provide a list of file paths to your own images if you prefer custom stimuli that better match your study's theme or participant age group.
 
+**`stim_size`**: This parameter controls the size of the calibration stimuli. You can choose `'small'` or `'big'` to adjust how large the images appear on screen. We strongly recommend using `'big'` for infant and child participants to make the targets more noticeable and easier to fixate on. On the other hand, `'small'` may be suitable for adult participants to achiveive higher calibration precision.
+
 **`audio`**: By default (`audio=True`), an attention-getting sound included with DeToX plays automatically when stimuli appear. Set this to `None` to disable audio entirely, or pass your own pre-loaded `psychopy.sound.Sound` object to use custom sounds that fit your experimental context.
 
-**`calibration_points`**: By default uses a 5-point pattern (corners plus center). You can specify `9` for higher precision, or pass a custom list of coordinates in height units for specialized configurations tailored to your stimulus regions.
+**Remeber** that while you can customize these parameters **you can also use default settings** to make the calibration process quick and easy. You could just call
+``` python
+ET_controller.calibrate()
+```
+to run a standard 5-point calibration with default settings.
 :::
+
 
 ### The Calibration Process
 

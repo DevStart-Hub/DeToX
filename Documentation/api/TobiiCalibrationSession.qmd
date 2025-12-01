@@ -7,6 +7,7 @@ TobiiCalibrationSession(
     infant_stims,
     audio=None,
     anim_type='zoom',
+    stim_size='big',
     visualization_style='lines',
     verbose=True,
 )

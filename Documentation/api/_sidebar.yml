@@ -37,7 +37,6 @@ website:
       section: Coordinate Conversion
     - contents:
       - api/NicePrint.qmd
-      - api/InfantStimuli.qmd
       section: Utilities
     - contents:
       - api/ETSettings.AnimationSettings.qmd
