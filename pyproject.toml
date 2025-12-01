@@ -6,7 +6,7 @@ build-backend = "setuptools.build_meta"
 # This is the PYPI name (what users pip install)
 name = "dvst-detox"
 
-version = "0.1.0b1"
+version = "0.2.0b1"
 description = "Lightweight Python wrapper around tobii-researcher"
 readme = "README.md"
 requires-python = ">=3.10"
@@ -25,4 +25,4 @@ authors = [
 packages = ["DeToX"]
 
 [tool.setuptools.package-data]
-DeToX = ["stimuli/*"]
+DeToX = ["stimuli/*.png", "stimuli/*.mp4", "stimuli/*.wav"]
