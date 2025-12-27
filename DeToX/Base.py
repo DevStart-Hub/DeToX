@@ -1384,13 +1384,13 @@ class ETracker:
         
         # --- Gaze data processing ---
         # Convert buffered data to DataFrame and prepare Events column
-        gaze_df = pd.DataFrame(list(save_gaze))
+        gaze_df = pd.DataFrame(save_gaze)
         gaze_df['Events'] = pd.array([''] * len(gaze_df), dtype='string')
         
         # --- Event data processing and merging ---
         if event_count > 0:
             # Convert events to DataFrame
-            events_df = pd.DataFrame(list(save_events))
+            events_df = pd.DataFrame(save_events)
             
             # --- Timestamp-based event merging ---
             # Find closest gaze sample for each event using binary search
