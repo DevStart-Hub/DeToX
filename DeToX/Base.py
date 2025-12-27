@@ -126,25 +126,41 @@ class ETracker:
         self._get_info(moment='connection')
         atexit.register(self._close)
 
-    def set_eyetracking_settings(self, desired_fps=None, desired_illumination_mode=None, use_gui = False,):
+        
+    def set_eyetracking_settings(self, desired_fps=None, desired_illumination_mode=None, use_gui=False, screen=-1, alwaysOnTop=True):
         """
         Configure and apply Tobii eye tracker settings.
 
         This method updates the eye tracker's sampling frequency (FPS) and illumination 
         mode, either programmatically or via a graphical interface. It ensures that 
         configuration changes are only made when the device is idle and connected.
+        
+        After applying settings, a summary is displayed showing which settings changed
+        and which remained the same.
 
         Parameters
         ----------
         desired_fps : int, optional
             Desired sampling frequency in Hz (e.g., 60, 120, 300). If None, the current 
-            frequency is retained.
+            frequency is retained. When `use_gui=True`, this value pre-populates the 
+            dialog box dropdown.
         desired_illumination_mode : str, optional
-            Desired illumination mode (e.g., 'Auto', 'Bright', 'Dark'). If None, the current 
-            illumination mode is retained.
+            Desired illumination mode (e.g., 'Auto', 'Bright', 'Dark'). If None, the 
+            current illumination mode is retained. When `use_gui=True`, this value 
+            pre-populates the dialog box dropdown.
         use_gui : bool, optional
-            If True, opens a PsychoPy GUI dialog that allows users to select settings 
-            interactively. Defaults to False.
+            If True, opens a PsychoPy GUI dialog with dropdown menus that allows users 
+            to select settings interactively. The dropdowns are pre-populated with values 
+            from `desired_fps` and `desired_illumination_mode` if provided, or current 
+            settings if None. Defaults to False.
+        screen : int, optional
+            Screen number where the GUI dialog is displayed. Only used when `use_gui=True`.
+            If -1 (default), the dialog appears on the primary screen. Use 0, 1, 2, etc. 
+            to specify other monitors. Ignored when `use_gui=False`.
+        alwaysOnTop : bool, optional
+            Whether the GUI dialog stays on top of other windows. Only used when 
+            `use_gui=True`. Default is True to prevent the dialog from being hidden 
+            behind experiment windows. Ignored when `use_gui=False`.
 
         Raises
         ------
@@ -152,40 +168,51 @@ class ETracker:
             If no physical eye tracker is connected or if the function is called in 
             simulation mode.
         ValueError
-            If the specified FPS or illumination mode is not supported by the connected device.
+            If the specified FPS or illumination mode is not supported by the connected 
+            device.
 
         Notes
         -----
         - Settings cannot be changed during active recording. If an ongoing recording 
         is detected, a non-blocking warning is issued and the function exits safely.
-        - When `use_gui=True`, a PsychoPy dialog window appears. It must be closed 
-        manually before the program continues.
+        - When `use_gui=True`, a PsychoPy dialog window appears with dropdown menus.
+        The `screen` and `alwaysOnTop` parameters control its display behavior.
         - After successfully applying new settings, the internal attributes `self.fps` 
         and `self.illum_mode` are updated to reflect the current device configuration.
+        - A summary of applied changes is displayed using NicePrint, showing which 
+        settings changed (with old → new values) and which remained unchanged.
         
         Examples
         --------
-        ```python
-        # Set frequency to 120 Hz programmatically
-        ET_controller.set_eyetracking_settings(desired_fps=120)
+        Set frequency to 120 Hz programmatically:
         
-        # Set illumination mode to 'Bright'
-        ET_controller.set_eyetracking_settings(desired_illumination_mode='Bright')
+        >>> ET_controller.set_eyetracking_settings(desired_fps=120)
+        ┌──────────────────────────────────────┐
+        │          Applied Changes             │
+        ├──────────────────────────────────────┤
+        │ - FPS: 60 Hz --> 120 Hz              │
+        │ - Illumination mode: kept at Dark    │
+        └──────────────────────────────────────┘
         
-        # Set both frequency and illumination mode
-        ET_controller.set_eyetracking_settings(desired_fps=120, desired_illumination_mode='Bright')
+        Set illumination mode to 'Bright':
         
-        # Use GUI to select settings interactively
-        ET_controller.set_eyetracking_settings(use_gui=True)
-        ```
+        >>> ET_controller.set_eyetracking_settings(desired_illumination_mode='Bright')
+        
+        Use GUI on secondary monitor without always-on-top:
+        
+        >>> ET_controller.set_eyetracking_settings(use_gui=True, screen=1, alwaysOnTop=False)
+        
+        Use GUI with 120 Hz pre-selected in dropdown on primary screen:
+        
+        >>> ET_controller.set_eyetracking_settings(desired_fps=120, use_gui=True)
         """
-        # Pre-condition Check 
+        # --- Pre-condition Check ---
 
         # Ensure we are not recording already, as settings cannot be changed mid-recording.
-        # Raise a non blocking warning instead of an error.
+        # Raise a non-blocking warning instead of an error.
         if self.recording:
             warnings.warn(
-                "|-- Ongoging recording!! --|\n"
+                "|-- Ongoing recording!! --|\n"
                 "Eye-tracking settings cannot be changed while recording is active.\n"
                 "Skipping set_eyetracking_settings() call.",
                 UserWarning
@@ -198,24 +225,45 @@ class ETracker:
                 "Cannot set eye-tracking settings in simulation mode. "
                 "This operation requires a physical Tobii eye tracker."
             )
+        
         # Ensure an eyetracker is connected before applying settings.
         if self.eyetracker is None:
             raise RuntimeError(
                 "No eyetracker connected. Cannot set eye-tracking settings."
             )
         
-        #  Apply Settings 
+        # --- Store old settings for summary ---
+        old_fps = self.fps
+        old_illum_mode = self.illum_mode
+        
+        # --- Apply Settings ---
         if use_gui:
             from psychopy import gui
 
-            # Prepare options for GUI selection
+            # Determine defaults
+            default_fps = desired_fps if desired_fps is not None else self.fps
+            default_illum = desired_illumination_mode if desired_illumination_mode is not None else self.illum_mode
+
+            # Build choice lists with default first, then other options
+            fps_choices = [default_fps] + [f for f in self.freqs if f != default_fps]
+            illum_choices = [default_illum] + [m for m in self.illum_modes if m != default_illum]
+
+            # Prepare options for GUI selection with dropdown menus
             desired_settings_dict = {
-                'Hz': self.freqs,
-                'Illumination mode': self.illum_modes  # Creates dropdown
+                'Hz': fps_choices,
+                'Illumination mode': illum_choices
             }
 
-            #-- Open GUI dialog for user to select settings ---
-            desired_settings = gui.DlgFromDict(desired_settings_dict, title='Possible Eye-Tracking Settings')
+            # Open GUI dialog for user to select settings
+            desired_settings = gui.DlgFromDict(
+                dictionary=desired_settings_dict, 
+                title='Eye-Tracking Settings',
+                order=['Hz', 'Illumination mode'],
+                tip={'Hz': f'Available: {self.freqs}', 
+                    'Illumination mode': f'Available: {self.illum_modes}'},
+                screen=screen,
+                alwaysOnTop=alwaysOnTop
+            )
             
             # Handle cancellation
             if not desired_settings.OK:
@@ -227,36 +275,45 @@ class ETracker:
             desired_illumination_mode = desired_settings_dict['Illumination mode']
 
         else:
-            # Set the desired FPS and illumination mode
-            if desired_fps is None:
-                print(f"|-- No fps change, still using {self.fps} --|")
-            else:
-                if desired_fps not in self.freqs :
-                    raise ValueError(
-                        f"Desired FPS {desired_fps} not supported. "
-                        f"Supported frequencies: {self.freqs}"
-                    )
+            # Validate desired FPS if provided
+            if desired_fps is not None and desired_fps not in self.freqs:
+                raise ValueError(
+                    f"Desired FPS {desired_fps} not supported. "
+                    f"Supported frequencies: {self.freqs}"
+                )
             
-            if desired_illumination_mode is None:
-                print(f"|-- No illumination mode change, still using {self.illum_mode} --|")
-            else:
-                if desired_illumination_mode not in self.illum_modes:
-                    raise ValueError(
-                        f"Desired illumination mode '{desired_illumination_mode}' not supported. "
-                        f"Supported modes: {self.illum_modes}"
-                    )
-        if desired_fps  != self.fps:
+            # Validate desired illumination mode if provided
+            if desired_illumination_mode is not None and desired_illumination_mode not in self.illum_modes:
+                raise ValueError(
+                    f"Desired illumination mode '{desired_illumination_mode}' not supported. "
+                    f"Supported modes: {self.illum_modes}"
+                )
+        
+        # --- Apply changes and build summary ---
+        changes = []
+        
+        if desired_fps is not None and desired_fps != self.fps:
             # Update eye tracker frequency 
             self.eyetracker.set_gaze_output_frequency(desired_fps)
-
             # Update internal FPS attribute 
             self.fps = desired_fps
+            changes.append(f"- FPS: {old_fps} Hz --> {self.fps} Hz")
+        else:
+            changes.append(f"- FPS: kept at {self.fps} Hz")
 
-        if desired_illumination_mode != self.illum_mode:
-            #  Update eye tracker illumination mode 
-            self.eyetracker.set_illumination_mode(desired_illumination_mode)
-            #  Update internal illumination mode attribute
+        if desired_illumination_mode is not None and desired_illumination_mode != self.illum_mode:
+            # Update eye tracker illumination mode 
+            self.eyetracker.set_eye_tracking_mode(desired_illumination_mode)
+            # Update internal illumination mode attribute
             self.illum_mode = desired_illumination_mode
+            changes.append(f"- Illumination mode: {old_illum_mode} --> {self.illum_mode}")
+        else:
+            changes.append(f"- Illumination mode: kept at {self.illum_mode}")
+        
+        # --- Print summary ---
+        summary = "\n".join(changes)
+        NicePrint(summary, title="Applied Changes")
+
 
     # --- Calibration Methods ---
 
