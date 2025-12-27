@@ -1100,6 +1100,9 @@ class ETracker:
         # Create output file structure and determine format
         self._prepare_recording(filename)
         
+        # --- Recording info display ---  #
+        self._get_info(moment='recording')
+
         # --- Data collection startup ---
         # Configure and start appropriate data collection method
         if self.simulate:
