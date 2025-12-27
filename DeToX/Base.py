@@ -434,13 +434,13 @@ class ETracker:
                 
                 # --- Draw left eye position ---
                 if lv:
-                    lx_conv, ly_conv = Coords.get_psychopy_pos_from_trackbox(self.win, [lx, ly], "height")
+                    lx_conv, ly_conv = Coords.get_psychopy_pos_from_user_position(self.win, [lx, ly], "height")
                     leye.setPos((round(lx_conv * 0.25, 4), round(ly_conv * 0.2 + 0.4, 4)))
                     leye.draw()
                 
                 # --- Draw right eye position ---
                 if rv:
-                    rx_conv, ry_conv = Coords.get_psychopy_pos_from_trackbox(self.win, [rx, ry], "height")
+                    rx_conv, ry_conv = Coords.get_psychopy_pos_from_user_position(self.win, [rx, ry], "height")
                     reye.setPos((round(rx_conv * 0.25, 4), round(ry_conv * 0.2 + 0.4, 4)))
                     reye.draw()
                 
