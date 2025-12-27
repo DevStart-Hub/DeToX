@@ -1131,23 +1131,60 @@ class ETracker:
             core.wait(1)
             self.recording = True
 
-    def stop_recording(self):
+    def stop_recording(self, data_check=True):
         """
         Stop gaze data recording and finalize session.
         
         Performs complete shutdown: stops data collection, cleans up resources,
-        saves all buffered data, and reports session summary. Handles both
-        simulation and real eye tracker modes appropriately.
+        saves all buffered data, and optionally performs a comprehensive data
+        quality check. Handles both simulation and real eye tracker modes appropriately.
+        
+        Parameters
+        ----------
+        data_check : bool, optional
+            If True (default), performs data quality check by reading the saved file
+            and analyzing timestamp gaps to detect dropped samples. If False, skips
+            the quality check and completes faster. Default True.
         
         Raises
-        -----
+        ------
         UserWarning
             If recording is not currently active.
             
         Notes
         -----
-        All pending data in buffers is automatically saved before completion.
-        Recording duration is measured from start_recording() call.
+        - All pending data in buffers is automatically saved before completion
+        - Recording duration is measured from start_recording() call
+        - Quality check reads the complete saved file to analyze gaps between ALL samples,
+        including potential gaps between save_data() calls
+        - At 120Hz, each sample should be ~8333μs apart; gaps significantly larger
+        indicate dropped samples
+        
+        Examples
+        --------
+        ```python
+            # Standard usage with quality check
+            ET_controller.start_recording('data.h5')
+            # ... run experiment ...
+            ET_controller.stop_recording()  # Shows quality report
+            
+            # Skip quality check for faster shutdown
+            ET_controller.stop_recording(data_check=False)
+            
+            # Expected output with quality check:
+            # ╔════════════════════════════╗
+            # ║  Recording Complete        ║
+            # ╠════════════════════════════╣
+            # ║ Data collection lasted     ║
+            # ║ approximately 120.45 sec   ║
+            # ║ Data has been saved to     ║
+            # ║ experiment.h5              ║
+            # ║                            ║
+            # ║ Data check Report:         ║
+            # ║   - Total samples: 14454   ║
+            # ║   - Dropped samples: 0     ║
+            # ╚════════════════════════════╝
+        ```
         """
         # --- State validation ---
         # Ensure recording is actually active before attempting to stop
@@ -1179,20 +1216,32 @@ class ETracker:
             # Unsubscribe from Tobii SDK data stream
             self.eyetracker.unsubscribe_from(tr.EYETRACKER_GAZE_DATA, self._on_gaze_data)
         
-        # --- Data finalization ---
-        # Save all remaining buffered data to file
+        # --- Save final batch ---
         self.save_data()
         
+        # --- Quality check ---
+        if data_check:
+            quality = self._check_continuity()
+        else:
+            quality = None
+        
         # --- Session summary ---
-        # Calculate total recording duration and display results
         duration_seconds = self.experiment_clock.getTime()
         
-        NicePrint(
+        summary = (
             f'Data collection lasted approximately {duration_seconds:.2f} seconds\n'
-            f'Data has been saved to {self.filename}',
-            title="Recording Complete",
-            verbose=self.verbose
+            f'Data has been saved to {self.filename}\n'
         )
+        
+        if quality:
+            summary += (
+                f'\nData check Report:\n'
+                f'  - Total samples: {quality["total_samples"]}\n'
+                f'  - Dropped samples: {quality["dropped_samples"]}\n'
+            )
+        
+        NicePrint(summary, title="Recording Complete")
+
 
     def record_event(self, label):
         """
@@ -1313,8 +1362,7 @@ class ETracker:
         start_saving = core.getTime()
         
         # --- Ensure event-gaze synchronization ---
-        # Wait for 4 samples to ensure events have corresponding gaze data
-        core.wait(4/self.fps)
+        self._check_gaze_samples()
         
         # --- Thread-safe buffer swap (O(1) operation) ---
         # Swap buffers under lock to minimize thread blocking time
@@ -1578,6 +1626,104 @@ class ETracker:
         # Stop recording if active (includes data saving and cleanup)
         if self.recording:
             self.stop_recording()
+
+
+    def _check_continuity(self):
+        """
+        Analyze complete saved data file for dropped samples.
+        
+        Reads all timestamps from the saved file and calculates the intervals
+        between consecutive samples. Detects gaps larger than expected based
+        on the eye tracker's sampling frequency, accounting for natural timing
+        jitter with 50% tolerance.
+        
+        This method is called automatically by stop_recording() if data_check=True.
+        It performs a comprehensive analysis of the ENTIRE recording session,
+        including potential gaps between save_data() calls that wouldn't be
+        detected by incremental checking.
+        
+        Returns
+        -------
+        dict or None
+            Dictionary containing quality metrics:
+            - 'total_samples' (int): Number of samples successfully collected
+            - 'dropped_samples' (int): Estimated number of dropped samples based
+            on timestamp gaps
+            Returns None if file has fewer than 2 samples or cannot be read.
+        
+        Notes
+        -----
+        - Only reads the timestamp column for efficiency
+        - Works with both HDF5 and CSV formats
+        - Dropped sample estimation: gaps larger than expected_interval * 1.5
+        are flagged, and the number of missing samples is calculated based
+        on gap duration
+        - At 120Hz: expected interval = 8333μs, tolerance = ±4167μs
+        - At 60Hz: expected interval = 16667μs, tolerance = ±8333μs
+        """
+        # --- Read timestamps from saved file ---
+        if self.file_format == 'hdf5':
+            with tables.open_file(self.filename, mode='r') as f:
+                timestamps = f.root.gaze.col('system_time_stamp')
+        elif self.file_format == 'csv':
+            # Read only timestamp column for efficiency
+            df = pd.read_csv(self.filename, usecols=['system_time_stamp'])
+            timestamps = df['system_time_stamp'].values
+        
+        if len(timestamps) < 2:
+            return None
+        
+        # --- Calculate quality metrics ---
+        expected_interval_us = 1_000_000 / self.fps
+        intervals = np.diff(timestamps)
+        
+        # Detect gaps (allow 50% tolerance for jitter)
+        tolerance = expected_interval_us * 0.5
+        gaps = intervals > (expected_interval_us + tolerance)
+        
+        # Estimate dropped samples
+        dropped_samples = int(np.sum((intervals[gaps] / expected_interval_us) - 1))
+        total_samples = len(timestamps)
+        
+        return {
+            'total_samples': total_samples,
+            'dropped_samples': dropped_samples
+        }
+
+    def _check_gaze_samples(self):
+        """
+        Wait until gaze data has caught up to the last recorded event.
+        
+        Ensures that the last event has corresponding gaze samples by checking
+        if the most recent gaze timestamp is at or past the most recent event
+        timestamp. Releases GIL during waits to allow callbacks to continue
+        collecting data.
+        
+        Notes
+        -----
+        - Returns immediately if no events are buffered
+        - Each wait releases GIL, allowing callback thread to run
+        - Typically completes in 1-2 sample intervals
+        """
+        if len(self.event_data) == 0:
+            return  # No events to sync
+
+        while True:
+
+            # Thread-safe peek at last timestamps
+            with self._buf_lock:
+                if len(self.gaze_data) == 0:
+                    break  # No gaze data yet, can't sync
+                
+                last_event_time = self.event_data[-1]['system_time_stamp']
+                last_gaze_time = self.gaze_data[-1]['system_time_stamp']
+            
+            # If gaze has caught up to events, we're done
+            if last_gaze_time >= last_event_time:
+                break
+            
+            # Wait for one sample interval (releases GIL)
+            core.wait(1 / self.fps)
 
 
     def _get_info(self, moment='connection'):
