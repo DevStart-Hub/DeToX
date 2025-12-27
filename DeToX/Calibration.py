@@ -633,27 +633,22 @@ class BaseCalibrationSession:
             
             self.win.flip()
     
- 
-    def _create_calibration_result_image(self, sample_data):
+    
+    def _create_calibration_result_image(self, calibration_points, sample_data):
         """
         Common function to create calibration result visualization.
         
-        ALWAYS draws target circles for ALL calibration points from 
-        self.calibration_points, then draws sample lines only for points
-        that have valid data in sample_data.
+        Generates a visual representation of calibration quality by drawing
+        lines from each target to collected gaze samples. Uses color coding
+        to distinguish left eye, right eye, and mouse data.
         
         Parameters
         ----------
+        calibration_points : list of (float, float)
+            List of calibration target coordinates in window units.
         sample_data : dict
-            Dictionary mapping point indices to lists of sample lines:
-            {
-                point_idx: [
-                    (sample_pos_pixels, color),
-                    (sample_pos_pixels, color),
-                    ...
-                ]
-            }
-            Points not in this dict will show circles only (no lines).
+            Dictionary mapping point indices to lists of (target_pos, sample_pos, color)
+            tuples. Each tuple represents one gaze sample with its deviation from target.
             
         Returns
         -------
@@ -661,70 +656,55 @@ class BaseCalibrationSession:
             PsychoPy image stimulus containing the rendered calibration results.
         """
         # --- Image Canvas Creation ---
+        # Create blank RGBA image matching window size (transparent background like Tobii)
         img = Image.new("RGBA", tuple(self.win.size))
         img_draw = ImageDraw.Draw(img)
         
-        # --- Configuration ---
+        # --- Line Width Configuration ---
+        # Convert plot line width from height units to pixels
         line_width_pixels = cfg.ui_sizes.plot_line * self.win.size[1]
+        
+        # --- Target Circle Configuration ---
+        # Convert target circle size and line width from height units to pixels
         target_circle_radius_pixels = cfg.ui_sizes.target_circle * self.win.size[1]
         target_circle_width_pixels = cfg.ui_sizes.target_circle_width * self.win.size[1]
         
-        # --- STEP 1: Draw Samples (Style-Dependent) ---
-        
-        ## Warning and default to circles if unknown style
-        if self.visualization_style not in ['lines', 'circles']:
-            warnings.warn(
-                f"Unknown visualization style: '{self.visualization_style}'. "
-                f"Defaulting to 'circles'.",
-                UserWarning
-            )
-            self.visualization_style = 'circles'
-
-        ## LINES STYLE: Draw lines from targets to samples
-        elif self.visualization_style == 'lines':
-            for point_idx, samples in sample_data.items():
-                if point_idx < len(self.calibration_points):
-                    target_pos = self.calibration_points[point_idx]
-                    target_pix = psychopy_to_pixels(self.win, target_pos)
-                    
-                    for sample_pix, line_color in samples:
-                        img_draw.line(
-                            (target_pix[0], target_pix[1], 
-                            sample_pix[0], sample_pix[1]),
-                            fill=line_color,
-                            width=max(1, int(line_width_pixels))
-                        )
-       
-        ## CIRCLES STYLE: Draw filled circles at sample positions
-        elif self.visualization_style == 'circles':
-            sample_marker_radius = cfg.ui_sizes.sample_marker * self.win.size[1]
-            for point_idx, samples in sample_data.items():
-                for sample_pix, fill_color in samples:
-                    img_draw.ellipse(
-                        (sample_pix[0] - sample_marker_radius,
-                        sample_pix[1] - sample_marker_radius,
-                        sample_pix[0] + sample_marker_radius,
-                        sample_pix[1] + sample_marker_radius),
-                        fill=fill_color,
-                        outline=None
+        # --- Calibration Data Rendering ---
+        # Draw calibration data for each point
+        for point_idx, samples in sample_data.items():
+            if point_idx < len(calibration_points):
+                # --- Target Position Processing ---
+                target_pos = calibration_points[point_idx]
+                target_pix = psychopy_to_pixels(self.win, target_pos)
+                
+                # --- Target Circle Drawing ---
+                # Draw target circle with configurable size and line width
+                img_draw.ellipse(
+                    (target_pix[0] - target_circle_radius_pixels, 
+                    target_pix[1] - target_circle_radius_pixels,
+                    target_pix[0] + target_circle_radius_pixels, 
+                    target_pix[1] + target_circle_radius_pixels),
+                    outline=cfg.colors.target_outline,
+                    width=max(1, int(target_circle_width_pixels))
+                )
+                
+                # --- Vectorized Sample Position Conversion ---
+                # Extract all sample positions and convert at once (efficient!)
+                sample_positions = np.array([sample_pos for _, sample_pos, _ in samples])
+                samples_pix = psychopy_to_pixels(self.win, sample_positions)
+                
+                # --- Sample Lines Drawing ---
+                # Draw lines from target to samples using converted positions
+                for i, (_, _, line_color) in enumerate(samples):
+                    sample_pix = samples_pix[i]
+                    img_draw.line(
+                        (target_pix[0], target_pix[1], sample_pix[0], sample_pix[1]),
+                        fill=line_color,
+                        width=max(1, int(line_width_pixels))
                     )
-
-        # --- STEP 2: Draw ALL Target Circles (Always) ---
-        for point_idx, target_pos in enumerate(self.calibration_points):
-            # Convert to pixels
-            target_pix = psychopy_to_pixels(self.win, target_pos)
-            
-            # Draw target circle
-            img_draw.ellipse(
-                (target_pix[0] - target_circle_radius_pixels, 
-                target_pix[1] - target_circle_radius_pixels,
-                target_pix[0] + target_circle_radius_pixels, 
-                target_pix[1] + target_circle_radius_pixels),
-                outline=cfg.colors.target_outline,
-                width=max(1, int(target_circle_width_pixels))
-            )
-
-
+        
+        # --- Image Stimulus Creation ---
+        # Wrap in SimpleImageStim and return
         return visual.SimpleImageStim(self.win, img, autoLog=False)
 
 
