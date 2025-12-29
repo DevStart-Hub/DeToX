@@ -31,15 +31,15 @@ class ETracker:
     This class is the central hub for your eye-tracking experiment. Instead of managing low-level SDK functions, the TobiiController provides a clean, unified workflow for key experimental tasks. It is designed to "detoxify" the process, abstracting away complex boilerplate code so you can focus on your research.
 
     Key features include:
-    - **Experiment Control**: Start, stop, and manage eye-tracking recordings with simple method calls.
-    - **Data Management**: Automatically save recorded gaze data to a specified file format.
-    - **Calibration**: Easily run a calibration procedure or load an existing calibration file to prepare the eye-tracker.
-    - **Seamless Integration**: Built specifically to integrate with PsychoPy's experimental loop, making it a natural fit for your existing research designs.
+     - **Experiment Control**: Start, stop, and manage eye-tracking recordings with simple method calls.
+     - **Data Management**: Automatically save recorded gaze data to a specified file format.
+     - **Calibration**: Easily run a calibration procedure or load an existing calibration file to prepare the eye-tracker.
+     - **Seamless Integration**: Built specifically to integrate with PsychoPy's experimental loop, making it a natural fit for your existing research designs.
 
     This class is intended to be the first object you instantiate in your experiment script. It provides a minimal yet powerful set of methods that are essential for conducting a reliable and reproducible eye-tracking study.
     """
 
-    # --- Core Lifecycle Methods ---
+    # --- Core Methods ---
 
     def __init__(self, win, etracker_id=0, simulate=False, verbose=True):
         """
@@ -130,14 +130,14 @@ class ETracker:
     def set_eyetracking_settings(self, desired_fps=None, desired_illumination_mode=None, use_gui=False, screen=-1, alwaysOnTop=True):
         """
         Configure and apply Tobii eye tracker settings.
-
+        
         This method updates the eye tracker's sampling frequency (FPS) and illumination 
         mode, either programmatically or via a graphical interface. It ensures that 
         configuration changes are only made when the device is idle and connected.
         
         After applying settings, a summary is displayed showing which settings changed
         and which remained the same.
-
+        
         Parameters
         ----------
         desired_fps : int, optional
@@ -161,7 +161,7 @@ class ETracker:
             Whether the GUI dialog stays on top of other windows. Only used when 
             `use_gui=True`. Default is True to prevent the dialog from being hidden 
             behind experiment windows. Ignored when `use_gui=False`.
-
+        
         Raises
         ------
         RuntimeError
@@ -170,7 +170,7 @@ class ETracker:
         ValueError
             If the specified FPS or illumination mode is not supported by the connected 
             device.
-
+        
         Notes
         -----
         - Settings cannot be changed during active recording. If an ongoing recording 
@@ -180,31 +180,53 @@ class ETracker:
         - After successfully applying new settings, the internal attributes `self.fps` 
         and `self.illum_mode` are updated to reflect the current device configuration.
         - A summary of applied changes is displayed using NicePrint, showing which 
-        settings changed (with old → new values) and which remained unchanged.
+        settings changed (with old --> new values) and which remained unchanged.
         
         Examples
         --------
-        Set frequency to 120 Hz programmatically:
+        ### Programmatic Settings
         
-        >>> ET_controller.set_eyetracking_settings(desired_fps=120)
-        ┌──────────────────────────────────────┐
-        │          Applied Changes             │
-        ├──────────────────────────────────────┤
-        │ - FPS: 60 Hz --> 120 Hz              │
-        │ - Illumination mode: kept at Dark    │
-        └──────────────────────────────────────┘
+        #### Set frequency to 120 Hz
+        ```python
+                ET_controller.set_eyetracking_settings(desired_fps=120)
+        ```
         
-        Set illumination mode to 'Bright':
+        #### Set illumination mode to 'Bright'
+        ```python
+            ET_controller.set_eyetracking_settings(desired_illumination_mode='Bright')
+        ```
         
-        >>> ET_controller.set_eyetracking_settings(desired_illumination_mode='Bright')
+        #### Set both frequency and illumination mode
+        ```python
+            ET_controller.set_eyetracking_settings(
+                desired_fps=120,
+                desired_illumination_mode='Bright'
+            )
+        ```
         
-        Use GUI on secondary monitor without always-on-top:
+        ### GUI-Based Settings
         
-        >>> ET_controller.set_eyetracking_settings(use_gui=True, screen=1, alwaysOnTop=False)
+        #### Open GUI with default settings
+        ```python
+            ET_controller.set_eyetracking_settings(use_gui=True)
+        ```
         
-        Use GUI with 120 Hz pre-selected in dropdown on primary screen:
+        #### GUI on secondary monitor without always-on-top
+        ```python
+            ET_controller.set_eyetracking_settings(
+                use_gui=True,
+                screen=1,
+                alwaysOnTop=False
+            )
+        ```
         
-        >>> ET_controller.set_eyetracking_settings(desired_fps=120, use_gui=True)
+        #### GUI with pre-selected 120 Hz in dropdown
+        ```python
+            ET_controller.set_eyetracking_settings(
+                desired_fps=120,
+                use_gui=True
+            )
+        ```
         """
         # --- Pre-condition Check ---
 
@@ -352,34 +374,52 @@ class ETracker:
         
         Examples
         --------
+        ### Basic Usage
+        
+        #### Default with built-in video
         ```python
-        # Basic usage with built-in video
-        ET_controller.show_status()
+            ET_controller.show_status()
+        ```
         
-        # No background video
-        ET_controller.show_status(video_help=False)
+        #### Without background video
+        ```python
+            ET_controller.show_status(video_help=False)
+        ```
         
-        # Custom exit key
-        ET_controller.show_status(decision_key='return')
+        ### Customization Options
         
-        # Use custom video
-        from psychopy import visual
-        my_video = visual.MovieStim(
-            win, 
-            'instructions.mp4', 
-            size=(0.8, 0.6), 
-            pos=(0, -0.1)
-        )
-        ET_controller.show_status(video_help=my_video)
+        #### Custom exit key
+        ```python
+            ET_controller.show_status(decision_key='return')
+        ```
         
-        # Complete workflow: position participant before calibration
-        ET_controller.show_status()  # Position participant
-        success = ET_controller.calibrate(5)  # Run calibration
-        if success:
-            ET_controller.start_recording('data.h5')  # Start recording
+        #### Custom video with specific size and position
+        ```python
+            from psychopy import visual
+            my_video = visual.MovieStim(
+                win, 
+                'instructions.mp4', 
+                size=(0.8, 0.6), 
+                pos=(0, -0.1)
+            )
+            ET_controller.show_status(video_help=my_video)
+        ```
+        
+        ### Complete Workflows
+        
+        #### Position participant before calibration
+        ```python
+            # Position participant
+            ET_controller.show_status()
+            
+            # Run calibration
+            success = ET_controller.calibrate(5)
+            
+            # Start recording if calibration successful
+            if success:
+                ET_controller.start_recording('data.h5')
         ```
         """
-
         # --- 1. Instruction Display ---
         instructions_text = f"""Showing participant position:
 
@@ -558,20 +598,22 @@ class ETracker:
         ----------
         calibration_points : int or list of tuple, optional
             Calibration pattern specification. 
-            Use **5** for the standard 5-point pattern (4 corners + center; default). 
-            Use **9** for a comprehensive 9-point pattern (3x3 grid). 
-            Alternatively, provide a **list of tuples** with custom points in normalized 
-            coordinates [-1, 1]. Example: ``[(-0.4, 0.4), (0.4, 0.4), (0.0, 0.0)]``.
+
+             - Use **5** for the standard 5-point pattern (4 corners + center; default). 
+             - Use **9** for a comprehensive 9-point pattern (3x3 grid). 
+             - Alternatively, provide a **list of tuples** with custom points in normalized 
+             - coordinates [-1, 1]. Example: ``[(-0.4, 0.4), (0.4, 0.4), (0.0, 0.0)]``.
 
         infant_stims : True or str or list or visual stimulus, optional
-            Calibration stimulus specification. Accepts multiple formats: 
-            **True** uses built-in stimuli from the package (default); 
-            **False** uses a default blue square; 
-            a **str** specifies a single image file path (e.g., ``'stimulus.png'``); 
-            a **list of str** provides multiple image paths; 
-            a **PsychoPy visual stimulus** (e.g., Circle, Rect, Polygon, ImageStim, ShapeStim) 
+            Calibration stimulus specification. Accepts multiple formats
+
+             - **True** uses built-in stimuli from the package (default); 
+             - **False** uses a default blue square; 
+             - a **str** specifies a single image file path (e.g., ``'stimulus.png'``); 
+             - a **list of str** provides multiple image paths; 
+             - a **PsychoPy visual stimulus** (e.g., Circle, Rect, Polygon, ImageStim, ShapeStim) 
             can be used as a single object; 
-            or a **list of visual stimuli** may be provided. 
+             - or a **list of visual stimuli** may be provided. 
             If fewer stimuli than calibration points are given, they are automatically 
             repeated and optionally shuffled to cover all points. 
             Supported types: ImageStim, Circle, Rect, Polygon, ShapeStim. 
@@ -582,29 +624,31 @@ class ETracker:
             repetition. Helps prevent habituation to stimulus sequence. Default is True.
 
         audio : True or False or None or psychopy.sound.Sound, optional
-            Controls attention-getting audio during calibration. 
-            **True** uses the built-in looping calibration sound (default). 
-            **False** or **None** disables audio. 
+            Controls attention-getting audio during calibration:
+
+             -**True** uses the built-in looping calibration sound (default). 
+             -**False** or **None** disables audio. 
             A **psychopy.sound.Sound** object may be provided for custom audio 
             (ensure it is configured appropriately, e.g., ``loops=-1`` for continuous looping). 
             Audio plays when a calibration point is selected and fades out during data collection.
 
         anim_type : {'zoom', 'trill'}, optional
-            Animation style for calibration stimuli. 
-            **'zoom'** applies smooth size oscillation using a cosine function (default). 
-            **'trill'** uses rapid rotation with intermittent pauses.
+            Animation style for calibration stimuli:
+
+             - **'zoom'** applies smooth size oscillation using a cosine function (default). 
+             - **'trill'** uses rapid rotation with intermittent pauses.
 
         stim_size : {'big', 'small'}, optional
-            Size preset for calibration stimuli. 
-            **'big'** uses larger stimuli recommended for infants and children (default). 
-            **'small'** uses smaller stimuli for adults.
+            Size preset for calibration stimuli:
+
+             - **'big'** uses larger stimuli recommended for infants and children (default). 
+             -**'small'** uses smaller stimuli for adults.
 
         visualization_style : {'circles', 'lines'}, optional
-            How to display calibration results. 
-            **'circles'** shows small filled circles at each gaze sample position. 
-            **'lines'** draws lines from targets to gaze samples. 
-            In Tobii mode, green indicates the left eye and red the right eye; 
-            in simulation mode, orange represents mouse position.
+            How to display calibration results:
+
+             - **'circles'** shows small filled circles at each gaze sample position. 
+             - **'lines'** draws lines from targets to gaze samples. 
 
         Returns
         -------
@@ -623,101 +667,106 @@ class ETracker:
 
         Examples
         --------
-        Basic usage with built-in stimuli:
+        ### Calibration Point Patterns
+        
+        #### Standard 5-point calibration
         ```python
-        controller.calibrate(5)
+            controller.calibrate(5)
         ```
-
-        9-point calibration:
+        
+        #### Comprehensive 9-point calibration
         ```python
-        controller.calibrate(9)
+            controller.calibrate(9)
         ```
-
-        Custom calibration points:
+        
+        #### Custom calibration points
         ```python
-        custom_points = [
-            (0.0, 0.0),      # Center
-            (-0.5, 0.5),     # Top-left
-            (0.5, 0.5),      # Top-right
-            (-0.5, -0.5),    # Bottom-left
-            (0.5, -0.5)      # Bottom-right
-        ]
-        controller.calibrate(custom_points)
+            custom_points = [
+                (0.0, 0.0),      # Center
+                (-0.5, 0.5),     # Top-left
+                (0.5, 0.5),      # Top-right
+                (-0.5, -0.5),    # Bottom-left
+                (0.5, -0.5)      # Bottom-right
+            ]
+            controller.calibrate(custom_points)
         ```
-
-        Single image file:
+        
+        ### Stimulus Options
+        
+        #### Single image file
         ```python
-        controller.calibrate(5, infant_stims='my_stimulus.png')
+            controller.calibrate(5, infant_stims='my_stimulus.png')
         ```
-
-        Multiple image files:
+        
+        #### Multiple image files
         ```python
-        controller.calibrate(5, infant_stims=['stim1.png', 'stim2.png', 'stim3.png'])
+            controller.calibrate(5, infant_stims=['stim1.png', 'stim2.png', 'stim3.png'])
         ```
-
-        Single shape stimulus:
+        
+        #### Single shape stimulus
         ```python
-        red_square = visual.Rect(win, size=0.08, fillColor='red', units='height')
-        controller.calibrate(5, infant_stims=red_square)
+            red_square = visual.Rect(win, size=0.08, fillColor='red', units='height')
+            controller.calibrate(5, infant_stims=red_square)
         ```
-
-        Multiple shape stimuli:
+        
+        #### Multiple shape stimuli
         ```python
-        shapes = [
-            visual.Circle(win, radius=0.04, fillColor='red', units='height'),
-            visual.Rect(win, size=0.08, fillColor='blue', units='height'),
-            visual.Polygon(win, edges=6, radius=0.04, fillColor='green', units='height')
-        ]
-        controller.calibrate(5, infant_stims=shapes, shuffle=True)
+            shapes = [
+                visual.Circle(win, radius=0.04, fillColor='red', units='height'),
+                visual.Rect(win, size=0.08, fillColor='blue', units='height'),
+                visual.Polygon(win, edges=6, radius=0.04, fillColor='green', units='height')
+            ]
+            controller.calibrate(5, infant_stims=shapes, shuffle=True)
         ```
-
-        Custom audio:
+        
+        ### Animation and Audio
+        
+        #### Custom audio
         ```python
-        from psychopy import sound
-        my_sound = sound.Sound('custom_beep.wav', loops=-1)
-        controller.calibrate(5, audio=my_sound)
+            from psychopy import sound
+            my_sound = sound.Sound('custom_beep.wav', loops=-1)
+            controller.calibrate(5, audio=my_sound)
         ```
-
-        No audio with trill animation:
+        
+        #### Trill animation without audio
         ```python
-        controller.calibrate(5, audio=False, anim_type='trill')
+            controller.calibrate(5, audio=False, anim_type='trill')
         ```
-
-        Lines visualization style:
+        
+        ### Visualization Styles
+        
+        #### Lines visualization
         ```python
-        controller.calibrate(5, visualization_style='lines')
+            controller.calibrate(5, visualization_style='lines')
         ```
-
-        Complete custom workflow:
+        
+        #### Circles visualization with small stimuli
         ```python
-        # Position participant
-        controller.show_status()
-
-        # Custom calibration
-        success = controller.calibrate(
-            calibration_points=9,
-            infant_stims=['stim1.png', 'stim2.png'],
-            shuffle=True,
-            audio=True,
-            anim_type='zoom',
-            visualization_style='circles'
-        )
-
-        if success:
-            controller.start_recording('data.h5')
-            # ... run experiment ...
-            controller.stop_recording()
+            controller.calibrate(5, stim_size='small', visualization_style='circles')
         ```
-
-        Notes
-        -----
-        - Calibration uses normalized coordinates [-1, 1] where (0, 0) is screen center.
-        - Stimuli are automatically repeated if fewer than calibration points.
-        - Animation preserves stimulus aspect ratio automatically.
-        - In simulation mode, use mouse to simulate gaze position.
-        - Press number keys (1–9) to select points, SPACE to collect data.
-        - Press ENTER to view results, ESC to abort.
-        - After viewing results: ENTER accepts, numbers + SPACE retries selected points.
+        
+        ### Complete Workflows
+        
+        #### Full calibration workflow
+        ```python
+            # Position participant
+            controller.show_status()
+            
+            # Run calibration
+            success = controller.calibrate(
+                calibration_points=9,
+                infant_stims=['stim1.png', 'stim2.png'],
+                shuffle=True,
+                audio=True,
+                anim_type='zoom',
+                visualization_style='circles'
+            )
+            
+            if success:
+                controller.start_recording('data.h5')
+                # ... run experiment ...
+                controller.stop_recording()
+        ```
         """
         # --- Visualization Style Validation ---
         valid_styles = ['lines', 'circles']
@@ -865,14 +914,14 @@ class ETracker:
         
         return success
 
-    def save_calibration(self, filename=None, use_gui=False):
+    def save_calibration(self, filename=None, use_gui=False, screen=-1, alwaysOnTop=True):
         """
         Save the current calibration data to a file.
-
+        
         Retrieves the active calibration data from the connected Tobii eye tracker
         and saves it as a binary file. This can be reloaded later with
         `load_calibration()` to avoid re-calibrating the same participant.
-
+        
         Parameters
         ----------
         filename : str | None, optional
@@ -883,26 +932,46 @@ class ETracker:
         use_gui : bool, optional
             If True, opens a file-save dialog (Psychopy) where the user chooses the path.
             The suggested name respects the logic above. Default False.
-
+        screen : int, optional
+            Screen number where the GUI dialog is displayed. Only used when `use_gui=True`.
+            If -1 (default), the dialog appears on the primary screen. Use 0, 1, 2, etc. 
+            to specify other monitors. Ignored when `use_gui=False`.
+        alwaysOnTop : bool, optional
+            Whether the GUI dialog stays on top of other windows. Only used when 
+            `use_gui=True`. Default is True to prevent the dialog from being hidden 
+            behind experiment windows. Ignored when `use_gui=False`.
+        
         Returns
         -------
         bool
             True if saved successfully; False if cancelled, no data available, in
             simulation mode, or on error.
-
+        
         Notes
         -----
         - In simulation mode, saving is skipped and a warning is issued.
         - If `use_gui` is True and the dialog is cancelled, returns False.
-
+        
         Examples
         --------
+        #### Save with default timestamped name
         ```python
-        # Save with default timestamped name
         ET_controller.save_calibration()
-
-        ### Save with specified filename
+        ```
+        
+        #### Save with specified filename
+        ```python
         ET_controller.save_calibration('subject_01_calib.dat')
+        ```
+        
+        #### Use GUI to choose save location
+        ```python
+        ET_controller.save_calibration(use_gui=True)
+        ```
+        
+        #### GUI on secondary monitor
+        ```python
+        ET_controller.save_calibration(use_gui=True, screen=1, alwaysOnTop=False)
         ```
         """
         # --- Simulation guard ---
@@ -940,7 +1009,9 @@ class ETracker:
                     prompt='Save calibration data as…',
                     # Psychopy expects a string path; supply our suggested default
                     initFilePath=str(path),
-                    allowed='*.dat'
+                    allowed='*.dat',
+                    screen=screen,
+                    alwaysOnTop=alwaysOnTop
                 )
                 if not save_path:
                     print("|-- Save calibration cancelled by user. --|")
@@ -966,7 +1037,7 @@ class ETracker:
             warnings.warn(f"Failed to save calibration data: {e}")
             return False
 
-    def load_calibration(self, filename=None, use_gui=False):
+    def load_calibration(self, filename=None, use_gui=False, screen=-1, alwaysOnTop=True):
         """
         Loads calibration data from a file and applies it to the eye tracker.
         
@@ -986,6 +1057,14 @@ class ETracker:
         use_gui : bool, optional
             If `True`, a graphical file-open dialog is displayed for the user to
             select the calibration file. Defaults to `False`.
+        screen : int, optional
+            Screen number where the GUI dialog is displayed. Only used when `use_gui=True`.
+            If -1 (default), the dialog appears on the primary screen. Use 0, 1, 2, etc. 
+            to specify other monitors. Ignored when `use_gui=False`.
+        alwaysOnTop : bool, optional
+            Whether the GUI dialog stays on top of other windows. Only used when 
+            `use_gui=True`. Default is True to prevent the dialog from being hidden 
+            behind experiment windows. Ignored when `use_gui=False`.
         
         Returns
         -------
@@ -1003,16 +1082,29 @@ class ETracker:
         
         Examples
         --------
+        #### Load calibration from specific file
         ```python
-        # Load calibration from specific file
         success = ET_controller.load_calibration('subject_01_calib.dat')
         if success:
             ET_controller.start_recording('subject_01_data.h5')
+        ```
         
-        # Use GUI to select file
+        #### Use GUI to select file
+        ```python
         success = ET_controller.load_calibration(use_gui=True)
+        ```
         
-        # Multi-session workflow
+        #### GUI on secondary monitor
+        ```python
+        success = ET_controller.load_calibration(
+            use_gui=True, 
+            screen=1, 
+            alwaysOnTop=False
+        )
+        ```
+        
+        #### Multi-session workflow
+        ```python
         # Session 1: Calibrate and save
         ET_controller.calibrate(5)
         ET_controller.save_calibration('participant_123.dat')
@@ -1055,7 +1147,9 @@ class ETracker:
             file_list = gui.fileOpenDlg(
                 prompt='Select calibration file to load…',
                 allowed='*.dat',
-                tryFilePath=start_path
+                tryFilePath=start_path,
+                screen=screen,
+                alwaysOnTop=alwaysOnTop
             )
                 
             # The dialog returns a list; if cancelled, it's None.
@@ -1089,7 +1183,7 @@ class ETracker:
 
             # --- Final Confirmation ---
             NicePrint(f"Calibration data loaded from:\n{load_path}",
-                      title="Calibration Loaded", verbose=self.verbose)
+                    title="Calibration Loaded", verbose=self.verbose)
             return True
 
         except FileNotFoundError:
@@ -1101,12 +1195,13 @@ class ETracker:
             warnings.warn(f"Failed to load and apply calibration data: {e}")
             return False
 
+        
     # --- Recording Methods ---
 
     def start_recording(self, filename=None, raw_format=False):
         """
         Begin gaze data recording session.
-
+        
         Initializes file structure, clears any existing buffers, and starts
         data collection from either the eye tracker or simulation mode.
         Creates HDF5 or CSV files based on filename extension.
@@ -1121,15 +1216,51 @@ class ETracker:
             If True, preserves all original Tobii SDK column names and data.
             If False (default), uses simplified column names and subset of columns.
             Raw format is useful for advanced analysis requiring full metadata.
-            
+        
         Examples
         --------
-        ```python
-        ### Standard format (simplified columns)
-        ET_controller.start_recording('data.h5')
+        ### Basic Usage
         
-        ### Raw format (all Tobii SDK columns preserved)
+        #### Standard HDF5 format
+        ```python
+        ET_controller.start_recording('data.h5')
+        ```
+        
+        #### Auto-generated timestamped filename
+        ```python
+        ET_controller.start_recording()  # Creates YYYY-MM-DD_HH-MM-SS.h5
+        ```
+        
+        #### CSV format
+        ```python
+        ET_controller.start_recording('data.csv')
+        ```
+        
+        ### Advanced Options
+        
+        #### Raw format with all Tobii SDK columns
+        ```python
         ET_controller.start_recording('data_raw.h5', raw_format=True)
+        ```
+        
+        ### Complete Workflows
+        
+        #### Full experiment with event markers
+        ```python
+        # Setup and calibration
+        ET_controller.show_status()
+        ET_controller.calibrate(5)
+        
+        # Start recording
+        ET_controller.start_recording('participant_01.h5')
+        
+        # Run experiment with event markers
+        ET_controller.record_event('trial_1_start')
+        # ... present stimuli ...
+        ET_controller.record_event('trial_1_end')
+        
+        # Stop recording
+        ET_controller.stop_recording()
         ```
         """
         # --- State validation ---
@@ -1191,6 +1322,7 @@ class ETracker:
             core.wait(1)
             self.recording = True
 
+        
     def stop_recording(self, data_check=True):
         """
         Stop gaze data recording and finalize session.
@@ -1217,33 +1349,42 @@ class ETracker:
         - Recording duration is measured from start_recording() call
         - Quality check reads the complete saved file to analyze gaps between ALL samples,
         including potential gaps between save_data() calls
-        - At 120Hz, each sample should be ~8333μs apart; gaps significantly larger
+        - At 120Hz, each sample should be ~8333µs apart; gaps significantly larger
         indicate dropped samples
         
         Examples
         --------
+        ### Basic Usage
+        
+        #### Standard stop with quality check
         ```python
-            # Standard usage with quality check
-            ET_controller.start_recording('data.h5')
-            # ... run experiment ...
-            ET_controller.stop_recording()  # Shows quality report
-            
-            # Skip quality check for faster shutdown
-            ET_controller.stop_recording(data_check=False)
-            
-            # Expected output with quality check:
-            # ╔════════════════════════════╗
-            # ║  Recording Complete        ║
-            # ╠════════════════════════════╣
-            # ║ Data collection lasted     ║
-            # ║ approximately 120.45 sec   ║
-            # ║ Data has been saved to     ║
-            # ║ experiment.h5              ║
-            # ║                            ║
-            # ║ Data check Report:         ║
-            # ║   - Total samples: 14454   ║
-            # ║   - Dropped samples: 0     ║
-            # ╚════════════════════════════╝
+        ET_controller.start_recording('data.h5')
+        # ... run experiment ...
+        ET_controller.stop_recording()  # Shows quality report
+        ```
+        
+        #### Skip quality check for faster shutdown
+        ```python
+        ET_controller.stop_recording(data_check=False)
+        ```
+        
+        ### Understanding Output
+        
+        #### Expected quality check report
+        ```python
+        # When data_check=True, you'll see output like:
+        # ╔════════════════════════════╗
+        # ║  Recording Complete        ║
+        # ╠════════════════════════════╣
+        # ║ Data collection lasted     ║
+        # ║ approximately 120.45 sec   ║
+        # ║ Data has been saved to     ║
+        # ║ experiment.h5              ║
+        # ║                            ║
+        # ║ Data Quality Report:       ║
+        # ║   - Total samples: 14454   ║
+        # ║   - Dropped samples: 0     ║
+        # ╚════════════════════════════╝
         ```
         """
         # --- State validation ---
@@ -1323,10 +1464,44 @@ class ETracker:
             
         Examples
         --------
+        ### Basic Usage
+        
+        #### Recording single events
         ```python
         ET_controller.record_event('trial_1_start')
-        #  present stimulus 
+        # ... present stimulus ...
         ET_controller.record_event('stimulus_offset')
+        ```
+        
+        ### Common Patterns
+        
+        #### Complete trial structure
+        ```python
+        ET_controller.record_event('trial_1_start')
+        ET_controller.record_event('fixation_onset')
+        core.wait(1.0)
+        ET_controller.record_event('fixation_offset')
+        
+        ET_controller.record_event('stimulus_onset')
+        # ... show stimulus ...
+        ET_controller.record_event('stimulus_offset')
+        
+        ET_controller.record_event('response_prompt')
+        # ... wait for response ...
+        ET_controller.record_event('response_recorded')
+        ET_controller.record_event('trial_1_end')
+        ```
+        
+        #### Multi-trial experiment
+        ```python
+        ET_controller.start_recording('experiment.h5')
+        
+        for trial_num in range(10):
+            ET_controller.record_event(f'trial_{trial_num}_start')
+            # ... run trial ...
+            ET_controller.record_event(f'trial_{trial_num}_end')
+        
+        ET_controller.stop_recording()
         ```
         """
         # --- State validation ---
@@ -1374,16 +1549,26 @@ class ETracker:
         - Safe to call during active recording
         - Clears buffers after saving
         - Events are matched to nearest gaze sample by timestamp
+        - In HDF5 format, events are saved in two places:
+        1. Merged into the main gaze table's 'Events' column
+        2. As a separate 'events' table for independent event analysis
+        - In CSV format, events only appear in the 'Events' column
         
         Examples
         --------
+        ### Automatic Usage
+        
+        #### Default behavior (most common)
         ```python
-        # Automatic saving (most common)
         ET_controller.start_recording('data.h5')
         # ... run experiment ...
         ET_controller.stop_recording()  # Automatically calls save_data()
+        ```
         
-        # Manual periodic saves for long experiments
+        ### Manual Periodic Saves
+        
+        #### Save every N trials for long experiments
+        ```python
         ET_controller.start_recording('long_experiment.h5')
         
         for trial in range(100):
@@ -1396,8 +1581,12 @@ class ETracker:
                 ET_controller.save_data()  # Saves and clears buffers
         
         ET_controller.stop_recording()
+        ```
         
-        # Save data at natural break points
+        ### Strategic Save Points
+        
+        #### Save at natural break points between blocks
+        ```python
         ET_controller.start_recording('session.h5')
         
         # Block 1
@@ -1475,6 +1664,7 @@ class ETracker:
         # --- Performance reporting ---
         save_duration = round(core.getTime() - start_saving, 3)
         print(f"|-- Data saved in {save_duration} seconds --|")
+
 
     # --- Real-time Methods ---
 
@@ -1670,22 +1860,42 @@ class ETracker:
             
         Examples
         --------
+        ### Basic Usage
+        
+        #### Default behavior with median aggregation
         ```python
-        # Basic usage (median aggregation)
         pos = ET_controller.get_gaze_position()
         if pos is not None:
-             circle.pos = pos
+            circle.pos = pos
+        ```
         
-        # Use mean for smoother tracking
+        ### Aggregation Methods
+        
+        #### Mean for smoother tracking
+        ```python
         pos = ET_controller.get_gaze_position(method="mean")
+        ```
         
-        # Lowest latency (last sample only)
+        #### Last sample for lowest latency
+        ```python
         pos = ET_controller.get_gaze_position(method="last")
+        ```
         
-        # Return None instead of offscreen position
+        ### Handling Missing Data
+        
+        #### Return None instead of offscreen position
+        ```python
         pos = ET_controller.get_gaze_position(fallback_offscreen=False)
         if pos is None:
-             print("No valid gaze data")
+            print("No valid gaze data")
+        ```
+        
+        #### Check for offscreen gaze
+        ```python
+        pos = ET_controller.get_gaze_position(fallback_offscreen=True)
+        # Offscreen positions will be far outside window bounds
+        if abs(pos[0]) > 2.0 or abs(pos[1]) > 2.0:
+            print("Participant looking away")
         ```
         """
         # --- Buffer validation ---
@@ -1738,7 +1948,9 @@ class ETracker:
         # --- Convert to PsychoPy coordinates ---
         return Coords.get_psychopy_pos(self.win, mean_tobii)
 
-    # --- Private Data Processing Methods ---
+
+    # --- Interanl fucntions ---
+
 
     def _close(self):
         """
@@ -1783,8 +1995,8 @@ class ETracker:
         - Dropped sample estimation: gaps larger than expected_interval * 1.5
         are flagged, and the number of missing samples is calculated based
         on gap duration
-        - At 120Hz: expected interval = 8333μs, tolerance = ±4167μs
-        - At 60Hz: expected interval = 16667μs, tolerance = ±8333μs
+        - At 120Hz: expected interval = 8333microS, tolerance = ±4167microS
+        - At 60Hz: expected interval = 16667microS, tolerance = ±8333microS
         """
         # --- Read timestamps from saved file ---
         if self.file_format == 'hdf5':
@@ -1928,6 +2140,7 @@ class ETracker:
 
             # Use the custom NicePrint utility to display the formatted information.
             NicePrint(text, title, verbose=self.verbose)
+
 
     def _prepare_recording(self, filename=None):
         """
@@ -2156,7 +2369,8 @@ class ETracker:
                     f.root.events.append(events_array)
                 else:
                     f.create_table(f.root, 'events', obj=events_array)
-                    
+
+
     def _on_gaze_data(self, gaze_data):
         """
         Thread-safe callback for incoming eye tracker data.
@@ -2187,7 +2401,9 @@ class ETracker:
                     gaze_data.get('right_gaze_point_on_display_area')
                 ])
 
-    # --- Private Simulation Methods ---
+
+    # --- Simulation Methods ---
+
 
     def _simulate_data_loop(self, data_type='gaze'):
         """
@@ -2224,6 +2440,7 @@ class ETracker:
             # --- Error handling ---
             print(f"Simulation error: {e}")
             self._stop_simulation.set()
+
 
     def _simulate_gaze_data(self):
         """Generate single gaze sample from current mouse position."""
@@ -2273,6 +2490,7 @@ class ETracker:
         except Exception as e:
             print(f"Simulated gaze error: {e}")
 
+
     def _simulate_user_position_guide(self):
         """
         Generate user position data for track box visualization.
@@ -2316,57 +2534,3 @@ class ETracker:
             
         except Exception as e:
             print(f"Simulated user position error: {e}")
-
-
-# Example usage:
-'''
-from psychopy import visual, sound
-
-# Create window
-win = visual.Window(fullscr=True, units='height')
-
-# Create controller
-controller = ETracker(win)
-
-# Define calibration points (in height units)
-cal_points = [
-(-0.4, 0.4), (0.0, 0.4), (0.4, 0.4),
-(-0.4, 0.0), (0.0, 0.0), (0.4, 0.0),
-(-0.4, -0.4), (0.0, -0.4), (0.4, -0.4)
-]
-
-# Define stimuli paths
-stims = ['stims/stim1.png', 'stims/stim2.png', 'stims/stim3.png']
-
-# Optional: add sound
-audio = sound.Sound('stims/attention.wav')
-
-# Run calibration and save data
-success = controller.run_calibration(cal_points, stims, 
-                                   audio=audio,
-                                   save_calib=True, 
-                                   calib_filename="subject1_calib.dat")
-
-if success:
-    print("Calibration successful!")
-    
-    # Start recording
-    controller.start_recording('subject1_gaze.tsv')
-
-    # Record events during experiment
-    controller.record_event('trial_1_start')
-    # Run trial 1
-    controller.record_event('trial_1_end')
-    controller.save_data()  # Save and clear buffer after trial 1
-
-    # Later, in a different session, you can load the calibration:
-    # controller.load_calibration("subject1_calib.dat")
-
-    controller.stop_recording()
-else:
-    print("Calibration failed!")
-
-# Clean up
-controller.close()
-win.close()
-'''
