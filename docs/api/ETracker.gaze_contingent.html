@@ -199,8 +199,8 @@ div.callout-Advanced.callout-style-default .callout-icon::before, div.callout-Ad
         </a>
     </div>
   </nav>
-  <div id="quarto-announcement" data-announcement-id="5603cdf67aefc87f3b65f8721f133f89" class="alert alert-danger hidden"><i class="bi bi-exclamation-triangle quarto-announcement-icon"></i><div class="quarto-announcement-content">
-<p><strong>Development Version</strong> - DeToX is currently in beta. Features may change without notice. Thoroughly test before using in production studies.</p>
+  <div id="quarto-announcement" data-announcement-id="de69b60bfdf2ea42f39c5cf1d3162adf" class="alert alert-danger hidden"><i class="bi bi-exclamation-triangle quarto-announcement-icon"></i><div class="quarto-announcement-content">
+<p><strong>Development Version</strong> - DeToX is currently in beta. Features may change without notice. Thoroughly test before using.</p>
 </div><i class="bi bi-x-lg quarto-announcement-action"></i></div>
 </header>
 <!-- content -->
@@ -261,6 +261,12 @@ div.callout-Advanced.callout-style-default .callout-icon::before, div.callout-Ad
   <div class="sidebar-item-container"> 
   <a href="../api/ETracker.save_data.html" class="sidebar-item-text sidebar-link">
  <span class="menu-text">ETracker.save_data</span></a>
+  </div>
+</li>
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="../api/ETracker.set_eyetracking_settings.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text">ETracker.set_eyetracking_settings</span></a>
   </div>
 </li>
       </ul>
@@ -395,14 +401,8 @@ div.callout-Advanced.callout-style-default .callout-icon::before, div.callout-Ad
 </li>
           <li class="sidebar-item">
   <div class="sidebar-item-container"> 
-  <a href="../api/tobii2pix.html" class="sidebar-item-text sidebar-link">
- <span class="menu-text">tobii2pix</span></a>
-  </div>
-</li>
-          <li class="sidebar-item">
-  <div class="sidebar-item-container"> 
-  <a href="../api/get_psychopy_pos_from_trackbox.html" class="sidebar-item-text sidebar-link">
- <span class="menu-text">get_psychopy_pos_from_trackbox</span></a>
+  <a href="../api/get_psychopy_pos_from_user_position.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text">get_psychopy_pos_from_user_position</span></a>
   </div>
 </li>
       </ul>
@@ -465,7 +465,7 @@ div.callout-Advanced.callout-style-default .callout-icon::before, div.callout-Ad
 <div id="quarto-sidebar-glass" class="quarto-sidebar-collapse-item" data-bs-toggle="collapse" data-bs-target=".quarto-sidebar-collapse-item"></div>
 <!-- margin-sidebar -->
     <div id="quarto-margin-sidebar" class="sidebar margin-sidebar">
-        <nav id="TOC" role="doc-toc" class="toc-active" data-toc-expanded="4">
+        <nav id="TOC" role="doc-toc" class="toc-active" data-toc-expanded="6">
     <h2 id="toc-title">On this page</h2>
    
   <ul>
@@ -474,7 +474,12 @@ div.callout-Advanced.callout-style-default .callout-icon::before, div.callout-Ad
   <li><a href="#parameters" id="toc-parameters" class="nav-link" data-scroll-target="#parameters">Parameters</a></li>
   <li><a href="#raises" id="toc-raises" class="nav-link" data-scroll-target="#raises">Raises</a></li>
   <li><a href="#notes" id="toc-notes" class="nav-link" data-scroll-target="#notes">Notes</a></li>
-  <li><a href="#examples" id="toc-examples" class="nav-link" data-scroll-target="#examples">Examples</a></li>
+  <li><a href="#examples" id="toc-examples" class="nav-link" data-scroll-target="#examples">Examples</a>
+  <ul class="collapse">
+  <li><a href="#basic-usage" id="toc-basic-usage" class="nav-link" data-scroll-target="#basic-usage">Basic Usage</a></li>
+  <li><a href="#sample-based-configuration" id="toc-sample-based-configuration" class="nav-link" data-scroll-target="#sample-based-configuration">Sample-Based Configuration</a></li>
+  <li><a href="#complete-applications" id="toc-complete-applications" class="nav-link" data-scroll-target="#complete-applications">Complete Applications</a></li>
+  </ul></li>
   </ul></li>
   </ul>
 </nav>
@@ -487,10 +492,10 @@ div.callout-Advanced.callout-style-default .callout-icon::before, div.callout-Ad
 
 <section id="DeToX.ETracker.gaze_contingent" class="level1">
 <h1>ETracker.gaze_contingent</h1>
-<div class="sourceCode" id="cb1"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb1-1"><a href="#cb1-1" aria-hidden="true" tabindex="-1"></a>ETracker.gaze_contingent(N<span class="op">=</span><span class="dv">5</span>)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="sourceCode" id="cb1"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb1-1"><a href="#cb1-1" aria-hidden="true" tabindex="-1"></a>ETracker.gaze_contingent(N<span class="op">=</span><span class="fl">0.5</span>, units<span class="op">=</span><span class="st">'seconds'</span>)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
 <p>Initialize real-time gaze buffer for contingent applications.</p>
-<p>Creates a rolling buffer that stores the most recent N gaze samples, enabling real-time gaze-contingent paradigms. Must be called before using <code>get_gaze_position()</code> for real-time gaze tracking.</p>
-<p>The buffer automatically maintains the N most recent samples, discarding older data. This provides a stable estimate of current gaze position by aggregating across multiple samples.</p>
+<p>Creates a rolling buffer that stores recent gaze samples over a specified time window or number of samples, enabling real-time gaze-contingent paradigms. Must be called before using <code>get_gaze_position()</code> for real-time gaze tracking.</p>
+<p>The buffer automatically maintains the most recent samples, discarding older data. This provides a stable estimate of current gaze position by aggregating across multiple samples.</p>
 <section id="parameters" class="level2 doc-section doc-section-parameters">
 <h2 class="doc-section doc-section-parameters anchored" data-anchor-id="parameters">Parameters</h2>
 <table class="caption-top table">
@@ -505,9 +510,15 @@ div.callout-Advanced.callout-style-default .callout-icon::before, div.callout-Ad
 <tbody>
 <tr class="odd">
 <td>N</td>
-<td><a href="`int`">int</a></td>
-<td>Number of recent gaze samples to store in the rolling buffer. Larger values provide smoother estimates but increase latency. Typical values: 3-10 samples. Default 5.</td>
-<td><code>5</code></td>
+<td><a href="`float`">float</a> or <a href="`int`">int</a></td>
+<td>Buffer size specification. Interpretation depends on <code>units</code> parameter: - If units=‘seconds’: Duration in seconds (e.g., 0.5 = 500ms window) - If units=‘samples’: Number of gaze samples (e.g., 5 = last 5 samples) Default is 0.5 (seconds).</td>
+<td><code>0.5</code></td>
+</tr>
+<tr class="even">
+<td>units</td>
+<td><a href="`str`">str</a></td>
+<td>Unit for buffer size specification: ‘seconds’ or ‘samples’. - ‘seconds’ (default): N specifies time duration, automatically calculates required samples based on eye tracker frequency - ‘samples’: N specifies exact number of samples Default is ‘seconds’.</td>
+<td><code>'seconds'</code></td>
 </tr>
 </tbody>
 </table>
@@ -517,16 +528,18 @@ div.callout-Advanced.callout-style-default .callout-icon::before, div.callout-Ad
 <table class="caption-top table">
 <thead>
 <tr class="header">
-<th>Name</th>
 <th>Type</th>
 <th>Description</th>
 </tr>
 </thead>
 <tbody>
 <tr class="odd">
-<td></td>
 <td><a href="`TypeError`">TypeError</a></td>
-<td>If N is not an integer.</td>
+<td>If N is not numeric or units is not a string.</td>
+</tr>
+<tr class="even">
+<td><a href="`ValueError`">ValueError</a></td>
+<td>If units is not ‘seconds’ or ‘samples’, or if calculated buffer size &lt; 1.</td>
 </tr>
 </tbody>
 </table>
@@ -536,56 +549,83 @@ div.callout-Advanced.callout-style-default .callout-icon::before, div.callout-Ad
 <ul>
 <li>Call this method ONCE before your experimental loop</li>
 <li>Buffer size trades off stability vs.&nbsp;latency:</li>
-<li>Smaller N (3-5): Lower latency, more noise</li>
-<li>Larger N (8-10): Smoother tracking, higher latency</li>
-<li>For 120 Hz eye tracker with N=5: ~42ms latency</li>
-<li>For 60 Hz eye tracker with N=5: ~83ms latency</li>
+<li>Shorter duration/fewer samples: Lower latency, more noise</li>
+<li>Longer duration/more samples: Smoother tracking, higher latency</li>
+<li>For 120 Hz tracker with N=0.5 seconds: 60 samples, ~500ms latency</li>
+<li>For 60 Hz tracker with N=0.5 seconds: 30 samples, ~500ms latency</li>
+<li>For any tracker with N=5 samples: 5 samples, variable latency by fps</li>
 </ul>
 </section>
 <section id="examples" class="level2 doc-section doc-section-examples">
 <h2 class="doc-section doc-section-examples anchored" data-anchor-id="examples">Examples</h2>
-<div class="sourceCode" id="cb2"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb2-1"><a href="#cb2-1" aria-hidden="true" tabindex="-1"></a><span class="co"># Basic real-time gaze tracking</span></span>
-<span id="cb2-2"><a href="#cb2-2" aria-hidden="true" tabindex="-1"></a>ET_controller.gaze_contingent(N<span class="op">=</span><span class="dv">5</span>)  <span class="co"># Initialize buffer</span></span>
-<span id="cb2-3"><a href="#cb2-3" aria-hidden="true" tabindex="-1"></a>ET_controller.start_recording(<span class="st">'data.h5'</span>)</span>
-<span id="cb2-4"><a href="#cb2-4" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb2-5"><a href="#cb2-5" aria-hidden="true" tabindex="-1"></a><span class="co"># Create gaze-contingent stimulus</span></span>
-<span id="cb2-6"><a href="#cb2-6" aria-hidden="true" tabindex="-1"></a>circle <span class="op">=</span> visual.Circle(win, radius<span class="op">=</span><span class="fl">0.05</span>, fillColor<span class="op">=</span><span class="st">'red'</span>)</span>
-<span id="cb2-7"><a href="#cb2-7" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb2-8"><a href="#cb2-8" aria-hidden="true" tabindex="-1"></a><span class="cf">for</span> frame <span class="kw">in</span> <span class="bu">range</span>(<span class="dv">600</span>):  <span class="co"># 10 seconds at 60 fps</span></span>
-<span id="cb2-9"><a href="#cb2-9" aria-hidden="true" tabindex="-1"></a>    gaze_pos <span class="op">=</span> ET_controller.get_gaze_position()</span>
-<span id="cb2-10"><a href="#cb2-10" aria-hidden="true" tabindex="-1"></a>    circle.pos <span class="op">=</span> gaze_pos</span>
-<span id="cb2-11"><a href="#cb2-11" aria-hidden="true" tabindex="-1"></a>    circle.draw()</span>
-<span id="cb2-12"><a href="#cb2-12" aria-hidden="true" tabindex="-1"></a>    win.flip()</span>
-<span id="cb2-13"><a href="#cb2-13" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb2-14"><a href="#cb2-14" aria-hidden="true" tabindex="-1"></a>ET_controller.stop_recording()</span>
-<span id="cb2-15"><a href="#cb2-15" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb2-16"><a href="#cb2-16" aria-hidden="true" tabindex="-1"></a><span class="co"># Adjust buffer size for your needs</span></span>
-<span id="cb2-17"><a href="#cb2-17" aria-hidden="true" tabindex="-1"></a>ET_controller.gaze_contingent(N<span class="op">=</span><span class="dv">3</span>)   <span class="co"># Low latency, more jitter</span></span>
-<span id="cb2-18"><a href="#cb2-18" aria-hidden="true" tabindex="-1"></a>ET_controller.gaze_contingent(N<span class="op">=</span><span class="dv">10</span>)  <span class="co"># Smooth, higher latency</span></span>
-<span id="cb2-19"><a href="#cb2-19" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb2-20"><a href="#cb2-20" aria-hidden="true" tabindex="-1"></a><span class="co"># Gaze-contingent window paradigm</span></span>
-<span id="cb2-21"><a href="#cb2-21" aria-hidden="true" tabindex="-1"></a>ET_controller.gaze_contingent(N<span class="op">=</span><span class="dv">5</span>)</span>
-<span id="cb2-22"><a href="#cb2-22" aria-hidden="true" tabindex="-1"></a>ET_controller.start_recording(<span class="st">'gaze_window.h5'</span>)</span>
-<span id="cb2-23"><a href="#cb2-23" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb2-24"><a href="#cb2-24" aria-hidden="true" tabindex="-1"></a>stimulus <span class="op">=</span> visual.ImageStim(win, <span class="st">'image.png'</span>)</span>
-<span id="cb2-25"><a href="#cb2-25" aria-hidden="true" tabindex="-1"></a>window <span class="op">=</span> visual.Circle(win, radius<span class="op">=</span><span class="fl">0.1</span>, fillColor<span class="op">=</span><span class="va">None</span>, lineColor<span class="op">=</span><span class="st">'white'</span>)</span>
-<span id="cb2-26"><a href="#cb2-26" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb2-27"><a href="#cb2-27" aria-hidden="true" tabindex="-1"></a><span class="cf">for</span> trial <span class="kw">in</span> <span class="bu">range</span>(<span class="dv">20</span>):</span>
-<span id="cb2-28"><a href="#cb2-28" aria-hidden="true" tabindex="-1"></a>    stimulus.draw()</span>
-<span id="cb2-29"><a href="#cb2-29" aria-hidden="true" tabindex="-1"></a>    </span>
-<span id="cb2-30"><a href="#cb2-30" aria-hidden="true" tabindex="-1"></a>    <span class="cf">for</span> frame <span class="kw">in</span> <span class="bu">range</span>(<span class="dv">120</span>):  <span class="co"># 2 seconds</span></span>
-<span id="cb2-31"><a href="#cb2-31" aria-hidden="true" tabindex="-1"></a>        gaze_pos <span class="op">=</span> ET_controller.get_gaze_position()</span>
-<span id="cb2-32"><a href="#cb2-32" aria-hidden="true" tabindex="-1"></a>        window.pos <span class="op">=</span> gaze_pos</span>
-<span id="cb2-33"><a href="#cb2-33" aria-hidden="true" tabindex="-1"></a>        window.draw()</span>
-<span id="cb2-34"><a href="#cb2-34" aria-hidden="true" tabindex="-1"></a>        win.flip()</span>
-<span id="cb2-35"><a href="#cb2-35" aria-hidden="true" tabindex="-1"></a>    </span>
-<span id="cb2-36"><a href="#cb2-36" aria-hidden="true" tabindex="-1"></a>    ET_controller.record_event(<span class="ss">f'trial_</span><span class="sc">{</span>trial<span class="sc">}</span><span class="ss">_end'</span>)</span>
-<span id="cb2-37"><a href="#cb2-37" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb2-38"><a href="#cb2-38" aria-hidden="true" tabindex="-1"></a>ET_controller.stop_recording()</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<section id="basic-usage" class="level3">
+<h3 class="anchored" data-anchor-id="basic-usage">Basic Usage</h3>
+<section id="default-time-based-buffer-0.5-seconds" class="level4">
+<h4 class="anchored" data-anchor-id="default-time-based-buffer-0.5-seconds">Default time-based buffer (0.5 seconds)</h4>
+<div class="sourceCode" id="cb2"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb2-1"><a href="#cb2-1" aria-hidden="true" tabindex="-1"></a>    <span class="co"># Initialize with 500ms window (adapts to tracker frequency)</span></span>
+<span id="cb2-2"><a href="#cb2-2" aria-hidden="true" tabindex="-1"></a>    ET_controller.gaze_contingent()  <span class="co"># Uses default N=0.5, units='seconds'</span></span>
+<span id="cb2-3"><a href="#cb2-3" aria-hidden="true" tabindex="-1"></a>    ET_controller.start_recording(<span class="st">'data.h5'</span>)</span>
+<span id="cb2-4"><a href="#cb2-4" aria-hidden="true" tabindex="-1"></a>    </span>
+<span id="cb2-5"><a href="#cb2-5" aria-hidden="true" tabindex="-1"></a>    <span class="co"># Create gaze-contingent stimulus</span></span>
+<span id="cb2-6"><a href="#cb2-6" aria-hidden="true" tabindex="-1"></a>    circle <span class="op">=</span> visual.Circle(win, radius<span class="op">=</span><span class="fl">0.05</span>, fillColor<span class="op">=</span><span class="st">'red'</span>)</span>
+<span id="cb2-7"><a href="#cb2-7" aria-hidden="true" tabindex="-1"></a>    </span>
+<span id="cb2-8"><a href="#cb2-8" aria-hidden="true" tabindex="-1"></a>    <span class="cf">for</span> frame <span class="kw">in</span> <span class="bu">range</span>(<span class="dv">600</span>):  <span class="co"># 10 seconds at 60 fps</span></span>
+<span id="cb2-9"><a href="#cb2-9" aria-hidden="true" tabindex="-1"></a>        gaze_pos <span class="op">=</span> ET_controller.get_gaze_position()</span>
+<span id="cb2-10"><a href="#cb2-10" aria-hidden="true" tabindex="-1"></a>        circle.pos <span class="op">=</span> gaze_pos</span>
+<span id="cb2-11"><a href="#cb2-11" aria-hidden="true" tabindex="-1"></a>        circle.draw()</span>
+<span id="cb2-12"><a href="#cb2-12" aria-hidden="true" tabindex="-1"></a>        win.flip()</span>
+<span id="cb2-13"><a href="#cb2-13" aria-hidden="true" tabindex="-1"></a>    </span>
+<span id="cb2-14"><a href="#cb2-14" aria-hidden="true" tabindex="-1"></a>    ET_controller.stop_recording()</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+</section>
+<section id="custom-time-window" class="level4">
+<h4 class="anchored" data-anchor-id="custom-time-window">Custom time window</h4>
+<div class="sourceCode" id="cb3"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb3-1"><a href="#cb3-1" aria-hidden="true" tabindex="-1"></a>    <span class="co"># 250ms window for lower latency</span></span>
+<span id="cb3-2"><a href="#cb3-2" aria-hidden="true" tabindex="-1"></a>    ET_controller.gaze_contingent(N<span class="op">=</span><span class="fl">0.25</span>, units<span class="op">=</span><span class="st">'seconds'</span>)</span>
+<span id="cb3-3"><a href="#cb3-3" aria-hidden="true" tabindex="-1"></a>    </span>
+<span id="cb3-4"><a href="#cb3-4" aria-hidden="true" tabindex="-1"></a>    <span class="co"># 1 second window for very smooth tracking</span></span>
+<span id="cb3-5"><a href="#cb3-5" aria-hidden="true" tabindex="-1"></a>    ET_controller.gaze_contingent(N<span class="op">=</span><span class="fl">1.0</span>, units<span class="op">=</span><span class="st">'seconds'</span>)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+</section>
+</section>
+<section id="sample-based-configuration" class="level3">
+<h3 class="anchored" data-anchor-id="sample-based-configuration">Sample-Based Configuration</h3>
+<section id="explicit-sample-count" class="level4">
+<h4 class="anchored" data-anchor-id="explicit-sample-count">Explicit sample count</h4>
+<div class="sourceCode" id="cb4"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb4-1"><a href="#cb4-1" aria-hidden="true" tabindex="-1"></a>    <span class="co"># Exactly 5 most recent samples</span></span>
+<span id="cb4-2"><a href="#cb4-2" aria-hidden="true" tabindex="-1"></a>    ET_controller.gaze_contingent(N<span class="op">=</span><span class="dv">5</span>, units<span class="op">=</span><span class="st">'samples'</span>)</span>
+<span id="cb4-3"><a href="#cb4-3" aria-hidden="true" tabindex="-1"></a>    </span>
+<span id="cb4-4"><a href="#cb4-4" aria-hidden="true" tabindex="-1"></a>    <span class="co"># Exactly 10 samples for smoother tracking</span></span>
+<span id="cb4-5"><a href="#cb4-5" aria-hidden="true" tabindex="-1"></a>    ET_controller.gaze_contingent(N<span class="op">=</span><span class="dv">10</span>, units<span class="op">=</span><span class="st">'samples'</span>)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+</section>
+</section>
+<section id="complete-applications" class="level3">
+<h3 class="anchored" data-anchor-id="complete-applications">Complete Applications</h3>
+<section id="gaze-contingent-window-paradigm" class="level4">
+<h4 class="anchored" data-anchor-id="gaze-contingent-window-paradigm">Gaze-contingent window paradigm</h4>
+<div class="sourceCode" id="cb5"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb5-1"><a href="#cb5-1" aria-hidden="true" tabindex="-1"></a>    <span class="co"># 300ms time window (auto-adjusts to tracker frequency)</span></span>
+<span id="cb5-2"><a href="#cb5-2" aria-hidden="true" tabindex="-1"></a>    ET_controller.gaze_contingent(N<span class="op">=</span><span class="fl">0.3</span>, units<span class="op">=</span><span class="st">'seconds'</span>)</span>
+<span id="cb5-3"><a href="#cb5-3" aria-hidden="true" tabindex="-1"></a>    ET_controller.start_recording(<span class="st">'gaze_window.h5'</span>)</span>
+<span id="cb5-4"><a href="#cb5-4" aria-hidden="true" tabindex="-1"></a>    </span>
+<span id="cb5-5"><a href="#cb5-5" aria-hidden="true" tabindex="-1"></a>    stimulus <span class="op">=</span> visual.ImageStim(win, <span class="st">'image.png'</span>)</span>
+<span id="cb5-6"><a href="#cb5-6" aria-hidden="true" tabindex="-1"></a>    window <span class="op">=</span> visual.Circle(win, radius<span class="op">=</span><span class="fl">0.1</span>, fillColor<span class="op">=</span><span class="va">None</span>, lineColor<span class="op">=</span><span class="st">'white'</span>)</span>
+<span id="cb5-7"><a href="#cb5-7" aria-hidden="true" tabindex="-1"></a>    </span>
+<span id="cb5-8"><a href="#cb5-8" aria-hidden="true" tabindex="-1"></a>    <span class="cf">for</span> trial <span class="kw">in</span> <span class="bu">range</span>(<span class="dv">20</span>):</span>
+<span id="cb5-9"><a href="#cb5-9" aria-hidden="true" tabindex="-1"></a>        stimulus.draw()</span>
+<span id="cb5-10"><a href="#cb5-10" aria-hidden="true" tabindex="-1"></a>        </span>
+<span id="cb5-11"><a href="#cb5-11" aria-hidden="true" tabindex="-1"></a>        <span class="cf">for</span> frame <span class="kw">in</span> <span class="bu">range</span>(<span class="dv">120</span>):  <span class="co"># 2 seconds</span></span>
+<span id="cb5-12"><a href="#cb5-12" aria-hidden="true" tabindex="-1"></a>            gaze_pos <span class="op">=</span> ET_controller.get_gaze_position()</span>
+<span id="cb5-13"><a href="#cb5-13" aria-hidden="true" tabindex="-1"></a>            window.pos <span class="op">=</span> gaze_pos</span>
+<span id="cb5-14"><a href="#cb5-14" aria-hidden="true" tabindex="-1"></a>            window.draw()</span>
+<span id="cb5-15"><a href="#cb5-15" aria-hidden="true" tabindex="-1"></a>            win.flip()</span>
+<span id="cb5-16"><a href="#cb5-16" aria-hidden="true" tabindex="-1"></a>        </span>
+<span id="cb5-17"><a href="#cb5-17" aria-hidden="true" tabindex="-1"></a>        ET_controller.record_event(<span class="ss">f'trial_</span><span class="sc">{</span>trial<span class="sc">}</span><span class="ss">_end'</span>)</span>
+<span id="cb5-18"><a href="#cb5-18" aria-hidden="true" tabindex="-1"></a>    </span>
+<span id="cb5-19"><a href="#cb5-19" aria-hidden="true" tabindex="-1"></a>    ET_controller.stop_recording()</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
 
 
 <!-- -->
 
+</section>
+</section>
 </section>
 </section>
 
@@ -1073,85 +1113,118 @@ window.document.addEventListener("DOMContentLoaded", function (event) {
       </a>
   </div>
 </nav><div class="modal fade" id="quarto-embedded-source-code-modal" tabindex="-1" aria-labelledby="quarto-embedded-source-code-modal-label" aria-hidden="true"><div class="modal-dialog modal-dialog-scrollable"><div class="modal-content"><div class="modal-header"><h5 class="modal-title" id="quarto-embedded-source-code-modal-label">Source Code</h5><button class="btn-close" data-bs-dismiss="modal"></button></div><div class="modal-body"><div class="">
-<div class="sourceCode" id="cb3" data-shortcodes="false"><pre class="sourceCode markdown code-with-copy"><code class="sourceCode markdown"><span id="cb3-1"><a href="#cb3-1" aria-hidden="true" tabindex="-1"></a><span class="fu"># ETracker.gaze_contingent { #DeToX.ETracker.gaze_contingent }</span></span>
-<span id="cb3-2"><a href="#cb3-2" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb3-3"><a href="#cb3-3" aria-hidden="true" tabindex="-1"></a><span class="in">```python</span></span>
-<span id="cb3-4"><a href="#cb3-4" aria-hidden="true" tabindex="-1"></a>ETracker.gaze_contingent(N<span class="op">=</span><span class="dv">5</span>)</span>
-<span id="cb3-5"><a href="#cb3-5" aria-hidden="true" tabindex="-1"></a><span class="in">```</span></span>
-<span id="cb3-6"><a href="#cb3-6" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb3-7"><a href="#cb3-7" aria-hidden="true" tabindex="-1"></a>Initialize real-time gaze buffer for contingent applications.</span>
-<span id="cb3-8"><a href="#cb3-8" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb3-9"><a href="#cb3-9" aria-hidden="true" tabindex="-1"></a>Creates a rolling buffer that stores the most recent N gaze samples,</span>
-<span id="cb3-10"><a href="#cb3-10" aria-hidden="true" tabindex="-1"></a>enabling real-time gaze-contingent paradigms. Must be called before</span>
-<span id="cb3-11"><a href="#cb3-11" aria-hidden="true" tabindex="-1"></a>using <span class="in">`get_gaze_position()`</span> for real-time gaze tracking.</span>
-<span id="cb3-12"><a href="#cb3-12" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb3-13"><a href="#cb3-13" aria-hidden="true" tabindex="-1"></a>The buffer automatically maintains the N most recent samples, discarding</span>
-<span id="cb3-14"><a href="#cb3-14" aria-hidden="true" tabindex="-1"></a>older data. This provides a stable estimate of current gaze position by</span>
-<span id="cb3-15"><a href="#cb3-15" aria-hidden="true" tabindex="-1"></a>aggregating across multiple samples.</span>
-<span id="cb3-16"><a href="#cb3-16" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb3-17"><a href="#cb3-17" aria-hidden="true" tabindex="-1"></a><span class="fu">## Parameters {.doc-section .doc-section-parameters}</span></span>
-<span id="cb3-18"><a href="#cb3-18" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb3-19"><a href="#cb3-19" aria-hidden="true" tabindex="-1"></a>| Name   | Type         | Description                                                                                                                                                           | Default   |</span>
-<span id="cb3-20"><a href="#cb3-20" aria-hidden="true" tabindex="-1"></a>|--------|--------------|-----------------------------------------------------------------------------------------------------------------------------------------------------------------------|-----------|</span>
-<span id="cb3-21"><a href="#cb3-21" aria-hidden="true" tabindex="-1"></a>| N      | <span class="co">[</span><span class="ot">int</span><span class="co">](`int`)</span> | Number of recent gaze samples to store in the rolling buffer. Larger values provide smoother estimates but increase latency. Typical values: 3-10 samples. Default 5. | <span class="in">`5`</span>       |</span>
-<span id="cb3-22"><a href="#cb3-22" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb3-23"><a href="#cb3-23" aria-hidden="true" tabindex="-1"></a><span class="fu">## Raises {.doc-section .doc-section-raises}</span></span>
-<span id="cb3-24"><a href="#cb3-24" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb3-25"><a href="#cb3-25" aria-hidden="true" tabindex="-1"></a>| Name   | Type                     | Description             |</span>
-<span id="cb3-26"><a href="#cb3-26" aria-hidden="true" tabindex="-1"></a>|--------|--------------------------|-------------------------|</span>
-<span id="cb3-27"><a href="#cb3-27" aria-hidden="true" tabindex="-1"></a>|        | <span class="co">[</span><span class="ot">TypeError</span><span class="co">](`TypeError`)</span> | If N is not an integer. |</span>
-<span id="cb3-28"><a href="#cb3-28" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb3-29"><a href="#cb3-29" aria-hidden="true" tabindex="-1"></a><span class="fu">## Notes {.doc-section .doc-section-notes}</span></span>
-<span id="cb3-30"><a href="#cb3-30" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb3-31"><a href="#cb3-31" aria-hidden="true" tabindex="-1"></a><span class="ss">- </span>Call this method ONCE before your experimental loop</span>
-<span id="cb3-32"><a href="#cb3-32" aria-hidden="true" tabindex="-1"></a><span class="ss">- </span>Buffer size trades off stability vs. latency:</span>
-<span id="cb3-33"><a href="#cb3-33" aria-hidden="true" tabindex="-1"></a><span class="ss">* </span>Smaller N (3-5): Lower latency, more noise</span>
-<span id="cb3-34"><a href="#cb3-34" aria-hidden="true" tabindex="-1"></a><span class="ss">* </span>Larger N (8-10): Smoother tracking, higher latency</span>
-<span id="cb3-35"><a href="#cb3-35" aria-hidden="true" tabindex="-1"></a><span class="ss">- </span>For 120 Hz eye tracker with N=5: ~42ms latency</span>
-<span id="cb3-36"><a href="#cb3-36" aria-hidden="true" tabindex="-1"></a><span class="ss">- </span>For 60 Hz eye tracker with N=5: ~83ms latency</span>
-<span id="cb3-37"><a href="#cb3-37" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb3-38"><a href="#cb3-38" aria-hidden="true" tabindex="-1"></a><span class="fu">## Examples {.doc-section .doc-section-examples}</span></span>
-<span id="cb3-39"><a href="#cb3-39" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb3-40"><a href="#cb3-40" aria-hidden="true" tabindex="-1"></a><span class="in">```python</span></span>
-<span id="cb3-41"><a href="#cb3-41" aria-hidden="true" tabindex="-1"></a><span class="co"># Basic real-time gaze tracking</span></span>
-<span id="cb3-42"><a href="#cb3-42" aria-hidden="true" tabindex="-1"></a>ET_controller.gaze_contingent(N<span class="op">=</span><span class="dv">5</span>)  <span class="co"># Initialize buffer</span></span>
-<span id="cb3-43"><a href="#cb3-43" aria-hidden="true" tabindex="-1"></a>ET_controller.start_recording(<span class="st">'data.h5'</span>)</span>
-<span id="cb3-44"><a href="#cb3-44" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb3-45"><a href="#cb3-45" aria-hidden="true" tabindex="-1"></a><span class="co"># Create gaze-contingent stimulus</span></span>
-<span id="cb3-46"><a href="#cb3-46" aria-hidden="true" tabindex="-1"></a>circle <span class="op">=</span> visual.Circle(win, radius<span class="op">=</span><span class="fl">0.05</span>, fillColor<span class="op">=</span><span class="st">'red'</span>)</span>
-<span id="cb3-47"><a href="#cb3-47" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb3-48"><a href="#cb3-48" aria-hidden="true" tabindex="-1"></a><span class="cf">for</span> frame <span class="kw">in</span> <span class="bu">range</span>(<span class="dv">600</span>):  <span class="co"># 10 seconds at 60 fps</span></span>
-<span id="cb3-49"><a href="#cb3-49" aria-hidden="true" tabindex="-1"></a>    gaze_pos <span class="op">=</span> ET_controller.get_gaze_position()</span>
-<span id="cb3-50"><a href="#cb3-50" aria-hidden="true" tabindex="-1"></a>    circle.pos <span class="op">=</span> gaze_pos</span>
-<span id="cb3-51"><a href="#cb3-51" aria-hidden="true" tabindex="-1"></a>    circle.draw()</span>
-<span id="cb3-52"><a href="#cb3-52" aria-hidden="true" tabindex="-1"></a>    win.flip()</span>
-<span id="cb3-53"><a href="#cb3-53" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb3-54"><a href="#cb3-54" aria-hidden="true" tabindex="-1"></a>ET_controller.stop_recording()</span>
-<span id="cb3-55"><a href="#cb3-55" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb3-56"><a href="#cb3-56" aria-hidden="true" tabindex="-1"></a><span class="co"># Adjust buffer size for your needs</span></span>
-<span id="cb3-57"><a href="#cb3-57" aria-hidden="true" tabindex="-1"></a>ET_controller.gaze_contingent(N<span class="op">=</span><span class="dv">3</span>)   <span class="co"># Low latency, more jitter</span></span>
-<span id="cb3-58"><a href="#cb3-58" aria-hidden="true" tabindex="-1"></a>ET_controller.gaze_contingent(N<span class="op">=</span><span class="dv">10</span>)  <span class="co"># Smooth, higher latency</span></span>
-<span id="cb3-59"><a href="#cb3-59" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb3-60"><a href="#cb3-60" aria-hidden="true" tabindex="-1"></a><span class="co"># Gaze-contingent window paradigm</span></span>
-<span id="cb3-61"><a href="#cb3-61" aria-hidden="true" tabindex="-1"></a>ET_controller.gaze_contingent(N<span class="op">=</span><span class="dv">5</span>)</span>
-<span id="cb3-62"><a href="#cb3-62" aria-hidden="true" tabindex="-1"></a>ET_controller.start_recording(<span class="st">'gaze_window.h5'</span>)</span>
-<span id="cb3-63"><a href="#cb3-63" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb3-64"><a href="#cb3-64" aria-hidden="true" tabindex="-1"></a>stimulus <span class="op">=</span> visual.ImageStim(win, <span class="st">'image.png'</span>)</span>
-<span id="cb3-65"><a href="#cb3-65" aria-hidden="true" tabindex="-1"></a>window <span class="op">=</span> visual.Circle(win, radius<span class="op">=</span><span class="fl">0.1</span>, fillColor<span class="op">=</span><span class="va">None</span>, lineColor<span class="op">=</span><span class="st">'white'</span>)</span>
-<span id="cb3-66"><a href="#cb3-66" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb3-67"><a href="#cb3-67" aria-hidden="true" tabindex="-1"></a><span class="cf">for</span> trial <span class="kw">in</span> <span class="bu">range</span>(<span class="dv">20</span>):</span>
-<span id="cb3-68"><a href="#cb3-68" aria-hidden="true" tabindex="-1"></a>    stimulus.draw()</span>
-<span id="cb3-69"><a href="#cb3-69" aria-hidden="true" tabindex="-1"></a>    </span>
-<span id="cb3-70"><a href="#cb3-70" aria-hidden="true" tabindex="-1"></a>    <span class="cf">for</span> frame <span class="kw">in</span> <span class="bu">range</span>(<span class="dv">120</span>):  <span class="co"># 2 seconds</span></span>
-<span id="cb3-71"><a href="#cb3-71" aria-hidden="true" tabindex="-1"></a>        gaze_pos <span class="op">=</span> ET_controller.get_gaze_position()</span>
-<span id="cb3-72"><a href="#cb3-72" aria-hidden="true" tabindex="-1"></a>        window.pos <span class="op">=</span> gaze_pos</span>
-<span id="cb3-73"><a href="#cb3-73" aria-hidden="true" tabindex="-1"></a>        window.draw()</span>
-<span id="cb3-74"><a href="#cb3-74" aria-hidden="true" tabindex="-1"></a>        win.flip()</span>
-<span id="cb3-75"><a href="#cb3-75" aria-hidden="true" tabindex="-1"></a>    </span>
-<span id="cb3-76"><a href="#cb3-76" aria-hidden="true" tabindex="-1"></a>    ET_controller.record_event(<span class="ss">f'trial_</span><span class="sc">{</span>trial<span class="sc">}</span><span class="ss">_end'</span>)</span>
-<span id="cb3-77"><a href="#cb3-77" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb3-78"><a href="#cb3-78" aria-hidden="true" tabindex="-1"></a>ET_controller.stop_recording()</span>
-<span id="cb3-79"><a href="#cb3-79" aria-hidden="true" tabindex="-1"></a><span class="in">```</span></span></code><button title="Copy to Clipboard" class="code-copy-button" data-in-quarto-modal=""><i class="bi"></i></button></pre></div>
+<div class="sourceCode" id="cb6" data-shortcodes="false"><pre class="sourceCode markdown code-with-copy"><code class="sourceCode markdown"><span id="cb6-1"><a href="#cb6-1" aria-hidden="true" tabindex="-1"></a><span class="fu"># ETracker.gaze_contingent { #DeToX.ETracker.gaze_contingent }</span></span>
+<span id="cb6-2"><a href="#cb6-2" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb6-3"><a href="#cb6-3" aria-hidden="true" tabindex="-1"></a><span class="in">```python</span></span>
+<span id="cb6-4"><a href="#cb6-4" aria-hidden="true" tabindex="-1"></a>ETracker.gaze_contingent(N<span class="op">=</span><span class="fl">0.5</span>, units<span class="op">=</span><span class="st">'seconds'</span>)</span>
+<span id="cb6-5"><a href="#cb6-5" aria-hidden="true" tabindex="-1"></a><span class="in">```</span></span>
+<span id="cb6-6"><a href="#cb6-6" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb6-7"><a href="#cb6-7" aria-hidden="true" tabindex="-1"></a>Initialize real-time gaze buffer for contingent applications.</span>
+<span id="cb6-8"><a href="#cb6-8" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb6-9"><a href="#cb6-9" aria-hidden="true" tabindex="-1"></a>Creates a rolling buffer that stores recent gaze samples over a specified</span>
+<span id="cb6-10"><a href="#cb6-10" aria-hidden="true" tabindex="-1"></a>time window or number of samples, enabling real-time gaze-contingent paradigms.</span>
+<span id="cb6-11"><a href="#cb6-11" aria-hidden="true" tabindex="-1"></a>Must be called before using <span class="in">`get_gaze_position()`</span> for real-time gaze tracking.</span>
+<span id="cb6-12"><a href="#cb6-12" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb6-13"><a href="#cb6-13" aria-hidden="true" tabindex="-1"></a>The buffer automatically maintains the most recent samples, discarding</span>
+<span id="cb6-14"><a href="#cb6-14" aria-hidden="true" tabindex="-1"></a>older data. This provides a stable estimate of current gaze position by</span>
+<span id="cb6-15"><a href="#cb6-15" aria-hidden="true" tabindex="-1"></a>aggregating across multiple samples.</span>
+<span id="cb6-16"><a href="#cb6-16" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb6-17"><a href="#cb6-17" aria-hidden="true" tabindex="-1"></a><span class="fu">## Parameters {.doc-section .doc-section-parameters}</span></span>
+<span id="cb6-18"><a href="#cb6-18" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb6-19"><a href="#cb6-19" aria-hidden="true" tabindex="-1"></a>+--------+----------------------------------+---------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------+-------------+</span>
+<span id="cb6-20"><a href="#cb6-20" aria-hidden="true" tabindex="-1"></a>| Name   | Type                             | Description                                                                                                                                                                                                                                                   | Default     |</span>
+<span id="cb6-21"><a href="#cb6-21" aria-hidden="true" tabindex="-1"></a>+========+==================================+===============================================================================================================================================================================================================================================================+=============+</span>
+<span id="cb6-22"><a href="#cb6-22" aria-hidden="true" tabindex="-1"></a>| N      | <span class="co">[</span><span class="ot">float</span><span class="co">](`float`)</span> or <span class="co">[</span><span class="ot">int</span><span class="co">](`int`)</span> | Buffer size specification. Interpretation depends on <span class="in">`units`</span> parameter: - If units='seconds': Duration in seconds (e.g., 0.5 = 500ms window) - If units='samples': Number of gaze samples (e.g., 5 = last 5 samples) Default is 0.5 (seconds).                | <span class="in">`0.5`</span>       |</span>
+<span id="cb6-23"><a href="#cb6-23" aria-hidden="true" tabindex="-1"></a>+--------+----------------------------------+---------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------+-------------+</span>
+<span id="cb6-24"><a href="#cb6-24" aria-hidden="true" tabindex="-1"></a>| units  | <span class="co">[</span><span class="ot">str</span><span class="co">](`str`)</span>                     | Unit for buffer size specification: 'seconds' or 'samples'. - 'seconds' (default): N specifies time duration, automatically calculates required samples based on eye tracker frequency - 'samples': N specifies exact number of samples Default is 'seconds'. | <span class="in">`'seconds'`</span> |</span>
+<span id="cb6-25"><a href="#cb6-25" aria-hidden="true" tabindex="-1"></a>+--------+----------------------------------+---------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------+-------------+</span>
+<span id="cb6-26"><a href="#cb6-26" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb6-27"><a href="#cb6-27" aria-hidden="true" tabindex="-1"></a><span class="fu">## Raises {.doc-section .doc-section-raises}</span></span>
+<span id="cb6-28"><a href="#cb6-28" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb6-29"><a href="#cb6-29" aria-hidden="true" tabindex="-1"></a>+----------------------------+---------------------------------------------------------------------------+</span>
+<span id="cb6-30"><a href="#cb6-30" aria-hidden="true" tabindex="-1"></a>| Type                       | Description                                                               |</span>
+<span id="cb6-31"><a href="#cb6-31" aria-hidden="true" tabindex="-1"></a>+============================+===========================================================================+</span>
+<span id="cb6-32"><a href="#cb6-32" aria-hidden="true" tabindex="-1"></a>| <span class="co">[</span><span class="ot">TypeError</span><span class="co">](`TypeError`)</span>   | If N is not numeric or units is not a string.                             |</span>
+<span id="cb6-33"><a href="#cb6-33" aria-hidden="true" tabindex="-1"></a>+----------------------------+---------------------------------------------------------------------------+</span>
+<span id="cb6-34"><a href="#cb6-34" aria-hidden="true" tabindex="-1"></a>| <span class="co">[</span><span class="ot">ValueError</span><span class="co">](`ValueError`)</span> | If units is not 'seconds' or 'samples', or if calculated buffer size &lt; 1. |</span>
+<span id="cb6-35"><a href="#cb6-35" aria-hidden="true" tabindex="-1"></a>+----------------------------+---------------------------------------------------------------------------+</span>
+<span id="cb6-36"><a href="#cb6-36" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb6-37"><a href="#cb6-37" aria-hidden="true" tabindex="-1"></a><span class="fu">## Notes {.doc-section .doc-section-notes}</span></span>
+<span id="cb6-38"><a href="#cb6-38" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb6-39"><a href="#cb6-39" aria-hidden="true" tabindex="-1"></a><span class="ss">- </span>Call this method ONCE before your experimental loop</span>
+<span id="cb6-40"><a href="#cb6-40" aria-hidden="true" tabindex="-1"></a><span class="ss">- </span>Buffer size trades off stability vs. latency:</span>
+<span id="cb6-41"><a href="#cb6-41" aria-hidden="true" tabindex="-1"></a><span class="ss">* </span>Shorter duration/fewer samples: Lower latency, more noise</span>
+<span id="cb6-42"><a href="#cb6-42" aria-hidden="true" tabindex="-1"></a><span class="ss">* </span>Longer duration/more samples: Smoother tracking, higher latency</span>
+<span id="cb6-43"><a href="#cb6-43" aria-hidden="true" tabindex="-1"></a><span class="ss">- </span>For 120 Hz tracker with N=0.5 seconds: 60 samples, ~500ms latency</span>
+<span id="cb6-44"><a href="#cb6-44" aria-hidden="true" tabindex="-1"></a><span class="ss">- </span>For 60 Hz tracker with N=0.5 seconds: 30 samples, ~500ms latency</span>
+<span id="cb6-45"><a href="#cb6-45" aria-hidden="true" tabindex="-1"></a><span class="ss">- </span>For any tracker with N=5 samples: 5 samples, variable latency by fps</span>
+<span id="cb6-46"><a href="#cb6-46" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb6-47"><a href="#cb6-47" aria-hidden="true" tabindex="-1"></a><span class="fu">## Examples {.doc-section .doc-section-examples}</span></span>
+<span id="cb6-48"><a href="#cb6-48" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb6-49"><a href="#cb6-49" aria-hidden="true" tabindex="-1"></a><span class="fu">### Basic Usage</span></span>
+<span id="cb6-50"><a href="#cb6-50" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb6-51"><a href="#cb6-51" aria-hidden="true" tabindex="-1"></a><span class="fu">#### Default time-based buffer (0.5 seconds)</span></span>
+<span id="cb6-52"><a href="#cb6-52" aria-hidden="true" tabindex="-1"></a><span class="in">```python</span></span>
+<span id="cb6-53"><a href="#cb6-53" aria-hidden="true" tabindex="-1"></a>    <span class="co"># Initialize with 500ms window (adapts to tracker frequency)</span></span>
+<span id="cb6-54"><a href="#cb6-54" aria-hidden="true" tabindex="-1"></a>    ET_controller.gaze_contingent()  <span class="co"># Uses default N=0.5, units='seconds'</span></span>
+<span id="cb6-55"><a href="#cb6-55" aria-hidden="true" tabindex="-1"></a>    ET_controller.start_recording(<span class="st">'data.h5'</span>)</span>
+<span id="cb6-56"><a href="#cb6-56" aria-hidden="true" tabindex="-1"></a>    </span>
+<span id="cb6-57"><a href="#cb6-57" aria-hidden="true" tabindex="-1"></a>    <span class="co"># Create gaze-contingent stimulus</span></span>
+<span id="cb6-58"><a href="#cb6-58" aria-hidden="true" tabindex="-1"></a>    circle <span class="op">=</span> visual.Circle(win, radius<span class="op">=</span><span class="fl">0.05</span>, fillColor<span class="op">=</span><span class="st">'red'</span>)</span>
+<span id="cb6-59"><a href="#cb6-59" aria-hidden="true" tabindex="-1"></a>    </span>
+<span id="cb6-60"><a href="#cb6-60" aria-hidden="true" tabindex="-1"></a>    <span class="cf">for</span> frame <span class="kw">in</span> <span class="bu">range</span>(<span class="dv">600</span>):  <span class="co"># 10 seconds at 60 fps</span></span>
+<span id="cb6-61"><a href="#cb6-61" aria-hidden="true" tabindex="-1"></a>        gaze_pos <span class="op">=</span> ET_controller.get_gaze_position()</span>
+<span id="cb6-62"><a href="#cb6-62" aria-hidden="true" tabindex="-1"></a>        circle.pos <span class="op">=</span> gaze_pos</span>
+<span id="cb6-63"><a href="#cb6-63" aria-hidden="true" tabindex="-1"></a>        circle.draw()</span>
+<span id="cb6-64"><a href="#cb6-64" aria-hidden="true" tabindex="-1"></a>        win.flip()</span>
+<span id="cb6-65"><a href="#cb6-65" aria-hidden="true" tabindex="-1"></a>    </span>
+<span id="cb6-66"><a href="#cb6-66" aria-hidden="true" tabindex="-1"></a>    ET_controller.stop_recording()</span>
+<span id="cb6-67"><a href="#cb6-67" aria-hidden="true" tabindex="-1"></a><span class="in">```</span></span>
+<span id="cb6-68"><a href="#cb6-68" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb6-69"><a href="#cb6-69" aria-hidden="true" tabindex="-1"></a><span class="fu">#### Custom time window</span></span>
+<span id="cb6-70"><a href="#cb6-70" aria-hidden="true" tabindex="-1"></a><span class="in">```python</span></span>
+<span id="cb6-71"><a href="#cb6-71" aria-hidden="true" tabindex="-1"></a>    <span class="co"># 250ms window for lower latency</span></span>
+<span id="cb6-72"><a href="#cb6-72" aria-hidden="true" tabindex="-1"></a>    ET_controller.gaze_contingent(N<span class="op">=</span><span class="fl">0.25</span>, units<span class="op">=</span><span class="st">'seconds'</span>)</span>
+<span id="cb6-73"><a href="#cb6-73" aria-hidden="true" tabindex="-1"></a>    </span>
+<span id="cb6-74"><a href="#cb6-74" aria-hidden="true" tabindex="-1"></a>    <span class="co"># 1 second window for very smooth tracking</span></span>
+<span id="cb6-75"><a href="#cb6-75" aria-hidden="true" tabindex="-1"></a>    ET_controller.gaze_contingent(N<span class="op">=</span><span class="fl">1.0</span>, units<span class="op">=</span><span class="st">'seconds'</span>)</span>
+<span id="cb6-76"><a href="#cb6-76" aria-hidden="true" tabindex="-1"></a><span class="in">```</span></span>
+<span id="cb6-77"><a href="#cb6-77" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb6-78"><a href="#cb6-78" aria-hidden="true" tabindex="-1"></a><span class="fu">### Sample-Based Configuration</span></span>
+<span id="cb6-79"><a href="#cb6-79" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb6-80"><a href="#cb6-80" aria-hidden="true" tabindex="-1"></a><span class="fu">#### Explicit sample count</span></span>
+<span id="cb6-81"><a href="#cb6-81" aria-hidden="true" tabindex="-1"></a><span class="in">```python</span></span>
+<span id="cb6-82"><a href="#cb6-82" aria-hidden="true" tabindex="-1"></a>    <span class="co"># Exactly 5 most recent samples</span></span>
+<span id="cb6-83"><a href="#cb6-83" aria-hidden="true" tabindex="-1"></a>    ET_controller.gaze_contingent(N<span class="op">=</span><span class="dv">5</span>, units<span class="op">=</span><span class="st">'samples'</span>)</span>
+<span id="cb6-84"><a href="#cb6-84" aria-hidden="true" tabindex="-1"></a>    </span>
+<span id="cb6-85"><a href="#cb6-85" aria-hidden="true" tabindex="-1"></a>    <span class="co"># Exactly 10 samples for smoother tracking</span></span>
+<span id="cb6-86"><a href="#cb6-86" aria-hidden="true" tabindex="-1"></a>    ET_controller.gaze_contingent(N<span class="op">=</span><span class="dv">10</span>, units<span class="op">=</span><span class="st">'samples'</span>)</span>
+<span id="cb6-87"><a href="#cb6-87" aria-hidden="true" tabindex="-1"></a><span class="in">```</span></span>
+<span id="cb6-88"><a href="#cb6-88" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb6-89"><a href="#cb6-89" aria-hidden="true" tabindex="-1"></a><span class="fu">### Complete Applications</span></span>
+<span id="cb6-90"><a href="#cb6-90" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb6-91"><a href="#cb6-91" aria-hidden="true" tabindex="-1"></a><span class="fu">#### Gaze-contingent window paradigm</span></span>
+<span id="cb6-92"><a href="#cb6-92" aria-hidden="true" tabindex="-1"></a><span class="in">```python</span></span>
+<span id="cb6-93"><a href="#cb6-93" aria-hidden="true" tabindex="-1"></a>    <span class="co"># 300ms time window (auto-adjusts to tracker frequency)</span></span>
+<span id="cb6-94"><a href="#cb6-94" aria-hidden="true" tabindex="-1"></a>    ET_controller.gaze_contingent(N<span class="op">=</span><span class="fl">0.3</span>, units<span class="op">=</span><span class="st">'seconds'</span>)</span>
+<span id="cb6-95"><a href="#cb6-95" aria-hidden="true" tabindex="-1"></a>    ET_controller.start_recording(<span class="st">'gaze_window.h5'</span>)</span>
+<span id="cb6-96"><a href="#cb6-96" aria-hidden="true" tabindex="-1"></a>    </span>
+<span id="cb6-97"><a href="#cb6-97" aria-hidden="true" tabindex="-1"></a>    stimulus <span class="op">=</span> visual.ImageStim(win, <span class="st">'image.png'</span>)</span>
+<span id="cb6-98"><a href="#cb6-98" aria-hidden="true" tabindex="-1"></a>    window <span class="op">=</span> visual.Circle(win, radius<span class="op">=</span><span class="fl">0.1</span>, fillColor<span class="op">=</span><span class="va">None</span>, lineColor<span class="op">=</span><span class="st">'white'</span>)</span>
+<span id="cb6-99"><a href="#cb6-99" aria-hidden="true" tabindex="-1"></a>    </span>
+<span id="cb6-100"><a href="#cb6-100" aria-hidden="true" tabindex="-1"></a>    <span class="cf">for</span> trial <span class="kw">in</span> <span class="bu">range</span>(<span class="dv">20</span>):</span>
+<span id="cb6-101"><a href="#cb6-101" aria-hidden="true" tabindex="-1"></a>        stimulus.draw()</span>
+<span id="cb6-102"><a href="#cb6-102" aria-hidden="true" tabindex="-1"></a>        </span>
+<span id="cb6-103"><a href="#cb6-103" aria-hidden="true" tabindex="-1"></a>        <span class="cf">for</span> frame <span class="kw">in</span> <span class="bu">range</span>(<span class="dv">120</span>):  <span class="co"># 2 seconds</span></span>
+<span id="cb6-104"><a href="#cb6-104" aria-hidden="true" tabindex="-1"></a>            gaze_pos <span class="op">=</span> ET_controller.get_gaze_position()</span>
+<span id="cb6-105"><a href="#cb6-105" aria-hidden="true" tabindex="-1"></a>            window.pos <span class="op">=</span> gaze_pos</span>
+<span id="cb6-106"><a href="#cb6-106" aria-hidden="true" tabindex="-1"></a>            window.draw()</span>
+<span id="cb6-107"><a href="#cb6-107" aria-hidden="true" tabindex="-1"></a>            win.flip()</span>
+<span id="cb6-108"><a href="#cb6-108" aria-hidden="true" tabindex="-1"></a>        </span>
+<span id="cb6-109"><a href="#cb6-109" aria-hidden="true" tabindex="-1"></a>        ET_controller.record_event(<span class="ss">f'trial_</span><span class="sc">{</span>trial<span class="sc">}</span><span class="ss">_end'</span>)</span>
+<span id="cb6-110"><a href="#cb6-110" aria-hidden="true" tabindex="-1"></a>    </span>
+<span id="cb6-111"><a href="#cb6-111" aria-hidden="true" tabindex="-1"></a>    ET_controller.stop_recording()</span>
+<span id="cb6-112"><a href="#cb6-112" aria-hidden="true" tabindex="-1"></a><span class="in">```</span></span></code><button title="Copy to Clipboard" class="code-copy-button" data-in-quarto-modal=""><i class="bi"></i></button></pre></div>
 </div></div></div></div></div>
 </div> <!-- /content -->
 <footer class="footer">

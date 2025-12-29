@@ -199,8 +199,8 @@ div.callout-Advanced.callout-style-default .callout-icon::before, div.callout-Ad
         </a>
     </div>
   </nav>
-  <div id="quarto-announcement" data-announcement-id="5603cdf67aefc87f3b65f8721f133f89" class="alert alert-danger hidden"><i class="bi bi-exclamation-triangle quarto-announcement-icon"></i><div class="quarto-announcement-content">
-<p><strong>Development Version</strong> - DeToX is currently in beta. Features may change without notice. Thoroughly test before using in production studies.</p>
+  <div id="quarto-announcement" data-announcement-id="de69b60bfdf2ea42f39c5cf1d3162adf" class="alert alert-danger hidden"><i class="bi bi-exclamation-triangle quarto-announcement-icon"></i><div class="quarto-announcement-content">
+<p><strong>Development Version</strong> - DeToX is currently in beta. Features may change without notice. Thoroughly test before using.</p>
 </div><i class="bi bi-x-lg quarto-announcement-action"></i></div>
 </header>
 <!-- content -->
@@ -261,6 +261,12 @@ div.callout-Advanced.callout-style-default .callout-icon::before, div.callout-Ad
   <div class="sidebar-item-container"> 
   <a href="../api/ETracker.save_data.html" class="sidebar-item-text sidebar-link">
  <span class="menu-text">ETracker.save_data</span></a>
+  </div>
+</li>
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="../api/ETracker.set_eyetracking_settings.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text">ETracker.set_eyetracking_settings</span></a>
   </div>
 </li>
       </ul>
@@ -395,14 +401,8 @@ div.callout-Advanced.callout-style-default .callout-icon::before, div.callout-Ad
 </li>
           <li class="sidebar-item">
   <div class="sidebar-item-container"> 
-  <a href="../api/tobii2pix.html" class="sidebar-item-text sidebar-link">
- <span class="menu-text">tobii2pix</span></a>
-  </div>
-</li>
-          <li class="sidebar-item">
-  <div class="sidebar-item-container"> 
-  <a href="../api/get_psychopy_pos_from_trackbox.html" class="sidebar-item-text sidebar-link">
- <span class="menu-text">get_psychopy_pos_from_trackbox</span></a>
+  <a href="../api/get_psychopy_pos_from_user_position.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text">get_psychopy_pos_from_user_position</span></a>
   </div>
 </li>
       </ul>
@@ -465,7 +465,7 @@ div.callout-Advanced.callout-style-default .callout-icon::before, div.callout-Ad
 <div id="quarto-sidebar-glass" class="quarto-sidebar-collapse-item" data-bs-toggle="collapse" data-bs-target=".quarto-sidebar-collapse-item"></div>
 <!-- margin-sidebar -->
     <div id="quarto-margin-sidebar" class="sidebar margin-sidebar">
-        <nav id="TOC" role="doc-toc" class="toc-active" data-toc-expanded="4">
+        <nav id="TOC" role="doc-toc" class="toc-active" data-toc-expanded="6">
     <h2 id="toc-title">On this page</h2>
    
   <ul>
@@ -1103,28 +1103,41 @@ window.document.addEventListener("DOMContentLoaded", function (event) {
 <span id="cb3-29"><a href="#cb3-29" aria-hidden="true" tabindex="-1"></a></span>
 <span id="cb3-30"><a href="#cb3-30" aria-hidden="true" tabindex="-1"></a><span class="fu">## Attributes {.doc-section .doc-section-attributes}</span></span>
 <span id="cb3-31"><a href="#cb3-31" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb3-32"><a href="#cb3-32" aria-hidden="true" tabindex="-1"></a>| Name                  | Type             | Description                                                                                                                                            |</span>
-<span id="cb3-33"><a href="#cb3-33" aria-hidden="true" tabindex="-1"></a>|-----------------------|------------------|--------------------------------------------------------------------------------------------------------------------------------------------------------|</span>
-<span id="cb3-34"><a href="#cb3-34" aria-hidden="true" tabindex="-1"></a>| focus_time            | <span class="co">[</span><span class="ot">float</span><span class="co">](`float`)</span> | Wait time in seconds before collecting calibration data at each point. Allows participant to fixate on the target. Default is 0.5 seconds.             |</span>
-<span id="cb3-35"><a href="#cb3-35" aria-hidden="true" tabindex="-1"></a>| zoom_speed            | <span class="co">[</span><span class="ot">float</span><span class="co">](`float`)</span> | Speed multiplier for the zoom animation. Higher values make the size oscillation faster. Default is 6.0.                                               |</span>
-<span id="cb3-36"><a href="#cb3-36" aria-hidden="true" tabindex="-1"></a>| max_zoom_size_big     | <span class="co">[</span><span class="ot">float</span><span class="co">](`float`)</span> | Maximum size for zoom animation (big preset) as percentage of screen height. Recommended for infants/children. Default is 0.16 (16% of screen height). |</span>
-<span id="cb3-37"><a href="#cb3-37" aria-hidden="true" tabindex="-1"></a>| min_zoom_size_big     | <span class="co">[</span><span class="ot">float</span><span class="co">](`float`)</span> | Minimum size for zoom animation (big preset) as percentage of screen height. Default is 0.05 (5% of screen height).                                    |</span>
-<span id="cb3-38"><a href="#cb3-38" aria-hidden="true" tabindex="-1"></a>| trill_size_big        | <span class="co">[</span><span class="ot">float</span><span class="co">](`float`)</span> | Fixed size for trill animation (big preset) as percentage of screen height. Default is 0.14 (14% of screen height).                                    |</span>
-<span id="cb3-39"><a href="#cb3-39" aria-hidden="true" tabindex="-1"></a>| max_zoom_size_small   | <span class="co">[</span><span class="ot">float</span><span class="co">](`float`)</span> | Maximum size for zoom animation (small preset) as percentage of screen height. Recommended for adults. Default is 0.06 (6% of screen height).          |</span>
-<span id="cb3-40"><a href="#cb3-40" aria-hidden="true" tabindex="-1"></a>| min_zoom_size_small   | <span class="co">[</span><span class="ot">float</span><span class="co">](`float`)</span> | Minimum size for zoom animation (small preset) as percentage of screen height. Default is 0.01 (1% of screen height).                                  |</span>
-<span id="cb3-41"><a href="#cb3-41" aria-hidden="true" tabindex="-1"></a>| trill_size_small      | <span class="co">[</span><span class="ot">float</span><span class="co">](`float`)</span> | Fixed size for trill animation (small preset) as percentage of screen height. Default is 0.04 (4% of screen height).                                   |</span>
-<span id="cb3-42"><a href="#cb3-42" aria-hidden="true" tabindex="-1"></a>| trill_rotation_range  | <span class="co">[</span><span class="ot">float</span><span class="co">](`float`)</span> | Maximum rotation angle in degrees for trill animation. Default is 20 degrees.                                                                          |</span>
-<span id="cb3-43"><a href="#cb3-43" aria-hidden="true" tabindex="-1"></a>| trill_cycle_duration  | <span class="co">[</span><span class="ot">float</span><span class="co">](`float`)</span> | Total cycle time for trill animation in seconds (active + pause). Default is 1.5 seconds.                                                              |</span>
-<span id="cb3-44"><a href="#cb3-44" aria-hidden="true" tabindex="-1"></a>| trill_active_duration | <span class="co">[</span><span class="ot">float</span><span class="co">](`float`)</span> | Duration of active trill rotation in seconds, within each cycle. Default is 1.1 seconds (leaves 0.4s pause).                                           |</span>
-<span id="cb3-45"><a href="#cb3-45" aria-hidden="true" tabindex="-1"></a>| trill_frequency       | <span class="co">[</span><span class="ot">float</span><span class="co">](`float`)</span> | Number of back-and-forth rotation oscillations per second during active trill phase. Default is 3.0 oscillations/second.                               |</span>
-<span id="cb3-46"><a href="#cb3-46" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb3-47"><a href="#cb3-47" aria-hidden="true" tabindex="-1"></a><span class="fu">## Examples {.doc-section .doc-section-examples}</span></span>
-<span id="cb3-48"><a href="#cb3-48" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb3-49"><a href="#cb3-49" aria-hidden="true" tabindex="-1"></a><span class="in">```python</span></span>
-<span id="cb3-50"><a href="#cb3-50" aria-hidden="true" tabindex="-1"></a><span class="op">&gt;&gt;&gt;</span> settings <span class="op">=</span> AnimationSettings()</span>
-<span id="cb3-51"><a href="#cb3-51" aria-hidden="true" tabindex="-1"></a><span class="op">&gt;&gt;&gt;</span> settings.max_zoom_size_big <span class="op">=</span> <span class="fl">0.18</span>  <span class="co"># Increase big max size to 18%</span></span>
-<span id="cb3-52"><a href="#cb3-52" aria-hidden="true" tabindex="-1"></a><span class="op">&gt;&gt;&gt;</span> settings.trill_frequency <span class="op">=</span> <span class="fl">5.0</span>  <span class="co"># Faster trill</span></span>
-<span id="cb3-53"><a href="#cb3-53" aria-hidden="true" tabindex="-1"></a><span class="in">```</span></span></code><button title="Copy to Clipboard" class="code-copy-button" data-in-quarto-modal=""><i class="bi"></i></button></pre></div>
+<span id="cb3-32"><a href="#cb3-32" aria-hidden="true" tabindex="-1"></a>+-----------------------+------------------+--------------------------------------------------------------------------------------------------------------------------------------------------------+</span>
+<span id="cb3-33"><a href="#cb3-33" aria-hidden="true" tabindex="-1"></a>| Name                  | Type             | Description                                                                                                                                            |</span>
+<span id="cb3-34"><a href="#cb3-34" aria-hidden="true" tabindex="-1"></a>+=======================+==================+========================================================================================================================================================+</span>
+<span id="cb3-35"><a href="#cb3-35" aria-hidden="true" tabindex="-1"></a>| focus_time            | <span class="co">[</span><span class="ot">float</span><span class="co">](`float`)</span> | Wait time in seconds before collecting calibration data at each point. Allows participant to fixate on the target. Default is 0.5 seconds.             |</span>
+<span id="cb3-36"><a href="#cb3-36" aria-hidden="true" tabindex="-1"></a>+-----------------------+------------------+--------------------------------------------------------------------------------------------------------------------------------------------------------+</span>
+<span id="cb3-37"><a href="#cb3-37" aria-hidden="true" tabindex="-1"></a>| zoom_speed            | <span class="co">[</span><span class="ot">float</span><span class="co">](`float`)</span> | Speed multiplier for the zoom animation. Higher values make the size oscillation faster. Default is 6.0.                                               |</span>
+<span id="cb3-38"><a href="#cb3-38" aria-hidden="true" tabindex="-1"></a>+-----------------------+------------------+--------------------------------------------------------------------------------------------------------------------------------------------------------+</span>
+<span id="cb3-39"><a href="#cb3-39" aria-hidden="true" tabindex="-1"></a>| max_zoom_size_big     | <span class="co">[</span><span class="ot">float</span><span class="co">](`float`)</span> | Maximum size for zoom animation (big preset) as percentage of screen height. Recommended for infants/children. Default is 0.16 (16% of screen height). |</span>
+<span id="cb3-40"><a href="#cb3-40" aria-hidden="true" tabindex="-1"></a>+-----------------------+------------------+--------------------------------------------------------------------------------------------------------------------------------------------------------+</span>
+<span id="cb3-41"><a href="#cb3-41" aria-hidden="true" tabindex="-1"></a>| min_zoom_size_big     | <span class="co">[</span><span class="ot">float</span><span class="co">](`float`)</span> | Minimum size for zoom animation (big preset) as percentage of screen height. Default is 0.05 (5% of screen height).                                    |</span>
+<span id="cb3-42"><a href="#cb3-42" aria-hidden="true" tabindex="-1"></a>+-----------------------+------------------+--------------------------------------------------------------------------------------------------------------------------------------------------------+</span>
+<span id="cb3-43"><a href="#cb3-43" aria-hidden="true" tabindex="-1"></a>| trill_size_big        | <span class="co">[</span><span class="ot">float</span><span class="co">](`float`)</span> | Fixed size for trill animation (big preset) as percentage of screen height. Default is 0.14 (14% of screen height).                                    |</span>
+<span id="cb3-44"><a href="#cb3-44" aria-hidden="true" tabindex="-1"></a>+-----------------------+------------------+--------------------------------------------------------------------------------------------------------------------------------------------------------+</span>
+<span id="cb3-45"><a href="#cb3-45" aria-hidden="true" tabindex="-1"></a>| max_zoom_size_small   | <span class="co">[</span><span class="ot">float</span><span class="co">](`float`)</span> | Maximum size for zoom animation (small preset) as percentage of screen height. Recommended for adults. Default is 0.06 (6% of screen height).          |</span>
+<span id="cb3-46"><a href="#cb3-46" aria-hidden="true" tabindex="-1"></a>+-----------------------+------------------+--------------------------------------------------------------------------------------------------------------------------------------------------------+</span>
+<span id="cb3-47"><a href="#cb3-47" aria-hidden="true" tabindex="-1"></a>| min_zoom_size_small   | <span class="co">[</span><span class="ot">float</span><span class="co">](`float`)</span> | Minimum size for zoom animation (small preset) as percentage of screen height. Default is 0.01 (1% of screen height).                                  |</span>
+<span id="cb3-48"><a href="#cb3-48" aria-hidden="true" tabindex="-1"></a>+-----------------------+------------------+--------------------------------------------------------------------------------------------------------------------------------------------------------+</span>
+<span id="cb3-49"><a href="#cb3-49" aria-hidden="true" tabindex="-1"></a>| trill_size_small      | <span class="co">[</span><span class="ot">float</span><span class="co">](`float`)</span> | Fixed size for trill animation (small preset) as percentage of screen height. Default is 0.04 (4% of screen height).                                   |</span>
+<span id="cb3-50"><a href="#cb3-50" aria-hidden="true" tabindex="-1"></a>+-----------------------+------------------+--------------------------------------------------------------------------------------------------------------------------------------------------------+</span>
+<span id="cb3-51"><a href="#cb3-51" aria-hidden="true" tabindex="-1"></a>| trill_rotation_range  | <span class="co">[</span><span class="ot">float</span><span class="co">](`float`)</span> | Maximum rotation angle in degrees for trill animation. Default is 20 degrees.                                                                          |</span>
+<span id="cb3-52"><a href="#cb3-52" aria-hidden="true" tabindex="-1"></a>+-----------------------+------------------+--------------------------------------------------------------------------------------------------------------------------------------------------------+</span>
+<span id="cb3-53"><a href="#cb3-53" aria-hidden="true" tabindex="-1"></a>| trill_cycle_duration  | <span class="co">[</span><span class="ot">float</span><span class="co">](`float`)</span> | Total cycle time for trill animation in seconds (active + pause). Default is 1.5 seconds.                                                              |</span>
+<span id="cb3-54"><a href="#cb3-54" aria-hidden="true" tabindex="-1"></a>+-----------------------+------------------+--------------------------------------------------------------------------------------------------------------------------------------------------------+</span>
+<span id="cb3-55"><a href="#cb3-55" aria-hidden="true" tabindex="-1"></a>| trill_active_duration | <span class="co">[</span><span class="ot">float</span><span class="co">](`float`)</span> | Duration of active trill rotation in seconds, within each cycle. Default is 1.1 seconds (leaves 0.4s pause).                                           |</span>
+<span id="cb3-56"><a href="#cb3-56" aria-hidden="true" tabindex="-1"></a>+-----------------------+------------------+--------------------------------------------------------------------------------------------------------------------------------------------------------+</span>
+<span id="cb3-57"><a href="#cb3-57" aria-hidden="true" tabindex="-1"></a>| trill_frequency       | <span class="co">[</span><span class="ot">float</span><span class="co">](`float`)</span> | Number of back-and-forth rotation oscillations per second during active trill phase. Default is 3.0 oscillations/second.                               |</span>
+<span id="cb3-58"><a href="#cb3-58" aria-hidden="true" tabindex="-1"></a>+-----------------------+------------------+--------------------------------------------------------------------------------------------------------------------------------------------------------+</span>
+<span id="cb3-59"><a href="#cb3-59" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb3-60"><a href="#cb3-60" aria-hidden="true" tabindex="-1"></a><span class="fu">## Examples {.doc-section .doc-section-examples}</span></span>
+<span id="cb3-61"><a href="#cb3-61" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb3-62"><a href="#cb3-62" aria-hidden="true" tabindex="-1"></a><span class="in">```python</span></span>
+<span id="cb3-63"><a href="#cb3-63" aria-hidden="true" tabindex="-1"></a><span class="op">&gt;&gt;&gt;</span> settings <span class="op">=</span> AnimationSettings()</span>
+<span id="cb3-64"><a href="#cb3-64" aria-hidden="true" tabindex="-1"></a><span class="op">&gt;&gt;&gt;</span> settings.max_zoom_size_big <span class="op">=</span> <span class="fl">0.18</span>  <span class="co"># Increase big max size to 18%</span></span>
+<span id="cb3-65"><a href="#cb3-65" aria-hidden="true" tabindex="-1"></a><span class="op">&gt;&gt;&gt;</span> settings.trill_frequency <span class="op">=</span> <span class="fl">5.0</span>  <span class="co"># Faster trill</span></span>
+<span id="cb3-66"><a href="#cb3-66" aria-hidden="true" tabindex="-1"></a><span class="in">```</span></span></code><button title="Copy to Clipboard" class="code-copy-button" data-in-quarto-modal=""><i class="bi"></i></button></pre></div>
 </div></div></div></div></div>
 </div> <!-- /content -->
 <footer class="footer">

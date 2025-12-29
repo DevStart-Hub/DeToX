@@ -1,22 +1,71 @@
 # ETracker.stop_recording { #DeToX.ETracker.stop_recording }
 
 ```python
-ETracker.stop_recording()
+ETracker.stop_recording(data_check=True)
 ```
 
 Stop gaze data recording and finalize session.
 
 Performs complete shutdown: stops data collection, cleans up resources,
-saves all buffered data, and reports session summary. Handles both
-simulation and real eye tracker modes appropriately.
+saves all buffered data, and optionally performs a comprehensive data
+quality check. Handles both simulation and real eye tracker modes appropriately.
+
+## Parameters {.doc-section .doc-section-parameters}
+
++------------+----------------+--------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------+-----------+
+| Name       | Type           | Description                                                                                                                                                                                            | Default   |
++============+================+========================================================================================================================================================================================================+===========+
+| data_check | [bool](`bool`) | If True (default), performs data quality check by reading the saved file and analyzing timestamp gaps to detect dropped samples. If False, skips the quality check and completes faster. Default True. | `True`    |
++------------+----------------+--------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------+-----------+
 
 ## Raises {.doc-section .doc-section-raises}
 
-| Name   | Type                         | Description                           |
-|--------|------------------------------|---------------------------------------|
-|        | [UserWarning](`UserWarning`) | If recording is not currently active. |
++------------------------------+---------------------------------------+
+| Type                         | Description                           |
++==============================+=======================================+
+| [UserWarning](`UserWarning`) | If recording is not currently active. |
++------------------------------+---------------------------------------+
 
 ## Notes {.doc-section .doc-section-notes}
 
-All pending data in buffers is automatically saved before completion.
-Recording duration is measured from start_recording() call.
+- All pending data in buffers is automatically saved before completion
+- Recording duration is measured from start_recording() call
+- Quality check reads the complete saved file to analyze gaps between ALL samples,
+including potential gaps between save_data() calls
+- At 120Hz, each sample should be ~8333µs apart; gaps significantly larger
+indicate dropped samples
+
+## Examples {.doc-section .doc-section-examples}
+
+### Basic Usage
+
+#### Standard stop with quality check
+```python
+ET_controller.start_recording('data.h5')
+# ... run experiment ...
+ET_controller.stop_recording()  # Shows quality report
+```
+
+#### Skip quality check for faster shutdown
+```python
+ET_controller.stop_recording(data_check=False)
+```
+
+### Understanding Output
+
+#### Expected quality check report
+```python
+# When data_check=True, you'll see output like:
+# ╔════════════════════════════╗
+# ║  Recording Complete        ║
+# ╠════════════════════════════╣
+# ║ Data collection lasted     ║
+# ║ approximately 120.45 sec   ║
+# ║ Data has been saved to     ║
+# ║ experiment.h5              ║
+# ║                            ║
+# ║ Data Quality Report:       ║
+# ║   - Total samples: 14454   ║
+# ║   - Dropped samples: 0     ║
+# ╚════════════════════════════╝
+```

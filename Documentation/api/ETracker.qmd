@@ -11,10 +11,10 @@ The **ETracker** class is a simplified Python interface designed to streamline t
 This class is the central hub for your eye-tracking experiment. Instead of managing low-level SDK functions, the TobiiController provides a clean, unified workflow for key experimental tasks. It is designed to "detoxify" the process, abstracting away complex boilerplate code so you can focus on your research.
 
 Key features include:
-- **Experiment Control**: Start, stop, and manage eye-tracking recordings with simple method calls.
-- **Data Management**: Automatically save recorded gaze data to a specified file format.
-- **Calibration**: Easily run a calibration procedure or load an existing calibration file to prepare the eye-tracker.
-- **Seamless Integration**: Built specifically to integrate with PsychoPy's experimental loop, making it a natural fit for your existing research designs.
+ - **Experiment Control**: Start, stop, and manage eye-tracking recordings with simple method calls.
+ - **Data Management**: Automatically save recorded gaze data to a specified file format.
+ - **Calibration**: Easily run a calibration procedure or load an existing calibration file to prepare the eye-tracker.
+ - **Seamless Integration**: Built specifically to integrate with PsychoPy's experimental loop, making it a natural fit for your existing research designs.
 
 This class is intended to be the first object you instantiate in your experiment script. It provides a minimal yet powerful set of methods that are essential for conducting a reliable and reproducible eye-tracking study.
 
@@ -58,211 +58,288 @@ mode (real eye tracker vs. mouse simulation).
 
 #### Parameters {.doc-section .doc-section-parameters}
 
-| Name                | Type                                                                                                      | Description                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                      | Default     |
-|---------------------|-----------------------------------------------------------------------------------------------------------|------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------|-------------|
-| calibration_points  | int or list of tuple                                                                                      | Calibration pattern specification.  Use **5** for the standard 5-point pattern (4 corners + center; default).  Use **9** for a comprehensive 9-point pattern (3x3 grid).  Alternatively, provide a **list of tuples** with custom points in normalized  coordinates [-1, 1]. Example: ``[(-0.4, 0.4), (0.4, 0.4), (0.0, 0.0)]``.                                                                                                                                                                                                                                                                                                                                                                                 | `5`         |
-| infant_stims        | True or str or list or visual stimulus                                                                    | Calibration stimulus specification. Accepts multiple formats:  **True** uses built-in stimuli from the package (default);  **False** uses a default blue square;  a **str** specifies a single image file path (e.g., ``'stimulus.png'``);  a **list of str** provides multiple image paths;  a **PsychoPy visual stimulus** (e.g., Circle, Rect, Polygon, ImageStim, ShapeStim)  can be used as a single object;  or a **list of visual stimuli** may be provided.  If fewer stimuli than calibration points are given, they are automatically  repeated and optionally shuffled to cover all points.  Supported types: ImageStim, Circle, Rect, Polygon, ShapeStim.  TextStim and MovieStim are not supported. | `True`      |
-| shuffle             | [bool](`bool`)                                                                                            | Whether to randomize stimulus presentation order after any necessary  repetition. Helps prevent habituation to stimulus sequence. Default is True.                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                               | `True`      |
-| audio               | True or False or None or [psychopy](`psychopy`).[sound](`psychopy.sound`).[Sound](`psychopy.sound.Sound`) | Controls attention-getting audio during calibration.  **True** uses the built-in looping calibration sound (default).  **False** or **None** disables audio.  A **psychopy.sound.Sound** object may be provided for custom audio  (ensure it is configured appropriately, e.g., ``loops=-1`` for continuous looping).  Audio plays when a calibration point is selected and fades out during data collection.                                                                                                                                                                                                                                                                                                    | `True`      |
-| anim_type           | ([zoom](`zoom`), [trill](`trill`))                                                                        | Animation style for calibration stimuli.  **'zoom'** applies smooth size oscillation using a cosine function (default).  **'trill'** uses rapid rotation with intermittent pauses.                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                               | `'zoom'`    |
-| stim_size           | ([big](`big`), [small](`small`))                                                                          | Size preset for calibration stimuli.  **'big'** uses larger stimuli recommended for infants and children (default):  zoom animation ranges from 5�16% screen height, trill uses 14%.  **'small'** uses smaller stimuli for adults:  zoom ranges from 3�8%, trill uses 6%.                                                                                                                                                                                                                                                                                                                                                                                                                                        | `'big'`     |
-| visualization_style | ([circles](`circles`), [lines](`lines`))                                                                  | How to display calibration results.  **'circles'** shows small filled circles at each gaze sample position.  **'lines'** draws lines from targets to gaze samples (default).  In Tobii mode, green indicates the left eye and red the right eye;  in simulation mode, orange represents mouse position.                                                                                                                                                                                                                                                                                                                                                                                                          | `'circles'` |
++---------------------+---------------------------------------------------------------------------------------------------------------------+----------------------------------------------------------------------------------------------------------------------------------------------------+-------------+
+| Name                | Type                                                                                                                | Description                                                                                                                                        | Default     |
++=====================+=====================================================================================================================+====================================================================================================================================================+=============+
+| calibration_points  | int or list of tuple                                                                                                | Calibration pattern specification.                                                                                                                 | `5`         |
+|                     |                                                                                                                     |                                                                                                                                                    |             |
+|                     |                                                                                                                     |  - Use **5** for the standard 5-point pattern (4 corners + center; default).                                                                       |             |
+|                     |                                                                                                                     |  - Use **9** for a comprehensive 9-point pattern (3x3 grid).                                                                                       |             |
+|                     |                                                                                                                     |  - Alternatively, provide a **list of tuples** with custom points in normalized                                                                    |             |
+|                     |                                                                                                                     |  - coordinates [-1, 1]. Example: ``[(-0.4, 0.4), (0.4, 0.4), (0.0, 0.0)]``.                                                                        |             |
++---------------------+---------------------------------------------------------------------------------------------------------------------+----------------------------------------------------------------------------------------------------------------------------------------------------+-------------+
+| infant_stims        | True or str or list or visual stimulus                                                                              | Calibration stimulus specification. Accepts multiple formats                                                                                       | `True`      |
+|                     |                                                                                                                     |                                                                                                                                                    |             |
+|                     |                                                                                                                     |  - **True** uses built-in stimuli from the package (default);                                                                                      |             |
+|                     |                                                                                                                     |  - **False** uses a default blue square;                                                                                                           |             |
+|                     |                                                                                                                     |  - a **str** specifies a single image file path (e.g., ``'stimulus.png'``);                                                                        |             |
+|                     |                                                                                                                     |  - a **list of str** provides multiple image paths;                                                                                                |             |
+|                     |                                                                                                                     |  - a **PsychoPy visual stimulus** (e.g., Circle, Rect, Polygon, ImageStim, ShapeStim)                                                              |             |
+|                     |                                                                                                                     | can be used as a single object;                                                                                                                    |             |
+|                     |                                                                                                                     |  - or a **list of visual stimuli** may be provided.                                                                                                |             |
+|                     |                                                                                                                     | If fewer stimuli than calibration points are given, they are automatically                                                                         |             |
+|                     |                                                                                                                     | repeated and optionally shuffled to cover all points.                                                                                              |             |
+|                     |                                                                                                                     | Supported types: ImageStim, Circle, Rect, Polygon, ShapeStim.                                                                                      |             |
+|                     |                                                                                                                     | TextStim and MovieStim are not supported.                                                                                                          |             |
++---------------------+---------------------------------------------------------------------------------------------------------------------+----------------------------------------------------------------------------------------------------------------------------------------------------+-------------+
+| shuffle             | [bool](`bool`)                                                                                                      | Whether to randomize stimulus presentation order after any necessary  repetition. Helps prevent habituation to stimulus sequence. Default is True. | `True`      |
++---------------------+---------------------------------------------------------------------------------------------------------------------+----------------------------------------------------------------------------------------------------------------------------------------------------+-------------+
+| audio               | True or False or [None](`None`) or [psychopy](`psychopy`).[sound](`psychopy.sound`).[Sound](`psychopy.sound.Sound`) | Controls attention-getting audio during calibration:                                                                                               | `True`      |
+|                     |                                                                                                                     |                                                                                                                                                    |             |
+|                     |                                                                                                                     |  -**True** uses the built-in looping calibration sound (default).                                                                                  |             |
+|                     |                                                                                                                     |  -**False** or **None** disables audio.                                                                                                            |             |
+|                     |                                                                                                                     | A **psychopy.sound.Sound** object may be provided for custom audio                                                                                 |             |
+|                     |                                                                                                                     | (ensure it is configured appropriately, e.g., ``loops=-1`` for continuous looping).                                                                |             |
+|                     |                                                                                                                     | Audio plays when a calibration point is selected and fades out during data collection.                                                             |             |
++---------------------+---------------------------------------------------------------------------------------------------------------------+----------------------------------------------------------------------------------------------------------------------------------------------------+-------------+
+| anim_type           | ([zoom](`zoom`), [trill](`trill`))                                                                                  | Animation style for calibration stimuli:                                                                                                           | `'zoom'`    |
+|                     |                                                                                                                     |                                                                                                                                                    |             |
+|                     |                                                                                                                     |  - **'zoom'** applies smooth size oscillation using a cosine function (default).                                                                   |             |
+|                     |                                                                                                                     |  - **'trill'** uses rapid rotation with intermittent pauses.                                                                                       |             |
++---------------------+---------------------------------------------------------------------------------------------------------------------+----------------------------------------------------------------------------------------------------------------------------------------------------+-------------+
+| stim_size           | ([big](`big`), [small](`small`))                                                                                    | Size preset for calibration stimuli:                                                                                                               | `'big'`     |
+|                     |                                                                                                                     |                                                                                                                                                    |             |
+|                     |                                                                                                                     |  - **'big'** uses larger stimuli recommended for infants and children (default).                                                                   |             |
+|                     |                                                                                                                     |  -**'small'** uses smaller stimuli for adults.                                                                                                     |             |
++---------------------+---------------------------------------------------------------------------------------------------------------------+----------------------------------------------------------------------------------------------------------------------------------------------------+-------------+
+| visualization_style | ([circles](`circles`), [lines](`lines`))                                                                            | How to display calibration results:                                                                                                                | `'circles'` |
+|                     |                                                                                                                     |                                                                                                                                                    |             |
+|                     |                                                                                                                     |  - **'circles'** shows small filled circles at each gaze sample position.                                                                          |             |
+|                     |                                                                                                                     |  - **'lines'** draws lines from targets to gaze samples.                                                                                           |             |
++---------------------+---------------------------------------------------------------------------------------------------------------------+----------------------------------------------------------------------------------------------------------------------------------------------------+-------------+
 
 #### Returns {.doc-section .doc-section-returns}
 
++--------+----------------+-------------------------------------------------------------------------------------------------------------------------------------------+
 | Name   | Type           | Description                                                                                                                               |
-|--------|----------------|-------------------------------------------------------------------------------------------------------------------------------------------|
++========+================+===========================================================================================================================================+
 |        | [bool](`bool`) | True if calibration completed successfully and was accepted by the user.  False if calibration was aborted (e.g., via ESC key) or failed. |
++--------+----------------+-------------------------------------------------------------------------------------------------------------------------------------------+
 
 #### Raises {.doc-section .doc-section-raises}
 
-| Name   | Type                       | Description                                                                                                                                                                     |
-|--------|----------------------------|---------------------------------------------------------------------------------------------------------------------------------------------------------------------------------|
-|        | [ValueError](`ValueError`) | If `calibration_points` is not 5, 9, or a valid list of coordinate tuples;  if `visualization_style` is not 'circles' or 'lines';  or if `infant_stims` format is unrecognized. |
-|        | [TypeError](`TypeError`)   | If pre-loaded stimuli include unsupported types (e.g., TextStim, MovieStim).                                                                                                    |
++----------------------------+---------------------------------------------------------------------------------------------------------------------------------------------------------------------------------+
+| Type                       | Description                                                                                                                                                                     |
++============================+=================================================================================================================================================================================+
+| [ValueError](`ValueError`) | If `calibration_points` is not 5, 9, or a valid list of coordinate tuples;  if `visualization_style` is not 'circles' or 'lines';  or if `infant_stims` format is unrecognized. |
++----------------------------+---------------------------------------------------------------------------------------------------------------------------------------------------------------------------------+
+| [TypeError](`TypeError`)   | If pre-loaded stimuli include unsupported types (e.g., TextStim, MovieStim).                                                                                                    |
++----------------------------+---------------------------------------------------------------------------------------------------------------------------------------------------------------------------------+
 
 #### Examples {.doc-section .doc-section-examples}
 
-Basic usage with built-in stimuli:
+### Calibration Point Patterns
+
+#### Standard 5-point calibration
 ```python
-controller.calibrate(5)
+    controller.calibrate(5)
 ```
 
-9-point calibration:
+#### Comprehensive 9-point calibration
 ```python
-controller.calibrate(9)
+    controller.calibrate(9)
 ```
 
-Custom calibration points:
+#### Custom calibration points
 ```python
-custom_points = [
-    (0.0, 0.0),      # Center
-    (-0.5, 0.5),     # Top-left
-    (0.5, 0.5),      # Top-right
-    (-0.5, -0.5),    # Bottom-left
-    (0.5, -0.5)      # Bottom-right
-]
-controller.calibrate(custom_points)
+    custom_points = [
+        (0.0, 0.0),      # Center
+        (-0.5, 0.5),     # Top-left
+        (0.5, 0.5),      # Top-right
+        (-0.5, -0.5),    # Bottom-left
+        (0.5, -0.5)      # Bottom-right
+    ]
+    controller.calibrate(custom_points)
 ```
 
-Single image file:
+### Stimulus Options
+
+#### Single image file
 ```python
-controller.calibrate(5, infant_stims='my_stimulus.png')
+    controller.calibrate(5, infant_stims='my_stimulus.png')
 ```
 
-Multiple image files:
+#### Multiple image files
 ```python
-controller.calibrate(5, infant_stims=['stim1.png', 'stim2.png', 'stim3.png'])
+    controller.calibrate(5, infant_stims=['stim1.png', 'stim2.png', 'stim3.png'])
 ```
 
-Single shape stimulus:
+#### Single shape stimulus
 ```python
-red_square = visual.Rect(win, size=0.08, fillColor='red', units='height')
-controller.calibrate(5, infant_stims=red_square)
+    red_square = visual.Rect(win, size=0.08, fillColor='red', units='height')
+    controller.calibrate(5, infant_stims=red_square)
 ```
 
-Multiple shape stimuli:
+#### Multiple shape stimuli
 ```python
-shapes = [
-    visual.Circle(win, radius=0.04, fillColor='red', units='height'),
-    visual.Rect(win, size=0.08, fillColor='blue', units='height'),
-    visual.Polygon(win, edges=6, radius=0.04, fillColor='green', units='height')
-]
-controller.calibrate(5, infant_stims=shapes, shuffle=True)
+    shapes = [
+        visual.Circle(win, radius=0.04, fillColor='red', units='height'),
+        visual.Rect(win, size=0.08, fillColor='blue', units='height'),
+        visual.Polygon(win, edges=6, radius=0.04, fillColor='green', units='height')
+    ]
+    controller.calibrate(5, infant_stims=shapes, shuffle=True)
 ```
 
-Custom audio:
+### Animation and Audio
+
+#### Custom audio
 ```python
-from psychopy import sound
-my_sound = sound.Sound('custom_beep.wav', loops=-1)
-controller.calibrate(5, audio=my_sound)
+    from psychopy import sound
+    my_sound = sound.Sound('custom_beep.wav', loops=-1)
+    controller.calibrate(5, audio=my_sound)
 ```
 
-No audio with trill animation:
+#### Trill animation without audio
 ```python
-controller.calibrate(5, audio=False, anim_type='trill')
+    controller.calibrate(5, audio=False, anim_type='trill')
 ```
 
-Lines visualization style:
+### Visualization Styles
+
+#### Lines visualization
 ```python
-controller.calibrate(5, visualization_style='lines')
+    controller.calibrate(5, visualization_style='lines')
 ```
 
-Complete custom workflow:
+#### Circles visualization with small stimuli
 ```python
-# Position participant
-controller.show_status()
-
-# Custom calibration
-success = controller.calibrate(
-    calibration_points=9,
-    infant_stims=['stim1.png', 'stim2.png'],
-    shuffle=True,
-    audio=True,
-    anim_type='zoom',
-    visualization_style='circles'
-)
-
-if success:
-    controller.start_recording('data.h5')
-    # ... run experiment ...
-    controller.stop_recording()
+    controller.calibrate(5, stim_size='small', visualization_style='circles')
 ```
 
-#### Notes {.doc-section .doc-section-notes}
+### Complete Workflows
 
-- Calibration uses normalized coordinates [-1, 1] where (0, 0) is screen center.
-- Stimuli are automatically repeated if fewer than calibration points.
-- Animation preserves stimulus aspect ratio automatically.
-- In simulation mode, use mouse to simulate gaze position.
-- Press number keys (1�9) to select points, SPACE to collect data.
-- Press ENTER to view results, ESC to abort.
-- After viewing results: ENTER accepts, numbers + SPACE retries selected points.
-
-#### See Also {.doc-section .doc-section-see-also}
-
-show_status : Position participant before calibration
-save_calibration : Save calibration for later sessions
-load_calibration : Load previously saved calibration
+#### Full calibration workflow
+```python
+    # Position participant
+    controller.show_status()
+    
+    # Run calibration
+    success = controller.calibrate(
+        calibration_points=9,
+        infant_stims=['stim1.png', 'stim2.png'],
+        shuffle=True,
+        audio=True,
+        anim_type='zoom',
+        visualization_style='circles'
+    )
+    
+    if success:
+        controller.start_recording('data.h5')
+        # ... run experiment ...
+        controller.stop_recording()
+```
 
 ### gaze_contingent { #DeToX.ETracker.gaze_contingent }
 
 ```python
-ETracker.gaze_contingent(N=5)
+ETracker.gaze_contingent(N=0.5, units='seconds')
 ```
 
 Initialize real-time gaze buffer for contingent applications.
 
-Creates a rolling buffer that stores the most recent N gaze samples,
-enabling real-time gaze-contingent paradigms. Must be called before
-using `get_gaze_position()` for real-time gaze tracking.
+Creates a rolling buffer that stores recent gaze samples over a specified
+time window or number of samples, enabling real-time gaze-contingent paradigms.
+Must be called before using `get_gaze_position()` for real-time gaze tracking.
 
-The buffer automatically maintains the N most recent samples, discarding
+The buffer automatically maintains the most recent samples, discarding
 older data. This provides a stable estimate of current gaze position by
 aggregating across multiple samples.
 
 #### Parameters {.doc-section .doc-section-parameters}
 
-| Name   | Type         | Description                                                                                                                                                           | Default   |
-|--------|--------------|-----------------------------------------------------------------------------------------------------------------------------------------------------------------------|-----------|
-| N      | [int](`int`) | Number of recent gaze samples to store in the rolling buffer. Larger values provide smoother estimates but increase latency. Typical values: 3-10 samples. Default 5. | `5`       |
++--------+----------------------------------+---------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------+-------------+
+| Name   | Type                             | Description                                                                                                                                                                                                                                                   | Default     |
++========+==================================+===============================================================================================================================================================================================================================================================+=============+
+| N      | [float](`float`) or [int](`int`) | Buffer size specification. Interpretation depends on `units` parameter: - If units='seconds': Duration in seconds (e.g., 0.5 = 500ms window) - If units='samples': Number of gaze samples (e.g., 5 = last 5 samples) Default is 0.5 (seconds).                | `0.5`       |
++--------+----------------------------------+---------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------+-------------+
+| units  | [str](`str`)                     | Unit for buffer size specification: 'seconds' or 'samples'. - 'seconds' (default): N specifies time duration, automatically calculates required samples based on eye tracker frequency - 'samples': N specifies exact number of samples Default is 'seconds'. | `'seconds'` |
++--------+----------------------------------+---------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------+-------------+
 
 #### Raises {.doc-section .doc-section-raises}
 
-| Name   | Type                     | Description             |
-|--------|--------------------------|-------------------------|
-|        | [TypeError](`TypeError`) | If N is not an integer. |
++----------------------------+---------------------------------------------------------------------------+
+| Type                       | Description                                                               |
++============================+===========================================================================+
+| [TypeError](`TypeError`)   | If N is not numeric or units is not a string.                             |
++----------------------------+---------------------------------------------------------------------------+
+| [ValueError](`ValueError`) | If units is not 'seconds' or 'samples', or if calculated buffer size < 1. |
++----------------------------+---------------------------------------------------------------------------+
 
 #### Notes {.doc-section .doc-section-notes}
 
 - Call this method ONCE before your experimental loop
 - Buffer size trades off stability vs. latency:
-* Smaller N (3-5): Lower latency, more noise
-* Larger N (8-10): Smoother tracking, higher latency
-- For 120 Hz eye tracker with N=5: ~42ms latency
-- For 60 Hz eye tracker with N=5: ~83ms latency
+* Shorter duration/fewer samples: Lower latency, more noise
+* Longer duration/more samples: Smoother tracking, higher latency
+- For 120 Hz tracker with N=0.5 seconds: 60 samples, ~500ms latency
+- For 60 Hz tracker with N=0.5 seconds: 30 samples, ~500ms latency
+- For any tracker with N=5 samples: 5 samples, variable latency by fps
 
 #### Examples {.doc-section .doc-section-examples}
 
+### Basic Usage
+
+#### Default time-based buffer (0.5 seconds)
 ```python
-# Basic real-time gaze tracking
-ET_controller.gaze_contingent(N=5)  # Initialize buffer
-ET_controller.start_recording('data.h5')
-
-# Create gaze-contingent stimulus
-circle = visual.Circle(win, radius=0.05, fillColor='red')
-
-for frame in range(600):  # 10 seconds at 60 fps
-    gaze_pos = ET_controller.get_gaze_position()
-    circle.pos = gaze_pos
-    circle.draw()
-    win.flip()
-
-ET_controller.stop_recording()
-
-# Adjust buffer size for your needs
-ET_controller.gaze_contingent(N=3)   # Low latency, more jitter
-ET_controller.gaze_contingent(N=10)  # Smooth, higher latency
-
-# Gaze-contingent window paradigm
-ET_controller.gaze_contingent(N=5)
-ET_controller.start_recording('gaze_window.h5')
-
-stimulus = visual.ImageStim(win, 'image.png')
-window = visual.Circle(win, radius=0.1, fillColor=None, lineColor='white')
-
-for trial in range(20):
-    stimulus.draw()
+    # Initialize with 500ms window (adapts to tracker frequency)
+    ET_controller.gaze_contingent()  # Uses default N=0.5, units='seconds'
+    ET_controller.start_recording('data.h5')
     
-    for frame in range(120):  # 2 seconds
+    # Create gaze-contingent stimulus
+    circle = visual.Circle(win, radius=0.05, fillColor='red')
+    
+    for frame in range(600):  # 10 seconds at 60 fps
         gaze_pos = ET_controller.get_gaze_position()
-        window.pos = gaze_pos
-        window.draw()
+        circle.pos = gaze_pos
+        circle.draw()
         win.flip()
     
-    ET_controller.record_event(f'trial_{trial}_end')
+    ET_controller.stop_recording()
+```
 
-ET_controller.stop_recording()
+#### Custom time window
+```python
+    # 250ms window for lower latency
+    ET_controller.gaze_contingent(N=0.25, units='seconds')
+    
+    # 1 second window for very smooth tracking
+    ET_controller.gaze_contingent(N=1.0, units='seconds')
+```
+
+### Sample-Based Configuration
+
+#### Explicit sample count
+```python
+    # Exactly 5 most recent samples
+    ET_controller.gaze_contingent(N=5, units='samples')
+    
+    # Exactly 10 samples for smoother tracking
+    ET_controller.gaze_contingent(N=10, units='samples')
+```
+
+### Complete Applications
+
+#### Gaze-contingent window paradigm
+```python
+    # 300ms time window (auto-adjusts to tracker frequency)
+    ET_controller.gaze_contingent(N=0.3, units='seconds')
+    ET_controller.start_recording('gaze_window.h5')
+    
+    stimulus = visual.ImageStim(win, 'image.png')
+    window = visual.Circle(win, radius=0.1, fillColor=None, lineColor='white')
+    
+    for trial in range(20):
+        stimulus.draw()
+        
+        for frame in range(120):  # 2 seconds
+            gaze_pos = ET_controller.get_gaze_position()
+            window.pos = gaze_pos
+            window.draw()
+            win.flip()
+        
+        ET_controller.record_event(f'trial_{trial}_end')
+    
+    ET_controller.stop_recording()
 ```
 
 ### get_gaze_position { #DeToX.ETracker.get_gaze_position }
@@ -278,47 +355,79 @@ real-time gaze estimate. Handles missing or invalid data gracefully.
 
 #### Parameters {.doc-section .doc-section-parameters}
 
++--------------------+----------------+----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------+------------+
 | Name               | Type           | Description                                                                                                                                                                                                          | Default    |
-|--------------------|----------------|----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------|------------|
++====================+================+======================================================================================================================================================================================================================+============+
 | fallback_offscreen | [bool](`bool`) | If True (default), returns an offscreen position (3x screen dimensions) when no valid gaze data is available. If False, returns None.                                                                                | `True`     |
++--------------------+----------------+----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------+------------+
 | method             | [str](`str`)   | Aggregation method for combining samples and eyes. - "median" (default): Robust to outliers, good for noisy data - "mean": Smoother but sensitive to outliers - "last": Lowest latency, uses only most recent sample | `'median'` |
++--------------------+----------------+----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------+------------+
 
 #### Returns {.doc-section .doc-section-returns}
 
-| Name   | Type                     | Description                                                                                                                 |
-|--------|--------------------------|-----------------------------------------------------------------------------------------------------------------------------|
-|        | [tuple](`tuple`) or None | Gaze position (x, y) in PsychoPy coordinates (current window units), or None if no valid data and fallback_offscreen=False. |
++--------+------------------------------------+-----------------------------------------------------------------------------------------------------------------------------+
+| Name   | Type                               | Description                                                                                                                 |
++========+====================================+=============================================================================================================================+
+|        | [tuple](`tuple`) or [None](`None`) | Gaze position (x, y) in PsychoPy coordinates (current window units), or None if no valid data and fallback_offscreen=False. |
++--------+------------------------------------+-----------------------------------------------------------------------------------------------------------------------------+
 
 #### Raises {.doc-section .doc-section-raises}
 
-| Name   | Type                           | Description                                                   |
-|--------|--------------------------------|---------------------------------------------------------------|
-|        | [RuntimeError](`RuntimeError`) | If gaze_contingent() was not called to initialize the buffer. |
++--------------------------------+---------------------------------------------------------------+
+| Type                           | Description                                                   |
++================================+===============================================================+
+| [RuntimeError](`RuntimeError`) | If gaze_contingent() was not called to initialize the buffer. |
++--------------------------------+---------------------------------------------------------------+
 
 #### Examples {.doc-section .doc-section-examples}
 
+### Basic Usage
+
+#### Default behavior with median aggregation
 ```python
-# Basic usage (median aggregation)
 pos = ET_controller.get_gaze_position()
 if pos is not None:
-     circle.pos = pos
+    circle.pos = pos
+```
 
-# Use mean for smoother tracking
+### Aggregation Methods
+
+#### Mean for smoother tracking
+```python
 pos = ET_controller.get_gaze_position(method="mean")
+```
 
-# Lowest latency (last sample only)
+#### Last sample for lowest latency
+```python
 pos = ET_controller.get_gaze_position(method="last")
+```
 
-# Return None instead of offscreen position
+### Handling Missing Data
+
+#### Return None instead of offscreen position
+```python
 pos = ET_controller.get_gaze_position(fallback_offscreen=False)
 if pos is None:
-     print("No valid gaze data")
+    print("No valid gaze data")
+```
+
+#### Check for offscreen gaze
+```python
+pos = ET_controller.get_gaze_position(fallback_offscreen=True)
+# Offscreen positions will be far outside window bounds
+if abs(pos[0]) > 2.0 or abs(pos[1]) > 2.0:
+    print("Participant looking away")
 ```
 
 ### load_calibration { #DeToX.ETracker.load_calibration }
 
 ```python
-ETracker.load_calibration(filename=None, use_gui=False)
+ETracker.load_calibration(
+    filename=None,
+    use_gui=False,
+    screen=-1,
+    alwaysOnTop=True,
+)
 ```
 
 Loads calibration data from a file and applies it to the eye tracker.
@@ -331,36 +440,61 @@ available when connected to a physical eye tracker.
 
 #### Parameters {.doc-section .doc-section-parameters}
 
-| Name     | Type           | Description                                                                                                                                                                                                        | Default   |
-|----------|----------------|--------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------|-----------|
-| filename | [str](`str`)   | The path to the calibration data file (e.g., "subject_01_calib.dat"). If `use_gui` is `True`, this path is used as the default suggestion in the file dialog. If `use_gui` is `False`, this parameter is required. | `None`    |
-| use_gui  | [bool](`bool`) | If `True`, a graphical file-open dialog is displayed for the user to select the calibration file. Defaults to `False`.                                                                                             | `False`   |
++-------------+----------------+------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------+-----------+
+| Name        | Type           | Description                                                                                                                                                                                                            | Default   |
++=============+================+========================================================================================================================================================================================================================+===========+
+| filename    | [str](`str`)   | The path to the calibration data file (e.g., "subject_01_calib.dat"). If `use_gui` is `True`, this path is used as the default suggestion in the file dialog. If `use_gui` is `False`, this parameter is required.     | `None`    |
++-------------+----------------+------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------+-----------+
+| use_gui     | [bool](`bool`) | If `True`, a graphical file-open dialog is displayed for the user to select the calibration file. Defaults to `False`.                                                                                                 | `False`   |
++-------------+----------------+------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------+-----------+
+| screen      | [int](`int`)   | Screen number where the GUI dialog is displayed. Only used when `use_gui=True`. If -1 (default), the dialog appears on the primary screen. Use 0, 1, 2, etc.  to specify other monitors. Ignored when `use_gui=False`. | `-1`      |
++-------------+----------------+------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------+-----------+
+| alwaysOnTop | [bool](`bool`) | Whether the GUI dialog stays on top of other windows. Only used when  `use_gui=True`. Default is True to prevent the dialog from being hidden  behind experiment windows. Ignored when `use_gui=False`.                | `True`    |
++-------------+----------------+------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------+-----------+
 
 #### Returns {.doc-section .doc-section-returns}
 
++--------+----------------+----------------------------------------------------------------------------------------------------------------------------------------------------------------------+
 | Name   | Type           | Description                                                                                                                                                          |
-|--------|----------------|----------------------------------------------------------------------------------------------------------------------------------------------------------------------|
++========+================+======================================================================================================================================================================+
 |        | [bool](`bool`) | Returns `True` if the calibration was successfully loaded and applied, and `False` otherwise (e.g., user cancelled the dialog, file not found, or data was invalid). |
++--------+----------------+----------------------------------------------------------------------------------------------------------------------------------------------------------------------+
 
 #### Raises {.doc-section .doc-section-raises}
 
-| Name   | Type                           | Description                                                       |
-|--------|--------------------------------|-------------------------------------------------------------------|
-|        | [RuntimeError](`RuntimeError`) | If the method is called while the ETracker is in simulation mode. |
-|        | [ValueError](`ValueError`)     | If `use_gui` is `False` and `filename` is not provided.           |
++--------------------------------+-------------------------------------------------------------------+
+| Type                           | Description                                                       |
++================================+===================================================================+
+| [RuntimeError](`RuntimeError`) | If the method is called while the ETracker is in simulation mode. |
++--------------------------------+-------------------------------------------------------------------+
+| [ValueError](`ValueError`)     | If `use_gui` is `False` and `filename` is not provided.           |
++--------------------------------+-------------------------------------------------------------------+
 
 #### Examples {.doc-section .doc-section-examples}
 
+#### Load calibration from specific file
 ```python
-# Load calibration from specific file
 success = ET_controller.load_calibration('subject_01_calib.dat')
 if success:
     ET_controller.start_recording('subject_01_data.h5')
+```
 
-# Use GUI to select file
+#### Use GUI to select file
+```python
 success = ET_controller.load_calibration(use_gui=True)
+```
 
-# Multi-session workflow
+#### GUI on secondary monitor
+```python
+success = ET_controller.load_calibration(
+    use_gui=True, 
+    screen=1, 
+    alwaysOnTop=False
+)
+```
+
+#### Multi-session workflow
+```python
 # Session 1: Calibrate and save
 ET_controller.calibrate(5)
 ET_controller.save_calibration('participant_123.dat')
@@ -389,28 +523,71 @@ simulation vs. real eye tracker modes.
 
 #### Parameters {.doc-section .doc-section-parameters}
 
++--------+--------------+--------------------------------------------------------------------------+------------+
 | Name   | Type         | Description                                                              | Default    |
-|--------|--------------|--------------------------------------------------------------------------|------------|
++========+==============+==========================================================================+============+
 | label  | [str](`str`) | Descriptive label for the event (e.g., 'trial_start', 'stimulus_onset'). | _required_ |
++--------+--------------+--------------------------------------------------------------------------+------------+
 
 #### Raises {.doc-section .doc-section-raises}
 
-| Name   | Type                               | Description                             |
-|--------|------------------------------------|-----------------------------------------|
-|        | [RuntimeWarning](`RuntimeWarning`) | If called when recording is not active. |
++------------------------------------+-----------------------------------------+
+| Type                               | Description                             |
++====================================+=========================================+
+| [RuntimeWarning](`RuntimeWarning`) | If called when recording is not active. |
++------------------------------------+-----------------------------------------+
 
 #### Examples {.doc-section .doc-section-examples}
 
+### Basic Usage
+
+#### Recording single events
 ```python
 ET_controller.record_event('trial_1_start')
-#  present stimulus 
+# ... present stimulus ...
 ET_controller.record_event('stimulus_offset')
+```
+
+### Common Patterns
+
+#### Complete trial structure
+```python
+ET_controller.record_event('trial_1_start')
+ET_controller.record_event('fixation_onset')
+core.wait(1.0)
+ET_controller.record_event('fixation_offset')
+
+ET_controller.record_event('stimulus_onset')
+# ... show stimulus ...
+ET_controller.record_event('stimulus_offset')
+
+ET_controller.record_event('response_prompt')
+# ... wait for response ...
+ET_controller.record_event('response_recorded')
+ET_controller.record_event('trial_1_end')
+```
+
+#### Multi-trial experiment
+```python
+ET_controller.start_recording('experiment.h5')
+
+for trial_num in range(10):
+    ET_controller.record_event(f'trial_{trial_num}_start')
+    # ... run trial ...
+    ET_controller.record_event(f'trial_{trial_num}_end')
+
+ET_controller.stop_recording()
 ```
 
 ### save_calibration { #DeToX.ETracker.save_calibration }
 
 ```python
-ETracker.save_calibration(filename=None, use_gui=False)
+ETracker.save_calibration(
+    filename=None,
+    use_gui=False,
+    screen=-1,
+    alwaysOnTop=True,
+)
 ```
 
 Save the current calibration data to a file.
@@ -421,16 +598,25 @@ and saves it as a binary file. This can be reloaded later with
 
 #### Parameters {.doc-section .doc-section-parameters}
 
-| Name     | Type                 | Description                                                                                                                                                                                                                                            | Default   |
-|----------|----------------------|--------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------|-----------|
-| filename | [str](`str`) \| None | Desired output path. If None and `use_gui` is False, a timestamped default name is used (e.g., 'YYYY-mm-dd_HH-MM-SS_calibration.dat'). If provided without an extension, '.dat' is appended. If an extension is already present, it is left unchanged. | `None`    |
-| use_gui  | [bool](`bool`)       | If True, opens a file-save dialog (Psychopy) where the user chooses the path. The suggested name respects the logic above. Default False.                                                                                                              | `False`   |
++-------------+--------------------------------+--------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------+-----------+
+| Name        | Type                           | Description                                                                                                                                                                                                                                            | Default   |
++=============+================================+========================================================================================================================================================================================================================================================+===========+
+| filename    | [str](`str`) \| [None](`None`) | Desired output path. If None and `use_gui` is False, a timestamped default name is used (e.g., 'YYYY-mm-dd_HH-MM-SS_calibration.dat'). If provided without an extension, '.dat' is appended. If an extension is already present, it is left unchanged. | `None`    |
++-------------+--------------------------------+--------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------+-----------+
+| use_gui     | [bool](`bool`)                 | If True, opens a file-save dialog (Psychopy) where the user chooses the path. The suggested name respects the logic above. Default False.                                                                                                              | `False`   |
++-------------+--------------------------------+--------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------+-----------+
+| screen      | [int](`int`)                   | Screen number where the GUI dialog is displayed. Only used when `use_gui=True`. If -1 (default), the dialog appears on the primary screen. Use 0, 1, 2, etc.  to specify other monitors. Ignored when `use_gui=False`.                                 | `-1`      |
++-------------+--------------------------------+--------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------+-----------+
+| alwaysOnTop | [bool](`bool`)                 | Whether the GUI dialog stays on top of other windows. Only used when  `use_gui=True`. Default is True to prevent the dialog from being hidden  behind experiment windows. Ignored when `use_gui=False`.                                                | `True`    |
++-------------+--------------------------------+--------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------+-----------+
 
 #### Returns {.doc-section .doc-section-returns}
 
++--------+----------------+-----------------------------------------------------------------------------------------------------+
 | Name   | Type           | Description                                                                                         |
-|--------|----------------|-----------------------------------------------------------------------------------------------------|
++========+================+=====================================================================================================+
 |        | [bool](`bool`) | True if saved successfully; False if cancelled, no data available, in simulation mode, or on error. |
++--------+----------------+-----------------------------------------------------------------------------------------------------+
 
 #### Notes {.doc-section .doc-section-notes}
 
@@ -439,12 +625,24 @@ and saves it as a binary file. This can be reloaded later with
 
 #### Examples {.doc-section .doc-section-examples}
 
+#### Save with default timestamped name
 ```python
-# Save with default timestamped name
 ET_controller.save_calibration()
+```
 
-### Save with specified filename
+#### Save with specified filename
+```python
 ET_controller.save_calibration('subject_01_calib.dat')
+```
+
+#### Use GUI to choose save location
+```python
+ET_controller.save_calibration(use_gui=True)
+```
+
+#### GUI on secondary monitor
+```python
+ET_controller.save_calibration(use_gui=True, screen=1, alwaysOnTop=False)
 ```
 
 ### save_data { #DeToX.ETracker.save_data }
@@ -470,16 +668,26 @@ and ensure data is saved even if the program crashes.
 - Safe to call during active recording
 - Clears buffers after saving
 - Events are matched to nearest gaze sample by timestamp
+- In HDF5 format, events are saved in two places:
+1. Merged into the main gaze table's 'Events' column
+2. As a separate 'events' table for independent event analysis
+- In CSV format, events only appear in the 'Events' column
 
 #### Examples {.doc-section .doc-section-examples}
 
+### Automatic Usage
+
+#### Default behavior (most common)
 ```python
-# Automatic saving (most common)
 ET_controller.start_recording('data.h5')
 # ... run experiment ...
 ET_controller.stop_recording()  # Automatically calls save_data()
+```
 
-# Manual periodic saves for long experiments
+### Manual Periodic Saves
+
+#### Save every N trials for long experiments
+```python
 ET_controller.start_recording('long_experiment.h5')
 
 for trial in range(100):
@@ -492,8 +700,12 @@ for trial in range(100):
         ET_controller.save_data()  # Saves and clears buffers
 
 ET_controller.stop_recording()
+```
 
-# Save data at natural break points
+### Strategic Save Points
+
+#### Save at natural break points between blocks
+```python
 ET_controller.start_recording('session.h5')
 
 # Block 1
@@ -521,6 +733,8 @@ ETracker.set_eyetracking_settings(
     desired_fps=None,
     desired_illumination_mode=None,
     use_gui=False,
+    screen=-1,
+    alwaysOnTop=True,
 )
 ```
 
@@ -530,44 +744,90 @@ This method updates the eye tracker's sampling frequency (FPS) and illumination
 mode, either programmatically or via a graphical interface. It ensures that 
 configuration changes are only made when the device is idle and connected.
 
+After applying settings, a summary is displayed showing which settings changed
+and which remained the same.
+
 #### Parameters {.doc-section .doc-section-parameters}
 
-| Name                      | Type           | Description                                                                                                      | Default   |
-|---------------------------|----------------|------------------------------------------------------------------------------------------------------------------|-----------|
-| desired_fps               | [int](`int`)   | Desired sampling frequency in Hz (e.g., 60, 120, 300). If None, the current  frequency is retained.              | `None`    |
-| desired_illumination_mode | [str](`str`)   | Desired illumination mode (e.g., 'Auto', 'Bright', 'Dark'). If None, the current  illumination mode is retained. | `None`    |
-| use_gui                   | [bool](`bool`) | If True, opens a PsychoPy GUI dialog that allows users to select settings  interactively. Defaults to False.     | `False`   |
++---------------------------+----------------+-----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------+-----------+
+| Name                      | Type           | Description                                                                                                                                                                                                                                                                 | Default   |
++===========================+================+=============================================================================================================================================================================================================================================================================+===========+
+| desired_fps               | [int](`int`)   | Desired sampling frequency in Hz (e.g., 60, 120, 300). If None, the current  frequency is retained. When `use_gui=True`, this value pre-populates the  dialog box dropdown.                                                                                                 | `None`    |
++---------------------------+----------------+-----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------+-----------+
+| desired_illumination_mode | [str](`str`)   | Desired illumination mode (e.g., 'Auto', 'Bright', 'Dark'). If None, the  current illumination mode is retained. When `use_gui=True`, this value  pre-populates the dialog box dropdown.                                                                                    | `None`    |
++---------------------------+----------------+-----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------+-----------+
+| use_gui                   | [bool](`bool`) | If True, opens a PsychoPy GUI dialog with dropdown menus that allows users  to select settings interactively. The dropdowns are pre-populated with values  from `desired_fps` and `desired_illumination_mode` if provided, or current  settings if None. Defaults to False. | `False`   |
++---------------------------+----------------+-----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------+-----------+
+| screen                    | [int](`int`)   | Screen number where the GUI dialog is displayed. Only used when `use_gui=True`. If -1 (default), the dialog appears on the primary screen. Use 0, 1, 2, etc.  to specify other monitors. Ignored when `use_gui=False`.                                                      | `-1`      |
++---------------------------+----------------+-----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------+-----------+
+| alwaysOnTop               | [bool](`bool`) | Whether the GUI dialog stays on top of other windows. Only used when  `use_gui=True`. Default is True to prevent the dialog from being hidden  behind experiment windows. Ignored when `use_gui=False`.                                                                     | `True`    |
++---------------------------+----------------+-----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------+-----------+
 
 #### Raises {.doc-section .doc-section-raises}
 
-| Name   | Type                           | Description                                                                               |
-|--------|--------------------------------|-------------------------------------------------------------------------------------------|
-|        | [RuntimeError](`RuntimeError`) | If no physical eye tracker is connected or if the function is called in  simulation mode. |
-|        | [ValueError](`ValueError`)     | If the specified FPS or illumination mode is not supported by the connected device.       |
++--------------------------------+-------------------------------------------------------------------------------------------+
+| Type                           | Description                                                                               |
++================================+===========================================================================================+
+| [RuntimeError](`RuntimeError`) | If no physical eye tracker is connected or if the function is called in  simulation mode. |
++--------------------------------+-------------------------------------------------------------------------------------------+
+| [ValueError](`ValueError`)     | If the specified FPS or illumination mode is not supported by the connected  device.      |
++--------------------------------+-------------------------------------------------------------------------------------------+
 
 #### Notes {.doc-section .doc-section-notes}
 
 - Settings cannot be changed during active recording. If an ongoing recording 
 is detected, a non-blocking warning is issued and the function exits safely.
-- When `use_gui=True`, a PsychoPy dialog window appears. It must be closed 
-manually before the program continues.
+- When `use_gui=True`, a PsychoPy dialog window appears with dropdown menus.
+The `screen` and `alwaysOnTop` parameters control its display behavior.
 - After successfully applying new settings, the internal attributes `self.fps` 
 and `self.illum_mode` are updated to reflect the current device configuration.
+- A summary of applied changes is displayed using NicePrint, showing which 
+settings changed (with old --> new values) and which remained unchanged.
 
 #### Examples {.doc-section .doc-section-examples}
 
+### Programmatic Settings
+
+#### Set frequency to 120 Hz
 ```python
-# Set frequency to 120 Hz programmatically
-ET_controller.set_eyetracking_settings(desired_fps=120)
+        ET_controller.set_eyetracking_settings(desired_fps=120)
+```
 
-# Set illumination mode to 'Bright'
-ET_controller.set_eyetracking_settings(desired_illumination_mode='Bright')
+#### Set illumination mode to 'Bright'
+```python
+    ET_controller.set_eyetracking_settings(desired_illumination_mode='Bright')
+```
 
-# Set both frequency and illumination mode
-ET_controller.set_eyetracking_settings(desired_fps=120, desired_illumination_mode='Bright')
+#### Set both frequency and illumination mode
+```python
+    ET_controller.set_eyetracking_settings(
+        desired_fps=120,
+        desired_illumination_mode='Bright'
+    )
+```
 
-# Use GUI to select settings interactively
-ET_controller.set_eyetracking_settings(use_gui=True)
+### GUI-Based Settings
+
+#### Open GUI with default settings
+```python
+    ET_controller.set_eyetracking_settings(use_gui=True)
+```
+
+#### GUI on secondary monitor without always-on-top
+```python
+    ET_controller.set_eyetracking_settings(
+        use_gui=True,
+        screen=1,
+        alwaysOnTop=False
+    )
+```
+
+#### GUI with pre-selected 120 Hz in dropdown
+```python
+    ET_controller.set_eyetracking_settings(
+        desired_fps=120,
+        use_gui=True
+    )
 ```
 
 ### show_status { #DeToX.ETracker.show_status }
@@ -588,10 +848,13 @@ or provide your own custom MovieStim object.
 
 #### Parameters {.doc-section .doc-section-parameters}
 
++--------------+----------------------------------------------------------------------------------------+------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------+-----------+
 | Name         | Type                                                                                   | Description                                                                                                                                                                                                                                                                                    | Default   |
-|--------------|----------------------------------------------------------------------------------------|------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------|-----------|
++==============+========================================================================================+================================================================================================================================================================================================================================================================================================+===========+
 | decision_key | [str](`str`)                                                                           | Key to press to exit visualization. Default 'space'.                                                                                                                                                                                                                                           | `'space'` |
++--------------+----------------------------------------------------------------------------------------+------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------+-----------+
 | video_help   | [bool](`bool`) or [visual](`psychopy.visual`).[MovieStim](`psychopy.visual.MovieStim`) | Controls background video display: - True: Uses built-in instructional video (default) - False: No video displayed - visual.MovieStim: Uses your pre-loaded custom video. You are responsible for scaling (size) and positioning (pos) the MovieStim to fit your desired layout. Default True. | `True`    |
++--------------+----------------------------------------------------------------------------------------+------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------+-----------+
 
 #### Notes {.doc-section .doc-section-notes}
 
@@ -603,31 +866,50 @@ height units and positioned at (0, -0.08) to avoid covering the track box.
 
 #### Examples {.doc-section .doc-section-examples}
 
+### Basic Usage
+
+#### Default with built-in video
 ```python
-# Basic usage with built-in video
-ET_controller.show_status()
+    ET_controller.show_status()
+```
 
-# No background video
-ET_controller.show_status(video_help=False)
+#### Without background video
+```python
+    ET_controller.show_status(video_help=False)
+```
 
-# Custom exit key
-ET_controller.show_status(decision_key='return')
+### Customization Options
 
-# Use custom video
-from psychopy import visual
-my_video = visual.MovieStim(
-    win, 
-    'instructions.mp4', 
-    size=(0.8, 0.6), 
-    pos=(0, -0.1)
-)
-ET_controller.show_status(video_help=my_video)
+#### Custom exit key
+```python
+    ET_controller.show_status(decision_key='return')
+```
 
-# Complete workflow: position participant before calibration
-ET_controller.show_status()  # Position participant
-success = ET_controller.calibrate(5)  # Run calibration
-if success:
-    ET_controller.start_recording('data.h5')  # Start recording
+#### Custom video with specific size and position
+```python
+    from psychopy import visual
+    my_video = visual.MovieStim(
+        win, 
+        'instructions.mp4', 
+        size=(0.8, 0.6), 
+        pos=(0, -0.1)
+    )
+    ET_controller.show_status(video_help=my_video)
+```
+
+### Complete Workflows
+
+#### Position participant before calibration
+```python
+    # Position participant
+    ET_controller.show_status()
+    
+    # Run calibration
+    success = ET_controller.calibrate(5)
+    
+    # Start recording if calibration successful
+    if success:
+        ET_controller.start_recording('data.h5')
 ```
 
 ### start_recording { #DeToX.ETracker.start_recording }
@@ -644,40 +926,128 @@ Creates HDF5 or CSV files based on filename extension.
 
 #### Parameters {.doc-section .doc-section-parameters}
 
++------------+----------------+--------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------+-----------+
 | Name       | Type           | Description                                                                                                                                                                                                  | Default   |
-|------------|----------------|--------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------|-----------|
++============+================+==============================================================================================================================================================================================================+===========+
 | filename   | [str](`str`)   | Output filename for gaze data. If None, generates timestamp-based name. File extension determines format (.h5/.hdf5 for HDF5, .csv for CSV, defaults to .h5).                                                | `None`    |
++------------+----------------+--------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------+-----------+
 | raw_format | [bool](`bool`) | If True, preserves all original Tobii SDK column names and data. If False (default), uses simplified column names and subset of columns. Raw format is useful for advanced analysis requiring full metadata. | `False`   |
++------------+----------------+--------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------+-----------+
 
 #### Examples {.doc-section .doc-section-examples}
 
-```python
-### Standard format (simplified columns)
-ET_controller.start_recording('data.h5')
+### Basic Usage
 
-### Raw format (all Tobii SDK columns preserved)
+#### Standard HDF5 format
+```python
+ET_controller.start_recording('data.h5')
+```
+
+#### Auto-generated timestamped filename
+```python
+ET_controller.start_recording()  # Creates YYYY-MM-DD_HH-MM-SS.h5
+```
+
+#### CSV format
+```python
+ET_controller.start_recording('data.csv')
+```
+
+### Advanced Options
+
+#### Raw format with all Tobii SDK columns
+```python
 ET_controller.start_recording('data_raw.h5', raw_format=True)
+```
+
+### Complete Workflows
+
+#### Full experiment with event markers
+```python
+# Setup and calibration
+ET_controller.show_status()
+ET_controller.calibrate(5)
+
+# Start recording
+ET_controller.start_recording('participant_01.h5')
+
+# Run experiment with event markers
+ET_controller.record_event('trial_1_start')
+# ... present stimuli ...
+ET_controller.record_event('trial_1_end')
+
+# Stop recording
+ET_controller.stop_recording()
 ```
 
 ### stop_recording { #DeToX.ETracker.stop_recording }
 
 ```python
-ETracker.stop_recording()
+ETracker.stop_recording(data_check=True)
 ```
 
 Stop gaze data recording and finalize session.
 
 Performs complete shutdown: stops data collection, cleans up resources,
-saves all buffered data, and reports session summary. Handles both
-simulation and real eye tracker modes appropriately.
+saves all buffered data, and optionally performs a comprehensive data
+quality check. Handles both simulation and real eye tracker modes appropriately.
+
+#### Parameters {.doc-section .doc-section-parameters}
+
++------------+----------------+--------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------+-----------+
+| Name       | Type           | Description                                                                                                                                                                                            | Default   |
++============+================+========================================================================================================================================================================================================+===========+
+| data_check | [bool](`bool`) | If True (default), performs data quality check by reading the saved file and analyzing timestamp gaps to detect dropped samples. If False, skips the quality check and completes faster. Default True. | `True`    |
++------------+----------------+--------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------+-----------+
 
 #### Raises {.doc-section .doc-section-raises}
 
-| Name   | Type                         | Description                           |
-|--------|------------------------------|---------------------------------------|
-|        | [UserWarning](`UserWarning`) | If recording is not currently active. |
++------------------------------+---------------------------------------+
+| Type                         | Description                           |
++==============================+=======================================+
+| [UserWarning](`UserWarning`) | If recording is not currently active. |
++------------------------------+---------------------------------------+
 
 #### Notes {.doc-section .doc-section-notes}
 
-All pending data in buffers is automatically saved before completion.
-Recording duration is measured from start_recording() call.
+- All pending data in buffers is automatically saved before completion
+- Recording duration is measured from start_recording() call
+- Quality check reads the complete saved file to analyze gaps between ALL samples,
+including potential gaps between save_data() calls
+- At 120Hz, each sample should be ~8333µs apart; gaps significantly larger
+indicate dropped samples
+
+#### Examples {.doc-section .doc-section-examples}
+
+### Basic Usage
+
+#### Standard stop with quality check
+```python
+ET_controller.start_recording('data.h5')
+# ... run experiment ...
+ET_controller.stop_recording()  # Shows quality report
+```
+
+#### Skip quality check for faster shutdown
+```python
+ET_controller.stop_recording(data_check=False)
+```
+
+### Understanding Output
+
+#### Expected quality check report
+```python
+# When data_check=True, you'll see output like:
+# ╔════════════════════════════╗
+# ║  Recording Complete        ║
+# ╠════════════════════════════╣
+# ║ Data collection lasted     ║
+# ║ approximately 120.45 sec   ║
+# ║ Data has been saved to     ║
+# ║ experiment.h5              ║
+# ║                            ║
+# ║ Data Quality Report:       ║
+# ║   - Total samples: 14454   ║
+# ║   - Dropped samples: 0     ║
+# ╚════════════════════════════╝
+```

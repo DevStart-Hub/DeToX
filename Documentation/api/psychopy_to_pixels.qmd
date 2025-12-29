@@ -4,34 +4,70 @@
 psychopy_to_pixels(win, pos)
 ```
 
-Convert PsychoPy coordinates to pixel coordinates.
+    Convert PsychoPy coordinates to pixel coordinates for image drawing.
 
-Transforms coordinates from any PsychoPy coordinate system to pixel coordinates
-suitable for image drawing operations. This function is essential for creating
-calibration result visualizations and other pixel-based graphics.
+    Transforms coordinates from any PsychoPy coordinate system to pixel coordinates
+    with top-left origin, suitable for PIL image drawing operations. Essential for
+    creating calibration result visualizations.
 
-The conversion accounts for PsychoPy's centered coordinate system and transforms
-to a top-left origin system used by image libraries like PIL.
+    Supports both single coordinate conversion and vectorized batch conversion
+    for efficient processing of multiple positions.
 
-## Parameters {.doc-section .doc-section-parameters}
+##     Parameters {.doc-section .doc-section-----parameters}
 
-| Name   | Type                                                                                  | Description                                                                                                                       | Default    |
-|--------|---------------------------------------------------------------------------------------|-----------------------------------------------------------------------------------------------------------------------------------|------------|
-| win    | [psychopy](`psychopy`).[visual](`psychopy.visual`).[Window](`psychopy.visual.Window`) | The PsychoPy window which provides information about units and size. Window units and dimensions determine the conversion method. | _required_ |
-| pos    | [tuple](`tuple`)                                                                      | The PsychoPy coordinates to convert as (x, y) in current window units.                                                            | _required_ |
+    win : psychopy.visual.Window
+        The PsychoPy window providing unit and size information.
+    pos : tuple or array-like
+        PsychoPy coordinates to convert:
+        - Single coordinate: (x, y) tuple in current window units
+        - Multiple coordinates: (N, 2) array where N is number of positions
 
-## Returns {.doc-section .doc-section-returns}
+##     Returns {.doc-section .doc-section-----returns}
 
-| Name   | Type             | Description                                                                                                                       |
-|--------|------------------|-----------------------------------------------------------------------------------------------------------------------------------|
-|        | [tuple](`tuple`) | The converted pixel coordinates as (int, int) with origin at top-left. Values are rounded to nearest integer for pixel alignment. |
+    tuple or ndarray
+        Pixel coordinates with origin at top-left:
+        - Single input: returns (int, int) tuple
+        - Array input: returns (N, 2) array of integers
+        Values are rounded to nearest integer for pixel alignment.
 
-## Notes {.doc-section .doc-section-notes}
+##     Notes {.doc-section .doc-section-----notes}
 
-This function handles the main PsychoPy coordinate systems:
-- 'height': Screen height = 1, width adjusted by aspect ratio, centered origin
-- 'norm': Screen ranges from -1 to 1 in both dimensions, centered origin
-- Other units: Assumes coordinates are already close to pixel values
+    The output uses standard image coordinates where (0,0) is top-left and
+    y increases downward, suitable for PIL and similar libraries.
 
-The output uses standard image coordinates where (0,0) is top-left and
-y increases downward, suitable for PIL and similar libraries.
+    Supported input units: height, norm, pix, and others (treated as centered)
+
+##     Examples {.doc-section .doc-section-----examples}
+
+```python
+    from DeToX import Coords
+    from PIL import Image, ImageDraw
+    import numpy as np
+    
+    # Single coordinate conversion
+    target_pos = (0.2, -0.1)  # PsychoPy coordinates (height units)
+    pixel_pos = Coords.psychopy_to_pixels(win, target_pos)
+    # Returns (1152, 432) for 1920x1080 display
+    
+    # Vectorized batch conversion (efficient!)
+    gaze_positions = np.array([
+        [0.2, -0.1],
+        [-0.1, 0.3],
+        [0.0, 0.0]
+    ])
+    pixel_positions = Coords.psychopy_to_pixels(win, gaze_positions)
+    # Returns (3, 2) array: [[1152, 432], [864, 216], [960, 540]]
+    
+    # Use for drawing calibration results with multiple samples
+    img = Image.new("RGBA", tuple(win.size))
+    draw = ImageDraw.Draw(img)
+    
+    # Convert all sample positions at once (vectorized!)
+    sample_positions = np.array([(0.1, 0.2), (-0.1, 0.1), (0.3, -0.2)])
+    samples_pix = Coords.psychopy_to_pixels(win, sample_positions)
+    
+    # Draw circles at each sample position
+    for sample_pix in samples_pix:
+        draw.ellipse([sample_pix[0]-5, sample_pix[1]-5, 
+                      sample_pix[0]+5, sample_pix[1]+5], fill='red')
+```

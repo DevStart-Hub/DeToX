@@ -199,8 +199,8 @@ div.callout-Advanced.callout-style-default .callout-icon::before, div.callout-Ad
         </a>
     </div>
   </nav>
-  <div id="quarto-announcement" data-announcement-id="5603cdf67aefc87f3b65f8721f133f89" class="alert alert-danger hidden"><i class="bi bi-exclamation-triangle quarto-announcement-icon"></i><div class="quarto-announcement-content">
-<p><strong>Development Version</strong> - DeToX is currently in beta. Features may change without notice. Thoroughly test before using in production studies.</p>
+  <div id="quarto-announcement" data-announcement-id="de69b60bfdf2ea42f39c5cf1d3162adf" class="alert alert-danger hidden"><i class="bi bi-exclamation-triangle quarto-announcement-icon"></i><div class="quarto-announcement-content">
+<p><strong>Development Version</strong> - DeToX is currently in beta. Features may change without notice. Thoroughly test before using.</p>
 </div><i class="bi bi-x-lg quarto-announcement-action"></i></div>
 </header>
 <!-- content -->
@@ -261,6 +261,12 @@ div.callout-Advanced.callout-style-default .callout-icon::before, div.callout-Ad
   <div class="sidebar-item-container"> 
   <a href="../api/ETracker.save_data.html" class="sidebar-item-text sidebar-link">
  <span class="menu-text">ETracker.save_data</span></a>
+  </div>
+</li>
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="../api/ETracker.set_eyetracking_settings.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text">ETracker.set_eyetracking_settings</span></a>
   </div>
 </li>
       </ul>
@@ -395,14 +401,8 @@ div.callout-Advanced.callout-style-default .callout-icon::before, div.callout-Ad
 </li>
           <li class="sidebar-item">
   <div class="sidebar-item-container"> 
-  <a href="../api/tobii2pix.html" class="sidebar-item-text sidebar-link">
- <span class="menu-text">tobii2pix</span></a>
-  </div>
-</li>
-          <li class="sidebar-item">
-  <div class="sidebar-item-container"> 
-  <a href="../api/get_psychopy_pos_from_trackbox.html" class="sidebar-item-text sidebar-link">
- <span class="menu-text">get_psychopy_pos_from_trackbox</span></a>
+  <a href="../api/get_psychopy_pos_from_user_position.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text">get_psychopy_pos_from_user_position</span></a>
   </div>
 </li>
       </ul>
@@ -465,7 +465,7 @@ div.callout-Advanced.callout-style-default .callout-icon::before, div.callout-Ad
 <div id="quarto-sidebar-glass" class="quarto-sidebar-collapse-item" data-bs-toggle="collapse" data-bs-target=".quarto-sidebar-collapse-item"></div>
 <!-- margin-sidebar -->
     <div id="quarto-margin-sidebar" class="sidebar margin-sidebar">
-        <nav id="TOC" role="doc-toc" class="toc-active" data-toc-expanded="4">
+        <nav id="TOC" role="doc-toc" class="toc-active" data-toc-expanded="6">
     <h2 id="toc-title">On this page</h2>
    
   <ul>
@@ -499,9 +499,9 @@ div.callout-Advanced.callout-style-default .callout-icon::before, div.callout-Ad
 <h2 class="doc-section doc-section-attributes anchored" data-anchor-id="attributes">Attributes</h2>
 <table class="caption-top table">
 <colgroup>
-<col style="width: 10%">
+<col style="width: 11%">
 <col style="width: 9%">
-<col style="width: 79%">
+<col style="width: 78%">
 </colgroup>
 <thead>
 <tr class="header">
@@ -1058,26 +1058,32 @@ window.document.addEventListener("DOMContentLoaded", function (event) {
 <span id="cb3-17"><a href="#cb3-17" aria-hidden="true" tabindex="-1"></a></span>
 <span id="cb3-18"><a href="#cb3-18" aria-hidden="true" tabindex="-1"></a><span class="fu">## Attributes {.doc-section .doc-section-attributes}</span></span>
 <span id="cb3-19"><a href="#cb3-19" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb3-20"><a href="#cb3-20" aria-hidden="true" tabindex="-1"></a>| Name           | Type         | Description                                                                                                          |</span>
-<span id="cb3-21"><a href="#cb3-21" aria-hidden="true" tabindex="-1"></a>|----------------|--------------|----------------------------------------------------------------------------------------------------------------------|</span>
-<span id="cb3-22"><a href="#cb3-22" aria-hidden="true" tabindex="-1"></a>| left_eye       | tuple of int | RGBA color for Tobii left eye gaze samples (R, G, B, A). Default is (0, 255, 0, 255) - bright green.                 |</span>
-<span id="cb3-23"><a href="#cb3-23" aria-hidden="true" tabindex="-1"></a>| right_eye      | tuple of int | RGBA color for Tobii right eye gaze samples (R, G, B, A). Default is (255, 0, 0, 255) - bright red.                  |</span>
-<span id="cb3-24"><a href="#cb3-24" aria-hidden="true" tabindex="-1"></a>| mouse          | tuple of int | RGBA color for simulated mouse position samples (R, G, B, A). Default is (255, 128, 0, 255) - orange.                |</span>
-<span id="cb3-25"><a href="#cb3-25" aria-hidden="true" tabindex="-1"></a>| target_outline | tuple of int | RGBA color for calibration target circle outlines (R, G, B, A). Default is (24, 24, 24, 255) - dark gray/black.      |</span>
-<span id="cb3-26"><a href="#cb3-26" aria-hidden="true" tabindex="-1"></a>| highlight      | tuple of int | RGBA color for highlighting selected calibration points (R, G, B, A). Default is (255, 255, 0, 255) - bright yellow. |</span>
-<span id="cb3-27"><a href="#cb3-27" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb3-28"><a href="#cb3-28" aria-hidden="true" tabindex="-1"></a><span class="fu">## Notes {.doc-section .doc-section-notes}</span></span>
-<span id="cb3-29"><a href="#cb3-29" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb3-30"><a href="#cb3-30" aria-hidden="true" tabindex="-1"></a>All color values use 8-bit channels (0-255 range) in RGBA format.</span>
-<span id="cb3-31"><a href="#cb3-31" aria-hidden="true" tabindex="-1"></a>The alpha channel (A) controls opacity where 255 is fully opaque.</span>
-<span id="cb3-32"><a href="#cb3-32" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb3-33"><a href="#cb3-33" aria-hidden="true" tabindex="-1"></a><span class="fu">## Examples {.doc-section .doc-section-examples}</span></span>
-<span id="cb3-34"><a href="#cb3-34" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb3-35"><a href="#cb3-35" aria-hidden="true" tabindex="-1"></a><span class="in">```python</span></span>
-<span id="cb3-36"><a href="#cb3-36" aria-hidden="true" tabindex="-1"></a><span class="op">&gt;&gt;&gt;</span> colors <span class="op">=</span> CalibrationColors()</span>
-<span id="cb3-37"><a href="#cb3-37" aria-hidden="true" tabindex="-1"></a><span class="op">&gt;&gt;&gt;</span> colors.highlight <span class="op">=</span> (<span class="dv">0</span>, <span class="dv">255</span>, <span class="dv">255</span>, <span class="dv">255</span>)  <span class="co"># Change to cyan</span></span>
-<span id="cb3-38"><a href="#cb3-38" aria-hidden="true" tabindex="-1"></a><span class="op">&gt;&gt;&gt;</span> colors.left_eye <span class="op">=</span> (<span class="dv">0</span>, <span class="dv">200</span>, <span class="dv">0</span>, <span class="dv">200</span>)  <span class="co"># Semi-transparent green</span></span>
-<span id="cb3-39"><a href="#cb3-39" aria-hidden="true" tabindex="-1"></a><span class="in">```</span></span></code><button title="Copy to Clipboard" class="code-copy-button" data-in-quarto-modal=""><i class="bi"></i></button></pre></div>
+<span id="cb3-20"><a href="#cb3-20" aria-hidden="true" tabindex="-1"></a>+----------------+--------------+----------------------------------------------------------------------------------------------------------------------+</span>
+<span id="cb3-21"><a href="#cb3-21" aria-hidden="true" tabindex="-1"></a>| Name           | Type         | Description                                                                                                          |</span>
+<span id="cb3-22"><a href="#cb3-22" aria-hidden="true" tabindex="-1"></a>+================+==============+======================================================================================================================+</span>
+<span id="cb3-23"><a href="#cb3-23" aria-hidden="true" tabindex="-1"></a>| left_eye       | tuple of int | RGBA color for Tobii left eye gaze samples (R, G, B, A). Default is (0, 255, 0, 255) - bright green.                 |</span>
+<span id="cb3-24"><a href="#cb3-24" aria-hidden="true" tabindex="-1"></a>+----------------+--------------+----------------------------------------------------------------------------------------------------------------------+</span>
+<span id="cb3-25"><a href="#cb3-25" aria-hidden="true" tabindex="-1"></a>| right_eye      | tuple of int | RGBA color for Tobii right eye gaze samples (R, G, B, A). Default is (255, 0, 0, 255) - bright red.                  |</span>
+<span id="cb3-26"><a href="#cb3-26" aria-hidden="true" tabindex="-1"></a>+----------------+--------------+----------------------------------------------------------------------------------------------------------------------+</span>
+<span id="cb3-27"><a href="#cb3-27" aria-hidden="true" tabindex="-1"></a>| mouse          | tuple of int | RGBA color for simulated mouse position samples (R, G, B, A). Default is (255, 128, 0, 255) - orange.                |</span>
+<span id="cb3-28"><a href="#cb3-28" aria-hidden="true" tabindex="-1"></a>+----------------+--------------+----------------------------------------------------------------------------------------------------------------------+</span>
+<span id="cb3-29"><a href="#cb3-29" aria-hidden="true" tabindex="-1"></a>| target_outline | tuple of int | RGBA color for calibration target circle outlines (R, G, B, A). Default is (24, 24, 24, 255) - dark gray/black.      |</span>
+<span id="cb3-30"><a href="#cb3-30" aria-hidden="true" tabindex="-1"></a>+----------------+--------------+----------------------------------------------------------------------------------------------------------------------+</span>
+<span id="cb3-31"><a href="#cb3-31" aria-hidden="true" tabindex="-1"></a>| highlight      | tuple of int | RGBA color for highlighting selected calibration points (R, G, B, A). Default is (255, 255, 0, 255) - bright yellow. |</span>
+<span id="cb3-32"><a href="#cb3-32" aria-hidden="true" tabindex="-1"></a>+----------------+--------------+----------------------------------------------------------------------------------------------------------------------+</span>
+<span id="cb3-33"><a href="#cb3-33" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb3-34"><a href="#cb3-34" aria-hidden="true" tabindex="-1"></a><span class="fu">## Notes {.doc-section .doc-section-notes}</span></span>
+<span id="cb3-35"><a href="#cb3-35" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb3-36"><a href="#cb3-36" aria-hidden="true" tabindex="-1"></a>All color values use 8-bit channels (0-255 range) in RGBA format.</span>
+<span id="cb3-37"><a href="#cb3-37" aria-hidden="true" tabindex="-1"></a>The alpha channel (A) controls opacity where 255 is fully opaque.</span>
+<span id="cb3-38"><a href="#cb3-38" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb3-39"><a href="#cb3-39" aria-hidden="true" tabindex="-1"></a><span class="fu">## Examples {.doc-section .doc-section-examples}</span></span>
+<span id="cb3-40"><a href="#cb3-40" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb3-41"><a href="#cb3-41" aria-hidden="true" tabindex="-1"></a><span class="in">```python</span></span>
+<span id="cb3-42"><a href="#cb3-42" aria-hidden="true" tabindex="-1"></a><span class="op">&gt;&gt;&gt;</span> colors <span class="op">=</span> CalibrationColors()</span>
+<span id="cb3-43"><a href="#cb3-43" aria-hidden="true" tabindex="-1"></a><span class="op">&gt;&gt;&gt;</span> colors.highlight <span class="op">=</span> (<span class="dv">0</span>, <span class="dv">255</span>, <span class="dv">255</span>, <span class="dv">255</span>)  <span class="co"># Change to cyan</span></span>
+<span id="cb3-44"><a href="#cb3-44" aria-hidden="true" tabindex="-1"></a><span class="op">&gt;&gt;&gt;</span> colors.left_eye <span class="op">=</span> (<span class="dv">0</span>, <span class="dv">200</span>, <span class="dv">0</span>, <span class="dv">200</span>)  <span class="co"># Semi-transparent green</span></span>
+<span id="cb3-45"><a href="#cb3-45" aria-hidden="true" tabindex="-1"></a><span class="in">```</span></span></code><button title="Copy to Clipboard" class="code-copy-button" data-in-quarto-modal=""><i class="bi"></i></button></pre></div>
 </div></div></div></div></div>
 </div> <!-- /content -->
 <footer class="footer">

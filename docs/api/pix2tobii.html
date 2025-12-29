@@ -64,7 +64,7 @@ pre > code.sourceCode > span > a:first-child::before { text-decoration: underlin
 <script src="../site_libs/quarto-search/fuse.min.js"></script>
 <script src="../site_libs/quarto-search/quarto-search.js"></script>
 <meta name="quarto:offset" content="../">
-<link href="../api/tobii2pix.html" rel="next">
+<link href="../api/get_psychopy_pos_from_user_position.html" rel="next">
 <link href="../api/get_tobii_pos.html" rel="prev">
 <script src="../site_libs/cookie-consent/cookie-consent.js"></script>
 <link href="../site_libs/cookie-consent/cookie-consent.css" rel="stylesheet">
@@ -199,8 +199,8 @@ div.callout-Advanced.callout-style-default .callout-icon::before, div.callout-Ad
         </a>
     </div>
   </nav>
-  <div id="quarto-announcement" data-announcement-id="5603cdf67aefc87f3b65f8721f133f89" class="alert alert-danger hidden"><i class="bi bi-exclamation-triangle quarto-announcement-icon"></i><div class="quarto-announcement-content">
-<p><strong>Development Version</strong> - DeToX is currently in beta. Features may change without notice. Thoroughly test before using in production studies.</p>
+  <div id="quarto-announcement" data-announcement-id="de69b60bfdf2ea42f39c5cf1d3162adf" class="alert alert-danger hidden"><i class="bi bi-exclamation-triangle quarto-announcement-icon"></i><div class="quarto-announcement-content">
+<p><strong>Development Version</strong> - DeToX is currently in beta. Features may change without notice. Thoroughly test before using.</p>
 </div><i class="bi bi-x-lg quarto-announcement-action"></i></div>
 </header>
 <!-- content -->
@@ -261,6 +261,12 @@ div.callout-Advanced.callout-style-default .callout-icon::before, div.callout-Ad
   <div class="sidebar-item-container"> 
   <a href="../api/ETracker.save_data.html" class="sidebar-item-text sidebar-link">
  <span class="menu-text">ETracker.save_data</span></a>
+  </div>
+</li>
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="../api/ETracker.set_eyetracking_settings.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text">ETracker.set_eyetracking_settings</span></a>
   </div>
 </li>
       </ul>
@@ -395,14 +401,8 @@ div.callout-Advanced.callout-style-default .callout-icon::before, div.callout-Ad
 </li>
           <li class="sidebar-item">
   <div class="sidebar-item-container"> 
-  <a href="../api/tobii2pix.html" class="sidebar-item-text sidebar-link">
- <span class="menu-text">tobii2pix</span></a>
-  </div>
-</li>
-          <li class="sidebar-item">
-  <div class="sidebar-item-container"> 
-  <a href="../api/get_psychopy_pos_from_trackbox.html" class="sidebar-item-text sidebar-link">
- <span class="menu-text">get_psychopy_pos_from_trackbox</span></a>
+  <a href="../api/get_psychopy_pos_from_user_position.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text">get_psychopy_pos_from_user_position</span></a>
   </div>
 </li>
       </ul>
@@ -465,7 +465,7 @@ div.callout-Advanced.callout-style-default .callout-icon::before, div.callout-Ad
 <div id="quarto-sidebar-glass" class="quarto-sidebar-collapse-item" data-bs-toggle="collapse" data-bs-target=".quarto-sidebar-collapse-item"></div>
 <!-- margin-sidebar -->
     <div id="quarto-margin-sidebar" class="sidebar margin-sidebar">
-        <nav id="TOC" role="doc-toc" class="toc-active" data-toc-expanded="4">
+        <nav id="TOC" role="doc-toc" class="toc-active" data-toc-expanded="6">
     <h2 id="toc-title">On this page</h2>
    
   <ul>
@@ -474,6 +474,7 @@ div.callout-Advanced.callout-style-default .callout-icon::before, div.callout-Ad
   <li><a href="#parameters" id="toc-parameters" class="nav-link" data-scroll-target="#parameters">Parameters</a></li>
   <li><a href="#returns" id="toc-returns" class="nav-link" data-scroll-target="#returns">Returns</a></li>
   <li><a href="#notes" id="toc-notes" class="nav-link" data-scroll-target="#notes">Notes</a></li>
+  <li><a href="#examples" id="toc-examples" class="nav-link" data-scroll-target="#examples">Examples</a></li>
   </ul></li>
   </ul>
 </nav>
@@ -488,7 +489,7 @@ div.callout-Advanced.callout-style-default .callout-icon::before, div.callout-Ad
 <h1>pix2tobii</h1>
 <div class="sourceCode" id="cb1"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb1-1"><a href="#cb1-1" aria-hidden="true" tabindex="-1"></a>pix2tobii(win, p)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
 <p>Convert PsychoPy pixel coordinates to Tobii ADCS coordinates.</p>
-<p>Low-level conversion function that transforms pixel coordinates with a centered origin (PsychoPy convention) to Tobii’s normalized ADCS coordinates with top-left origin. This is a fundamental building block for other coordinate conversion functions.</p>
+<p>Low-level conversion function transforming pixel coordinates with centered origin (PsychoPy convention) to Tobii’s normalized ADCS coordinates with top-left origin. Used internally by get_tobii_pos().</p>
 <section id="parameters" class="level2 doc-section doc-section-parameters">
 <h2 class="doc-section doc-section-parameters anchored" data-anchor-id="parameters">Parameters</h2>
 <table class="caption-top table">
@@ -504,13 +505,13 @@ div.callout-Advanced.callout-style-default .callout-icon::before, div.callout-Ad
 <tr class="odd">
 <td>win</td>
 <td><a href="`psychopy`">psychopy</a>.<a href="`psychopy.visual`">visual</a>.<a href="`psychopy.visual.Window`">Window</a></td>
-<td>The PsychoPy window which provides screen dimensions for normalization.</td>
+<td>The PsychoPy window providing screen dimensions for normalization.</td>
 <td><em>required</em></td>
 </tr>
 <tr class="even">
 <td>p</td>
 <td><a href="`tuple`">tuple</a></td>
-<td>The PsychoPy pixel coordinates to convert as (x, y). Origin is at screen center, x increases rightward, y increases upward.</td>
+<td>PsychoPy pixel coordinates as (x, y). Origin at screen center, x increases rightward, y increases upward.</td>
 <td><em>required</em></td>
 </tr>
 </tbody>
@@ -530,15 +531,28 @@ div.callout-Advanced.callout-style-default .callout-icon::before, div.callout-Ad
 <tr class="odd">
 <td></td>
 <td><a href="`tuple`">tuple</a></td>
-<td>The converted Tobii ADCS coordinates as (x, y) in range [0, 1]. Origin is top-left, x increases rightward, y increases downward.</td>
+<td>Tobii ADCS coordinates as (x, y) in range [0, 1]. Origin is top-left, x increases rightward, y increases downward.</td>
 </tr>
 </tbody>
 </table>
 </section>
 <section id="notes" class="level2 doc-section doc-section-notes">
 <h2 class="doc-section doc-section-notes anchored" data-anchor-id="notes">Notes</h2>
-<p>The conversion involves: 1. Translating the origin from center to top-left (+0.5 offset) 2. Normalizing by screen dimensions to get [0, 1] range 3. Inverting the Y-axis to match Tobii’s top-down convention</p>
-<p>This function assumes PsychoPy’s pixel coordinate convention where (0, 0) is at screen center.</p>
+<p>The conversion process: 1. Normalize by screen dimensions to get [0, 1] range 2. Translate origin from center to top-left (+0.5 offset) 3. Invert Y-axis to match Tobii’s top-down convention</p>
+</section>
+<section id="examples" class="level2 doc-section doc-section-examples">
+<h2 class="doc-section doc-section-examples anchored" data-anchor-id="examples">Examples</h2>
+<div class="sourceCode" id="cb2"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb2-1"><a href="#cb2-1" aria-hidden="true" tabindex="-1"></a><span class="im">from</span> DeToX <span class="im">import</span> Coords</span>
+<span id="cb2-2"><a href="#cb2-2" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb2-3"><a href="#cb2-3" aria-hidden="true" tabindex="-1"></a><span class="co"># Center of 1920x1080 screen</span></span>
+<span id="cb2-4"><a href="#cb2-4" aria-hidden="true" tabindex="-1"></a>pixel_center <span class="op">=</span> (<span class="dv">0</span>, <span class="dv">0</span>)  <span class="co"># PsychoPy pixel center</span></span>
+<span id="cb2-5"><a href="#cb2-5" aria-hidden="true" tabindex="-1"></a>tobii_center <span class="op">=</span> Coords.pix2tobii(win, pixel_center)</span>
+<span id="cb2-6"><a href="#cb2-6" aria-hidden="true" tabindex="-1"></a><span class="co"># Returns (0.5, 0.5) - center in ADCS</span></span>
+<span id="cb2-7"><a href="#cb2-7" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb2-8"><a href="#cb2-8" aria-hidden="true" tabindex="-1"></a><span class="co"># Top-left corner</span></span>
+<span id="cb2-9"><a href="#cb2-9" aria-hidden="true" tabindex="-1"></a>pixel_tl <span class="op">=</span> (<span class="op">-</span><span class="dv">960</span>, <span class="dv">540</span>)</span>
+<span id="cb2-10"><a href="#cb2-10" aria-hidden="true" tabindex="-1"></a>tobii_tl <span class="op">=</span> Coords.pix2tobii(win, pixel_tl)</span>
+<span id="cb2-11"><a href="#cb2-11" aria-hidden="true" tabindex="-1"></a><span class="co"># Returns (0.0, 0.0) - top-left in ADCS</span></span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
 
 
 <!-- -->
@@ -1025,46 +1039,63 @@ window.document.addEventListener("DOMContentLoaded", function (event) {
       </a>          
   </div>
   <div class="nav-page nav-page-next">
-      <a href="../api/tobii2pix.html" class="pagination-link" aria-label="tobii2pix">
-        <span class="nav-page-text">tobii2pix</span> <i class="bi bi-arrow-right-short"></i>
+      <a href="../api/get_psychopy_pos_from_user_position.html" class="pagination-link" aria-label="get_psychopy_pos_from_user_position">
+        <span class="nav-page-text">get_psychopy_pos_from_user_position</span> <i class="bi bi-arrow-right-short"></i>
       </a>
   </div>
 </nav><div class="modal fade" id="quarto-embedded-source-code-modal" tabindex="-1" aria-labelledby="quarto-embedded-source-code-modal-label" aria-hidden="true"><div class="modal-dialog modal-dialog-scrollable"><div class="modal-content"><div class="modal-header"><h5 class="modal-title" id="quarto-embedded-source-code-modal-label">Source Code</h5><button class="btn-close" data-bs-dismiss="modal"></button></div><div class="modal-body"><div class="">
-<div class="sourceCode" id="cb2" data-shortcodes="false"><pre class="sourceCode markdown code-with-copy"><code class="sourceCode markdown"><span id="cb2-1"><a href="#cb2-1" aria-hidden="true" tabindex="-1"></a><span class="fu"># pix2tobii { #DeToX.pix2tobii }</span></span>
-<span id="cb2-2"><a href="#cb2-2" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb2-3"><a href="#cb2-3" aria-hidden="true" tabindex="-1"></a><span class="in">```python</span></span>
-<span id="cb2-4"><a href="#cb2-4" aria-hidden="true" tabindex="-1"></a>pix2tobii(win, p)</span>
-<span id="cb2-5"><a href="#cb2-5" aria-hidden="true" tabindex="-1"></a><span class="in">```</span></span>
-<span id="cb2-6"><a href="#cb2-6" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb2-7"><a href="#cb2-7" aria-hidden="true" tabindex="-1"></a>Convert PsychoPy pixel coordinates to Tobii ADCS coordinates.</span>
-<span id="cb2-8"><a href="#cb2-8" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb2-9"><a href="#cb2-9" aria-hidden="true" tabindex="-1"></a>Low-level conversion function that transforms pixel coordinates with a</span>
-<span id="cb2-10"><a href="#cb2-10" aria-hidden="true" tabindex="-1"></a>centered origin (PsychoPy convention) to Tobii's normalized ADCS coordinates</span>
-<span id="cb2-11"><a href="#cb2-11" aria-hidden="true" tabindex="-1"></a>with top-left origin. This is a fundamental building block for other</span>
-<span id="cb2-12"><a href="#cb2-12" aria-hidden="true" tabindex="-1"></a>coordinate conversion functions.</span>
-<span id="cb2-13"><a href="#cb2-13" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb2-14"><a href="#cb2-14" aria-hidden="true" tabindex="-1"></a><span class="fu">## Parameters {.doc-section .doc-section-parameters}</span></span>
-<span id="cb2-15"><a href="#cb2-15" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb2-16"><a href="#cb2-16" aria-hidden="true" tabindex="-1"></a>| Name   | Type                                                                                  | Description                                                                                                                 | Default    |</span>
-<span id="cb2-17"><a href="#cb2-17" aria-hidden="true" tabindex="-1"></a>|--------|---------------------------------------------------------------------------------------|-----------------------------------------------------------------------------------------------------------------------------|------------|</span>
-<span id="cb2-18"><a href="#cb2-18" aria-hidden="true" tabindex="-1"></a>| win    | <span class="co">[</span><span class="ot">psychopy</span><span class="co">](`psychopy`)</span>.<span class="co">[</span><span class="ot">visual</span><span class="co">](`psychopy.visual`)</span>.<span class="co">[</span><span class="ot">Window</span><span class="co">](`psychopy.visual.Window`)</span> | The PsychoPy window which provides screen dimensions for normalization.                                                     | _required_ |</span>
-<span id="cb2-19"><a href="#cb2-19" aria-hidden="true" tabindex="-1"></a>| p      | <span class="co">[</span><span class="ot">tuple</span><span class="co">](`tuple`)</span>                                                                      | The PsychoPy pixel coordinates to convert as (x, y). Origin is at screen center, x increases rightward, y increases upward. | _required_ |</span>
-<span id="cb2-20"><a href="#cb2-20" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb2-21"><a href="#cb2-21" aria-hidden="true" tabindex="-1"></a><span class="fu">## Returns {.doc-section .doc-section-returns}</span></span>
-<span id="cb2-22"><a href="#cb2-22" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb2-23"><a href="#cb2-23" aria-hidden="true" tabindex="-1"></a>| Name   | Type             | Description                                                                                                                      |</span>
-<span id="cb2-24"><a href="#cb2-24" aria-hidden="true" tabindex="-1"></a>|--------|------------------|----------------------------------------------------------------------------------------------------------------------------------|</span>
-<span id="cb2-25"><a href="#cb2-25" aria-hidden="true" tabindex="-1"></a>|        | <span class="co">[</span><span class="ot">tuple</span><span class="co">](`tuple`)</span> | The converted Tobii ADCS coordinates as (x, y) in range <span class="co">[</span><span class="ot">0, 1</span><span class="co">]</span>. Origin is top-left, x increases rightward, y increases downward. |</span>
-<span id="cb2-26"><a href="#cb2-26" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb2-27"><a href="#cb2-27" aria-hidden="true" tabindex="-1"></a><span class="fu">## Notes {.doc-section .doc-section-notes}</span></span>
-<span id="cb2-28"><a href="#cb2-28" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb2-29"><a href="#cb2-29" aria-hidden="true" tabindex="-1"></a>The conversion involves:</span>
-<span id="cb2-30"><a href="#cb2-30" aria-hidden="true" tabindex="-1"></a><span class="ss">1. </span>Translating the origin from center to top-left (+0.5 offset)</span>
-<span id="cb2-31"><a href="#cb2-31" aria-hidden="true" tabindex="-1"></a><span class="ss">2. </span>Normalizing by screen dimensions to get <span class="co">[</span><span class="ot">0, 1</span><span class="co">]</span> range</span>
-<span id="cb2-32"><a href="#cb2-32" aria-hidden="true" tabindex="-1"></a><span class="ss">3. </span>Inverting the Y-axis to match Tobii's top-down convention</span>
-<span id="cb2-33"><a href="#cb2-33" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb2-34"><a href="#cb2-34" aria-hidden="true" tabindex="-1"></a>This function assumes PsychoPy's pixel coordinate convention where</span>
-<span id="cb2-35"><a href="#cb2-35" aria-hidden="true" tabindex="-1"></a>(0, 0) is at screen center.</span></code><button title="Copy to Clipboard" class="code-copy-button" data-in-quarto-modal=""><i class="bi"></i></button></pre></div>
+<div class="sourceCode" id="cb3" data-shortcodes="false"><pre class="sourceCode markdown code-with-copy"><code class="sourceCode markdown"><span id="cb3-1"><a href="#cb3-1" aria-hidden="true" tabindex="-1"></a><span class="fu"># pix2tobii { #DeToX.pix2tobii }</span></span>
+<span id="cb3-2"><a href="#cb3-2" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb3-3"><a href="#cb3-3" aria-hidden="true" tabindex="-1"></a><span class="in">```python</span></span>
+<span id="cb3-4"><a href="#cb3-4" aria-hidden="true" tabindex="-1"></a>pix2tobii(win, p)</span>
+<span id="cb3-5"><a href="#cb3-5" aria-hidden="true" tabindex="-1"></a><span class="in">```</span></span>
+<span id="cb3-6"><a href="#cb3-6" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb3-7"><a href="#cb3-7" aria-hidden="true" tabindex="-1"></a>Convert PsychoPy pixel coordinates to Tobii ADCS coordinates.</span>
+<span id="cb3-8"><a href="#cb3-8" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb3-9"><a href="#cb3-9" aria-hidden="true" tabindex="-1"></a>Low-level conversion function transforming pixel coordinates with centered</span>
+<span id="cb3-10"><a href="#cb3-10" aria-hidden="true" tabindex="-1"></a>origin (PsychoPy convention) to Tobii's normalized ADCS coordinates with</span>
+<span id="cb3-11"><a href="#cb3-11" aria-hidden="true" tabindex="-1"></a>top-left origin. Used internally by get_tobii_pos().</span>
+<span id="cb3-12"><a href="#cb3-12" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb3-13"><a href="#cb3-13" aria-hidden="true" tabindex="-1"></a><span class="fu">## Parameters {.doc-section .doc-section-parameters}</span></span>
+<span id="cb3-14"><a href="#cb3-14" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb3-15"><a href="#cb3-15" aria-hidden="true" tabindex="-1"></a>+--------+---------------------------------------------------------------------------------------+-----------------------------------------------------------------------------------------------------------+------------+</span>
+<span id="cb3-16"><a href="#cb3-16" aria-hidden="true" tabindex="-1"></a>| Name   | Type                                                                                  | Description                                                                                               | Default    |</span>
+<span id="cb3-17"><a href="#cb3-17" aria-hidden="true" tabindex="-1"></a>+========+=======================================================================================+===========================================================================================================+============+</span>
+<span id="cb3-18"><a href="#cb3-18" aria-hidden="true" tabindex="-1"></a>| win    | <span class="co">[</span><span class="ot">psychopy</span><span class="co">](`psychopy`)</span>.<span class="co">[</span><span class="ot">visual</span><span class="co">](`psychopy.visual`)</span>.<span class="co">[</span><span class="ot">Window</span><span class="co">](`psychopy.visual.Window`)</span> | The PsychoPy window providing screen dimensions for normalization.                                        | _required_ |</span>
+<span id="cb3-19"><a href="#cb3-19" aria-hidden="true" tabindex="-1"></a>+--------+---------------------------------------------------------------------------------------+-----------------------------------------------------------------------------------------------------------+------------+</span>
+<span id="cb3-20"><a href="#cb3-20" aria-hidden="true" tabindex="-1"></a>| p      | <span class="co">[</span><span class="ot">tuple</span><span class="co">](`tuple`)</span>                                                                      | PsychoPy pixel coordinates as (x, y). Origin at screen center, x increases rightward, y increases upward. | _required_ |</span>
+<span id="cb3-21"><a href="#cb3-21" aria-hidden="true" tabindex="-1"></a>+--------+---------------------------------------------------------------------------------------+-----------------------------------------------------------------------------------------------------------+------------+</span>
+<span id="cb3-22"><a href="#cb3-22" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb3-23"><a href="#cb3-23" aria-hidden="true" tabindex="-1"></a><span class="fu">## Returns {.doc-section .doc-section-returns}</span></span>
+<span id="cb3-24"><a href="#cb3-24" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb3-25"><a href="#cb3-25" aria-hidden="true" tabindex="-1"></a>+--------+------------------+--------------------------------------------------------------------------------------------------------------------+</span>
+<span id="cb3-26"><a href="#cb3-26" aria-hidden="true" tabindex="-1"></a>| Name   | Type             | Description                                                                                                        |</span>
+<span id="cb3-27"><a href="#cb3-27" aria-hidden="true" tabindex="-1"></a>+========+==================+====================================================================================================================+</span>
+<span id="cb3-28"><a href="#cb3-28" aria-hidden="true" tabindex="-1"></a>|        | <span class="co">[</span><span class="ot">tuple</span><span class="co">](`tuple`)</span> | Tobii ADCS coordinates as (x, y) in range <span class="co">[</span><span class="ot">0, 1</span><span class="co">]</span>. Origin is top-left, x increases rightward, y increases downward. |</span>
+<span id="cb3-29"><a href="#cb3-29" aria-hidden="true" tabindex="-1"></a>+--------+------------------+--------------------------------------------------------------------------------------------------------------------+</span>
+<span id="cb3-30"><a href="#cb3-30" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb3-31"><a href="#cb3-31" aria-hidden="true" tabindex="-1"></a><span class="fu">## Notes {.doc-section .doc-section-notes}</span></span>
+<span id="cb3-32"><a href="#cb3-32" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb3-33"><a href="#cb3-33" aria-hidden="true" tabindex="-1"></a>The conversion process:</span>
+<span id="cb3-34"><a href="#cb3-34" aria-hidden="true" tabindex="-1"></a><span class="ss">1. </span>Normalize by screen dimensions to get <span class="co">[</span><span class="ot">0, 1</span><span class="co">]</span> range</span>
+<span id="cb3-35"><a href="#cb3-35" aria-hidden="true" tabindex="-1"></a><span class="ss">2. </span>Translate origin from center to top-left (+0.5 offset)</span>
+<span id="cb3-36"><a href="#cb3-36" aria-hidden="true" tabindex="-1"></a><span class="ss">3. </span>Invert Y-axis to match Tobii's top-down convention</span>
+<span id="cb3-37"><a href="#cb3-37" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb3-38"><a href="#cb3-38" aria-hidden="true" tabindex="-1"></a><span class="fu">## Examples {.doc-section .doc-section-examples}</span></span>
+<span id="cb3-39"><a href="#cb3-39" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb3-40"><a href="#cb3-40" aria-hidden="true" tabindex="-1"></a><span class="in">```python</span></span>
+<span id="cb3-41"><a href="#cb3-41" aria-hidden="true" tabindex="-1"></a><span class="im">from</span> DeToX <span class="im">import</span> Coords</span>
+<span id="cb3-42"><a href="#cb3-42" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb3-43"><a href="#cb3-43" aria-hidden="true" tabindex="-1"></a><span class="co"># Center of 1920x1080 screen</span></span>
+<span id="cb3-44"><a href="#cb3-44" aria-hidden="true" tabindex="-1"></a>pixel_center <span class="op">=</span> (<span class="dv">0</span>, <span class="dv">0</span>)  <span class="co"># PsychoPy pixel center</span></span>
+<span id="cb3-45"><a href="#cb3-45" aria-hidden="true" tabindex="-1"></a>tobii_center <span class="op">=</span> Coords.pix2tobii(win, pixel_center)</span>
+<span id="cb3-46"><a href="#cb3-46" aria-hidden="true" tabindex="-1"></a><span class="co"># Returns (0.5, 0.5) - center in ADCS</span></span>
+<span id="cb3-47"><a href="#cb3-47" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb3-48"><a href="#cb3-48" aria-hidden="true" tabindex="-1"></a><span class="co"># Top-left corner</span></span>
+<span id="cb3-49"><a href="#cb3-49" aria-hidden="true" tabindex="-1"></a>pixel_tl <span class="op">=</span> (<span class="op">-</span><span class="dv">960</span>, <span class="dv">540</span>)</span>
+<span id="cb3-50"><a href="#cb3-50" aria-hidden="true" tabindex="-1"></a>tobii_tl <span class="op">=</span> Coords.pix2tobii(win, pixel_tl)</span>
+<span id="cb3-51"><a href="#cb3-51" aria-hidden="true" tabindex="-1"></a><span class="co"># Returns (0.0, 0.0) - top-left in ADCS</span></span>
+<span id="cb3-52"><a href="#cb3-52" aria-hidden="true" tabindex="-1"></a><span class="in">```</span></span></code><button title="Copy to Clipboard" class="code-copy-button" data-in-quarto-modal=""><i class="bi"></i></button></pre></div>
 </div></div></div></div></div>
 </div> <!-- /content -->
 <footer class="footer">

@@ -12,20 +12,58 @@ simulation vs. real eye tracker modes.
 
 ## Parameters {.doc-section .doc-section-parameters}
 
++--------+--------------+--------------------------------------------------------------------------+------------+
 | Name   | Type         | Description                                                              | Default    |
-|--------|--------------|--------------------------------------------------------------------------|------------|
++========+==============+==========================================================================+============+
 | label  | [str](`str`) | Descriptive label for the event (e.g., 'trial_start', 'stimulus_onset'). | _required_ |
++--------+--------------+--------------------------------------------------------------------------+------------+
 
 ## Raises {.doc-section .doc-section-raises}
 
-| Name   | Type                               | Description                             |
-|--------|------------------------------------|-----------------------------------------|
-|        | [RuntimeWarning](`RuntimeWarning`) | If called when recording is not active. |
++------------------------------------+-----------------------------------------+
+| Type                               | Description                             |
++====================================+=========================================+
+| [RuntimeWarning](`RuntimeWarning`) | If called when recording is not active. |
++------------------------------------+-----------------------------------------+
 
 ## Examples {.doc-section .doc-section-examples}
 
+### Basic Usage
+
+#### Recording single events
 ```python
 ET_controller.record_event('trial_1_start')
-#  present stimulus 
+# ... present stimulus ...
 ET_controller.record_event('stimulus_offset')
+```
+
+### Common Patterns
+
+#### Complete trial structure
+```python
+ET_controller.record_event('trial_1_start')
+ET_controller.record_event('fixation_onset')
+core.wait(1.0)
+ET_controller.record_event('fixation_offset')
+
+ET_controller.record_event('stimulus_onset')
+# ... show stimulus ...
+ET_controller.record_event('stimulus_offset')
+
+ET_controller.record_event('response_prompt')
+# ... wait for response ...
+ET_controller.record_event('response_recorded')
+ET_controller.record_event('trial_1_end')
+```
+
+#### Multi-trial experiment
+```python
+ET_controller.start_recording('experiment.h5')
+
+for trial_num in range(10):
+    ET_controller.record_event(f'trial_{trial_num}_start')
+    # ... run trial ...
+    ET_controller.record_event(f'trial_{trial_num}_end')
+
+ET_controller.stop_recording()
 ```

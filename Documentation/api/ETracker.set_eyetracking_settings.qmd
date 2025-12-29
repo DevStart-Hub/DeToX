@@ -1,0 +1,103 @@
+# ETracker.set_eyetracking_settings { #DeToX.ETracker.set_eyetracking_settings }
+
+```python
+ETracker.set_eyetracking_settings(
+    desired_fps=None,
+    desired_illumination_mode=None,
+    use_gui=False,
+    screen=-1,
+    alwaysOnTop=True,
+)
+```
+
+Configure and apply Tobii eye tracker settings.
+
+This method updates the eye tracker's sampling frequency (FPS) and illumination 
+mode, either programmatically or via a graphical interface. It ensures that 
+configuration changes are only made when the device is idle and connected.
+
+After applying settings, a summary is displayed showing which settings changed
+and which remained the same.
+
+## Parameters {.doc-section .doc-section-parameters}
+
++---------------------------+----------------+-----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------+-----------+
+| Name                      | Type           | Description                                                                                                                                                                                                                                                                 | Default   |
++===========================+================+=============================================================================================================================================================================================================================================================================+===========+
+| desired_fps               | [int](`int`)   | Desired sampling frequency in Hz (e.g., 60, 120, 300). If None, the current  frequency is retained. When `use_gui=True`, this value pre-populates the  dialog box dropdown.                                                                                                 | `None`    |
++---------------------------+----------------+-----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------+-----------+
+| desired_illumination_mode | [str](`str`)   | Desired illumination mode (e.g., 'Auto', 'Bright', 'Dark'). If None, the  current illumination mode is retained. When `use_gui=True`, this value  pre-populates the dialog box dropdown.                                                                                    | `None`    |
++---------------------------+----------------+-----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------+-----------+
+| use_gui                   | [bool](`bool`) | If True, opens a PsychoPy GUI dialog with dropdown menus that allows users  to select settings interactively. The dropdowns are pre-populated with values  from `desired_fps` and `desired_illumination_mode` if provided, or current  settings if None. Defaults to False. | `False`   |
++---------------------------+----------------+-----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------+-----------+
+| screen                    | [int](`int`)   | Screen number where the GUI dialog is displayed. Only used when `use_gui=True`. If -1 (default), the dialog appears on the primary screen. Use 0, 1, 2, etc.  to specify other monitors. Ignored when `use_gui=False`.                                                      | `-1`      |
++---------------------------+----------------+-----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------+-----------+
+| alwaysOnTop               | [bool](`bool`) | Whether the GUI dialog stays on top of other windows. Only used when  `use_gui=True`. Default is True to prevent the dialog from being hidden  behind experiment windows. Ignored when `use_gui=False`.                                                                     | `True`    |
++---------------------------+----------------+-----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------+-----------+
+
+## Raises {.doc-section .doc-section-raises}
+
++--------------------------------+-------------------------------------------------------------------------------------------+
+| Type                           | Description                                                                               |
++================================+===========================================================================================+
+| [RuntimeError](`RuntimeError`) | If no physical eye tracker is connected or if the function is called in  simulation mode. |
++--------------------------------+-------------------------------------------------------------------------------------------+
+| [ValueError](`ValueError`)     | If the specified FPS or illumination mode is not supported by the connected  device.      |
++--------------------------------+-------------------------------------------------------------------------------------------+
+
+## Notes {.doc-section .doc-section-notes}
+
+- Settings cannot be changed during active recording. If an ongoing recording 
+is detected, a non-blocking warning is issued and the function exits safely.
+- When `use_gui=True`, a PsychoPy dialog window appears with dropdown menus.
+The `screen` and `alwaysOnTop` parameters control its display behavior.
+- After successfully applying new settings, the internal attributes `self.fps` 
+and `self.illum_mode` are updated to reflect the current device configuration.
+- A summary of applied changes is displayed using NicePrint, showing which 
+settings changed (with old --> new values) and which remained unchanged.
+
+## Examples {.doc-section .doc-section-examples}
+
+### Programmatic Settings
+
+#### Set frequency to 120 Hz
+```python
+        ET_controller.set_eyetracking_settings(desired_fps=120)
+```
+
+#### Set illumination mode to 'Bright'
+```python
+    ET_controller.set_eyetracking_settings(desired_illumination_mode='Bright')
+```
+
+#### Set both frequency and illumination mode
+```python
+    ET_controller.set_eyetracking_settings(
+        desired_fps=120,
+        desired_illumination_mode='Bright'
+    )
+```
+
+### GUI-Based Settings
+
+#### Open GUI with default settings
+```python
+    ET_controller.set_eyetracking_settings(use_gui=True)
+```
+
+#### GUI on secondary monitor without always-on-top
+```python
+    ET_controller.set_eyetracking_settings(
+        use_gui=True,
+        screen=1,
+        alwaysOnTop=False
+    )
+```
+
+#### GUI with pre-selected 120 Hz in dropdown
+```python
+    ET_controller.set_eyetracking_settings(
+        desired_fps=120,
+        use_gui=True
+    )
+```

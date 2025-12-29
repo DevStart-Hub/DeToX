@@ -12,17 +12,56 @@ Creates HDF5 or CSV files based on filename extension.
 
 ## Parameters {.doc-section .doc-section-parameters}
 
++------------+----------------+--------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------+-----------+
 | Name       | Type           | Description                                                                                                                                                                                                  | Default   |
-|------------|----------------|--------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------|-----------|
++============+================+==============================================================================================================================================================================================================+===========+
 | filename   | [str](`str`)   | Output filename for gaze data. If None, generates timestamp-based name. File extension determines format (.h5/.hdf5 for HDF5, .csv for CSV, defaults to .h5).                                                | `None`    |
++------------+----------------+--------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------+-----------+
 | raw_format | [bool](`bool`) | If True, preserves all original Tobii SDK column names and data. If False (default), uses simplified column names and subset of columns. Raw format is useful for advanced analysis requiring full metadata. | `False`   |
++------------+----------------+--------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------+-----------+
 
 ## Examples {.doc-section .doc-section-examples}
 
-```python
-### Standard format (simplified columns)
-ET_controller.start_recording('data.h5')
+### Basic Usage
 
-### Raw format (all Tobii SDK columns preserved)
+#### Standard HDF5 format
+```python
+ET_controller.start_recording('data.h5')
+```
+
+#### Auto-generated timestamped filename
+```python
+ET_controller.start_recording()  # Creates YYYY-MM-DD_HH-MM-SS.h5
+```
+
+#### CSV format
+```python
+ET_controller.start_recording('data.csv')
+```
+
+### Advanced Options
+
+#### Raw format with all Tobii SDK columns
+```python
 ET_controller.start_recording('data_raw.h5', raw_format=True)
+```
+
+### Complete Workflows
+
+#### Full experiment with event markers
+```python
+# Setup and calibration
+ET_controller.show_status()
+ET_controller.calibrate(5)
+
+# Start recording
+ET_controller.start_recording('participant_01.h5')
+
+# Run experiment with event markers
+ET_controller.record_event('trial_1_start')
+# ... present stimuli ...
+ET_controller.record_event('trial_1_end')
+
+# Stop recording
+ET_controller.stop_recording()
 ```

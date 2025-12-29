@@ -1,79 +1,112 @@
 # ETracker.gaze_contingent { #DeToX.ETracker.gaze_contingent }
 
 ```python
-ETracker.gaze_contingent(N=5)
+ETracker.gaze_contingent(N=0.5, units='seconds')
 ```
 
 Initialize real-time gaze buffer for contingent applications.
 
-Creates a rolling buffer that stores the most recent N gaze samples,
-enabling real-time gaze-contingent paradigms. Must be called before
-using `get_gaze_position()` for real-time gaze tracking.
+Creates a rolling buffer that stores recent gaze samples over a specified
+time window or number of samples, enabling real-time gaze-contingent paradigms.
+Must be called before using `get_gaze_position()` for real-time gaze tracking.
 
-The buffer automatically maintains the N most recent samples, discarding
+The buffer automatically maintains the most recent samples, discarding
 older data. This provides a stable estimate of current gaze position by
 aggregating across multiple samples.
 
 ## Parameters {.doc-section .doc-section-parameters}
 
-| Name   | Type         | Description                                                                                                                                                           | Default   |
-|--------|--------------|-----------------------------------------------------------------------------------------------------------------------------------------------------------------------|-----------|
-| N      | [int](`int`) | Number of recent gaze samples to store in the rolling buffer. Larger values provide smoother estimates but increase latency. Typical values: 3-10 samples. Default 5. | `5`       |
++--------+----------------------------------+---------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------+-------------+
+| Name   | Type                             | Description                                                                                                                                                                                                                                                   | Default     |
++========+==================================+===============================================================================================================================================================================================================================================================+=============+
+| N      | [float](`float`) or [int](`int`) | Buffer size specification. Interpretation depends on `units` parameter: - If units='seconds': Duration in seconds (e.g., 0.5 = 500ms window) - If units='samples': Number of gaze samples (e.g., 5 = last 5 samples) Default is 0.5 (seconds).                | `0.5`       |
++--------+----------------------------------+---------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------+-------------+
+| units  | [str](`str`)                     | Unit for buffer size specification: 'seconds' or 'samples'. - 'seconds' (default): N specifies time duration, automatically calculates required samples based on eye tracker frequency - 'samples': N specifies exact number of samples Default is 'seconds'. | `'seconds'` |
++--------+----------------------------------+---------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------+-------------+
 
 ## Raises {.doc-section .doc-section-raises}
 
-| Name   | Type                     | Description             |
-|--------|--------------------------|-------------------------|
-|        | [TypeError](`TypeError`) | If N is not an integer. |
++----------------------------+---------------------------------------------------------------------------+
+| Type                       | Description                                                               |
++============================+===========================================================================+
+| [TypeError](`TypeError`)   | If N is not numeric or units is not a string.                             |
++----------------------------+---------------------------------------------------------------------------+
+| [ValueError](`ValueError`) | If units is not 'seconds' or 'samples', or if calculated buffer size < 1. |
++----------------------------+---------------------------------------------------------------------------+
 
 ## Notes {.doc-section .doc-section-notes}
 
 - Call this method ONCE before your experimental loop
 - Buffer size trades off stability vs. latency:
-* Smaller N (3-5): Lower latency, more noise
-* Larger N (8-10): Smoother tracking, higher latency
-- For 120 Hz eye tracker with N=5: ~42ms latency
-- For 60 Hz eye tracker with N=5: ~83ms latency
+* Shorter duration/fewer samples: Lower latency, more noise
+* Longer duration/more samples: Smoother tracking, higher latency
+- For 120 Hz tracker with N=0.5 seconds: 60 samples, ~500ms latency
+- For 60 Hz tracker with N=0.5 seconds: 30 samples, ~500ms latency
+- For any tracker with N=5 samples: 5 samples, variable latency by fps
 
 ## Examples {.doc-section .doc-section-examples}
 
+### Basic Usage
+
+#### Default time-based buffer (0.5 seconds)
 ```python
-# Basic real-time gaze tracking
-ET_controller.gaze_contingent(N=5)  # Initialize buffer
-ET_controller.start_recording('data.h5')
-
-# Create gaze-contingent stimulus
-circle = visual.Circle(win, radius=0.05, fillColor='red')
-
-for frame in range(600):  # 10 seconds at 60 fps
-    gaze_pos = ET_controller.get_gaze_position()
-    circle.pos = gaze_pos
-    circle.draw()
-    win.flip()
-
-ET_controller.stop_recording()
-
-# Adjust buffer size for your needs
-ET_controller.gaze_contingent(N=3)   # Low latency, more jitter
-ET_controller.gaze_contingent(N=10)  # Smooth, higher latency
-
-# Gaze-contingent window paradigm
-ET_controller.gaze_contingent(N=5)
-ET_controller.start_recording('gaze_window.h5')
-
-stimulus = visual.ImageStim(win, 'image.png')
-window = visual.Circle(win, radius=0.1, fillColor=None, lineColor='white')
-
-for trial in range(20):
-    stimulus.draw()
+    # Initialize with 500ms window (adapts to tracker frequency)
+    ET_controller.gaze_contingent()  # Uses default N=0.5, units='seconds'
+    ET_controller.start_recording('data.h5')
     
-    for frame in range(120):  # 2 seconds
+    # Create gaze-contingent stimulus
+    circle = visual.Circle(win, radius=0.05, fillColor='red')
+    
+    for frame in range(600):  # 10 seconds at 60 fps
         gaze_pos = ET_controller.get_gaze_position()
-        window.pos = gaze_pos
-        window.draw()
+        circle.pos = gaze_pos
+        circle.draw()
         win.flip()
     
-    ET_controller.record_event(f'trial_{trial}_end')
+    ET_controller.stop_recording()
+```
 
-ET_controller.stop_recording()
+#### Custom time window
+```python
+    # 250ms window for lower latency
+    ET_controller.gaze_contingent(N=0.25, units='seconds')
+    
+    # 1 second window for very smooth tracking
+    ET_controller.gaze_contingent(N=1.0, units='seconds')
+```
+
+### Sample-Based Configuration
+
+#### Explicit sample count
+```python
+    # Exactly 5 most recent samples
+    ET_controller.gaze_contingent(N=5, units='samples')
+    
+    # Exactly 10 samples for smoother tracking
+    ET_controller.gaze_contingent(N=10, units='samples')
+```
+
+### Complete Applications
+
+#### Gaze-contingent window paradigm
+```python
+    # 300ms time window (auto-adjusts to tracker frequency)
+    ET_controller.gaze_contingent(N=0.3, units='seconds')
+    ET_controller.start_recording('gaze_window.h5')
+    
+    stimulus = visual.ImageStim(win, 'image.png')
+    window = visual.Circle(win, radius=0.1, fillColor=None, lineColor='white')
+    
+    for trial in range(20):
+        stimulus.draw()
+        
+        for frame in range(120):  # 2 seconds
+            gaze_pos = ET_controller.get_gaze_position()
+            window.pos = gaze_pos
+            window.draw()
+            win.flip()
+        
+        ET_controller.record_event(f'trial_{trial}_end')
+    
+    ET_controller.stop_recording()
 ```

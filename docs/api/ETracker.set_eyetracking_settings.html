@@ -7,7 +7,7 @@
 <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=yes">
 
 
-<title>tobii2pix – DeToX</title>
+<title>etracker.set_eyetracking_settings – DeToX</title>
 <style>
 code{white-space: pre-wrap;}
 span.smallcaps{font-variant: small-caps;}
@@ -64,8 +64,8 @@ pre > code.sourceCode > span > a:first-child::before { text-decoration: underlin
 <script src="../site_libs/quarto-search/fuse.min.js"></script>
 <script src="../site_libs/quarto-search/quarto-search.js"></script>
 <meta name="quarto:offset" content="../">
-<link href="../api/get_psychopy_pos_from_trackbox.html" rel="next">
-<link href="../api/pix2tobii.html" rel="prev">
+<link href="../api/ETracker.show_status.html" rel="next">
+<link href="../api/ETracker.save_data.html" rel="prev">
 <script src="../site_libs/cookie-consent/cookie-consent.js"></script>
 <link href="../site_libs/cookie-consent/cookie-consent.css" rel="stylesheet">
 <script src="../site_libs/quarto-html/quarto.js"></script>
@@ -194,13 +194,13 @@ div.callout-Advanced.callout-style-default .callout-icon::before, div.callout-Ad
       <button type="button" class="quarto-btn-toggle btn" data-bs-toggle="collapse" role="button" data-bs-target=".quarto-sidebar-collapse-item" aria-controls="quarto-sidebar" aria-expanded="false" aria-label="Toggle sidebar navigation" onclick="if (window.quartoToggleHeadroom) { window.quartoToggleHeadroom(); }">
         <i class="bi bi-layout-text-sidebar-reverse"></i>
       </button>
-        <nav class="quarto-page-breadcrumbs" aria-label="breadcrumb"><ol class="breadcrumb"><li class="breadcrumb-item"><a href="../api/convert_height_to_units.html">Coordinate Conversion</a></li><li class="breadcrumb-item"><a href="../api/tobii2pix.html">tobii2pix</a></li></ol></nav>
+        <nav class="quarto-page-breadcrumbs" aria-label="breadcrumb"><ol class="breadcrumb"><li class="breadcrumb-item"><a href="../api/ETracker.html">Main Eye-tracker Class</a></li><li class="breadcrumb-item"><a href="../api/ETracker.start_recording.html">Control the Recording</a></li><li class="breadcrumb-item"><a href="../api/ETracker.set_eyetracking_settings.html">ETracker.set_eyetracking_settings</a></li></ol></nav>
         <a class="flex-grow-1" role="navigation" data-bs-toggle="collapse" data-bs-target=".quarto-sidebar-collapse-item" aria-controls="quarto-sidebar" aria-expanded="false" aria-label="Toggle sidebar navigation" onclick="if (window.quartoToggleHeadroom) { window.quartoToggleHeadroom(); }">      
         </a>
     </div>
   </nav>
-  <div id="quarto-announcement" data-announcement-id="5603cdf67aefc87f3b65f8721f133f89" class="alert alert-danger hidden"><i class="bi bi-exclamation-triangle quarto-announcement-icon"></i><div class="quarto-announcement-content">
-<p><strong>Development Version</strong> - DeToX is currently in beta. Features may change without notice. Thoroughly test before using in production studies.</p>
+  <div id="quarto-announcement" data-announcement-id="de69b60bfdf2ea42f39c5cf1d3162adf" class="alert alert-danger hidden"><i class="bi bi-exclamation-triangle quarto-announcement-icon"></i><div class="quarto-announcement-content">
+<p><strong>Development Version</strong> - DeToX is currently in beta. Features may change without notice. Thoroughly test before using.</p>
 </div><i class="bi bi-x-lg quarto-announcement-action"></i></div>
 </header>
 <!-- content -->
@@ -232,13 +232,13 @@ div.callout-Advanced.callout-style-default .callout-icon::before, div.callout-Ad
 </li>
           <li class="sidebar-item sidebar-item-section">
       <div class="sidebar-item-container"> 
-            <a class="sidebar-item-text sidebar-link text-start collapsed" data-bs-toggle="collapse" data-bs-target="#quarto-sidebar-section-2" role="navigation" aria-expanded="false">
+            <a class="sidebar-item-text sidebar-link text-start" data-bs-toggle="collapse" data-bs-target="#quarto-sidebar-section-2" role="navigation" aria-expanded="true">
  <span class="menu-text">Control the Recording</span></a>
-          <a class="sidebar-item-toggle text-start collapsed" data-bs-toggle="collapse" data-bs-target="#quarto-sidebar-section-2" role="navigation" aria-expanded="false" aria-label="Toggle section">
+          <a class="sidebar-item-toggle text-start" data-bs-toggle="collapse" data-bs-target="#quarto-sidebar-section-2" role="navigation" aria-expanded="true" aria-label="Toggle section">
             <i class="bi bi-chevron-right ms-2"></i>
           </a> 
       </div>
-      <ul id="quarto-sidebar-section-2" class="collapse list-unstyled sidebar-section depth2 ">  
+      <ul id="quarto-sidebar-section-2" class="collapse list-unstyled sidebar-section depth2 show">  
           <li class="sidebar-item">
   <div class="sidebar-item-container"> 
   <a href="../api/ETracker.start_recording.html" class="sidebar-item-text sidebar-link">
@@ -261,6 +261,12 @@ div.callout-Advanced.callout-style-default .callout-icon::before, div.callout-Ad
   <div class="sidebar-item-container"> 
   <a href="../api/ETracker.save_data.html" class="sidebar-item-text sidebar-link">
  <span class="menu-text">ETracker.save_data</span></a>
+  </div>
+</li>
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="../api/ETracker.set_eyetracking_settings.html" class="sidebar-item-text sidebar-link active">
+ <span class="menu-text">ETracker.set_eyetracking_settings</span></a>
   </div>
 </li>
       </ul>
@@ -395,14 +401,8 @@ div.callout-Advanced.callout-style-default .callout-icon::before, div.callout-Ad
 </li>
           <li class="sidebar-item">
   <div class="sidebar-item-container"> 
-  <a href="../api/tobii2pix.html" class="sidebar-item-text sidebar-link active">
- <span class="menu-text">tobii2pix</span></a>
-  </div>
-</li>
-          <li class="sidebar-item">
-  <div class="sidebar-item-container"> 
-  <a href="../api/get_psychopy_pos_from_trackbox.html" class="sidebar-item-text sidebar-link">
- <span class="menu-text">get_psychopy_pos_from_trackbox</span></a>
+  <a href="../api/get_psychopy_pos_from_user_position.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text">get_psychopy_pos_from_user_position</span></a>
   </div>
 </li>
       </ul>
@@ -465,30 +465,42 @@ div.callout-Advanced.callout-style-default .callout-icon::before, div.callout-Ad
 <div id="quarto-sidebar-glass" class="quarto-sidebar-collapse-item" data-bs-toggle="collapse" data-bs-target=".quarto-sidebar-collapse-item"></div>
 <!-- margin-sidebar -->
     <div id="quarto-margin-sidebar" class="sidebar margin-sidebar">
-        <nav id="TOC" role="doc-toc" class="toc-active" data-toc-expanded="4">
+        <nav id="TOC" role="doc-toc" class="toc-active" data-toc-expanded="6">
     <h2 id="toc-title">On this page</h2>
    
   <ul>
-  <li><a href="#DeToX.tobii2pix" id="toc-DeToX.tobii2pix" class="nav-link active" data-scroll-target="#DeToX.tobii2pix">tobii2pix</a>
+  <li><a href="#DeToX.ETracker.set_eyetracking_settings" id="toc-DeToX.ETracker.set_eyetracking_settings" class="nav-link active" data-scroll-target="#DeToX.ETracker.set_eyetracking_settings">ETracker.set_eyetracking_settings</a>
   <ul class="collapse">
   <li><a href="#parameters" id="toc-parameters" class="nav-link" data-scroll-target="#parameters">Parameters</a></li>
-  <li><a href="#returns" id="toc-returns" class="nav-link" data-scroll-target="#returns">Returns</a></li>
+  <li><a href="#raises" id="toc-raises" class="nav-link" data-scroll-target="#raises">Raises</a></li>
   <li><a href="#notes" id="toc-notes" class="nav-link" data-scroll-target="#notes">Notes</a></li>
+  <li><a href="#examples" id="toc-examples" class="nav-link" data-scroll-target="#examples">Examples</a>
+  <ul class="collapse">
+  <li><a href="#programmatic-settings" id="toc-programmatic-settings" class="nav-link" data-scroll-target="#programmatic-settings">Programmatic Settings</a></li>
+  <li><a href="#gui-based-settings" id="toc-gui-based-settings" class="nav-link" data-scroll-target="#gui-based-settings">GUI-Based Settings</a></li>
+  </ul></li>
   </ul></li>
   </ul>
 </nav>
     </div>
 <!-- main -->
-<main class="content" id="quarto-document-content"><div class="quarto-title-block"><nav class="quarto-page-breadcrumbs quarto-title-breadcrumbs d-none d-lg-block" aria-label="breadcrumb"><ol class="breadcrumb"><li class="breadcrumb-item"><a href="../api/convert_height_to_units.html">Coordinate Conversion</a></li><li class="breadcrumb-item"><a href="../api/tobii2pix.html">tobii2pix</a></li></ol></nav><div class="quarto-title-tools-only"><h1></h1><button type="button" class="btn code-tools-button" id="quarto-code-tools-source"><i class="bi"></i></button></div></div>
+<main class="content" id="quarto-document-content"><div class="quarto-title-block"><nav class="quarto-page-breadcrumbs quarto-title-breadcrumbs d-none d-lg-block" aria-label="breadcrumb"><ol class="breadcrumb"><li class="breadcrumb-item"><a href="../api/ETracker.html">Main Eye-tracker Class</a></li><li class="breadcrumb-item"><a href="../api/ETracker.start_recording.html">Control the Recording</a></li><li class="breadcrumb-item"><a href="../api/ETracker.set_eyetracking_settings.html">ETracker.set_eyetracking_settings</a></li></ol></nav><div class="quarto-title-tools-only"><h1></h1><button type="button" class="btn code-tools-button" id="quarto-code-tools-source"><i class="bi"></i></button></div></div>
 
 
 
 
-<section id="DeToX.tobii2pix" class="level1">
-<h1>tobii2pix</h1>
-<div class="sourceCode" id="cb1"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb1-1"><a href="#cb1-1" aria-hidden="true" tabindex="-1"></a>tobii2pix(win, p)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
-<p>Convert Tobii ADCS coordinates to PsychoPy pixel coordinates.</p>
-<p>Low-level conversion function that transforms Tobii’s normalized ADCS coordinates to PsychoPy pixel coordinates. This is the inverse of pix2tobii() and is essential for displaying gaze data in PsychoPy windows.</p>
+<section id="DeToX.ETracker.set_eyetracking_settings" class="level1">
+<h1>ETracker.set_eyetracking_settings</h1>
+<div class="sourceCode" id="cb1"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb1-1"><a href="#cb1-1" aria-hidden="true" tabindex="-1"></a>ETracker.set_eyetracking_settings(</span>
+<span id="cb1-2"><a href="#cb1-2" aria-hidden="true" tabindex="-1"></a>    desired_fps<span class="op">=</span><span class="va">None</span>,</span>
+<span id="cb1-3"><a href="#cb1-3" aria-hidden="true" tabindex="-1"></a>    desired_illumination_mode<span class="op">=</span><span class="va">None</span>,</span>
+<span id="cb1-4"><a href="#cb1-4" aria-hidden="true" tabindex="-1"></a>    use_gui<span class="op">=</span><span class="va">False</span>,</span>
+<span id="cb1-5"><a href="#cb1-5" aria-hidden="true" tabindex="-1"></a>    screen<span class="op">=-</span><span class="dv">1</span>,</span>
+<span id="cb1-6"><a href="#cb1-6" aria-hidden="true" tabindex="-1"></a>    alwaysOnTop<span class="op">=</span><span class="va">True</span>,</span>
+<span id="cb1-7"><a href="#cb1-7" aria-hidden="true" tabindex="-1"></a>)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<p>Configure and apply Tobii eye tracker settings.</p>
+<p>This method updates the eye tracker’s sampling frequency (FPS) and illumination mode, either programmatically or via a graphical interface. It ensures that configuration changes are only made when the device is idle and connected.</p>
+<p>After applying settings, a summary is displayed showing which settings changed and which remained the same.</p>
 <section id="parameters" class="level2 doc-section doc-section-parameters">
 <h2 class="doc-section doc-section-parameters anchored" data-anchor-id="parameters">Parameters</h2>
 <table class="caption-top table">
@@ -502,47 +514,114 @@ div.callout-Advanced.callout-style-default .callout-icon::before, div.callout-Ad
 </thead>
 <tbody>
 <tr class="odd">
-<td>win</td>
-<td><a href="`psychopy`">psychopy</a>.<a href="`psychopy.visual`">visual</a>.<a href="`psychopy.visual.Window`">Window</a></td>
-<td>The PsychoPy window which provides screen dimensions for scaling.</td>
-<td><em>required</em></td>
+<td>desired_fps</td>
+<td><a href="`int`">int</a></td>
+<td>Desired sampling frequency in Hz (e.g., 60, 120, 300). If None, the current frequency is retained. When <code>use_gui=True</code>, this value pre-populates the dialog box dropdown.</td>
+<td><code>None</code></td>
 </tr>
 <tr class="even">
-<td>p</td>
-<td><a href="`tuple`">tuple</a></td>
-<td>The Tobii ADCS coordinates to convert as (x, y) in range [0, 1]. Origin is top-left, x increases rightward, y increases downward.</td>
-<td><em>required</em></td>
+<td>desired_illumination_mode</td>
+<td><a href="`str`">str</a></td>
+<td>Desired illumination mode (e.g., ‘Auto’, ‘Bright’, ‘Dark’). If None, the current illumination mode is retained. When <code>use_gui=True</code>, this value pre-populates the dialog box dropdown.</td>
+<td><code>None</code></td>
+</tr>
+<tr class="odd">
+<td>use_gui</td>
+<td><a href="`bool`">bool</a></td>
+<td>If True, opens a PsychoPy GUI dialog with dropdown menus that allows users to select settings interactively. The dropdowns are pre-populated with values from <code>desired_fps</code> and <code>desired_illumination_mode</code> if provided, or current settings if None. Defaults to False.</td>
+<td><code>False</code></td>
+</tr>
+<tr class="even">
+<td>screen</td>
+<td><a href="`int`">int</a></td>
+<td>Screen number where the GUI dialog is displayed. Only used when <code>use_gui=True</code>. If -1 (default), the dialog appears on the primary screen. Use 0, 1, 2, etc. to specify other monitors. Ignored when <code>use_gui=False</code>.</td>
+<td><code>-1</code></td>
+</tr>
+<tr class="odd">
+<td>alwaysOnTop</td>
+<td><a href="`bool`">bool</a></td>
+<td>Whether the GUI dialog stays on top of other windows. Only used when <code>use_gui=True</code>. Default is True to prevent the dialog from being hidden behind experiment windows. Ignored when <code>use_gui=False</code>.</td>
+<td><code>True</code></td>
 </tr>
 </tbody>
 </table>
 </section>
-<section id="returns" class="level2 doc-section doc-section-returns">
-<h2 class="doc-section doc-section-returns anchored" data-anchor-id="returns">Returns</h2>
+<section id="raises" class="level2 doc-section doc-section-raises">
+<h2 class="doc-section doc-section-raises anchored" data-anchor-id="raises">Raises</h2>
 <table class="caption-top table">
 <thead>
 <tr class="header">
-<th>Name</th>
 <th>Type</th>
 <th>Description</th>
 </tr>
 </thead>
 <tbody>
 <tr class="odd">
-<td></td>
-<td><a href="`tuple`">tuple</a></td>
-<td>The converted PsychoPy pixel coordinates as (x, y) with origin at screen center. Values are rounded to nearest integer for pixel alignment.</td>
+<td><a href="`RuntimeError`">RuntimeError</a></td>
+<td>If no physical eye tracker is connected or if the function is called in simulation mode.</td>
+</tr>
+<tr class="even">
+<td><a href="`ValueError`">ValueError</a></td>
+<td>If the specified FPS or illumination mode is not supported by the connected device.</td>
 </tr>
 </tbody>
 </table>
 </section>
 <section id="notes" class="level2 doc-section doc-section-notes">
 <h2 class="doc-section doc-section-notes anchored" data-anchor-id="notes">Notes</h2>
-<p>The conversion involves: 1. Shifting origin from top-left to center (-0.5 offset) 2. Scaling by screen dimensions to get pixel values 3. Inverting the Y-axis to match PsychoPy’s bottom-up convention</p>
-<p>Output coordinates follow PsychoPy’s pixel convention where (0, 0) is at screen center.</p>
+<ul>
+<li>Settings cannot be changed during active recording. If an ongoing recording is detected, a non-blocking warning is issued and the function exits safely.</li>
+<li>When <code>use_gui=True</code>, a PsychoPy dialog window appears with dropdown menus. The <code>screen</code> and <code>alwaysOnTop</code> parameters control its display behavior.</li>
+<li>After successfully applying new settings, the internal attributes <code>self.fps</code> and <code>self.illum_mode</code> are updated to reflect the current device configuration.</li>
+<li>A summary of applied changes is displayed using NicePrint, showing which settings changed (with old –&gt; new values) and which remained unchanged.</li>
+</ul>
+</section>
+<section id="examples" class="level2 doc-section doc-section-examples">
+<h2 class="doc-section doc-section-examples anchored" data-anchor-id="examples">Examples</h2>
+<section id="programmatic-settings" class="level3">
+<h3 class="anchored" data-anchor-id="programmatic-settings">Programmatic Settings</h3>
+<section id="set-frequency-to-120-hz" class="level4">
+<h4 class="anchored" data-anchor-id="set-frequency-to-120-hz">Set frequency to 120 Hz</h4>
+<div class="sourceCode" id="cb2"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb2-1"><a href="#cb2-1" aria-hidden="true" tabindex="-1"></a>        ET_controller.set_eyetracking_settings(desired_fps<span class="op">=</span><span class="dv">120</span>)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+</section>
+<section id="set-illumination-mode-to-bright" class="level4">
+<h4 class="anchored" data-anchor-id="set-illumination-mode-to-bright">Set illumination mode to ‘Bright’</h4>
+<div class="sourceCode" id="cb3"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb3-1"><a href="#cb3-1" aria-hidden="true" tabindex="-1"></a>    ET_controller.set_eyetracking_settings(desired_illumination_mode<span class="op">=</span><span class="st">'Bright'</span>)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+</section>
+<section id="set-both-frequency-and-illumination-mode" class="level4">
+<h4 class="anchored" data-anchor-id="set-both-frequency-and-illumination-mode">Set both frequency and illumination mode</h4>
+<div class="sourceCode" id="cb4"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb4-1"><a href="#cb4-1" aria-hidden="true" tabindex="-1"></a>    ET_controller.set_eyetracking_settings(</span>
+<span id="cb4-2"><a href="#cb4-2" aria-hidden="true" tabindex="-1"></a>        desired_fps<span class="op">=</span><span class="dv">120</span>,</span>
+<span id="cb4-3"><a href="#cb4-3" aria-hidden="true" tabindex="-1"></a>        desired_illumination_mode<span class="op">=</span><span class="st">'Bright'</span></span>
+<span id="cb4-4"><a href="#cb4-4" aria-hidden="true" tabindex="-1"></a>    )</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+</section>
+</section>
+<section id="gui-based-settings" class="level3">
+<h3 class="anchored" data-anchor-id="gui-based-settings">GUI-Based Settings</h3>
+<section id="open-gui-with-default-settings" class="level4">
+<h4 class="anchored" data-anchor-id="open-gui-with-default-settings">Open GUI with default settings</h4>
+<div class="sourceCode" id="cb5"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb5-1"><a href="#cb5-1" aria-hidden="true" tabindex="-1"></a>    ET_controller.set_eyetracking_settings(use_gui<span class="op">=</span><span class="va">True</span>)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+</section>
+<section id="gui-on-secondary-monitor-without-always-on-top" class="level4">
+<h4 class="anchored" data-anchor-id="gui-on-secondary-monitor-without-always-on-top">GUI on secondary monitor without always-on-top</h4>
+<div class="sourceCode" id="cb6"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb6-1"><a href="#cb6-1" aria-hidden="true" tabindex="-1"></a>    ET_controller.set_eyetracking_settings(</span>
+<span id="cb6-2"><a href="#cb6-2" aria-hidden="true" tabindex="-1"></a>        use_gui<span class="op">=</span><span class="va">True</span>,</span>
+<span id="cb6-3"><a href="#cb6-3" aria-hidden="true" tabindex="-1"></a>        screen<span class="op">=</span><span class="dv">1</span>,</span>
+<span id="cb6-4"><a href="#cb6-4" aria-hidden="true" tabindex="-1"></a>        alwaysOnTop<span class="op">=</span><span class="va">False</span></span>
+<span id="cb6-5"><a href="#cb6-5" aria-hidden="true" tabindex="-1"></a>    )</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+</section>
+<section id="gui-with-pre-selected-120-hz-in-dropdown" class="level4">
+<h4 class="anchored" data-anchor-id="gui-with-pre-selected-120-hz-in-dropdown">GUI with pre-selected 120 Hz in dropdown</h4>
+<div class="sourceCode" id="cb7"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb7-1"><a href="#cb7-1" aria-hidden="true" tabindex="-1"></a>    ET_controller.set_eyetracking_settings(</span>
+<span id="cb7-2"><a href="#cb7-2" aria-hidden="true" tabindex="-1"></a>        desired_fps<span class="op">=</span><span class="dv">120</span>,</span>
+<span id="cb7-3"><a href="#cb7-3" aria-hidden="true" tabindex="-1"></a>        use_gui<span class="op">=</span><span class="va">True</span></span>
+<span id="cb7-4"><a href="#cb7-4" aria-hidden="true" tabindex="-1"></a>    )</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
 
 
 <!-- -->
 
+</section>
+</section>
 </section>
 </section>
 
@@ -1020,50 +1099,119 @@ window.document.addEventListener("DOMContentLoaded", function (event) {
 </script>
 <nav class="page-navigation">
   <div class="nav-page nav-page-previous">
-      <a href="../api/pix2tobii.html" class="pagination-link" aria-label="pix2tobii">
-        <i class="bi bi-arrow-left-short"></i> <span class="nav-page-text">pix2tobii</span>
+      <a href="../api/ETracker.save_data.html" class="pagination-link" aria-label="ETracker.save_data">
+        <i class="bi bi-arrow-left-short"></i> <span class="nav-page-text">ETracker.save_data</span>
       </a>          
   </div>
   <div class="nav-page nav-page-next">
-      <a href="../api/get_psychopy_pos_from_trackbox.html" class="pagination-link" aria-label="get_psychopy_pos_from_trackbox">
-        <span class="nav-page-text">get_psychopy_pos_from_trackbox</span> <i class="bi bi-arrow-right-short"></i>
+      <a href="../api/ETracker.show_status.html" class="pagination-link" aria-label="ETracker.show_status">
+        <span class="nav-page-text">ETracker.show_status</span> <i class="bi bi-arrow-right-short"></i>
       </a>
   </div>
 </nav><div class="modal fade" id="quarto-embedded-source-code-modal" tabindex="-1" aria-labelledby="quarto-embedded-source-code-modal-label" aria-hidden="true"><div class="modal-dialog modal-dialog-scrollable"><div class="modal-content"><div class="modal-header"><h5 class="modal-title" id="quarto-embedded-source-code-modal-label">Source Code</h5><button class="btn-close" data-bs-dismiss="modal"></button></div><div class="modal-body"><div class="">
-<div class="sourceCode" id="cb2" data-shortcodes="false"><pre class="sourceCode markdown code-with-copy"><code class="sourceCode markdown"><span id="cb2-1"><a href="#cb2-1" aria-hidden="true" tabindex="-1"></a><span class="fu"># tobii2pix { #DeToX.tobii2pix }</span></span>
-<span id="cb2-2"><a href="#cb2-2" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb2-3"><a href="#cb2-3" aria-hidden="true" tabindex="-1"></a><span class="in">```python</span></span>
-<span id="cb2-4"><a href="#cb2-4" aria-hidden="true" tabindex="-1"></a>tobii2pix(win, p)</span>
-<span id="cb2-5"><a href="#cb2-5" aria-hidden="true" tabindex="-1"></a><span class="in">```</span></span>
-<span id="cb2-6"><a href="#cb2-6" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb2-7"><a href="#cb2-7" aria-hidden="true" tabindex="-1"></a>Convert Tobii ADCS coordinates to PsychoPy pixel coordinates.</span>
-<span id="cb2-8"><a href="#cb2-8" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb2-9"><a href="#cb2-9" aria-hidden="true" tabindex="-1"></a>Low-level conversion function that transforms Tobii's normalized ADCS</span>
-<span id="cb2-10"><a href="#cb2-10" aria-hidden="true" tabindex="-1"></a>coordinates to PsychoPy pixel coordinates. This is the inverse of pix2tobii()</span>
-<span id="cb2-11"><a href="#cb2-11" aria-hidden="true" tabindex="-1"></a>and is essential for displaying gaze data in PsychoPy windows.</span>
-<span id="cb2-12"><a href="#cb2-12" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb2-13"><a href="#cb2-13" aria-hidden="true" tabindex="-1"></a><span class="fu">## Parameters {.doc-section .doc-section-parameters}</span></span>
-<span id="cb2-14"><a href="#cb2-14" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb2-15"><a href="#cb2-15" aria-hidden="true" tabindex="-1"></a>| Name   | Type                                                                                  | Description                                                                                                                       | Default    |</span>
-<span id="cb2-16"><a href="#cb2-16" aria-hidden="true" tabindex="-1"></a>|--------|---------------------------------------------------------------------------------------|-----------------------------------------------------------------------------------------------------------------------------------|------------|</span>
-<span id="cb2-17"><a href="#cb2-17" aria-hidden="true" tabindex="-1"></a>| win    | <span class="co">[</span><span class="ot">psychopy</span><span class="co">](`psychopy`)</span>.<span class="co">[</span><span class="ot">visual</span><span class="co">](`psychopy.visual`)</span>.<span class="co">[</span><span class="ot">Window</span><span class="co">](`psychopy.visual.Window`)</span> | The PsychoPy window which provides screen dimensions for scaling.                                                                 | _required_ |</span>
-<span id="cb2-18"><a href="#cb2-18" aria-hidden="true" tabindex="-1"></a>| p      | <span class="co">[</span><span class="ot">tuple</span><span class="co">](`tuple`)</span>                                                                      | The Tobii ADCS coordinates to convert as (x, y) in range <span class="co">[</span><span class="ot">0, 1</span><span class="co">]</span>. Origin is top-left, x increases rightward, y increases downward. | _required_ |</span>
-<span id="cb2-19"><a href="#cb2-19" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb2-20"><a href="#cb2-20" aria-hidden="true" tabindex="-1"></a><span class="fu">## Returns {.doc-section .doc-section-returns}</span></span>
-<span id="cb2-21"><a href="#cb2-21" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb2-22"><a href="#cb2-22" aria-hidden="true" tabindex="-1"></a>| Name   | Type             | Description                                                                                                                                 |</span>
-<span id="cb2-23"><a href="#cb2-23" aria-hidden="true" tabindex="-1"></a>|--------|------------------|---------------------------------------------------------------------------------------------------------------------------------------------|</span>
-<span id="cb2-24"><a href="#cb2-24" aria-hidden="true" tabindex="-1"></a>|        | <span class="co">[</span><span class="ot">tuple</span><span class="co">](`tuple`)</span> | The converted PsychoPy pixel coordinates as (x, y) with origin at screen center. Values are rounded to nearest integer for pixel alignment. |</span>
-<span id="cb2-25"><a href="#cb2-25" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb2-26"><a href="#cb2-26" aria-hidden="true" tabindex="-1"></a><span class="fu">## Notes {.doc-section .doc-section-notes}</span></span>
-<span id="cb2-27"><a href="#cb2-27" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb2-28"><a href="#cb2-28" aria-hidden="true" tabindex="-1"></a>The conversion involves:</span>
-<span id="cb2-29"><a href="#cb2-29" aria-hidden="true" tabindex="-1"></a><span class="ss">1. </span>Shifting origin from top-left to center (-0.5 offset)</span>
-<span id="cb2-30"><a href="#cb2-30" aria-hidden="true" tabindex="-1"></a><span class="ss">2. </span>Scaling by screen dimensions to get pixel values</span>
-<span id="cb2-31"><a href="#cb2-31" aria-hidden="true" tabindex="-1"></a><span class="ss">3. </span>Inverting the Y-axis to match PsychoPy's bottom-up convention</span>
-<span id="cb2-32"><a href="#cb2-32" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb2-33"><a href="#cb2-33" aria-hidden="true" tabindex="-1"></a>Output coordinates follow PsychoPy's pixel convention where (0, 0)</span>
-<span id="cb2-34"><a href="#cb2-34" aria-hidden="true" tabindex="-1"></a>is at screen center.</span></code><button title="Copy to Clipboard" class="code-copy-button" data-in-quarto-modal=""><i class="bi"></i></button></pre></div>
+<div class="sourceCode" id="cb8" data-shortcodes="false"><pre class="sourceCode markdown code-with-copy"><code class="sourceCode markdown"><span id="cb8-1"><a href="#cb8-1" aria-hidden="true" tabindex="-1"></a><span class="fu"># ETracker.set_eyetracking_settings { #DeToX.ETracker.set_eyetracking_settings }</span></span>
+<span id="cb8-2"><a href="#cb8-2" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb8-3"><a href="#cb8-3" aria-hidden="true" tabindex="-1"></a><span class="in">```python</span></span>
+<span id="cb8-4"><a href="#cb8-4" aria-hidden="true" tabindex="-1"></a>ETracker.set_eyetracking_settings(</span>
+<span id="cb8-5"><a href="#cb8-5" aria-hidden="true" tabindex="-1"></a>    desired_fps<span class="op">=</span><span class="va">None</span>,</span>
+<span id="cb8-6"><a href="#cb8-6" aria-hidden="true" tabindex="-1"></a>    desired_illumination_mode<span class="op">=</span><span class="va">None</span>,</span>
+<span id="cb8-7"><a href="#cb8-7" aria-hidden="true" tabindex="-1"></a>    use_gui<span class="op">=</span><span class="va">False</span>,</span>
+<span id="cb8-8"><a href="#cb8-8" aria-hidden="true" tabindex="-1"></a>    screen<span class="op">=-</span><span class="dv">1</span>,</span>
+<span id="cb8-9"><a href="#cb8-9" aria-hidden="true" tabindex="-1"></a>    alwaysOnTop<span class="op">=</span><span class="va">True</span>,</span>
+<span id="cb8-10"><a href="#cb8-10" aria-hidden="true" tabindex="-1"></a>)</span>
+<span id="cb8-11"><a href="#cb8-11" aria-hidden="true" tabindex="-1"></a><span class="in">```</span></span>
+<span id="cb8-12"><a href="#cb8-12" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb8-13"><a href="#cb8-13" aria-hidden="true" tabindex="-1"></a>Configure and apply Tobii eye tracker settings.</span>
+<span id="cb8-14"><a href="#cb8-14" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb8-15"><a href="#cb8-15" aria-hidden="true" tabindex="-1"></a>This method updates the eye tracker's sampling frequency (FPS) and illumination </span>
+<span id="cb8-16"><a href="#cb8-16" aria-hidden="true" tabindex="-1"></a>mode, either programmatically or via a graphical interface. It ensures that </span>
+<span id="cb8-17"><a href="#cb8-17" aria-hidden="true" tabindex="-1"></a>configuration changes are only made when the device is idle and connected.</span>
+<span id="cb8-18"><a href="#cb8-18" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb8-19"><a href="#cb8-19" aria-hidden="true" tabindex="-1"></a>After applying settings, a summary is displayed showing which settings changed</span>
+<span id="cb8-20"><a href="#cb8-20" aria-hidden="true" tabindex="-1"></a>and which remained the same.</span>
+<span id="cb8-21"><a href="#cb8-21" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb8-22"><a href="#cb8-22" aria-hidden="true" tabindex="-1"></a><span class="fu">## Parameters {.doc-section .doc-section-parameters}</span></span>
+<span id="cb8-23"><a href="#cb8-23" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb8-24"><a href="#cb8-24" aria-hidden="true" tabindex="-1"></a>+---------------------------+----------------+-----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------+-----------+</span>
+<span id="cb8-25"><a href="#cb8-25" aria-hidden="true" tabindex="-1"></a>| Name                      | Type           | Description                                                                                                                                                                                                                                                                 | Default   |</span>
+<span id="cb8-26"><a href="#cb8-26" aria-hidden="true" tabindex="-1"></a>+===========================+================+=============================================================================================================================================================================================================================================================================+===========+</span>
+<span id="cb8-27"><a href="#cb8-27" aria-hidden="true" tabindex="-1"></a>| desired_fps               | <span class="co">[</span><span class="ot">int</span><span class="co">](`int`)</span>   | Desired sampling frequency in Hz (e.g., 60, 120, 300). If None, the current  frequency is retained. When <span class="in">`use_gui=True`</span>, this value pre-populates the  dialog box dropdown.                                                                                                 | <span class="in">`None`</span>    |</span>
+<span id="cb8-28"><a href="#cb8-28" aria-hidden="true" tabindex="-1"></a>+---------------------------+----------------+-----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------+-----------+</span>
+<span id="cb8-29"><a href="#cb8-29" aria-hidden="true" tabindex="-1"></a>| desired_illumination_mode | <span class="co">[</span><span class="ot">str</span><span class="co">](`str`)</span>   | Desired illumination mode (e.g., 'Auto', 'Bright', 'Dark'). If None, the  current illumination mode is retained. When <span class="in">`use_gui=True`</span>, this value  pre-populates the dialog box dropdown.                                                                                    | <span class="in">`None`</span>    |</span>
+<span id="cb8-30"><a href="#cb8-30" aria-hidden="true" tabindex="-1"></a>+---------------------------+----------------+-----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------+-----------+</span>
+<span id="cb8-31"><a href="#cb8-31" aria-hidden="true" tabindex="-1"></a>| use_gui                   | <span class="co">[</span><span class="ot">bool</span><span class="co">](`bool`)</span> | If True, opens a PsychoPy GUI dialog with dropdown menus that allows users  to select settings interactively. The dropdowns are pre-populated with values  from <span class="in">`desired_fps`</span> and <span class="in">`desired_illumination_mode`</span> if provided, or current  settings if None. Defaults to False. | <span class="in">`False`</span>   |</span>
+<span id="cb8-32"><a href="#cb8-32" aria-hidden="true" tabindex="-1"></a>+---------------------------+----------------+-----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------+-----------+</span>
+<span id="cb8-33"><a href="#cb8-33" aria-hidden="true" tabindex="-1"></a>| screen                    | <span class="co">[</span><span class="ot">int</span><span class="co">](`int`)</span>   | Screen number where the GUI dialog is displayed. Only used when <span class="in">`use_gui=True`</span>. If -1 (default), the dialog appears on the primary screen. Use 0, 1, 2, etc.  to specify other monitors. Ignored when <span class="in">`use_gui=False`</span>.                                                      | <span class="in">`-1`</span>      |</span>
+<span id="cb8-34"><a href="#cb8-34" aria-hidden="true" tabindex="-1"></a>+---------------------------+----------------+-----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------+-----------+</span>
+<span id="cb8-35"><a href="#cb8-35" aria-hidden="true" tabindex="-1"></a>| alwaysOnTop               | <span class="co">[</span><span class="ot">bool</span><span class="co">](`bool`)</span> | Whether the GUI dialog stays on top of other windows. Only used when  <span class="in">`use_gui=True`</span>. Default is True to prevent the dialog from being hidden  behind experiment windows. Ignored when <span class="in">`use_gui=False`</span>.                                                                     | <span class="in">`True`</span>    |</span>
+<span id="cb8-36"><a href="#cb8-36" aria-hidden="true" tabindex="-1"></a>+---------------------------+----------------+-----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------+-----------+</span>
+<span id="cb8-37"><a href="#cb8-37" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb8-38"><a href="#cb8-38" aria-hidden="true" tabindex="-1"></a><span class="fu">## Raises {.doc-section .doc-section-raises}</span></span>
+<span id="cb8-39"><a href="#cb8-39" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb8-40"><a href="#cb8-40" aria-hidden="true" tabindex="-1"></a>+--------------------------------+-------------------------------------------------------------------------------------------+</span>
+<span id="cb8-41"><a href="#cb8-41" aria-hidden="true" tabindex="-1"></a>| Type                           | Description                                                                               |</span>
+<span id="cb8-42"><a href="#cb8-42" aria-hidden="true" tabindex="-1"></a>+================================+===========================================================================================+</span>
+<span id="cb8-43"><a href="#cb8-43" aria-hidden="true" tabindex="-1"></a>| <span class="co">[</span><span class="ot">RuntimeError</span><span class="co">](`RuntimeError`)</span> | If no physical eye tracker is connected or if the function is called in  simulation mode. |</span>
+<span id="cb8-44"><a href="#cb8-44" aria-hidden="true" tabindex="-1"></a>+--------------------------------+-------------------------------------------------------------------------------------------+</span>
+<span id="cb8-45"><a href="#cb8-45" aria-hidden="true" tabindex="-1"></a>| <span class="co">[</span><span class="ot">ValueError</span><span class="co">](`ValueError`)</span>     | If the specified FPS or illumination mode is not supported by the connected  device.      |</span>
+<span id="cb8-46"><a href="#cb8-46" aria-hidden="true" tabindex="-1"></a>+--------------------------------+-------------------------------------------------------------------------------------------+</span>
+<span id="cb8-47"><a href="#cb8-47" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb8-48"><a href="#cb8-48" aria-hidden="true" tabindex="-1"></a><span class="fu">## Notes {.doc-section .doc-section-notes}</span></span>
+<span id="cb8-49"><a href="#cb8-49" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb8-50"><a href="#cb8-50" aria-hidden="true" tabindex="-1"></a><span class="ss">- </span>Settings cannot be changed during active recording. If an ongoing recording </span>
+<span id="cb8-51"><a href="#cb8-51" aria-hidden="true" tabindex="-1"></a>is detected, a non-blocking warning is issued and the function exits safely.</span>
+<span id="cb8-52"><a href="#cb8-52" aria-hidden="true" tabindex="-1"></a><span class="ss">- </span>When <span class="in">`use_gui=True`</span>, a PsychoPy dialog window appears with dropdown menus.</span>
+<span id="cb8-53"><a href="#cb8-53" aria-hidden="true" tabindex="-1"></a>The <span class="in">`screen`</span> and <span class="in">`alwaysOnTop`</span> parameters control its display behavior.</span>
+<span id="cb8-54"><a href="#cb8-54" aria-hidden="true" tabindex="-1"></a><span class="ss">- </span>After successfully applying new settings, the internal attributes <span class="in">`self.fps`</span> </span>
+<span id="cb8-55"><a href="#cb8-55" aria-hidden="true" tabindex="-1"></a>and <span class="in">`self.illum_mode`</span> are updated to reflect the current device configuration.</span>
+<span id="cb8-56"><a href="#cb8-56" aria-hidden="true" tabindex="-1"></a><span class="ss">- </span>A summary of applied changes is displayed using NicePrint, showing which </span>
+<span id="cb8-57"><a href="#cb8-57" aria-hidden="true" tabindex="-1"></a>settings changed (with old --&gt; new values) and which remained unchanged.</span>
+<span id="cb8-58"><a href="#cb8-58" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb8-59"><a href="#cb8-59" aria-hidden="true" tabindex="-1"></a><span class="fu">## Examples {.doc-section .doc-section-examples}</span></span>
+<span id="cb8-60"><a href="#cb8-60" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb8-61"><a href="#cb8-61" aria-hidden="true" tabindex="-1"></a><span class="fu">### Programmatic Settings</span></span>
+<span id="cb8-62"><a href="#cb8-62" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb8-63"><a href="#cb8-63" aria-hidden="true" tabindex="-1"></a><span class="fu">#### Set frequency to 120 Hz</span></span>
+<span id="cb8-64"><a href="#cb8-64" aria-hidden="true" tabindex="-1"></a><span class="in">```python</span></span>
+<span id="cb8-65"><a href="#cb8-65" aria-hidden="true" tabindex="-1"></a>        ET_controller.set_eyetracking_settings(desired_fps<span class="op">=</span><span class="dv">120</span>)</span>
+<span id="cb8-66"><a href="#cb8-66" aria-hidden="true" tabindex="-1"></a><span class="in">```</span></span>
+<span id="cb8-67"><a href="#cb8-67" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb8-68"><a href="#cb8-68" aria-hidden="true" tabindex="-1"></a><span class="fu">#### Set illumination mode to 'Bright'</span></span>
+<span id="cb8-69"><a href="#cb8-69" aria-hidden="true" tabindex="-1"></a><span class="in">```python</span></span>
+<span id="cb8-70"><a href="#cb8-70" aria-hidden="true" tabindex="-1"></a>    ET_controller.set_eyetracking_settings(desired_illumination_mode<span class="op">=</span><span class="st">'Bright'</span>)</span>
+<span id="cb8-71"><a href="#cb8-71" aria-hidden="true" tabindex="-1"></a><span class="in">```</span></span>
+<span id="cb8-72"><a href="#cb8-72" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb8-73"><a href="#cb8-73" aria-hidden="true" tabindex="-1"></a><span class="fu">#### Set both frequency and illumination mode</span></span>
+<span id="cb8-74"><a href="#cb8-74" aria-hidden="true" tabindex="-1"></a><span class="in">```python</span></span>
+<span id="cb8-75"><a href="#cb8-75" aria-hidden="true" tabindex="-1"></a>    ET_controller.set_eyetracking_settings(</span>
+<span id="cb8-76"><a href="#cb8-76" aria-hidden="true" tabindex="-1"></a>        desired_fps<span class="op">=</span><span class="dv">120</span>,</span>
+<span id="cb8-77"><a href="#cb8-77" aria-hidden="true" tabindex="-1"></a>        desired_illumination_mode<span class="op">=</span><span class="st">'Bright'</span></span>
+<span id="cb8-78"><a href="#cb8-78" aria-hidden="true" tabindex="-1"></a>    )</span>
+<span id="cb8-79"><a href="#cb8-79" aria-hidden="true" tabindex="-1"></a><span class="in">```</span></span>
+<span id="cb8-80"><a href="#cb8-80" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb8-81"><a href="#cb8-81" aria-hidden="true" tabindex="-1"></a><span class="fu">### GUI-Based Settings</span></span>
+<span id="cb8-82"><a href="#cb8-82" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb8-83"><a href="#cb8-83" aria-hidden="true" tabindex="-1"></a><span class="fu">#### Open GUI with default settings</span></span>
+<span id="cb8-84"><a href="#cb8-84" aria-hidden="true" tabindex="-1"></a><span class="in">```python</span></span>
+<span id="cb8-85"><a href="#cb8-85" aria-hidden="true" tabindex="-1"></a>    ET_controller.set_eyetracking_settings(use_gui<span class="op">=</span><span class="va">True</span>)</span>
+<span id="cb8-86"><a href="#cb8-86" aria-hidden="true" tabindex="-1"></a><span class="in">```</span></span>
+<span id="cb8-87"><a href="#cb8-87" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb8-88"><a href="#cb8-88" aria-hidden="true" tabindex="-1"></a><span class="fu">#### GUI on secondary monitor without always-on-top</span></span>
+<span id="cb8-89"><a href="#cb8-89" aria-hidden="true" tabindex="-1"></a><span class="in">```python</span></span>
+<span id="cb8-90"><a href="#cb8-90" aria-hidden="true" tabindex="-1"></a>    ET_controller.set_eyetracking_settings(</span>
+<span id="cb8-91"><a href="#cb8-91" aria-hidden="true" tabindex="-1"></a>        use_gui<span class="op">=</span><span class="va">True</span>,</span>
+<span id="cb8-92"><a href="#cb8-92" aria-hidden="true" tabindex="-1"></a>        screen<span class="op">=</span><span class="dv">1</span>,</span>
+<span id="cb8-93"><a href="#cb8-93" aria-hidden="true" tabindex="-1"></a>        alwaysOnTop<span class="op">=</span><span class="va">False</span></span>
+<span id="cb8-94"><a href="#cb8-94" aria-hidden="true" tabindex="-1"></a>    )</span>
+<span id="cb8-95"><a href="#cb8-95" aria-hidden="true" tabindex="-1"></a><span class="in">```</span></span>
+<span id="cb8-96"><a href="#cb8-96" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb8-97"><a href="#cb8-97" aria-hidden="true" tabindex="-1"></a><span class="fu">#### GUI with pre-selected 120 Hz in dropdown</span></span>
+<span id="cb8-98"><a href="#cb8-98" aria-hidden="true" tabindex="-1"></a><span class="in">```python</span></span>
+<span id="cb8-99"><a href="#cb8-99" aria-hidden="true" tabindex="-1"></a>    ET_controller.set_eyetracking_settings(</span>
+<span id="cb8-100"><a href="#cb8-100" aria-hidden="true" tabindex="-1"></a>        desired_fps<span class="op">=</span><span class="dv">120</span>,</span>
+<span id="cb8-101"><a href="#cb8-101" aria-hidden="true" tabindex="-1"></a>        use_gui<span class="op">=</span><span class="va">True</span></span>
+<span id="cb8-102"><a href="#cb8-102" aria-hidden="true" tabindex="-1"></a>    )</span>
+<span id="cb8-103"><a href="#cb8-103" aria-hidden="true" tabindex="-1"></a><span class="in">```</span></span></code><button title="Copy to Clipboard" class="code-copy-button" data-in-quarto-modal=""><i class="bi"></i></button></pre></div>
 </div></div></div></div></div>
 </div> <!-- /content -->
 <footer class="footer">

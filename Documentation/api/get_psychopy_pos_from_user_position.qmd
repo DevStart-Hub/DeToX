@@ -1,0 +1,85 @@
+# get_psychopy_pos_from_user_position { #DeToX.get_psychopy_pos_from_user_position }
+
+```python
+get_psychopy_pos_from_user_position(win, p, units=None)
+```
+
+Convert User Position Guide coordinates to PsychoPy coordinates.
+
+Transforms coordinates from Tobii's User Position Guide stream
+to PsychoPy's coordinate system. The User Position Guide provides real-time
+eye position within the eye tracker's detection volume, used for positioning
+feedback displays.
+
+User Position coordinates are normalized 0-1 values representing eye location
+in the tracking volume. The coordinate system uses the tracker's perspective:
+X: 0 (right edge) to 1 (left edge) - reversed from user's view
+Y: 0 (top) to 1 (bottom)
+Z: 0 (far) to 1 (near)
+
+## Parameters {.doc-section .doc-section-parameters}
+
++--------+---------------------------------------------------------------------------------------+------------------------------------------------------------------------------------------------------------------------------------------+------------+
+| Name   | Type                                                                                  | Description                                                                                                                              | Default    |
++========+=======================================================================================+==========================================================================================================================================+============+
+| win    | [psychopy](`psychopy`).[visual](`psychopy.visual`).[Window](`psychopy.visual.Window`) | The PsychoPy window providing unit and size information.                                                                                 | _required_ |
++--------+---------------------------------------------------------------------------------------+------------------------------------------------------------------------------------------------------------------------------------------+------------+
+| p      | [tuple](`tuple`)                                                                      | User Position coordinates as (x, y). Values in range [0, 1] representing position within the tracking volume from tracker's perspective. | _required_ |
++--------+---------------------------------------------------------------------------------------+------------------------------------------------------------------------------------------------------------------------------------------+------------+
+| units  | [str](`str`)                                                                          | Target PsychoPy units. If None, uses window's default units. Supported: 'norm', 'height', 'pix', 'cm', 'deg', 'degFlat', 'degFlatPos'.   | `None`     |
++--------+---------------------------------------------------------------------------------------+------------------------------------------------------------------------------------------------------------------------------------------+------------+
+
+## Returns {.doc-section .doc-section-returns}
+
++--------+------------------+------------------------------------------------------------------------------------------------------------------------+
+| Name   | Type             | Description                                                                                                            |
++========+==================+========================================================================================================================+
+|        | [tuple](`tuple`) | Converted PsychoPy coordinates in specified unit system. Suitable for positioning visual feedback about user position. |
++--------+------------------+------------------------------------------------------------------------------------------------------------------------+
+
+## Raises {.doc-section .doc-section-raises}
+
++----------------------------+------------------------------------------+
+| Type                       | Description                              |
++============================+==========================================+
+| [ValueError](`ValueError`) | If the provided units are not supported. |
++----------------------------+------------------------------------------+
+
+## Notes {.doc-section .doc-section-notes}
+
+SDK Compatibility: Works with Tobii Pro SDK 1.6+ and 2.x
+
+This function replaces the deprecated Track Box API (removed in SDK 2.1).
+It's used primarily in show_status() to provide real-time positioning
+feedback during setup.
+
+The X-axis is reversed compared to ADCS because User Position coordinates
+use the tracker's perspective, not the user's.
+
+## Examples {.doc-section .doc-section-examples}
+
+```python
+from DeToX import Coords
+import tobii_research as tr
+
+# Subscribe to User Position Guide
+def position_callback(data):
+    if data['left_eye']['validity']:
+        x, y, z = data['left_eye']['user_position']
+        
+        # Convert to PsychoPy for visualization
+        pos = Coords.get_psychopy_pos_from_user_position(win, [x, y], 'height')
+        
+        # Display eye position indicator
+        eye_circle.pos = pos
+        eye_circle.draw()
+
+eyetracker.subscribe_to(tr.EYETRACKER_USER_POSITION_GUIDE, 
+                       position_callback, 
+                       as_dictionary=True)
+
+# Manual conversion example
+user_pos = (0.5, 0.6)  # Centered horizontally, slightly below center
+screen_pos = Coords.get_psychopy_pos_from_user_position(win, user_pos)
+# Returns position for drawing positioning feedback
+```

@@ -199,8 +199,8 @@ div.callout-Advanced.callout-style-default .callout-icon::before, div.callout-Ad
         </a>
     </div>
   </nav>
-  <div id="quarto-announcement" data-announcement-id="5603cdf67aefc87f3b65f8721f133f89" class="alert alert-danger hidden"><i class="bi bi-exclamation-triangle quarto-announcement-icon"></i><div class="quarto-announcement-content">
-<p><strong>Development Version</strong> - DeToX is currently in beta. Features may change without notice. Thoroughly test before using in production studies.</p>
+  <div id="quarto-announcement" data-announcement-id="de69b60bfdf2ea42f39c5cf1d3162adf" class="alert alert-danger hidden"><i class="bi bi-exclamation-triangle quarto-announcement-icon"></i><div class="quarto-announcement-content">
+<p><strong>Development Version</strong> - DeToX is currently in beta. Features may change without notice. Thoroughly test before using.</p>
 </div><i class="bi bi-x-lg quarto-announcement-action"></i></div>
 </header>
 <!-- content -->
@@ -261,6 +261,12 @@ div.callout-Advanced.callout-style-default .callout-icon::before, div.callout-Ad
   <div class="sidebar-item-container"> 
   <a href="../api/ETracker.save_data.html" class="sidebar-item-text sidebar-link">
  <span class="menu-text">ETracker.save_data</span></a>
+  </div>
+</li>
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="../api/ETracker.set_eyetracking_settings.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text">ETracker.set_eyetracking_settings</span></a>
   </div>
 </li>
       </ul>
@@ -395,14 +401,8 @@ div.callout-Advanced.callout-style-default .callout-icon::before, div.callout-Ad
 </li>
           <li class="sidebar-item">
   <div class="sidebar-item-container"> 
-  <a href="../api/tobii2pix.html" class="sidebar-item-text sidebar-link">
- <span class="menu-text">tobii2pix</span></a>
-  </div>
-</li>
-          <li class="sidebar-item">
-  <div class="sidebar-item-container"> 
-  <a href="../api/get_psychopy_pos_from_trackbox.html" class="sidebar-item-text sidebar-link">
- <span class="menu-text">get_psychopy_pos_from_trackbox</span></a>
+  <a href="../api/get_psychopy_pos_from_user_position.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text">get_psychopy_pos_from_user_position</span></a>
   </div>
 </li>
       </ul>
@@ -465,7 +465,7 @@ div.callout-Advanced.callout-style-default .callout-icon::before, div.callout-Ad
 <div id="quarto-sidebar-glass" class="quarto-sidebar-collapse-item" data-bs-toggle="collapse" data-bs-target=".quarto-sidebar-collapse-item"></div>
 <!-- margin-sidebar -->
     <div id="quarto-margin-sidebar" class="sidebar margin-sidebar">
-        <nav id="TOC" role="doc-toc" class="toc-active" data-toc-expanded="4">
+        <nav id="TOC" role="doc-toc" class="toc-active" data-toc-expanded="6">
     <h2 id="toc-title">On this page</h2>
    
   <ul>
@@ -474,6 +474,7 @@ div.callout-Advanced.callout-style-default .callout-icon::before, div.callout-Ad
   <li><a href="#parameters" id="toc-parameters" class="nav-link" data-scroll-target="#parameters">Parameters</a></li>
   <li><a href="#returns" id="toc-returns" class="nav-link" data-scroll-target="#returns">Returns</a></li>
   <li><a href="#notes" id="toc-notes" class="nav-link" data-scroll-target="#notes">Notes</a></li>
+  <li><a href="#examples" id="toc-examples" class="nav-link" data-scroll-target="#examples">Examples</a></li>
   </ul></li>
   </ul>
 </nav>
@@ -487,59 +488,70 @@ div.callout-Advanced.callout-style-default .callout-icon::before, div.callout-Ad
 <section id="DeToX.psychopy_to_pixels" class="level1">
 <h1>psychopy_to_pixels</h1>
 <div class="sourceCode" id="cb1"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb1-1"><a href="#cb1-1" aria-hidden="true" tabindex="-1"></a>psychopy_to_pixels(win, pos)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
-<p>Convert PsychoPy coordinates to pixel coordinates.</p>
-<p>Transforms coordinates from any PsychoPy coordinate system to pixel coordinates suitable for image drawing operations. This function is essential for creating calibration result visualizations and other pixel-based graphics.</p>
-<p>The conversion accounts for PsychoPy’s centered coordinate system and transforms to a top-left origin system used by image libraries like PIL.</p>
-<section id="parameters" class="level2 doc-section doc-section-parameters">
-<h2 class="doc-section doc-section-parameters anchored" data-anchor-id="parameters">Parameters</h2>
-<table class="caption-top table">
-<thead>
-<tr class="header">
-<th>Name</th>
-<th>Type</th>
-<th>Description</th>
-<th>Default</th>
-</tr>
-</thead>
-<tbody>
-<tr class="odd">
-<td>win</td>
-<td><a href="`psychopy`">psychopy</a>.<a href="`psychopy.visual`">visual</a>.<a href="`psychopy.visual.Window`">Window</a></td>
-<td>The PsychoPy window which provides information about units and size. Window units and dimensions determine the conversion method.</td>
-<td><em>required</em></td>
-</tr>
-<tr class="even">
-<td>pos</td>
-<td><a href="`tuple`">tuple</a></td>
-<td>The PsychoPy coordinates to convert as (x, y) in current window units.</td>
-<td><em>required</em></td>
-</tr>
-</tbody>
-</table>
+<pre><code>Convert PsychoPy coordinates to pixel coordinates for image drawing.
+
+Transforms coordinates from any PsychoPy coordinate system to pixel coordinates
+with top-left origin, suitable for PIL image drawing operations. Essential for
+creating calibration result visualizations.
+
+Supports both single coordinate conversion and vectorized batch conversion
+for efficient processing of multiple positions.</code></pre>
+<section id="parameters" class="level2 doc-section doc-section-----parameters">
+<h2 class="doc-section doc-section-----parameters anchored" data-anchor-id="parameters">Parameters</h2>
+<pre><code>win : psychopy.visual.Window
+    The PsychoPy window providing unit and size information.
+pos : tuple or array-like
+    PsychoPy coordinates to convert:
+    - Single coordinate: (x, y) tuple in current window units
+    - Multiple coordinates: (N, 2) array where N is number of positions</code></pre>
 </section>
-<section id="returns" class="level2 doc-section doc-section-returns">
-<h2 class="doc-section doc-section-returns anchored" data-anchor-id="returns">Returns</h2>
-<table class="caption-top table">
-<thead>
-<tr class="header">
-<th>Name</th>
-<th>Type</th>
-<th>Description</th>
-</tr>
-</thead>
-<tbody>
-<tr class="odd">
-<td></td>
-<td><a href="`tuple`">tuple</a></td>
-<td>The converted pixel coordinates as (int, int) with origin at top-left. Values are rounded to nearest integer for pixel alignment.</td>
-</tr>
-</tbody>
-</table>
+<section id="returns" class="level2 doc-section doc-section-----returns">
+<h2 class="doc-section doc-section-----returns anchored" data-anchor-id="returns">Returns</h2>
+<pre><code>tuple or ndarray
+    Pixel coordinates with origin at top-left:
+    - Single input: returns (int, int) tuple
+    - Array input: returns (N, 2) array of integers
+    Values are rounded to nearest integer for pixel alignment.</code></pre>
 </section>
-<section id="notes" class="level2 doc-section doc-section-notes">
-<h2 class="doc-section doc-section-notes anchored" data-anchor-id="notes">Notes</h2>
-<p>This function handles the main PsychoPy coordinate systems: - ‘height’: Screen height = 1, width adjusted by aspect ratio, centered origin - ‘norm’: Screen ranges from -1 to 1 in both dimensions, centered origin - Other units: Assumes coordinates are already close to pixel values</p>
-<p>The output uses standard image coordinates where (0,0) is top-left and y increases downward, suitable for PIL and similar libraries.</p>
+<section id="notes" class="level2 doc-section doc-section-----notes">
+<h2 class="doc-section doc-section-----notes anchored" data-anchor-id="notes">Notes</h2>
+<pre><code>The output uses standard image coordinates where (0,0) is top-left and
+y increases downward, suitable for PIL and similar libraries.
+
+Supported input units: height, norm, pix, and others (treated as centered)</code></pre>
+</section>
+<section id="examples" class="level2 doc-section doc-section-----examples">
+<h2 class="doc-section doc-section-----examples anchored" data-anchor-id="examples">Examples</h2>
+<div class="sourceCode" id="cb6"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb6-1"><a href="#cb6-1" aria-hidden="true" tabindex="-1"></a>    <span class="im">from</span> DeToX <span class="im">import</span> Coords</span>
+<span id="cb6-2"><a href="#cb6-2" aria-hidden="true" tabindex="-1"></a>    <span class="im">from</span> PIL <span class="im">import</span> Image, ImageDraw</span>
+<span id="cb6-3"><a href="#cb6-3" aria-hidden="true" tabindex="-1"></a>    <span class="im">import</span> numpy <span class="im">as</span> np</span>
+<span id="cb6-4"><a href="#cb6-4" aria-hidden="true" tabindex="-1"></a>    </span>
+<span id="cb6-5"><a href="#cb6-5" aria-hidden="true" tabindex="-1"></a>    <span class="co"># Single coordinate conversion</span></span>
+<span id="cb6-6"><a href="#cb6-6" aria-hidden="true" tabindex="-1"></a>    target_pos <span class="op">=</span> (<span class="fl">0.2</span>, <span class="op">-</span><span class="fl">0.1</span>)  <span class="co"># PsychoPy coordinates (height units)</span></span>
+<span id="cb6-7"><a href="#cb6-7" aria-hidden="true" tabindex="-1"></a>    pixel_pos <span class="op">=</span> Coords.psychopy_to_pixels(win, target_pos)</span>
+<span id="cb6-8"><a href="#cb6-8" aria-hidden="true" tabindex="-1"></a>    <span class="co"># Returns (1152, 432) for 1920x1080 display</span></span>
+<span id="cb6-9"><a href="#cb6-9" aria-hidden="true" tabindex="-1"></a>    </span>
+<span id="cb6-10"><a href="#cb6-10" aria-hidden="true" tabindex="-1"></a>    <span class="co"># Vectorized batch conversion (efficient!)</span></span>
+<span id="cb6-11"><a href="#cb6-11" aria-hidden="true" tabindex="-1"></a>    gaze_positions <span class="op">=</span> np.array([</span>
+<span id="cb6-12"><a href="#cb6-12" aria-hidden="true" tabindex="-1"></a>        [<span class="fl">0.2</span>, <span class="op">-</span><span class="fl">0.1</span>],</span>
+<span id="cb6-13"><a href="#cb6-13" aria-hidden="true" tabindex="-1"></a>        [<span class="op">-</span><span class="fl">0.1</span>, <span class="fl">0.3</span>],</span>
+<span id="cb6-14"><a href="#cb6-14" aria-hidden="true" tabindex="-1"></a>        [<span class="fl">0.0</span>, <span class="fl">0.0</span>]</span>
+<span id="cb6-15"><a href="#cb6-15" aria-hidden="true" tabindex="-1"></a>    ])</span>
+<span id="cb6-16"><a href="#cb6-16" aria-hidden="true" tabindex="-1"></a>    pixel_positions <span class="op">=</span> Coords.psychopy_to_pixels(win, gaze_positions)</span>
+<span id="cb6-17"><a href="#cb6-17" aria-hidden="true" tabindex="-1"></a>    <span class="co"># Returns (3, 2) array: [[1152, 432], [864, 216], [960, 540]]</span></span>
+<span id="cb6-18"><a href="#cb6-18" aria-hidden="true" tabindex="-1"></a>    </span>
+<span id="cb6-19"><a href="#cb6-19" aria-hidden="true" tabindex="-1"></a>    <span class="co"># Use for drawing calibration results with multiple samples</span></span>
+<span id="cb6-20"><a href="#cb6-20" aria-hidden="true" tabindex="-1"></a>    img <span class="op">=</span> Image.new(<span class="st">"RGBA"</span>, <span class="bu">tuple</span>(win.size))</span>
+<span id="cb6-21"><a href="#cb6-21" aria-hidden="true" tabindex="-1"></a>    draw <span class="op">=</span> ImageDraw.Draw(img)</span>
+<span id="cb6-22"><a href="#cb6-22" aria-hidden="true" tabindex="-1"></a>    </span>
+<span id="cb6-23"><a href="#cb6-23" aria-hidden="true" tabindex="-1"></a>    <span class="co"># Convert all sample positions at once (vectorized!)</span></span>
+<span id="cb6-24"><a href="#cb6-24" aria-hidden="true" tabindex="-1"></a>    sample_positions <span class="op">=</span> np.array([(<span class="fl">0.1</span>, <span class="fl">0.2</span>), (<span class="op">-</span><span class="fl">0.1</span>, <span class="fl">0.1</span>), (<span class="fl">0.3</span>, <span class="op">-</span><span class="fl">0.2</span>)])</span>
+<span id="cb6-25"><a href="#cb6-25" aria-hidden="true" tabindex="-1"></a>    samples_pix <span class="op">=</span> Coords.psychopy_to_pixels(win, sample_positions)</span>
+<span id="cb6-26"><a href="#cb6-26" aria-hidden="true" tabindex="-1"></a>    </span>
+<span id="cb6-27"><a href="#cb6-27" aria-hidden="true" tabindex="-1"></a>    <span class="co"># Draw circles at each sample position</span></span>
+<span id="cb6-28"><a href="#cb6-28" aria-hidden="true" tabindex="-1"></a>    <span class="cf">for</span> sample_pix <span class="kw">in</span> samples_pix:</span>
+<span id="cb6-29"><a href="#cb6-29" aria-hidden="true" tabindex="-1"></a>        draw.ellipse([sample_pix[<span class="dv">0</span>]<span class="op">-</span><span class="dv">5</span>, sample_pix[<span class="dv">1</span>]<span class="op">-</span><span class="dv">5</span>, </span>
+<span id="cb6-30"><a href="#cb6-30" aria-hidden="true" tabindex="-1"></a>                      sample_pix[<span class="dv">0</span>]<span class="op">+</span><span class="dv">5</span>, sample_pix[<span class="dv">1</span>]<span class="op">+</span><span class="dv">5</span>], fill<span class="op">=</span><span class="st">'red'</span>)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
 
 
 <!-- -->
@@ -1031,43 +1043,79 @@ window.document.addEventListener("DOMContentLoaded", function (event) {
       </a>
   </div>
 </nav><div class="modal fade" id="quarto-embedded-source-code-modal" tabindex="-1" aria-labelledby="quarto-embedded-source-code-modal-label" aria-hidden="true"><div class="modal-dialog modal-dialog-scrollable"><div class="modal-content"><div class="modal-header"><h5 class="modal-title" id="quarto-embedded-source-code-modal-label">Source Code</h5><button class="btn-close" data-bs-dismiss="modal"></button></div><div class="modal-body"><div class="">
-<div class="sourceCode" id="cb2" data-shortcodes="false"><pre class="sourceCode markdown code-with-copy"><code class="sourceCode markdown"><span id="cb2-1"><a href="#cb2-1" aria-hidden="true" tabindex="-1"></a><span class="fu"># psychopy_to_pixels { #DeToX.psychopy_to_pixels }</span></span>
-<span id="cb2-2"><a href="#cb2-2" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb2-3"><a href="#cb2-3" aria-hidden="true" tabindex="-1"></a><span class="in">```python</span></span>
-<span id="cb2-4"><a href="#cb2-4" aria-hidden="true" tabindex="-1"></a>psychopy_to_pixels(win, pos)</span>
-<span id="cb2-5"><a href="#cb2-5" aria-hidden="true" tabindex="-1"></a><span class="in">```</span></span>
-<span id="cb2-6"><a href="#cb2-6" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb2-7"><a href="#cb2-7" aria-hidden="true" tabindex="-1"></a>Convert PsychoPy coordinates to pixel coordinates.</span>
-<span id="cb2-8"><a href="#cb2-8" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb2-9"><a href="#cb2-9" aria-hidden="true" tabindex="-1"></a>Transforms coordinates from any PsychoPy coordinate system to pixel coordinates</span>
-<span id="cb2-10"><a href="#cb2-10" aria-hidden="true" tabindex="-1"></a>suitable for image drawing operations. This function is essential for creating</span>
-<span id="cb2-11"><a href="#cb2-11" aria-hidden="true" tabindex="-1"></a>calibration result visualizations and other pixel-based graphics.</span>
-<span id="cb2-12"><a href="#cb2-12" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb2-13"><a href="#cb2-13" aria-hidden="true" tabindex="-1"></a>The conversion accounts for PsychoPy's centered coordinate system and transforms</span>
-<span id="cb2-14"><a href="#cb2-14" aria-hidden="true" tabindex="-1"></a>to a top-left origin system used by image libraries like PIL.</span>
-<span id="cb2-15"><a href="#cb2-15" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb2-16"><a href="#cb2-16" aria-hidden="true" tabindex="-1"></a><span class="fu">## Parameters {.doc-section .doc-section-parameters}</span></span>
-<span id="cb2-17"><a href="#cb2-17" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb2-18"><a href="#cb2-18" aria-hidden="true" tabindex="-1"></a>| Name   | Type                                                                                  | Description                                                                                                                       | Default    |</span>
-<span id="cb2-19"><a href="#cb2-19" aria-hidden="true" tabindex="-1"></a>|--------|---------------------------------------------------------------------------------------|-----------------------------------------------------------------------------------------------------------------------------------|------------|</span>
-<span id="cb2-20"><a href="#cb2-20" aria-hidden="true" tabindex="-1"></a>| win    | <span class="co">[</span><span class="ot">psychopy</span><span class="co">](`psychopy`)</span>.<span class="co">[</span><span class="ot">visual</span><span class="co">](`psychopy.visual`)</span>.<span class="co">[</span><span class="ot">Window</span><span class="co">](`psychopy.visual.Window`)</span> | The PsychoPy window which provides information about units and size. Window units and dimensions determine the conversion method. | _required_ |</span>
-<span id="cb2-21"><a href="#cb2-21" aria-hidden="true" tabindex="-1"></a>| pos    | <span class="co">[</span><span class="ot">tuple</span><span class="co">](`tuple`)</span>                                                                      | The PsychoPy coordinates to convert as (x, y) in current window units.                                                            | _required_ |</span>
-<span id="cb2-22"><a href="#cb2-22" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb2-23"><a href="#cb2-23" aria-hidden="true" tabindex="-1"></a><span class="fu">## Returns {.doc-section .doc-section-returns}</span></span>
-<span id="cb2-24"><a href="#cb2-24" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb2-25"><a href="#cb2-25" aria-hidden="true" tabindex="-1"></a>| Name   | Type             | Description                                                                                                                       |</span>
-<span id="cb2-26"><a href="#cb2-26" aria-hidden="true" tabindex="-1"></a>|--------|------------------|-----------------------------------------------------------------------------------------------------------------------------------|</span>
-<span id="cb2-27"><a href="#cb2-27" aria-hidden="true" tabindex="-1"></a>|        | <span class="co">[</span><span class="ot">tuple</span><span class="co">](`tuple`)</span> | The converted pixel coordinates as (int, int) with origin at top-left. Values are rounded to nearest integer for pixel alignment. |</span>
-<span id="cb2-28"><a href="#cb2-28" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb2-29"><a href="#cb2-29" aria-hidden="true" tabindex="-1"></a><span class="fu">## Notes {.doc-section .doc-section-notes}</span></span>
-<span id="cb2-30"><a href="#cb2-30" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb2-31"><a href="#cb2-31" aria-hidden="true" tabindex="-1"></a>This function handles the main PsychoPy coordinate systems:</span>
-<span id="cb2-32"><a href="#cb2-32" aria-hidden="true" tabindex="-1"></a><span class="ss">- </span>'height': Screen height = 1, width adjusted by aspect ratio, centered origin</span>
-<span id="cb2-33"><a href="#cb2-33" aria-hidden="true" tabindex="-1"></a><span class="ss">- </span>'norm': Screen ranges from -1 to 1 in both dimensions, centered origin</span>
-<span id="cb2-34"><a href="#cb2-34" aria-hidden="true" tabindex="-1"></a><span class="ss">- </span>Other units: Assumes coordinates are already close to pixel values</span>
-<span id="cb2-35"><a href="#cb2-35" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb2-36"><a href="#cb2-36" aria-hidden="true" tabindex="-1"></a>The output uses standard image coordinates where (0,0) is top-left and</span>
-<span id="cb2-37"><a href="#cb2-37" aria-hidden="true" tabindex="-1"></a>y increases downward, suitable for PIL and similar libraries.</span></code><button title="Copy to Clipboard" class="code-copy-button" data-in-quarto-modal=""><i class="bi"></i></button></pre></div>
+<div class="sourceCode" id="cb7" data-shortcodes="false"><pre class="sourceCode markdown code-with-copy"><code class="sourceCode markdown"><span id="cb7-1"><a href="#cb7-1" aria-hidden="true" tabindex="-1"></a><span class="fu"># psychopy_to_pixels { #DeToX.psychopy_to_pixels }</span></span>
+<span id="cb7-2"><a href="#cb7-2" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb7-3"><a href="#cb7-3" aria-hidden="true" tabindex="-1"></a><span class="in">```python</span></span>
+<span id="cb7-4"><a href="#cb7-4" aria-hidden="true" tabindex="-1"></a>psychopy_to_pixels(win, pos)</span>
+<span id="cb7-5"><a href="#cb7-5" aria-hidden="true" tabindex="-1"></a><span class="in">```</span></span>
+<span id="cb7-6"><a href="#cb7-6" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb7-7"><a href="#cb7-7" aria-hidden="true" tabindex="-1"></a><span class="in">    Convert PsychoPy coordinates to pixel coordinates for image drawing.</span></span>
+<span id="cb7-8"><a href="#cb7-8" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb7-9"><a href="#cb7-9" aria-hidden="true" tabindex="-1"></a><span class="in">    Transforms coordinates from any PsychoPy coordinate system to pixel coordinates</span></span>
+<span id="cb7-10"><a href="#cb7-10" aria-hidden="true" tabindex="-1"></a><span class="in">    with top-left origin, suitable for PIL image drawing operations. Essential for</span></span>
+<span id="cb7-11"><a href="#cb7-11" aria-hidden="true" tabindex="-1"></a><span class="in">    creating calibration result visualizations.</span></span>
+<span id="cb7-12"><a href="#cb7-12" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb7-13"><a href="#cb7-13" aria-hidden="true" tabindex="-1"></a><span class="in">    Supports both single coordinate conversion and vectorized batch conversion</span></span>
+<span id="cb7-14"><a href="#cb7-14" aria-hidden="true" tabindex="-1"></a><span class="in">    for efficient processing of multiple positions.</span></span>
+<span id="cb7-15"><a href="#cb7-15" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb7-16"><a href="#cb7-16" aria-hidden="true" tabindex="-1"></a><span class="fu">##     Parameters {.doc-section .doc-section-----parameters}</span></span>
+<span id="cb7-17"><a href="#cb7-17" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb7-18"><a href="#cb7-18" aria-hidden="true" tabindex="-1"></a><span class="in">    win : psychopy.visual.Window</span></span>
+<span id="cb7-19"><a href="#cb7-19" aria-hidden="true" tabindex="-1"></a><span class="in">        The PsychoPy window providing unit and size information.</span></span>
+<span id="cb7-20"><a href="#cb7-20" aria-hidden="true" tabindex="-1"></a><span class="in">    pos : tuple or array-like</span></span>
+<span id="cb7-21"><a href="#cb7-21" aria-hidden="true" tabindex="-1"></a><span class="in">        PsychoPy coordinates to convert:</span></span>
+<span id="cb7-22"><a href="#cb7-22" aria-hidden="true" tabindex="-1"></a><span class="in">        - Single coordinate: (x, y) tuple in current window units</span></span>
+<span id="cb7-23"><a href="#cb7-23" aria-hidden="true" tabindex="-1"></a><span class="in">        - Multiple coordinates: (N, 2) array where N is number of positions</span></span>
+<span id="cb7-24"><a href="#cb7-24" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb7-25"><a href="#cb7-25" aria-hidden="true" tabindex="-1"></a><span class="fu">##     Returns {.doc-section .doc-section-----returns}</span></span>
+<span id="cb7-26"><a href="#cb7-26" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb7-27"><a href="#cb7-27" aria-hidden="true" tabindex="-1"></a><span class="in">    tuple or ndarray</span></span>
+<span id="cb7-28"><a href="#cb7-28" aria-hidden="true" tabindex="-1"></a><span class="in">        Pixel coordinates with origin at top-left:</span></span>
+<span id="cb7-29"><a href="#cb7-29" aria-hidden="true" tabindex="-1"></a><span class="in">        - Single input: returns (int, int) tuple</span></span>
+<span id="cb7-30"><a href="#cb7-30" aria-hidden="true" tabindex="-1"></a><span class="in">        - Array input: returns (N, 2) array of integers</span></span>
+<span id="cb7-31"><a href="#cb7-31" aria-hidden="true" tabindex="-1"></a><span class="in">        Values are rounded to nearest integer for pixel alignment.</span></span>
+<span id="cb7-32"><a href="#cb7-32" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb7-33"><a href="#cb7-33" aria-hidden="true" tabindex="-1"></a><span class="fu">##     Notes {.doc-section .doc-section-----notes}</span></span>
+<span id="cb7-34"><a href="#cb7-34" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb7-35"><a href="#cb7-35" aria-hidden="true" tabindex="-1"></a><span class="in">    The output uses standard image coordinates where (0,0) is top-left and</span></span>
+<span id="cb7-36"><a href="#cb7-36" aria-hidden="true" tabindex="-1"></a><span class="in">    y increases downward, suitable for PIL and similar libraries.</span></span>
+<span id="cb7-37"><a href="#cb7-37" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb7-38"><a href="#cb7-38" aria-hidden="true" tabindex="-1"></a><span class="in">    Supported input units: height, norm, pix, and others (treated as centered)</span></span>
+<span id="cb7-39"><a href="#cb7-39" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb7-40"><a href="#cb7-40" aria-hidden="true" tabindex="-1"></a><span class="fu">##     Examples {.doc-section .doc-section-----examples}</span></span>
+<span id="cb7-41"><a href="#cb7-41" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb7-42"><a href="#cb7-42" aria-hidden="true" tabindex="-1"></a><span class="in">```python</span></span>
+<span id="cb7-43"><a href="#cb7-43" aria-hidden="true" tabindex="-1"></a>    <span class="im">from</span> DeToX <span class="im">import</span> Coords</span>
+<span id="cb7-44"><a href="#cb7-44" aria-hidden="true" tabindex="-1"></a>    <span class="im">from</span> PIL <span class="im">import</span> Image, ImageDraw</span>
+<span id="cb7-45"><a href="#cb7-45" aria-hidden="true" tabindex="-1"></a>    <span class="im">import</span> numpy <span class="im">as</span> np</span>
+<span id="cb7-46"><a href="#cb7-46" aria-hidden="true" tabindex="-1"></a>    </span>
+<span id="cb7-47"><a href="#cb7-47" aria-hidden="true" tabindex="-1"></a>    <span class="co"># Single coordinate conversion</span></span>
+<span id="cb7-48"><a href="#cb7-48" aria-hidden="true" tabindex="-1"></a>    target_pos <span class="op">=</span> (<span class="fl">0.2</span>, <span class="op">-</span><span class="fl">0.1</span>)  <span class="co"># PsychoPy coordinates (height units)</span></span>
+<span id="cb7-49"><a href="#cb7-49" aria-hidden="true" tabindex="-1"></a>    pixel_pos <span class="op">=</span> Coords.psychopy_to_pixels(win, target_pos)</span>
+<span id="cb7-50"><a href="#cb7-50" aria-hidden="true" tabindex="-1"></a>    <span class="co"># Returns (1152, 432) for 1920x1080 display</span></span>
+<span id="cb7-51"><a href="#cb7-51" aria-hidden="true" tabindex="-1"></a>    </span>
+<span id="cb7-52"><a href="#cb7-52" aria-hidden="true" tabindex="-1"></a>    <span class="co"># Vectorized batch conversion (efficient!)</span></span>
+<span id="cb7-53"><a href="#cb7-53" aria-hidden="true" tabindex="-1"></a>    gaze_positions <span class="op">=</span> np.array([</span>
+<span id="cb7-54"><a href="#cb7-54" aria-hidden="true" tabindex="-1"></a>        [<span class="fl">0.2</span>, <span class="op">-</span><span class="fl">0.1</span>],</span>
+<span id="cb7-55"><a href="#cb7-55" aria-hidden="true" tabindex="-1"></a>        [<span class="op">-</span><span class="fl">0.1</span>, <span class="fl">0.3</span>],</span>
+<span id="cb7-56"><a href="#cb7-56" aria-hidden="true" tabindex="-1"></a>        [<span class="fl">0.0</span>, <span class="fl">0.0</span>]</span>
+<span id="cb7-57"><a href="#cb7-57" aria-hidden="true" tabindex="-1"></a>    ])</span>
+<span id="cb7-58"><a href="#cb7-58" aria-hidden="true" tabindex="-1"></a>    pixel_positions <span class="op">=</span> Coords.psychopy_to_pixels(win, gaze_positions)</span>
+<span id="cb7-59"><a href="#cb7-59" aria-hidden="true" tabindex="-1"></a>    <span class="co"># Returns (3, 2) array: [[1152, 432], [864, 216], [960, 540]]</span></span>
+<span id="cb7-60"><a href="#cb7-60" aria-hidden="true" tabindex="-1"></a>    </span>
+<span id="cb7-61"><a href="#cb7-61" aria-hidden="true" tabindex="-1"></a>    <span class="co"># Use for drawing calibration results with multiple samples</span></span>
+<span id="cb7-62"><a href="#cb7-62" aria-hidden="true" tabindex="-1"></a>    img <span class="op">=</span> Image.new(<span class="st">"RGBA"</span>, <span class="bu">tuple</span>(win.size))</span>
+<span id="cb7-63"><a href="#cb7-63" aria-hidden="true" tabindex="-1"></a>    draw <span class="op">=</span> ImageDraw.Draw(img)</span>
+<span id="cb7-64"><a href="#cb7-64" aria-hidden="true" tabindex="-1"></a>    </span>
+<span id="cb7-65"><a href="#cb7-65" aria-hidden="true" tabindex="-1"></a>    <span class="co"># Convert all sample positions at once (vectorized!)</span></span>
+<span id="cb7-66"><a href="#cb7-66" aria-hidden="true" tabindex="-1"></a>    sample_positions <span class="op">=</span> np.array([(<span class="fl">0.1</span>, <span class="fl">0.2</span>), (<span class="op">-</span><span class="fl">0.1</span>, <span class="fl">0.1</span>), (<span class="fl">0.3</span>, <span class="op">-</span><span class="fl">0.2</span>)])</span>
+<span id="cb7-67"><a href="#cb7-67" aria-hidden="true" tabindex="-1"></a>    samples_pix <span class="op">=</span> Coords.psychopy_to_pixels(win, sample_positions)</span>
+<span id="cb7-68"><a href="#cb7-68" aria-hidden="true" tabindex="-1"></a>    </span>
+<span id="cb7-69"><a href="#cb7-69" aria-hidden="true" tabindex="-1"></a>    <span class="co"># Draw circles at each sample position</span></span>
+<span id="cb7-70"><a href="#cb7-70" aria-hidden="true" tabindex="-1"></a>    <span class="cf">for</span> sample_pix <span class="kw">in</span> samples_pix:</span>
+<span id="cb7-71"><a href="#cb7-71" aria-hidden="true" tabindex="-1"></a>        draw.ellipse([sample_pix[<span class="dv">0</span>]<span class="op">-</span><span class="dv">5</span>, sample_pix[<span class="dv">1</span>]<span class="op">-</span><span class="dv">5</span>, </span>
+<span id="cb7-72"><a href="#cb7-72" aria-hidden="true" tabindex="-1"></a>                      sample_pix[<span class="dv">0</span>]<span class="op">+</span><span class="dv">5</span>, sample_pix[<span class="dv">1</span>]<span class="op">+</span><span class="dv">5</span>], fill<span class="op">=</span><span class="st">'red'</span>)</span>
+<span id="cb7-73"><a href="#cb7-73" aria-hidden="true" tabindex="-1"></a><span class="in">```</span></span></code><button title="Copy to Clipboard" class="code-copy-button" data-in-quarto-modal=""><i class="bi"></i></button></pre></div>
 </div></div></div></div></div>
 </div> <!-- /content -->
 <footer class="footer">

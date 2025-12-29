@@ -29,20 +29,33 @@ Two size presets are available:
 
 ## Attributes {.doc-section .doc-section-attributes}
 
++-----------------------+------------------+--------------------------------------------------------------------------------------------------------------------------------------------------------+
 | Name                  | Type             | Description                                                                                                                                            |
-|-----------------------|------------------|--------------------------------------------------------------------------------------------------------------------------------------------------------|
++=======================+==================+========================================================================================================================================================+
 | focus_time            | [float](`float`) | Wait time in seconds before collecting calibration data at each point. Allows participant to fixate on the target. Default is 0.5 seconds.             |
++-----------------------+------------------+--------------------------------------------------------------------------------------------------------------------------------------------------------+
 | zoom_speed            | [float](`float`) | Speed multiplier for the zoom animation. Higher values make the size oscillation faster. Default is 6.0.                                               |
++-----------------------+------------------+--------------------------------------------------------------------------------------------------------------------------------------------------------+
 | max_zoom_size_big     | [float](`float`) | Maximum size for zoom animation (big preset) as percentage of screen height. Recommended for infants/children. Default is 0.16 (16% of screen height). |
++-----------------------+------------------+--------------------------------------------------------------------------------------------------------------------------------------------------------+
 | min_zoom_size_big     | [float](`float`) | Minimum size for zoom animation (big preset) as percentage of screen height. Default is 0.05 (5% of screen height).                                    |
++-----------------------+------------------+--------------------------------------------------------------------------------------------------------------------------------------------------------+
 | trill_size_big        | [float](`float`) | Fixed size for trill animation (big preset) as percentage of screen height. Default is 0.14 (14% of screen height).                                    |
++-----------------------+------------------+--------------------------------------------------------------------------------------------------------------------------------------------------------+
 | max_zoom_size_small   | [float](`float`) | Maximum size for zoom animation (small preset) as percentage of screen height. Recommended for adults. Default is 0.06 (6% of screen height).          |
++-----------------------+------------------+--------------------------------------------------------------------------------------------------------------------------------------------------------+
 | min_zoom_size_small   | [float](`float`) | Minimum size for zoom animation (small preset) as percentage of screen height. Default is 0.01 (1% of screen height).                                  |
++-----------------------+------------------+--------------------------------------------------------------------------------------------------------------------------------------------------------+
 | trill_size_small      | [float](`float`) | Fixed size for trill animation (small preset) as percentage of screen height. Default is 0.04 (4% of screen height).                                   |
++-----------------------+------------------+--------------------------------------------------------------------------------------------------------------------------------------------------------+
 | trill_rotation_range  | [float](`float`) | Maximum rotation angle in degrees for trill animation. Default is 20 degrees.                                                                          |
++-----------------------+------------------+--------------------------------------------------------------------------------------------------------------------------------------------------------+
 | trill_cycle_duration  | [float](`float`) | Total cycle time for trill animation in seconds (active + pause). Default is 1.5 seconds.                                                              |
++-----------------------+------------------+--------------------------------------------------------------------------------------------------------------------------------------------------------+
 | trill_active_duration | [float](`float`) | Duration of active trill rotation in seconds, within each cycle. Default is 1.1 seconds (leaves 0.4s pause).                                           |
++-----------------------+------------------+--------------------------------------------------------------------------------------------------------------------------------------------------------+
 | trill_frequency       | [float](`float`) | Number of back-and-forth rotation oscillations per second during active trill phase. Default is 3.0 oscillations/second.                               |
++-----------------------+------------------+--------------------------------------------------------------------------------------------------------------------------------------------------------+
 
 ## Examples {.doc-section .doc-section-examples}
 

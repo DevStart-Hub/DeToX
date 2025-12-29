@@ -65,7 +65,7 @@ pre > code.sourceCode > span > a:first-child::before { text-decoration: underlin
 <script src="../site_libs/quarto-search/quarto-search.js"></script>
 <meta name="quarto:offset" content="../">
 <link href="../api/ETSettings.AnimationSettings.html" rel="next">
-<link href="../api/get_psychopy_pos_from_trackbox.html" rel="prev">
+<link href="../api/get_psychopy_pos_from_user_position.html" rel="prev">
 <script src="../site_libs/cookie-consent/cookie-consent.js"></script>
 <link href="../site_libs/cookie-consent/cookie-consent.css" rel="stylesheet">
 <script src="../site_libs/quarto-html/quarto.js"></script>
@@ -199,8 +199,8 @@ div.callout-Advanced.callout-style-default .callout-icon::before, div.callout-Ad
         </a>
     </div>
   </nav>
-  <div id="quarto-announcement" data-announcement-id="5603cdf67aefc87f3b65f8721f133f89" class="alert alert-danger hidden"><i class="bi bi-exclamation-triangle quarto-announcement-icon"></i><div class="quarto-announcement-content">
-<p><strong>Development Version</strong> - DeToX is currently in beta. Features may change without notice. Thoroughly test before using in production studies.</p>
+  <div id="quarto-announcement" data-announcement-id="de69b60bfdf2ea42f39c5cf1d3162adf" class="alert alert-danger hidden"><i class="bi bi-exclamation-triangle quarto-announcement-icon"></i><div class="quarto-announcement-content">
+<p><strong>Development Version</strong> - DeToX is currently in beta. Features may change without notice. Thoroughly test before using.</p>
 </div><i class="bi bi-x-lg quarto-announcement-action"></i></div>
 </header>
 <!-- content -->
@@ -261,6 +261,12 @@ div.callout-Advanced.callout-style-default .callout-icon::before, div.callout-Ad
   <div class="sidebar-item-container"> 
   <a href="../api/ETracker.save_data.html" class="sidebar-item-text sidebar-link">
  <span class="menu-text">ETracker.save_data</span></a>
+  </div>
+</li>
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="../api/ETracker.set_eyetracking_settings.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text">ETracker.set_eyetracking_settings</span></a>
   </div>
 </li>
       </ul>
@@ -395,14 +401,8 @@ div.callout-Advanced.callout-style-default .callout-icon::before, div.callout-Ad
 </li>
           <li class="sidebar-item">
   <div class="sidebar-item-container"> 
-  <a href="../api/tobii2pix.html" class="sidebar-item-text sidebar-link">
- <span class="menu-text">tobii2pix</span></a>
-  </div>
-</li>
-          <li class="sidebar-item">
-  <div class="sidebar-item-container"> 
-  <a href="../api/get_psychopy_pos_from_trackbox.html" class="sidebar-item-text sidebar-link">
- <span class="menu-text">get_psychopy_pos_from_trackbox</span></a>
+  <a href="../api/get_psychopy_pos_from_user_position.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text">get_psychopy_pos_from_user_position</span></a>
   </div>
 </li>
       </ul>
@@ -465,7 +465,7 @@ div.callout-Advanced.callout-style-default .callout-icon::before, div.callout-Ad
 <div id="quarto-sidebar-glass" class="quarto-sidebar-collapse-item" data-bs-toggle="collapse" data-bs-target=".quarto-sidebar-collapse-item"></div>
 <!-- margin-sidebar -->
     <div id="quarto-margin-sidebar" class="sidebar margin-sidebar">
-        <nav id="TOC" role="doc-toc" class="toc-active" data-toc-expanded="4">
+        <nav id="TOC" role="doc-toc" class="toc-active" data-toc-expanded="6">
     <h2 id="toc-title">On this page</h2>
    
   <ul>
@@ -1021,8 +1021,8 @@ window.document.addEventListener("DOMContentLoaded", function (event) {
 </script>
 <nav class="page-navigation">
   <div class="nav-page nav-page-previous">
-      <a href="../api/get_psychopy_pos_from_trackbox.html" class="pagination-link" aria-label="get_psychopy_pos_from_trackbox">
-        <i class="bi bi-arrow-left-short"></i> <span class="nav-page-text">get_psychopy_pos_from_trackbox</span>
+      <a href="../api/get_psychopy_pos_from_user_position.html" class="pagination-link" aria-label="get_psychopy_pos_from_user_position">
+        <i class="bi bi-arrow-left-short"></i> <span class="nav-page-text">get_psychopy_pos_from_user_position</span>
       </a>          
   </div>
   <div class="nav-page nav-page-next">
@@ -1051,17 +1051,23 @@ window.document.addEventListener("DOMContentLoaded", function (event) {
 <span id="cb2-18"><a href="#cb2-18" aria-hidden="true" tabindex="-1"></a></span>
 <span id="cb2-19"><a href="#cb2-19" aria-hidden="true" tabindex="-1"></a><span class="fu">## Parameters {.doc-section .doc-section-parameters}</span></span>
 <span id="cb2-20"><a href="#cb2-20" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb2-21"><a href="#cb2-21" aria-hidden="true" tabindex="-1"></a>| Name    | Type           | Description                                                                                                                                                                           | Default    |</span>
-<span id="cb2-22"><a href="#cb2-22" aria-hidden="true" tabindex="-1"></a>|---------|----------------|---------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------|------------|</span>
-<span id="cb2-23"><a href="#cb2-23" aria-hidden="true" tabindex="-1"></a>| body    | <span class="co">[</span><span class="ot">str</span><span class="co">](`str`)</span>   | The string to print inside the box. Can contain multiple lines separated by newline characters. Each line will be padded to align within the box.                                     | _required_ |</span>
-<span id="cb2-24"><a href="#cb2-24" aria-hidden="true" tabindex="-1"></a>| title   | <span class="co">[</span><span class="ot">str</span><span class="co">](`str`)</span>   | A title to print on the top border of the box. The title will be centered within the top border. If empty string or not provided, the top border will be solid. Default empty string. | <span class="in">`''`</span>       |</span>
-<span id="cb2-25"><a href="#cb2-25" aria-hidden="true" tabindex="-1"></a>| verbose | <span class="co">[</span><span class="ot">bool</span><span class="co">](`bool`)</span> | If True, the formatted box will be printed to the console. Default is True.                                                                                                           | <span class="in">`True`</span>     |</span>
-<span id="cb2-26"><a href="#cb2-26" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb2-27"><a href="#cb2-27" aria-hidden="true" tabindex="-1"></a><span class="fu">## Returns {.doc-section .doc-section-returns}</span></span>
-<span id="cb2-28"><a href="#cb2-28" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb2-29"><a href="#cb2-29" aria-hidden="true" tabindex="-1"></a>| Name   | Type         | Description                                                                                                                                                         |</span>
-<span id="cb2-30"><a href="#cb2-30" aria-hidden="true" tabindex="-1"></a>|--------|--------------|---------------------------------------------------------------------------------------------------------------------------------------------------------------------|</span>
-<span id="cb2-31"><a href="#cb2-31" aria-hidden="true" tabindex="-1"></a>|        | <span class="co">[</span><span class="ot">str</span><span class="co">](`str`)</span> | The formatted text with box characters, ready for display in console or use with PsychoPy TextStim objects. Includes all box-drawing characters and proper spacing. |</span></code><button title="Copy to Clipboard" class="code-copy-button" data-in-quarto-modal=""><i class="bi"></i></button></pre></div>
+<span id="cb2-21"><a href="#cb2-21" aria-hidden="true" tabindex="-1"></a>+---------+----------------+---------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------+------------+</span>
+<span id="cb2-22"><a href="#cb2-22" aria-hidden="true" tabindex="-1"></a>| Name    | Type           | Description                                                                                                                                                                           | Default    |</span>
+<span id="cb2-23"><a href="#cb2-23" aria-hidden="true" tabindex="-1"></a>+=========+================+=======================================================================================================================================================================================+============+</span>
+<span id="cb2-24"><a href="#cb2-24" aria-hidden="true" tabindex="-1"></a>| body    | <span class="co">[</span><span class="ot">str</span><span class="co">](`str`)</span>   | The string to print inside the box. Can contain multiple lines separated by newline characters. Each line will be padded to align within the box.                                     | _required_ |</span>
+<span id="cb2-25"><a href="#cb2-25" aria-hidden="true" tabindex="-1"></a>+---------+----------------+---------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------+------------+</span>
+<span id="cb2-26"><a href="#cb2-26" aria-hidden="true" tabindex="-1"></a>| title   | <span class="co">[</span><span class="ot">str</span><span class="co">](`str`)</span>   | A title to print on the top border of the box. The title will be centered within the top border. If empty string or not provided, the top border will be solid. Default empty string. | <span class="in">`''`</span>       |</span>
+<span id="cb2-27"><a href="#cb2-27" aria-hidden="true" tabindex="-1"></a>+---------+----------------+---------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------+------------+</span>
+<span id="cb2-28"><a href="#cb2-28" aria-hidden="true" tabindex="-1"></a>| verbose | <span class="co">[</span><span class="ot">bool</span><span class="co">](`bool`)</span> | If True, the formatted box will be printed to the console. Default is True.                                                                                                           | <span class="in">`True`</span>     |</span>
+<span id="cb2-29"><a href="#cb2-29" aria-hidden="true" tabindex="-1"></a>+---------+----------------+---------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------+------------+</span>
+<span id="cb2-30"><a href="#cb2-30" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb2-31"><a href="#cb2-31" aria-hidden="true" tabindex="-1"></a><span class="fu">## Returns {.doc-section .doc-section-returns}</span></span>
+<span id="cb2-32"><a href="#cb2-32" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb2-33"><a href="#cb2-33" aria-hidden="true" tabindex="-1"></a>+--------+--------------+---------------------------------------------------------------------------------------------------------------------------------------------------------------------+</span>
+<span id="cb2-34"><a href="#cb2-34" aria-hidden="true" tabindex="-1"></a>| Name   | Type         | Description                                                                                                                                                         |</span>
+<span id="cb2-35"><a href="#cb2-35" aria-hidden="true" tabindex="-1"></a>+========+==============+=====================================================================================================================================================================+</span>
+<span id="cb2-36"><a href="#cb2-36" aria-hidden="true" tabindex="-1"></a>|        | <span class="co">[</span><span class="ot">str</span><span class="co">](`str`)</span> | The formatted text with box characters, ready for display in console or use with PsychoPy TextStim objects. Includes all box-drawing characters and proper spacing. |</span>
+<span id="cb2-37"><a href="#cb2-37" aria-hidden="true" tabindex="-1"></a>+--------+--------------+---------------------------------------------------------------------------------------------------------------------------------------------------------------------+</span></code><button title="Copy to Clipboard" class="code-copy-button" data-in-quarto-modal=""><i class="bi"></i></button></pre></div>
 </div></div></div></div></div>
 </div> <!-- /content -->
 <footer class="footer">

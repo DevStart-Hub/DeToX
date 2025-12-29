@@ -21,16 +21,26 @@ and ensure data is saved even if the program crashes.
 - Safe to call during active recording
 - Clears buffers after saving
 - Events are matched to nearest gaze sample by timestamp
+- In HDF5 format, events are saved in two places:
+1. Merged into the main gaze table's 'Events' column
+2. As a separate 'events' table for independent event analysis
+- In CSV format, events only appear in the 'Events' column
 
 ## Examples {.doc-section .doc-section-examples}
 
+### Automatic Usage
+
+#### Default behavior (most common)
 ```python
-# Automatic saving (most common)
 ET_controller.start_recording('data.h5')
 # ... run experiment ...
 ET_controller.stop_recording()  # Automatically calls save_data()
+```
 
-# Manual periodic saves for long experiments
+### Manual Periodic Saves
+
+#### Save every N trials for long experiments
+```python
 ET_controller.start_recording('long_experiment.h5')
 
 for trial in range(100):
@@ -43,8 +53,12 @@ for trial in range(100):
         ET_controller.save_data()  # Saves and clears buffers
 
 ET_controller.stop_recording()
+```
 
-# Save data at natural break points
+### Strategic Save Points
+
+#### Save at natural break points between blocks
+```python
 ET_controller.start_recording('session.h5')
 
 # Block 1

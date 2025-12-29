@@ -7,36 +7,64 @@ get_tobii_pos(win, p, units=None)
 Convert PsychoPy coordinates to Tobii ADCS coordinates.
 
 Transforms coordinates from PsychoPy's coordinate system to Tobii's Active
-Display Coordinate System (ADCS). This conversion is essential for sending
-calibration target positions to the Tobii eye tracker during calibration
-procedures.
+Display Coordinate System (ADCS). Essential for sending calibration target
+positions to the Tobii eye tracker during calibration procedures.
 
 ADCS uses normalized coordinates where (0,0) is top-left and (1,1) is
-bottom-right, regardless of screen size or resolution. This provides a
-hardware-independent coordinate system for eye tracking data.
+bottom-right, providing a hardware-independent coordinate system.
 
 ## Parameters {.doc-section .doc-section-parameters}
 
-| Name   | Type                                                                                  | Description                                                                                                                                                      | Default    |
-|--------|---------------------------------------------------------------------------------------|------------------------------------------------------------------------------------------------------------------------------------------------------------------|------------|
-| win    | [psychopy](`psychopy`).[visual](`psychopy.visual`).[Window](`psychopy.visual.Window`) | The PsychoPy window which provides information about units and size. Window properties determine the source coordinate system.                                   | _required_ |
-| p      | [tuple](`tuple`)                                                                      | The PsychoPy coordinates to convert as (x, y) in specified units.                                                                                                | _required_ |
-| units  | [str](`str`)                                                                          | The units of the input PsychoPy coordinates. If None, uses the window's default units. Supported: 'norm', 'height', 'pix', 'cm', 'deg', 'degFlat', 'degFlatPos'. | `None`     |
++--------+---------------------------------------------------------------------------------------+-------------------------------------------------------------------------------------------------------------------------------------------------+------------+
+| Name   | Type                                                                                  | Description                                                                                                                                     | Default    |
++========+=======================================================================================+=================================================================================================================================================+============+
+| win    | [psychopy](`psychopy`).[visual](`psychopy.visual`).[Window](`psychopy.visual.Window`) | The PsychoPy window providing unit and size information.                                                                                        | _required_ |
++--------+---------------------------------------------------------------------------------------+-------------------------------------------------------------------------------------------------------------------------------------------------+------------+
+| p      | [tuple](`tuple`)                                                                      | PsychoPy coordinates to convert as (x, y) in specified units.                                                                                   | _required_ |
++--------+---------------------------------------------------------------------------------------+-------------------------------------------------------------------------------------------------------------------------------------------------+------------+
+| units  | [str](`str`)                                                                          | Units of the input coordinates. If None, uses window's default units. Supported: 'norm', 'height', 'pix', 'cm', 'deg', 'degFlat', 'degFlatPos'. | `None`     |
++--------+---------------------------------------------------------------------------------------+-------------------------------------------------------------------------------------------------------------------------------------------------+------------+
 
 ## Returns {.doc-section .doc-section-returns}
 
-| Name   | Type             | Description                                                                                                                       |
-|--------|------------------|-----------------------------------------------------------------------------------------------------------------------------------|
-|        | [tuple](`tuple`) | The converted Tobii ADCS coordinates as (x, y) where both values are in range [0, 1]. (0, 0) is top-left, (1, 1) is bottom-right. |
++--------+------------------+---------------------------------------------------------------------------------------------------------------------+
+| Name   | Type             | Description                                                                                                         |
++========+==================+=====================================================================================================================+
+|        | [tuple](`tuple`) | Tobii ADCS coordinates as (x, y) where both values are in range [0, 1]. (0, 0) is top-left, (1, 1) is bottom-right. |
++--------+------------------+---------------------------------------------------------------------------------------------------------------------+
 
 ## Raises {.doc-section .doc-section-raises}
 
-| Name   | Type                       | Description                              |
-|--------|----------------------------|------------------------------------------|
-|        | [ValueError](`ValueError`) | If the provided units are not supported. |
++----------------------------+------------------------------------------+
+| Type                       | Description                              |
++============================+==========================================+
+| [ValueError](`ValueError`) | If the provided units are not supported. |
++----------------------------+------------------------------------------+
 
 ## Notes {.doc-section .doc-section-notes}
 
 This function is the inverse of get_psychopy_pos() and is primarily used
-during calibration to inform the eye tracker where calibration targets
-are displayed on screen.
+during calibration to inform the eye tracker where targets are displayed.
+
+## Examples {.doc-section .doc-section-examples}
+
+```python
+from DeToX import Coords
+
+# Convert calibration target position
+target_psychopy = (0.2, -0.1)  # Height units
+target_tobii = Coords.get_tobii_pos(win, target_psychopy)
+# Returns (x, y) in [0, 1] range for Tobii SDK
+
+# Use during calibration
+calibration.collect_data(target_tobii[0], target_tobii[1])
+
+# Convert from different unit systems
+target_norm = (-0.5, 0.5)  # Normalized units
+tobii_pos = Coords.get_tobii_pos(win, target_norm, units='norm')
+
+# Works with pixel coordinates too
+target_pix = (960, 540)  # Center of 1920x1080 screen
+tobii_pos = Coords.get_tobii_pos(win, target_pix, units='pix')
+# Returns (0.5, 0.5) - center in ADCS
+```

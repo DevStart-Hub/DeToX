@@ -199,8 +199,8 @@ div.callout-Advanced.callout-style-default .callout-icon::before, div.callout-Ad
         </a>
     </div>
   </nav>
-  <div id="quarto-announcement" data-announcement-id="5603cdf67aefc87f3b65f8721f133f89" class="alert alert-danger hidden"><i class="bi bi-exclamation-triangle quarto-announcement-icon"></i><div class="quarto-announcement-content">
-<p><strong>Development Version</strong> - DeToX is currently in beta. Features may change without notice. Thoroughly test before using in production studies.</p>
+  <div id="quarto-announcement" data-announcement-id="de69b60bfdf2ea42f39c5cf1d3162adf" class="alert alert-danger hidden"><i class="bi bi-exclamation-triangle quarto-announcement-icon"></i><div class="quarto-announcement-content">
+<p><strong>Development Version</strong> - DeToX is currently in beta. Features may change without notice. Thoroughly test before using.</p>
 </div><i class="bi bi-x-lg quarto-announcement-action"></i></div>
 </header>
 <!-- content -->
@@ -261,6 +261,12 @@ div.callout-Advanced.callout-style-default .callout-icon::before, div.callout-Ad
   <div class="sidebar-item-container"> 
   <a href="../api/ETracker.save_data.html" class="sidebar-item-text sidebar-link">
  <span class="menu-text">ETracker.save_data</span></a>
+  </div>
+</li>
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="../api/ETracker.set_eyetracking_settings.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text">ETracker.set_eyetracking_settings</span></a>
   </div>
 </li>
       </ul>
@@ -395,14 +401,8 @@ div.callout-Advanced.callout-style-default .callout-icon::before, div.callout-Ad
 </li>
           <li class="sidebar-item">
   <div class="sidebar-item-container"> 
-  <a href="../api/tobii2pix.html" class="sidebar-item-text sidebar-link">
- <span class="menu-text">tobii2pix</span></a>
-  </div>
-</li>
-          <li class="sidebar-item">
-  <div class="sidebar-item-container"> 
-  <a href="../api/get_psychopy_pos_from_trackbox.html" class="sidebar-item-text sidebar-link">
- <span class="menu-text">get_psychopy_pos_from_trackbox</span></a>
+  <a href="../api/get_psychopy_pos_from_user_position.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text">get_psychopy_pos_from_user_position</span></a>
   </div>
 </li>
       </ul>
@@ -465,7 +465,7 @@ div.callout-Advanced.callout-style-default .callout-icon::before, div.callout-Ad
 <div id="quarto-sidebar-glass" class="quarto-sidebar-collapse-item" data-bs-toggle="collapse" data-bs-target=".quarto-sidebar-collapse-item"></div>
 <!-- margin-sidebar -->
     <div id="quarto-margin-sidebar" class="sidebar margin-sidebar">
-        <nav id="TOC" role="doc-toc" class="toc-active" data-toc-expanded="4">
+        <nav id="TOC" role="doc-toc" class="toc-active" data-toc-expanded="6">
     <h2 id="toc-title">On this page</h2>
    
   <ul>
@@ -474,9 +474,14 @@ div.callout-Advanced.callout-style-default .callout-icon::before, div.callout-Ad
   <li><a href="#parameters" id="toc-parameters" class="nav-link" data-scroll-target="#parameters">Parameters</a></li>
   <li><a href="#returns" id="toc-returns" class="nav-link" data-scroll-target="#returns">Returns</a></li>
   <li><a href="#raises" id="toc-raises" class="nav-link" data-scroll-target="#raises">Raises</a></li>
-  <li><a href="#examples" id="toc-examples" class="nav-link" data-scroll-target="#examples">Examples</a></li>
-  <li><a href="#notes" id="toc-notes" class="nav-link" data-scroll-target="#notes">Notes</a></li>
-  <li><a href="#see-also" id="toc-see-also" class="nav-link" data-scroll-target="#see-also">See Also</a></li>
+  <li><a href="#examples" id="toc-examples" class="nav-link" data-scroll-target="#examples">Examples</a>
+  <ul class="collapse">
+  <li><a href="#calibration-point-patterns" id="toc-calibration-point-patterns" class="nav-link" data-scroll-target="#calibration-point-patterns">Calibration Point Patterns</a></li>
+  <li><a href="#stimulus-options" id="toc-stimulus-options" class="nav-link" data-scroll-target="#stimulus-options">Stimulus Options</a></li>
+  <li><a href="#animation-and-audio" id="toc-animation-and-audio" class="nav-link" data-scroll-target="#animation-and-audio">Animation and Audio</a></li>
+  <li><a href="#visualization-styles" id="toc-visualization-styles" class="nav-link" data-scroll-target="#visualization-styles">Visualization Styles</a></li>
+  <li><a href="#complete-workflows" id="toc-complete-workflows" class="nav-link" data-scroll-target="#complete-workflows">Complete Workflows</a></li>
+  </ul></li>
   </ul></li>
   </ul>
 </nav>
@@ -515,13 +520,27 @@ div.callout-Advanced.callout-style-default .callout-icon::before, div.callout-Ad
 <tr class="odd">
 <td>calibration_points</td>
 <td>int or list of tuple</td>
-<td>Calibration pattern specification. Use <strong>5</strong> for the standard 5-point pattern (4 corners + center; default). Use <strong>9</strong> for a comprehensive 9-point pattern (3x3 grid). Alternatively, provide a <strong>list of tuples</strong> with custom points in normalized coordinates [-1, 1]. Example: <code>[(-0.4, 0.4), (0.4, 0.4), (0.0, 0.0)]</code>.</td>
+<td><p>Calibration pattern specification.</p>
+<ul>
+<li>Use <strong>5</strong> for the standard 5-point pattern (4 corners + center; default).</li>
+<li>Use <strong>9</strong> for a comprehensive 9-point pattern (3x3 grid).</li>
+<li>Alternatively, provide a <strong>list of tuples</strong> with custom points in normalized</li>
+<li>coordinates [-1, 1]. Example: <code>[(-0.4, 0.4), (0.4, 0.4), (0.0, 0.0)]</code>.</li>
+</ul></td>
 <td><code>5</code></td>
 </tr>
 <tr class="even">
 <td>infant_stims</td>
 <td>True or str or list or visual stimulus</td>
-<td>Calibration stimulus specification. Accepts multiple formats: <strong>True</strong> uses built-in stimuli from the package (default); <strong>False</strong> uses a default blue square; a <strong>str</strong> specifies a single image file path (e.g., <code>'stimulus.png'</code>); a <strong>list of str</strong> provides multiple image paths; a <strong>PsychoPy visual stimulus</strong> (e.g., Circle, Rect, Polygon, ImageStim, ShapeStim) can be used as a single object; or a <strong>list of visual stimuli</strong> may be provided. If fewer stimuli than calibration points are given, they are automatically repeated and optionally shuffled to cover all points. Supported types: ImageStim, Circle, Rect, Polygon, ShapeStim. TextStim and MovieStim are not supported.</td>
+<td><p>Calibration stimulus specification. Accepts multiple formats</p>
+<ul>
+<li><strong>True</strong> uses built-in stimuli from the package (default);</li>
+<li><strong>False</strong> uses a default blue square;</li>
+<li>a <strong>str</strong> specifies a single image file path (e.g., <code>'stimulus.png'</code>);</li>
+<li>a <strong>list of str</strong> provides multiple image paths;</li>
+<li>a <strong>PsychoPy visual stimulus</strong> (e.g., Circle, Rect, Polygon, ImageStim, ShapeStim) can be used as a single object;</li>
+<li>or a <strong>list of visual stimuli</strong> may be provided. If fewer stimuli than calibration points are given, they are automatically repeated and optionally shuffled to cover all points. Supported types: ImageStim, Circle, Rect, Polygon, ShapeStim. TextStim and MovieStim are not supported.</li>
+</ul></td>
 <td><code>True</code></td>
 </tr>
 <tr class="odd">
@@ -532,26 +551,38 @@ div.callout-Advanced.callout-style-default .callout-icon::before, div.callout-Ad
 </tr>
 <tr class="even">
 <td>audio</td>
-<td>True or False or None or <a href="`psychopy`">psychopy</a>.<a href="`psychopy.sound`">sound</a>.<a href="`psychopy.sound.Sound`">Sound</a></td>
-<td>Controls attention-getting audio during calibration. <strong>True</strong> uses the built-in looping calibration sound (default). <strong>False</strong> or <strong>None</strong> disables audio. A <strong>psychopy.sound.Sound</strong> object may be provided for custom audio (ensure it is configured appropriately, e.g., <code>loops=-1</code> for continuous looping). Audio plays when a calibration point is selected and fades out during data collection.</td>
+<td>True or False or <a href="`None`">None</a> or <a href="`psychopy`">psychopy</a>.<a href="`psychopy.sound`">sound</a>.<a href="`psychopy.sound.Sound`">Sound</a></td>
+<td><p>Controls attention-getting audio during calibration:</p>
+<p>-<strong>True</strong> uses the built-in looping calibration sound (default). -<strong>False</strong> or <strong>None</strong> disables audio. A <strong>psychopy.sound.Sound</strong> object may be provided for custom audio (ensure it is configured appropriately, e.g., <code>loops=-1</code> for continuous looping). Audio plays when a calibration point is selected and fades out during data collection.</p></td>
 <td><code>True</code></td>
 </tr>
 <tr class="odd">
 <td>anim_type</td>
 <td>(<a href="`zoom`">zoom</a>, <a href="`trill`">trill</a>)</td>
-<td>Animation style for calibration stimuli. <strong>‘zoom’</strong> applies smooth size oscillation using a cosine function (default). <strong>‘trill’</strong> uses rapid rotation with intermittent pauses.</td>
+<td><p>Animation style for calibration stimuli:</p>
+<ul>
+<li><strong>‘zoom’</strong> applies smooth size oscillation using a cosine function (default).</li>
+<li><strong>‘trill’</strong> uses rapid rotation with intermittent pauses.</li>
+</ul></td>
 <td><code>'zoom'</code></td>
 </tr>
 <tr class="even">
 <td>stim_size</td>
 <td>(<a href="`big`">big</a>, <a href="`small`">small</a>)</td>
-<td>Size preset for calibration stimuli. <strong>‘big’</strong> uses larger stimuli recommended for infants and children (default): zoom animation ranges from 5�16% screen height, trill uses 14%. <strong>‘small’</strong> uses smaller stimuli for adults: zoom ranges from 3�8%, trill uses 6%.</td>
+<td><p>Size preset for calibration stimuli:</p>
+<ul>
+<li><strong>‘big’</strong> uses larger stimuli recommended for infants and children (default). -<strong>‘small’</strong> uses smaller stimuli for adults.</li>
+</ul></td>
 <td><code>'big'</code></td>
 </tr>
 <tr class="odd">
 <td>visualization_style</td>
 <td>(<a href="`circles`">circles</a>, <a href="`lines`">lines</a>)</td>
-<td>How to display calibration results. <strong>‘circles’</strong> shows small filled circles at each gaze sample position. <strong>‘lines’</strong> draws lines from targets to gaze samples (default). In Tobii mode, green indicates the left eye and red the right eye; in simulation mode, orange represents mouse position.</td>
+<td><p>How to display calibration results:</p>
+<ul>
+<li><strong>‘circles’</strong> shows small filled circles at each gaze sample position.</li>
+<li><strong>‘lines’</strong> draws lines from targets to gaze samples.</li>
+</ul></td>
 <td><code>'circles'</code></td>
 </tr>
 </tbody>
@@ -581,19 +612,16 @@ div.callout-Advanced.callout-style-default .callout-icon::before, div.callout-Ad
 <table class="caption-top table">
 <thead>
 <tr class="header">
-<th>Name</th>
 <th>Type</th>
 <th>Description</th>
 </tr>
 </thead>
 <tbody>
 <tr class="odd">
-<td></td>
 <td><a href="`ValueError`">ValueError</a></td>
 <td>If <code>calibration_points</code> is not 5, 9, or a valid list of coordinate tuples; if <code>visualization_style</code> is not ‘circles’ or ‘lines’; or if <code>infant_stims</code> format is unrecognized.</td>
 </tr>
 <tr class="even">
-<td></td>
 <td><a href="`TypeError`">TypeError</a></td>
 <td>If pre-loaded stimuli include unsupported types (e.g., TextStim, MovieStim).</td>
 </tr>
@@ -602,79 +630,104 @@ div.callout-Advanced.callout-style-default .callout-icon::before, div.callout-Ad
 </section>
 <section id="examples" class="level2 doc-section doc-section-examples">
 <h2 class="doc-section doc-section-examples anchored" data-anchor-id="examples">Examples</h2>
-<p>Basic usage with built-in stimuli:</p>
-<div class="sourceCode" id="cb2"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb2-1"><a href="#cb2-1" aria-hidden="true" tabindex="-1"></a>controller.calibrate(<span class="dv">5</span>)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
-<p>9-point calibration:</p>
-<div class="sourceCode" id="cb3"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb3-1"><a href="#cb3-1" aria-hidden="true" tabindex="-1"></a>controller.calibrate(<span class="dv">9</span>)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
-<p>Custom calibration points:</p>
-<div class="sourceCode" id="cb4"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb4-1"><a href="#cb4-1" aria-hidden="true" tabindex="-1"></a>custom_points <span class="op">=</span> [</span>
-<span id="cb4-2"><a href="#cb4-2" aria-hidden="true" tabindex="-1"></a>    (<span class="fl">0.0</span>, <span class="fl">0.0</span>),      <span class="co"># Center</span></span>
-<span id="cb4-3"><a href="#cb4-3" aria-hidden="true" tabindex="-1"></a>    (<span class="op">-</span><span class="fl">0.5</span>, <span class="fl">0.5</span>),     <span class="co"># Top-left</span></span>
-<span id="cb4-4"><a href="#cb4-4" aria-hidden="true" tabindex="-1"></a>    (<span class="fl">0.5</span>, <span class="fl">0.5</span>),      <span class="co"># Top-right</span></span>
-<span id="cb4-5"><a href="#cb4-5" aria-hidden="true" tabindex="-1"></a>    (<span class="op">-</span><span class="fl">0.5</span>, <span class="op">-</span><span class="fl">0.5</span>),    <span class="co"># Bottom-left</span></span>
-<span id="cb4-6"><a href="#cb4-6" aria-hidden="true" tabindex="-1"></a>    (<span class="fl">0.5</span>, <span class="op">-</span><span class="fl">0.5</span>)      <span class="co"># Bottom-right</span></span>
-<span id="cb4-7"><a href="#cb4-7" aria-hidden="true" tabindex="-1"></a>]</span>
-<span id="cb4-8"><a href="#cb4-8" aria-hidden="true" tabindex="-1"></a>controller.calibrate(custom_points)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
-<p>Single image file:</p>
-<div class="sourceCode" id="cb5"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb5-1"><a href="#cb5-1" aria-hidden="true" tabindex="-1"></a>controller.calibrate(<span class="dv">5</span>, infant_stims<span class="op">=</span><span class="st">'my_stimulus.png'</span>)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
-<p>Multiple image files:</p>
-<div class="sourceCode" id="cb6"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb6-1"><a href="#cb6-1" aria-hidden="true" tabindex="-1"></a>controller.calibrate(<span class="dv">5</span>, infant_stims<span class="op">=</span>[<span class="st">'stim1.png'</span>, <span class="st">'stim2.png'</span>, <span class="st">'stim3.png'</span>])</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
-<p>Single shape stimulus:</p>
-<div class="sourceCode" id="cb7"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb7-1"><a href="#cb7-1" aria-hidden="true" tabindex="-1"></a>red_square <span class="op">=</span> visual.Rect(win, size<span class="op">=</span><span class="fl">0.08</span>, fillColor<span class="op">=</span><span class="st">'red'</span>, units<span class="op">=</span><span class="st">'height'</span>)</span>
-<span id="cb7-2"><a href="#cb7-2" aria-hidden="true" tabindex="-1"></a>controller.calibrate(<span class="dv">5</span>, infant_stims<span class="op">=</span>red_square)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
-<p>Multiple shape stimuli:</p>
-<div class="sourceCode" id="cb8"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb8-1"><a href="#cb8-1" aria-hidden="true" tabindex="-1"></a>shapes <span class="op">=</span> [</span>
-<span id="cb8-2"><a href="#cb8-2" aria-hidden="true" tabindex="-1"></a>    visual.Circle(win, radius<span class="op">=</span><span class="fl">0.04</span>, fillColor<span class="op">=</span><span class="st">'red'</span>, units<span class="op">=</span><span class="st">'height'</span>),</span>
-<span id="cb8-3"><a href="#cb8-3" aria-hidden="true" tabindex="-1"></a>    visual.Rect(win, size<span class="op">=</span><span class="fl">0.08</span>, fillColor<span class="op">=</span><span class="st">'blue'</span>, units<span class="op">=</span><span class="st">'height'</span>),</span>
-<span id="cb8-4"><a href="#cb8-4" aria-hidden="true" tabindex="-1"></a>    visual.Polygon(win, edges<span class="op">=</span><span class="dv">6</span>, radius<span class="op">=</span><span class="fl">0.04</span>, fillColor<span class="op">=</span><span class="st">'green'</span>, units<span class="op">=</span><span class="st">'height'</span>)</span>
-<span id="cb8-5"><a href="#cb8-5" aria-hidden="true" tabindex="-1"></a>]</span>
-<span id="cb8-6"><a href="#cb8-6" aria-hidden="true" tabindex="-1"></a>controller.calibrate(<span class="dv">5</span>, infant_stims<span class="op">=</span>shapes, shuffle<span class="op">=</span><span class="va">True</span>)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
-<p>Custom audio:</p>
-<div class="sourceCode" id="cb9"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb9-1"><a href="#cb9-1" aria-hidden="true" tabindex="-1"></a><span class="im">from</span> psychopy <span class="im">import</span> sound</span>
-<span id="cb9-2"><a href="#cb9-2" aria-hidden="true" tabindex="-1"></a>my_sound <span class="op">=</span> sound.Sound(<span class="st">'custom_beep.wav'</span>, loops<span class="op">=-</span><span class="dv">1</span>)</span>
-<span id="cb9-3"><a href="#cb9-3" aria-hidden="true" tabindex="-1"></a>controller.calibrate(<span class="dv">5</span>, audio<span class="op">=</span>my_sound)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
-<p>No audio with trill animation:</p>
-<div class="sourceCode" id="cb10"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb10-1"><a href="#cb10-1" aria-hidden="true" tabindex="-1"></a>controller.calibrate(<span class="dv">5</span>, audio<span class="op">=</span><span class="va">False</span>, anim_type<span class="op">=</span><span class="st">'trill'</span>)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
-<p>Lines visualization style:</p>
-<div class="sourceCode" id="cb11"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb11-1"><a href="#cb11-1" aria-hidden="true" tabindex="-1"></a>controller.calibrate(<span class="dv">5</span>, visualization_style<span class="op">=</span><span class="st">'lines'</span>)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
-<p>Complete custom workflow:</p>
-<div class="sourceCode" id="cb12"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb12-1"><a href="#cb12-1" aria-hidden="true" tabindex="-1"></a><span class="co"># Position participant</span></span>
-<span id="cb12-2"><a href="#cb12-2" aria-hidden="true" tabindex="-1"></a>controller.show_status()</span>
-<span id="cb12-3"><a href="#cb12-3" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb12-4"><a href="#cb12-4" aria-hidden="true" tabindex="-1"></a><span class="co"># Custom calibration</span></span>
-<span id="cb12-5"><a href="#cb12-5" aria-hidden="true" tabindex="-1"></a>success <span class="op">=</span> controller.calibrate(</span>
-<span id="cb12-6"><a href="#cb12-6" aria-hidden="true" tabindex="-1"></a>    calibration_points<span class="op">=</span><span class="dv">9</span>,</span>
-<span id="cb12-7"><a href="#cb12-7" aria-hidden="true" tabindex="-1"></a>    infant_stims<span class="op">=</span>[<span class="st">'stim1.png'</span>, <span class="st">'stim2.png'</span>],</span>
-<span id="cb12-8"><a href="#cb12-8" aria-hidden="true" tabindex="-1"></a>    shuffle<span class="op">=</span><span class="va">True</span>,</span>
-<span id="cb12-9"><a href="#cb12-9" aria-hidden="true" tabindex="-1"></a>    audio<span class="op">=</span><span class="va">True</span>,</span>
-<span id="cb12-10"><a href="#cb12-10" aria-hidden="true" tabindex="-1"></a>    anim_type<span class="op">=</span><span class="st">'zoom'</span>,</span>
-<span id="cb12-11"><a href="#cb12-11" aria-hidden="true" tabindex="-1"></a>    visualization_style<span class="op">=</span><span class="st">'circles'</span></span>
-<span id="cb12-12"><a href="#cb12-12" aria-hidden="true" tabindex="-1"></a>)</span>
-<span id="cb12-13"><a href="#cb12-13" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb12-14"><a href="#cb12-14" aria-hidden="true" tabindex="-1"></a><span class="cf">if</span> success:</span>
-<span id="cb12-15"><a href="#cb12-15" aria-hidden="true" tabindex="-1"></a>    controller.start_recording(<span class="st">'data.h5'</span>)</span>
-<span id="cb12-16"><a href="#cb12-16" aria-hidden="true" tabindex="-1"></a>    <span class="co"># ... run experiment ...</span></span>
-<span id="cb12-17"><a href="#cb12-17" aria-hidden="true" tabindex="-1"></a>    controller.stop_recording()</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<section id="calibration-point-patterns" class="level3">
+<h3 class="anchored" data-anchor-id="calibration-point-patterns">Calibration Point Patterns</h3>
+<section id="standard-5-point-calibration" class="level4">
+<h4 class="anchored" data-anchor-id="standard-5-point-calibration">Standard 5-point calibration</h4>
+<div class="sourceCode" id="cb2"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb2-1"><a href="#cb2-1" aria-hidden="true" tabindex="-1"></a>    controller.calibrate(<span class="dv">5</span>)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
 </section>
-<section id="notes" class="level2 doc-section doc-section-notes">
-<h2 class="doc-section doc-section-notes anchored" data-anchor-id="notes">Notes</h2>
-<ul>
-<li>Calibration uses normalized coordinates [-1, 1] where (0, 0) is screen center.</li>
-<li>Stimuli are automatically repeated if fewer than calibration points.</li>
-<li>Animation preserves stimulus aspect ratio automatically.</li>
-<li>In simulation mode, use mouse to simulate gaze position.</li>
-<li>Press number keys (1�9) to select points, SPACE to collect data.</li>
-<li>Press ENTER to view results, ESC to abort.</li>
-<li>After viewing results: ENTER accepts, numbers + SPACE retries selected points.</li>
-</ul>
+<section id="comprehensive-9-point-calibration" class="level4">
+<h4 class="anchored" data-anchor-id="comprehensive-9-point-calibration">Comprehensive 9-point calibration</h4>
+<div class="sourceCode" id="cb3"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb3-1"><a href="#cb3-1" aria-hidden="true" tabindex="-1"></a>    controller.calibrate(<span class="dv">9</span>)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
 </section>
-<section id="see-also" class="level2 doc-section doc-section-see-also">
-<h2 class="doc-section doc-section-see-also anchored" data-anchor-id="see-also">See Also</h2>
-<p>show_status : Position participant before calibration save_calibration : Save calibration for later sessions load_calibration : Load previously saved calibration</p>
+<section id="custom-calibration-points" class="level4">
+<h4 class="anchored" data-anchor-id="custom-calibration-points">Custom calibration points</h4>
+<div class="sourceCode" id="cb4"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb4-1"><a href="#cb4-1" aria-hidden="true" tabindex="-1"></a>    custom_points <span class="op">=</span> [</span>
+<span id="cb4-2"><a href="#cb4-2" aria-hidden="true" tabindex="-1"></a>        (<span class="fl">0.0</span>, <span class="fl">0.0</span>),      <span class="co"># Center</span></span>
+<span id="cb4-3"><a href="#cb4-3" aria-hidden="true" tabindex="-1"></a>        (<span class="op">-</span><span class="fl">0.5</span>, <span class="fl">0.5</span>),     <span class="co"># Top-left</span></span>
+<span id="cb4-4"><a href="#cb4-4" aria-hidden="true" tabindex="-1"></a>        (<span class="fl">0.5</span>, <span class="fl">0.5</span>),      <span class="co"># Top-right</span></span>
+<span id="cb4-5"><a href="#cb4-5" aria-hidden="true" tabindex="-1"></a>        (<span class="op">-</span><span class="fl">0.5</span>, <span class="op">-</span><span class="fl">0.5</span>),    <span class="co"># Bottom-left</span></span>
+<span id="cb4-6"><a href="#cb4-6" aria-hidden="true" tabindex="-1"></a>        (<span class="fl">0.5</span>, <span class="op">-</span><span class="fl">0.5</span>)      <span class="co"># Bottom-right</span></span>
+<span id="cb4-7"><a href="#cb4-7" aria-hidden="true" tabindex="-1"></a>    ]</span>
+<span id="cb4-8"><a href="#cb4-8" aria-hidden="true" tabindex="-1"></a>    controller.calibrate(custom_points)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+</section>
+</section>
+<section id="stimulus-options" class="level3">
+<h3 class="anchored" data-anchor-id="stimulus-options">Stimulus Options</h3>
+<section id="single-image-file" class="level4">
+<h4 class="anchored" data-anchor-id="single-image-file">Single image file</h4>
+<div class="sourceCode" id="cb5"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb5-1"><a href="#cb5-1" aria-hidden="true" tabindex="-1"></a>    controller.calibrate(<span class="dv">5</span>, infant_stims<span class="op">=</span><span class="st">'my_stimulus.png'</span>)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+</section>
+<section id="multiple-image-files" class="level4">
+<h4 class="anchored" data-anchor-id="multiple-image-files">Multiple image files</h4>
+<div class="sourceCode" id="cb6"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb6-1"><a href="#cb6-1" aria-hidden="true" tabindex="-1"></a>    controller.calibrate(<span class="dv">5</span>, infant_stims<span class="op">=</span>[<span class="st">'stim1.png'</span>, <span class="st">'stim2.png'</span>, <span class="st">'stim3.png'</span>])</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+</section>
+<section id="single-shape-stimulus" class="level4">
+<h4 class="anchored" data-anchor-id="single-shape-stimulus">Single shape stimulus</h4>
+<div class="sourceCode" id="cb7"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb7-1"><a href="#cb7-1" aria-hidden="true" tabindex="-1"></a>    red_square <span class="op">=</span> visual.Rect(win, size<span class="op">=</span><span class="fl">0.08</span>, fillColor<span class="op">=</span><span class="st">'red'</span>, units<span class="op">=</span><span class="st">'height'</span>)</span>
+<span id="cb7-2"><a href="#cb7-2" aria-hidden="true" tabindex="-1"></a>    controller.calibrate(<span class="dv">5</span>, infant_stims<span class="op">=</span>red_square)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+</section>
+<section id="multiple-shape-stimuli" class="level4">
+<h4 class="anchored" data-anchor-id="multiple-shape-stimuli">Multiple shape stimuli</h4>
+<div class="sourceCode" id="cb8"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb8-1"><a href="#cb8-1" aria-hidden="true" tabindex="-1"></a>    shapes <span class="op">=</span> [</span>
+<span id="cb8-2"><a href="#cb8-2" aria-hidden="true" tabindex="-1"></a>        visual.Circle(win, radius<span class="op">=</span><span class="fl">0.04</span>, fillColor<span class="op">=</span><span class="st">'red'</span>, units<span class="op">=</span><span class="st">'height'</span>),</span>
+<span id="cb8-3"><a href="#cb8-3" aria-hidden="true" tabindex="-1"></a>        visual.Rect(win, size<span class="op">=</span><span class="fl">0.08</span>, fillColor<span class="op">=</span><span class="st">'blue'</span>, units<span class="op">=</span><span class="st">'height'</span>),</span>
+<span id="cb8-4"><a href="#cb8-4" aria-hidden="true" tabindex="-1"></a>        visual.Polygon(win, edges<span class="op">=</span><span class="dv">6</span>, radius<span class="op">=</span><span class="fl">0.04</span>, fillColor<span class="op">=</span><span class="st">'green'</span>, units<span class="op">=</span><span class="st">'height'</span>)</span>
+<span id="cb8-5"><a href="#cb8-5" aria-hidden="true" tabindex="-1"></a>    ]</span>
+<span id="cb8-6"><a href="#cb8-6" aria-hidden="true" tabindex="-1"></a>    controller.calibrate(<span class="dv">5</span>, infant_stims<span class="op">=</span>shapes, shuffle<span class="op">=</span><span class="va">True</span>)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+</section>
+</section>
+<section id="animation-and-audio" class="level3">
+<h3 class="anchored" data-anchor-id="animation-and-audio">Animation and Audio</h3>
+<section id="custom-audio" class="level4">
+<h4 class="anchored" data-anchor-id="custom-audio">Custom audio</h4>
+<div class="sourceCode" id="cb9"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb9-1"><a href="#cb9-1" aria-hidden="true" tabindex="-1"></a>    <span class="im">from</span> psychopy <span class="im">import</span> sound</span>
+<span id="cb9-2"><a href="#cb9-2" aria-hidden="true" tabindex="-1"></a>    my_sound <span class="op">=</span> sound.Sound(<span class="st">'custom_beep.wav'</span>, loops<span class="op">=-</span><span class="dv">1</span>)</span>
+<span id="cb9-3"><a href="#cb9-3" aria-hidden="true" tabindex="-1"></a>    controller.calibrate(<span class="dv">5</span>, audio<span class="op">=</span>my_sound)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+</section>
+<section id="trill-animation-without-audio" class="level4">
+<h4 class="anchored" data-anchor-id="trill-animation-without-audio">Trill animation without audio</h4>
+<div class="sourceCode" id="cb10"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb10-1"><a href="#cb10-1" aria-hidden="true" tabindex="-1"></a>    controller.calibrate(<span class="dv">5</span>, audio<span class="op">=</span><span class="va">False</span>, anim_type<span class="op">=</span><span class="st">'trill'</span>)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+</section>
+</section>
+<section id="visualization-styles" class="level3">
+<h3 class="anchored" data-anchor-id="visualization-styles">Visualization Styles</h3>
+<section id="lines-visualization" class="level4">
+<h4 class="anchored" data-anchor-id="lines-visualization">Lines visualization</h4>
+<div class="sourceCode" id="cb11"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb11-1"><a href="#cb11-1" aria-hidden="true" tabindex="-1"></a>    controller.calibrate(<span class="dv">5</span>, visualization_style<span class="op">=</span><span class="st">'lines'</span>)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+</section>
+<section id="circles-visualization-with-small-stimuli" class="level4">
+<h4 class="anchored" data-anchor-id="circles-visualization-with-small-stimuli">Circles visualization with small stimuli</h4>
+<div class="sourceCode" id="cb12"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb12-1"><a href="#cb12-1" aria-hidden="true" tabindex="-1"></a>    controller.calibrate(<span class="dv">5</span>, stim_size<span class="op">=</span><span class="st">'small'</span>, visualization_style<span class="op">=</span><span class="st">'circles'</span>)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+</section>
+</section>
+<section id="complete-workflows" class="level3">
+<h3 class="anchored" data-anchor-id="complete-workflows">Complete Workflows</h3>
+<section id="full-calibration-workflow" class="level4">
+<h4 class="anchored" data-anchor-id="full-calibration-workflow">Full calibration workflow</h4>
+<div class="sourceCode" id="cb13"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb13-1"><a href="#cb13-1" aria-hidden="true" tabindex="-1"></a>    <span class="co"># Position participant</span></span>
+<span id="cb13-2"><a href="#cb13-2" aria-hidden="true" tabindex="-1"></a>    controller.show_status()</span>
+<span id="cb13-3"><a href="#cb13-3" aria-hidden="true" tabindex="-1"></a>    </span>
+<span id="cb13-4"><a href="#cb13-4" aria-hidden="true" tabindex="-1"></a>    <span class="co"># Run calibration</span></span>
+<span id="cb13-5"><a href="#cb13-5" aria-hidden="true" tabindex="-1"></a>    success <span class="op">=</span> controller.calibrate(</span>
+<span id="cb13-6"><a href="#cb13-6" aria-hidden="true" tabindex="-1"></a>        calibration_points<span class="op">=</span><span class="dv">9</span>,</span>
+<span id="cb13-7"><a href="#cb13-7" aria-hidden="true" tabindex="-1"></a>        infant_stims<span class="op">=</span>[<span class="st">'stim1.png'</span>, <span class="st">'stim2.png'</span>],</span>
+<span id="cb13-8"><a href="#cb13-8" aria-hidden="true" tabindex="-1"></a>        shuffle<span class="op">=</span><span class="va">True</span>,</span>
+<span id="cb13-9"><a href="#cb13-9" aria-hidden="true" tabindex="-1"></a>        audio<span class="op">=</span><span class="va">True</span>,</span>
+<span id="cb13-10"><a href="#cb13-10" aria-hidden="true" tabindex="-1"></a>        anim_type<span class="op">=</span><span class="st">'zoom'</span>,</span>
+<span id="cb13-11"><a href="#cb13-11" aria-hidden="true" tabindex="-1"></a>        visualization_style<span class="op">=</span><span class="st">'circles'</span></span>
+<span id="cb13-12"><a href="#cb13-12" aria-hidden="true" tabindex="-1"></a>    )</span>
+<span id="cb13-13"><a href="#cb13-13" aria-hidden="true" tabindex="-1"></a>    </span>
+<span id="cb13-14"><a href="#cb13-14" aria-hidden="true" tabindex="-1"></a>    <span class="cf">if</span> success:</span>
+<span id="cb13-15"><a href="#cb13-15" aria-hidden="true" tabindex="-1"></a>        controller.start_recording(<span class="st">'data.h5'</span>)</span>
+<span id="cb13-16"><a href="#cb13-16" aria-hidden="true" tabindex="-1"></a>        <span class="co"># ... run experiment ...</span></span>
+<span id="cb13-17"><a href="#cb13-17" aria-hidden="true" tabindex="-1"></a>        controller.stop_recording()</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
 
 
 <!-- -->
 
+</section>
+</section>
 </section>
 </section>
 
@@ -1162,156 +1215,200 @@ window.document.addEventListener("DOMContentLoaded", function (event) {
       </a>
   </div>
 </nav><div class="modal fade" id="quarto-embedded-source-code-modal" tabindex="-1" aria-labelledby="quarto-embedded-source-code-modal-label" aria-hidden="true"><div class="modal-dialog modal-dialog-scrollable"><div class="modal-content"><div class="modal-header"><h5 class="modal-title" id="quarto-embedded-source-code-modal-label">Source Code</h5><button class="btn-close" data-bs-dismiss="modal"></button></div><div class="modal-body"><div class="">
-<div class="sourceCode" id="cb13" data-shortcodes="false"><pre class="sourceCode markdown code-with-copy"><code class="sourceCode markdown"><span id="cb13-1"><a href="#cb13-1" aria-hidden="true" tabindex="-1"></a><span class="fu"># ETracker.calibrate { #DeToX.ETracker.calibrate }</span></span>
-<span id="cb13-2"><a href="#cb13-2" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb13-3"><a href="#cb13-3" aria-hidden="true" tabindex="-1"></a><span class="in">```python</span></span>
-<span id="cb13-4"><a href="#cb13-4" aria-hidden="true" tabindex="-1"></a>ETracker.calibrate(</span>
-<span id="cb13-5"><a href="#cb13-5" aria-hidden="true" tabindex="-1"></a>    calibration_points<span class="op">=</span><span class="dv">5</span>,</span>
-<span id="cb13-6"><a href="#cb13-6" aria-hidden="true" tabindex="-1"></a>    infant_stims<span class="op">=</span><span class="va">True</span>,</span>
-<span id="cb13-7"><a href="#cb13-7" aria-hidden="true" tabindex="-1"></a>    shuffle<span class="op">=</span><span class="va">True</span>,</span>
-<span id="cb13-8"><a href="#cb13-8" aria-hidden="true" tabindex="-1"></a>    audio<span class="op">=</span><span class="va">True</span>,</span>
-<span id="cb13-9"><a href="#cb13-9" aria-hidden="true" tabindex="-1"></a>    anim_type<span class="op">=</span><span class="st">'zoom'</span>,</span>
-<span id="cb13-10"><a href="#cb13-10" aria-hidden="true" tabindex="-1"></a>    stim_size<span class="op">=</span><span class="st">'big'</span>,</span>
-<span id="cb13-11"><a href="#cb13-11" aria-hidden="true" tabindex="-1"></a>    visualization_style<span class="op">=</span><span class="st">'circles'</span>,</span>
-<span id="cb13-12"><a href="#cb13-12" aria-hidden="true" tabindex="-1"></a>)</span>
-<span id="cb13-13"><a href="#cb13-13" aria-hidden="true" tabindex="-1"></a><span class="in">```</span></span>
-<span id="cb13-14"><a href="#cb13-14" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb13-15"><a href="#cb13-15" aria-hidden="true" tabindex="-1"></a>Run infant-friendly calibration procedure.</span>
-<span id="cb13-16"><a href="#cb13-16" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb13-17"><a href="#cb13-17" aria-hidden="true" tabindex="-1"></a>Performs eye tracker calibration using animated stimuli to engage infant </span>
-<span id="cb13-18"><a href="#cb13-18" aria-hidden="true" tabindex="-1"></a>participants. The calibration establishes the mapping between eye position </span>
-<span id="cb13-19"><a href="#cb13-19" aria-hidden="true" tabindex="-1"></a>and screen coordinates, which is essential for accurate gaze data collection.</span>
-<span id="cb13-20"><a href="#cb13-20" aria-hidden="true" tabindex="-1"></a>Automatically selects the appropriate calibration method based on operating </span>
-<span id="cb13-21"><a href="#cb13-21" aria-hidden="true" tabindex="-1"></a>mode (real eye tracker vs. mouse simulation).</span>
-<span id="cb13-22"><a href="#cb13-22" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb13-23"><a href="#cb13-23" aria-hidden="true" tabindex="-1"></a><span class="fu">## Parameters {.doc-section .doc-section-parameters}</span></span>
-<span id="cb13-24"><a href="#cb13-24" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb13-25"><a href="#cb13-25" aria-hidden="true" tabindex="-1"></a>| Name                | Type                                                                                                      | Description                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                      | Default     |</span>
-<span id="cb13-26"><a href="#cb13-26" aria-hidden="true" tabindex="-1"></a>|---------------------|-----------------------------------------------------------------------------------------------------------|------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------|-------------|</span>
-<span id="cb13-27"><a href="#cb13-27" aria-hidden="true" tabindex="-1"></a>| calibration_points  | int or list of tuple                                                                                      | Calibration pattern specification.  Use **5** for the standard 5-point pattern (4 corners + center; default).  Use **9** for a comprehensive 9-point pattern (3x3 grid).  Alternatively, provide a **list of tuples** with custom points in normalized  coordinates <span class="co">[</span><span class="ot">-1, 1</span><span class="co">]</span>. Example: ``<span class="co">[</span><span class="ot">(-0.4, 0.4), (0.4, 0.4), (0.0, 0.0)</span><span class="co">]</span>`<span class="in">`.                                                                                                                                                                                                                                                                                                                                                                                 | `</span>5`         |</span>
-<span id="cb13-28"><a href="#cb13-28" aria-hidden="true" tabindex="-1"></a>| infant_stims        | True or str or list or visual stimulus                                                                    | Calibration stimulus specification. Accepts multiple formats:  **True** uses built-in stimuli from the package (default);  **False** uses a default blue square;  a **str** specifies a single image file path (e.g., ``'stimulus.png'``);  a **list of str** provides multiple image paths;  a **PsychoPy visual stimulus** (e.g., Circle, Rect, Polygon, ImageStim, ShapeStim)  can be used as a single object;  or a **list of visual stimuli** may be provided.  If fewer stimuli than calibration points are given, they are automatically  repeated and optionally shuffled to cover all points.  Supported types: ImageStim, Circle, Rect, Polygon, ShapeStim.  TextStim and MovieStim are not supported. | <span class="in">`True`</span>      |</span>
-<span id="cb13-29"><a href="#cb13-29" aria-hidden="true" tabindex="-1"></a>| shuffle             | <span class="co">[</span><span class="ot">bool</span><span class="co">](`bool`)</span>                                                                                            | Whether to randomize stimulus presentation order after any necessary  repetition. Helps prevent habituation to stimulus sequence. Default is True.                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                               | <span class="in">`True`</span>      |</span>
-<span id="cb13-30"><a href="#cb13-30" aria-hidden="true" tabindex="-1"></a>| audio               | True or False or None or <span class="co">[</span><span class="ot">psychopy</span><span class="co">](`psychopy`)</span>.<span class="co">[</span><span class="ot">sound</span><span class="co">](`psychopy.sound`)</span>.<span class="co">[</span><span class="ot">Sound</span><span class="co">](`psychopy.sound.Sound`)</span> | Controls attention-getting audio during calibration.  **True** uses the built-in looping calibration sound (default).  **False** or **None** disables audio.  A **psychopy.sound.Sound** object may be provided for custom audio  (ensure it is configured appropriately, e.g., ``loops=-1`<span class="in">` for continuous looping).  Audio plays when a calibration point is selected and fades out during data collection.                                                                                                                                                                                                                                                                                                    | `</span>True`      |</span>
-<span id="cb13-31"><a href="#cb13-31" aria-hidden="true" tabindex="-1"></a>| anim_type           | (<span class="co">[</span><span class="ot">zoom</span><span class="co">](`zoom`)</span>, <span class="co">[</span><span class="ot">trill</span><span class="co">](`trill`)</span>)                                                                        | Animation style for calibration stimuli.  **'zoom'** applies smooth size oscillation using a cosine function (default).  **'trill'** uses rapid rotation with intermittent pauses.                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                               | <span class="in">`'zoom'`</span>    |</span>
-<span id="cb13-32"><a href="#cb13-32" aria-hidden="true" tabindex="-1"></a>| stim_size           | (<span class="co">[</span><span class="ot">big</span><span class="co">](`big`)</span>, <span class="co">[</span><span class="ot">small</span><span class="co">](`small`)</span>)                                                                          | Size preset for calibration stimuli.  **'big'** uses larger stimuli recommended for infants and children (default):  zoom animation ranges from 5�16% screen height, trill uses 14%.  **'small'** uses smaller stimuli for adults:  zoom ranges from 3�8%, trill uses 6%.                                                                                                                                                                                                                                                                                                                                                                                                                                        | <span class="in">`'big'`</span>     |</span>
-<span id="cb13-33"><a href="#cb13-33" aria-hidden="true" tabindex="-1"></a>| visualization_style | (<span class="co">[</span><span class="ot">circles</span><span class="co">](`circles`)</span>, <span class="co">[</span><span class="ot">lines</span><span class="co">](`lines`)</span>)                                                                  | How to display calibration results.  **'circles'** shows small filled circles at each gaze sample position.  **'lines'** draws lines from targets to gaze samples (default).  In Tobii mode, green indicates the left eye and red the right eye;  in simulation mode, orange represents mouse position.                                                                                                                                                                                                                                                                                                                                                                                                          | <span class="in">`'circles'`</span> |</span>
-<span id="cb13-34"><a href="#cb13-34" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb13-35"><a href="#cb13-35" aria-hidden="true" tabindex="-1"></a><span class="fu">## Returns {.doc-section .doc-section-returns}</span></span>
-<span id="cb13-36"><a href="#cb13-36" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb13-37"><a href="#cb13-37" aria-hidden="true" tabindex="-1"></a>| Name   | Type           | Description                                                                                                                               |</span>
-<span id="cb13-38"><a href="#cb13-38" aria-hidden="true" tabindex="-1"></a>|--------|----------------|-------------------------------------------------------------------------------------------------------------------------------------------|</span>
-<span id="cb13-39"><a href="#cb13-39" aria-hidden="true" tabindex="-1"></a>|        | <span class="co">[</span><span class="ot">bool</span><span class="co">](`bool`)</span> | True if calibration completed successfully and was accepted by the user.  False if calibration was aborted (e.g., via ESC key) or failed. |</span>
-<span id="cb13-40"><a href="#cb13-40" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb13-41"><a href="#cb13-41" aria-hidden="true" tabindex="-1"></a><span class="fu">## Raises {.doc-section .doc-section-raises}</span></span>
-<span id="cb13-42"><a href="#cb13-42" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb13-43"><a href="#cb13-43" aria-hidden="true" tabindex="-1"></a>| Name   | Type                       | Description                                                                                                                                                                     |</span>
-<span id="cb13-44"><a href="#cb13-44" aria-hidden="true" tabindex="-1"></a>|--------|----------------------------|---------------------------------------------------------------------------------------------------------------------------------------------------------------------------------|</span>
-<span id="cb13-45"><a href="#cb13-45" aria-hidden="true" tabindex="-1"></a>|        | <span class="co">[</span><span class="ot">ValueError</span><span class="co">](`ValueError`)</span> | If <span class="in">`calibration_points`</span> is not 5, 9, or a valid list of coordinate tuples;  if <span class="in">`visualization_style`</span> is not 'circles' or 'lines';  or if <span class="in">`infant_stims`</span> format is unrecognized. |</span>
-<span id="cb13-46"><a href="#cb13-46" aria-hidden="true" tabindex="-1"></a>|        | <span class="co">[</span><span class="ot">TypeError</span><span class="co">](`TypeError`)</span>   | If pre-loaded stimuli include unsupported types (e.g., TextStim, MovieStim).                                                                                                    |</span>
-<span id="cb13-47"><a href="#cb13-47" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb13-48"><a href="#cb13-48" aria-hidden="true" tabindex="-1"></a><span class="fu">## Examples {.doc-section .doc-section-examples}</span></span>
-<span id="cb13-49"><a href="#cb13-49" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb13-50"><a href="#cb13-50" aria-hidden="true" tabindex="-1"></a>Basic usage with built-in stimuli:</span>
-<span id="cb13-51"><a href="#cb13-51" aria-hidden="true" tabindex="-1"></a><span class="in">```python</span></span>
-<span id="cb13-52"><a href="#cb13-52" aria-hidden="true" tabindex="-1"></a>controller.calibrate(<span class="dv">5</span>)</span>
-<span id="cb13-53"><a href="#cb13-53" aria-hidden="true" tabindex="-1"></a><span class="in">```</span></span>
-<span id="cb13-54"><a href="#cb13-54" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb13-55"><a href="#cb13-55" aria-hidden="true" tabindex="-1"></a>9-point calibration:</span>
-<span id="cb13-56"><a href="#cb13-56" aria-hidden="true" tabindex="-1"></a><span class="in">```python</span></span>
-<span id="cb13-57"><a href="#cb13-57" aria-hidden="true" tabindex="-1"></a>controller.calibrate(<span class="dv">9</span>)</span>
-<span id="cb13-58"><a href="#cb13-58" aria-hidden="true" tabindex="-1"></a><span class="in">```</span></span>
-<span id="cb13-59"><a href="#cb13-59" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb13-60"><a href="#cb13-60" aria-hidden="true" tabindex="-1"></a>Custom calibration points:</span>
-<span id="cb13-61"><a href="#cb13-61" aria-hidden="true" tabindex="-1"></a><span class="in">```python</span></span>
-<span id="cb13-62"><a href="#cb13-62" aria-hidden="true" tabindex="-1"></a>custom_points <span class="op">=</span> [</span>
-<span id="cb13-63"><a href="#cb13-63" aria-hidden="true" tabindex="-1"></a>    (<span class="fl">0.0</span>, <span class="fl">0.0</span>),      <span class="co"># Center</span></span>
-<span id="cb13-64"><a href="#cb13-64" aria-hidden="true" tabindex="-1"></a>    (<span class="op">-</span><span class="fl">0.5</span>, <span class="fl">0.5</span>),     <span class="co"># Top-left</span></span>
-<span id="cb13-65"><a href="#cb13-65" aria-hidden="true" tabindex="-1"></a>    (<span class="fl">0.5</span>, <span class="fl">0.5</span>),      <span class="co"># Top-right</span></span>
-<span id="cb13-66"><a href="#cb13-66" aria-hidden="true" tabindex="-1"></a>    (<span class="op">-</span><span class="fl">0.5</span>, <span class="op">-</span><span class="fl">0.5</span>),    <span class="co"># Bottom-left</span></span>
-<span id="cb13-67"><a href="#cb13-67" aria-hidden="true" tabindex="-1"></a>    (<span class="fl">0.5</span>, <span class="op">-</span><span class="fl">0.5</span>)      <span class="co"># Bottom-right</span></span>
-<span id="cb13-68"><a href="#cb13-68" aria-hidden="true" tabindex="-1"></a>]</span>
-<span id="cb13-69"><a href="#cb13-69" aria-hidden="true" tabindex="-1"></a>controller.calibrate(custom_points)</span>
-<span id="cb13-70"><a href="#cb13-70" aria-hidden="true" tabindex="-1"></a><span class="in">```</span></span>
-<span id="cb13-71"><a href="#cb13-71" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb13-72"><a href="#cb13-72" aria-hidden="true" tabindex="-1"></a>Single image file:</span>
-<span id="cb13-73"><a href="#cb13-73" aria-hidden="true" tabindex="-1"></a><span class="in">```python</span></span>
-<span id="cb13-74"><a href="#cb13-74" aria-hidden="true" tabindex="-1"></a>controller.calibrate(<span class="dv">5</span>, infant_stims<span class="op">=</span><span class="st">'my_stimulus.png'</span>)</span>
-<span id="cb13-75"><a href="#cb13-75" aria-hidden="true" tabindex="-1"></a><span class="in">```</span></span>
-<span id="cb13-76"><a href="#cb13-76" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb13-77"><a href="#cb13-77" aria-hidden="true" tabindex="-1"></a>Multiple image files:</span>
-<span id="cb13-78"><a href="#cb13-78" aria-hidden="true" tabindex="-1"></a><span class="in">```python</span></span>
-<span id="cb13-79"><a href="#cb13-79" aria-hidden="true" tabindex="-1"></a>controller.calibrate(<span class="dv">5</span>, infant_stims<span class="op">=</span>[<span class="st">'stim1.png'</span>, <span class="st">'stim2.png'</span>, <span class="st">'stim3.png'</span>])</span>
-<span id="cb13-80"><a href="#cb13-80" aria-hidden="true" tabindex="-1"></a><span class="in">```</span></span>
-<span id="cb13-81"><a href="#cb13-81" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb13-82"><a href="#cb13-82" aria-hidden="true" tabindex="-1"></a>Single shape stimulus:</span>
-<span id="cb13-83"><a href="#cb13-83" aria-hidden="true" tabindex="-1"></a><span class="in">```python</span></span>
-<span id="cb13-84"><a href="#cb13-84" aria-hidden="true" tabindex="-1"></a>red_square <span class="op">=</span> visual.Rect(win, size<span class="op">=</span><span class="fl">0.08</span>, fillColor<span class="op">=</span><span class="st">'red'</span>, units<span class="op">=</span><span class="st">'height'</span>)</span>
-<span id="cb13-85"><a href="#cb13-85" aria-hidden="true" tabindex="-1"></a>controller.calibrate(<span class="dv">5</span>, infant_stims<span class="op">=</span>red_square)</span>
-<span id="cb13-86"><a href="#cb13-86" aria-hidden="true" tabindex="-1"></a><span class="in">```</span></span>
-<span id="cb13-87"><a href="#cb13-87" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb13-88"><a href="#cb13-88" aria-hidden="true" tabindex="-1"></a>Multiple shape stimuli:</span>
-<span id="cb13-89"><a href="#cb13-89" aria-hidden="true" tabindex="-1"></a><span class="in">```python</span></span>
-<span id="cb13-90"><a href="#cb13-90" aria-hidden="true" tabindex="-1"></a>shapes <span class="op">=</span> [</span>
-<span id="cb13-91"><a href="#cb13-91" aria-hidden="true" tabindex="-1"></a>    visual.Circle(win, radius<span class="op">=</span><span class="fl">0.04</span>, fillColor<span class="op">=</span><span class="st">'red'</span>, units<span class="op">=</span><span class="st">'height'</span>),</span>
-<span id="cb13-92"><a href="#cb13-92" aria-hidden="true" tabindex="-1"></a>    visual.Rect(win, size<span class="op">=</span><span class="fl">0.08</span>, fillColor<span class="op">=</span><span class="st">'blue'</span>, units<span class="op">=</span><span class="st">'height'</span>),</span>
-<span id="cb13-93"><a href="#cb13-93" aria-hidden="true" tabindex="-1"></a>    visual.Polygon(win, edges<span class="op">=</span><span class="dv">6</span>, radius<span class="op">=</span><span class="fl">0.04</span>, fillColor<span class="op">=</span><span class="st">'green'</span>, units<span class="op">=</span><span class="st">'height'</span>)</span>
-<span id="cb13-94"><a href="#cb13-94" aria-hidden="true" tabindex="-1"></a>]</span>
-<span id="cb13-95"><a href="#cb13-95" aria-hidden="true" tabindex="-1"></a>controller.calibrate(<span class="dv">5</span>, infant_stims<span class="op">=</span>shapes, shuffle<span class="op">=</span><span class="va">True</span>)</span>
-<span id="cb13-96"><a href="#cb13-96" aria-hidden="true" tabindex="-1"></a><span class="in">```</span></span>
-<span id="cb13-97"><a href="#cb13-97" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb13-98"><a href="#cb13-98" aria-hidden="true" tabindex="-1"></a>Custom audio:</span>
-<span id="cb13-99"><a href="#cb13-99" aria-hidden="true" tabindex="-1"></a><span class="in">```python</span></span>
-<span id="cb13-100"><a href="#cb13-100" aria-hidden="true" tabindex="-1"></a><span class="im">from</span> psychopy <span class="im">import</span> sound</span>
-<span id="cb13-101"><a href="#cb13-101" aria-hidden="true" tabindex="-1"></a>my_sound <span class="op">=</span> sound.Sound(<span class="st">'custom_beep.wav'</span>, loops<span class="op">=-</span><span class="dv">1</span>)</span>
-<span id="cb13-102"><a href="#cb13-102" aria-hidden="true" tabindex="-1"></a>controller.calibrate(<span class="dv">5</span>, audio<span class="op">=</span>my_sound)</span>
-<span id="cb13-103"><a href="#cb13-103" aria-hidden="true" tabindex="-1"></a><span class="in">```</span></span>
-<span id="cb13-104"><a href="#cb13-104" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb13-105"><a href="#cb13-105" aria-hidden="true" tabindex="-1"></a>No audio with trill animation:</span>
-<span id="cb13-106"><a href="#cb13-106" aria-hidden="true" tabindex="-1"></a><span class="in">```python</span></span>
-<span id="cb13-107"><a href="#cb13-107" aria-hidden="true" tabindex="-1"></a>controller.calibrate(<span class="dv">5</span>, audio<span class="op">=</span><span class="va">False</span>, anim_type<span class="op">=</span><span class="st">'trill'</span>)</span>
-<span id="cb13-108"><a href="#cb13-108" aria-hidden="true" tabindex="-1"></a><span class="in">```</span></span>
-<span id="cb13-109"><a href="#cb13-109" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb13-110"><a href="#cb13-110" aria-hidden="true" tabindex="-1"></a>Lines visualization style:</span>
-<span id="cb13-111"><a href="#cb13-111" aria-hidden="true" tabindex="-1"></a><span class="in">```python</span></span>
-<span id="cb13-112"><a href="#cb13-112" aria-hidden="true" tabindex="-1"></a>controller.calibrate(<span class="dv">5</span>, visualization_style<span class="op">=</span><span class="st">'lines'</span>)</span>
-<span id="cb13-113"><a href="#cb13-113" aria-hidden="true" tabindex="-1"></a><span class="in">```</span></span>
-<span id="cb13-114"><a href="#cb13-114" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb13-115"><a href="#cb13-115" aria-hidden="true" tabindex="-1"></a>Complete custom workflow:</span>
-<span id="cb13-116"><a href="#cb13-116" aria-hidden="true" tabindex="-1"></a><span class="in">```python</span></span>
-<span id="cb13-117"><a href="#cb13-117" aria-hidden="true" tabindex="-1"></a><span class="co"># Position participant</span></span>
-<span id="cb13-118"><a href="#cb13-118" aria-hidden="true" tabindex="-1"></a>controller.show_status()</span>
-<span id="cb13-119"><a href="#cb13-119" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb13-120"><a href="#cb13-120" aria-hidden="true" tabindex="-1"></a><span class="co"># Custom calibration</span></span>
-<span id="cb13-121"><a href="#cb13-121" aria-hidden="true" tabindex="-1"></a>success <span class="op">=</span> controller.calibrate(</span>
-<span id="cb13-122"><a href="#cb13-122" aria-hidden="true" tabindex="-1"></a>    calibration_points<span class="op">=</span><span class="dv">9</span>,</span>
-<span id="cb13-123"><a href="#cb13-123" aria-hidden="true" tabindex="-1"></a>    infant_stims<span class="op">=</span>[<span class="st">'stim1.png'</span>, <span class="st">'stim2.png'</span>],</span>
-<span id="cb13-124"><a href="#cb13-124" aria-hidden="true" tabindex="-1"></a>    shuffle<span class="op">=</span><span class="va">True</span>,</span>
-<span id="cb13-125"><a href="#cb13-125" aria-hidden="true" tabindex="-1"></a>    audio<span class="op">=</span><span class="va">True</span>,</span>
-<span id="cb13-126"><a href="#cb13-126" aria-hidden="true" tabindex="-1"></a>    anim_type<span class="op">=</span><span class="st">'zoom'</span>,</span>
-<span id="cb13-127"><a href="#cb13-127" aria-hidden="true" tabindex="-1"></a>    visualization_style<span class="op">=</span><span class="st">'circles'</span></span>
-<span id="cb13-128"><a href="#cb13-128" aria-hidden="true" tabindex="-1"></a>)</span>
-<span id="cb13-129"><a href="#cb13-129" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb13-130"><a href="#cb13-130" aria-hidden="true" tabindex="-1"></a><span class="cf">if</span> success:</span>
-<span id="cb13-131"><a href="#cb13-131" aria-hidden="true" tabindex="-1"></a>    controller.start_recording(<span class="st">'data.h5'</span>)</span>
-<span id="cb13-132"><a href="#cb13-132" aria-hidden="true" tabindex="-1"></a>    <span class="co"># ... run experiment ...</span></span>
-<span id="cb13-133"><a href="#cb13-133" aria-hidden="true" tabindex="-1"></a>    controller.stop_recording()</span>
-<span id="cb13-134"><a href="#cb13-134" aria-hidden="true" tabindex="-1"></a><span class="in">```</span></span>
-<span id="cb13-135"><a href="#cb13-135" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb13-136"><a href="#cb13-136" aria-hidden="true" tabindex="-1"></a><span class="fu">## Notes {.doc-section .doc-section-notes}</span></span>
-<span id="cb13-137"><a href="#cb13-137" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb13-138"><a href="#cb13-138" aria-hidden="true" tabindex="-1"></a><span class="ss">- </span>Calibration uses normalized coordinates <span class="co">[</span><span class="ot">-1, 1</span><span class="co">]</span> where (0, 0) is screen center.</span>
-<span id="cb13-139"><a href="#cb13-139" aria-hidden="true" tabindex="-1"></a><span class="ss">- </span>Stimuli are automatically repeated if fewer than calibration points.</span>
-<span id="cb13-140"><a href="#cb13-140" aria-hidden="true" tabindex="-1"></a><span class="ss">- </span>Animation preserves stimulus aspect ratio automatically.</span>
-<span id="cb13-141"><a href="#cb13-141" aria-hidden="true" tabindex="-1"></a><span class="ss">- </span>In simulation mode, use mouse to simulate gaze position.</span>
-<span id="cb13-142"><a href="#cb13-142" aria-hidden="true" tabindex="-1"></a><span class="ss">- </span>Press number keys (1�9) to select points, SPACE to collect data.</span>
-<span id="cb13-143"><a href="#cb13-143" aria-hidden="true" tabindex="-1"></a><span class="ss">- </span>Press ENTER to view results, ESC to abort.</span>
-<span id="cb13-144"><a href="#cb13-144" aria-hidden="true" tabindex="-1"></a><span class="ss">- </span>After viewing results: ENTER accepts, numbers + SPACE retries selected points.</span>
-<span id="cb13-145"><a href="#cb13-145" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb13-146"><a href="#cb13-146" aria-hidden="true" tabindex="-1"></a><span class="fu">## See Also {.doc-section .doc-section-see-also}</span></span>
-<span id="cb13-147"><a href="#cb13-147" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb13-148"><a href="#cb13-148" aria-hidden="true" tabindex="-1"></a>show_status : Position participant before calibration</span>
-<span id="cb13-149"><a href="#cb13-149" aria-hidden="true" tabindex="-1"></a>save_calibration : Save calibration for later sessions</span>
-<span id="cb13-150"><a href="#cb13-150" aria-hidden="true" tabindex="-1"></a>load_calibration : Load previously saved calibration</span></code><button title="Copy to Clipboard" class="code-copy-button" data-in-quarto-modal=""><i class="bi"></i></button></pre></div>
+<div class="sourceCode" id="cb14" data-shortcodes="false"><pre class="sourceCode markdown code-with-copy"><code class="sourceCode markdown"><span id="cb14-1"><a href="#cb14-1" aria-hidden="true" tabindex="-1"></a><span class="fu"># ETracker.calibrate { #DeToX.ETracker.calibrate }</span></span>
+<span id="cb14-2"><a href="#cb14-2" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb14-3"><a href="#cb14-3" aria-hidden="true" tabindex="-1"></a><span class="in">```python</span></span>
+<span id="cb14-4"><a href="#cb14-4" aria-hidden="true" tabindex="-1"></a>ETracker.calibrate(</span>
+<span id="cb14-5"><a href="#cb14-5" aria-hidden="true" tabindex="-1"></a>    calibration_points<span class="op">=</span><span class="dv">5</span>,</span>
+<span id="cb14-6"><a href="#cb14-6" aria-hidden="true" tabindex="-1"></a>    infant_stims<span class="op">=</span><span class="va">True</span>,</span>
+<span id="cb14-7"><a href="#cb14-7" aria-hidden="true" tabindex="-1"></a>    shuffle<span class="op">=</span><span class="va">True</span>,</span>
+<span id="cb14-8"><a href="#cb14-8" aria-hidden="true" tabindex="-1"></a>    audio<span class="op">=</span><span class="va">True</span>,</span>
+<span id="cb14-9"><a href="#cb14-9" aria-hidden="true" tabindex="-1"></a>    anim_type<span class="op">=</span><span class="st">'zoom'</span>,</span>
+<span id="cb14-10"><a href="#cb14-10" aria-hidden="true" tabindex="-1"></a>    stim_size<span class="op">=</span><span class="st">'big'</span>,</span>
+<span id="cb14-11"><a href="#cb14-11" aria-hidden="true" tabindex="-1"></a>    visualization_style<span class="op">=</span><span class="st">'circles'</span>,</span>
+<span id="cb14-12"><a href="#cb14-12" aria-hidden="true" tabindex="-1"></a>)</span>
+<span id="cb14-13"><a href="#cb14-13" aria-hidden="true" tabindex="-1"></a><span class="in">```</span></span>
+<span id="cb14-14"><a href="#cb14-14" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb14-15"><a href="#cb14-15" aria-hidden="true" tabindex="-1"></a>Run infant-friendly calibration procedure.</span>
+<span id="cb14-16"><a href="#cb14-16" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb14-17"><a href="#cb14-17" aria-hidden="true" tabindex="-1"></a>Performs eye tracker calibration using animated stimuli to engage infant </span>
+<span id="cb14-18"><a href="#cb14-18" aria-hidden="true" tabindex="-1"></a>participants. The calibration establishes the mapping between eye position </span>
+<span id="cb14-19"><a href="#cb14-19" aria-hidden="true" tabindex="-1"></a>and screen coordinates, which is essential for accurate gaze data collection.</span>
+<span id="cb14-20"><a href="#cb14-20" aria-hidden="true" tabindex="-1"></a>Automatically selects the appropriate calibration method based on operating </span>
+<span id="cb14-21"><a href="#cb14-21" aria-hidden="true" tabindex="-1"></a>mode (real eye tracker vs. mouse simulation).</span>
+<span id="cb14-22"><a href="#cb14-22" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb14-23"><a href="#cb14-23" aria-hidden="true" tabindex="-1"></a><span class="fu">## Parameters {.doc-section .doc-section-parameters}</span></span>
+<span id="cb14-24"><a href="#cb14-24" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb14-25"><a href="#cb14-25" aria-hidden="true" tabindex="-1"></a>+---------------------+---------------------------------------------------------------------------------------------------------------------+----------------------------------------------------------------------------------------------------------------------------------------------------+-------------+</span>
+<span id="cb14-26"><a href="#cb14-26" aria-hidden="true" tabindex="-1"></a>| Name                | Type                                                                                                                | Description                                                                                                                                        | Default     |</span>
+<span id="cb14-27"><a href="#cb14-27" aria-hidden="true" tabindex="-1"></a>+=====================+=====================================================================================================================+====================================================================================================================================================+=============+</span>
+<span id="cb14-28"><a href="#cb14-28" aria-hidden="true" tabindex="-1"></a>| calibration_points  | int or list of tuple                                                                                                | Calibration pattern specification.                                                                                                                 | <span class="in">`5`</span>         |</span>
+<span id="cb14-29"><a href="#cb14-29" aria-hidden="true" tabindex="-1"></a>|                     |                                                                                                                     |                                                                                                                                                    |             |</span>
+<span id="cb14-30"><a href="#cb14-30" aria-hidden="true" tabindex="-1"></a>|                     |                                                                                                                     |  - Use **5** for the standard 5-point pattern (4 corners + center; default).                                                                       |             |</span>
+<span id="cb14-31"><a href="#cb14-31" aria-hidden="true" tabindex="-1"></a>|                     |                                                                                                                     |  - Use **9** for a comprehensive 9-point pattern (3x3 grid).                                                                                       |             |</span>
+<span id="cb14-32"><a href="#cb14-32" aria-hidden="true" tabindex="-1"></a>|                     |                                                                                                                     |  - Alternatively, provide a **list of tuples** with custom points in normalized                                                                    |             |</span>
+<span id="cb14-33"><a href="#cb14-33" aria-hidden="true" tabindex="-1"></a>|                     |                                                                                                                     |  - coordinates <span class="co">[</span><span class="ot">-1, 1</span><span class="co">]</span>. Example: ``<span class="co">[</span><span class="ot">(-0.4, 0.4), (0.4, 0.4), (0.0, 0.0)</span><span class="co">]</span>``.                                                                        |             |</span>
+<span id="cb14-34"><a href="#cb14-34" aria-hidden="true" tabindex="-1"></a>+---------------------+---------------------------------------------------------------------------------------------------------------------+----------------------------------------------------------------------------------------------------------------------------------------------------+-------------+</span>
+<span id="cb14-35"><a href="#cb14-35" aria-hidden="true" tabindex="-1"></a>| infant_stims        | True or str or list or visual stimulus                                                                              | Calibration stimulus specification. Accepts multiple formats                                                                                       | <span class="in">`True`</span>      |</span>
+<span id="cb14-36"><a href="#cb14-36" aria-hidden="true" tabindex="-1"></a>|                     |                                                                                                                     |                                                                                                                                                    |             |</span>
+<span id="cb14-37"><a href="#cb14-37" aria-hidden="true" tabindex="-1"></a>|                     |                                                                                                                     |  - **True** uses built-in stimuli from the package (default);                                                                                      |             |</span>
+<span id="cb14-38"><a href="#cb14-38" aria-hidden="true" tabindex="-1"></a>|                     |                                                                                                                     |  - **False** uses a default blue square;                                                                                                           |             |</span>
+<span id="cb14-39"><a href="#cb14-39" aria-hidden="true" tabindex="-1"></a>|                     |                                                                                                                     |  - a **str** specifies a single image file path (e.g., ``'stimulus.png'``);                                                                        |             |</span>
+<span id="cb14-40"><a href="#cb14-40" aria-hidden="true" tabindex="-1"></a>|                     |                                                                                                                     |  - a **list of str** provides multiple image paths;                                                                                                |             |</span>
+<span id="cb14-41"><a href="#cb14-41" aria-hidden="true" tabindex="-1"></a>|                     |                                                                                                                     |  - a **PsychoPy visual stimulus** (e.g., Circle, Rect, Polygon, ImageStim, ShapeStim)                                                              |             |</span>
+<span id="cb14-42"><a href="#cb14-42" aria-hidden="true" tabindex="-1"></a>|                     |                                                                                                                     | can be used as a single object;                                                                                                                    |             |</span>
+<span id="cb14-43"><a href="#cb14-43" aria-hidden="true" tabindex="-1"></a>|                     |                                                                                                                     |  - or a **list of visual stimuli** may be provided.                                                                                                |             |</span>
+<span id="cb14-44"><a href="#cb14-44" aria-hidden="true" tabindex="-1"></a>|                     |                                                                                                                     | If fewer stimuli than calibration points are given, they are automatically                                                                         |             |</span>
+<span id="cb14-45"><a href="#cb14-45" aria-hidden="true" tabindex="-1"></a>|                     |                                                                                                                     | repeated and optionally shuffled to cover all points.                                                                                              |             |</span>
+<span id="cb14-46"><a href="#cb14-46" aria-hidden="true" tabindex="-1"></a>|                     |                                                                                                                     | Supported types: ImageStim, Circle, Rect, Polygon, ShapeStim.                                                                                      |             |</span>
+<span id="cb14-47"><a href="#cb14-47" aria-hidden="true" tabindex="-1"></a>|                     |                                                                                                                     | TextStim and MovieStim are not supported.                                                                                                          |             |</span>
+<span id="cb14-48"><a href="#cb14-48" aria-hidden="true" tabindex="-1"></a>+---------------------+---------------------------------------------------------------------------------------------------------------------+----------------------------------------------------------------------------------------------------------------------------------------------------+-------------+</span>
+<span id="cb14-49"><a href="#cb14-49" aria-hidden="true" tabindex="-1"></a>| shuffle             | <span class="co">[</span><span class="ot">bool</span><span class="co">](`bool`)</span>                                                                                                      | Whether to randomize stimulus presentation order after any necessary  repetition. Helps prevent habituation to stimulus sequence. Default is True. | <span class="in">`True`</span>      |</span>
+<span id="cb14-50"><a href="#cb14-50" aria-hidden="true" tabindex="-1"></a>+---------------------+---------------------------------------------------------------------------------------------------------------------+----------------------------------------------------------------------------------------------------------------------------------------------------+-------------+</span>
+<span id="cb14-51"><a href="#cb14-51" aria-hidden="true" tabindex="-1"></a>| audio               | True or False or <span class="co">[</span><span class="ot">None</span><span class="co">](`None`)</span> or <span class="co">[</span><span class="ot">psychopy</span><span class="co">](`psychopy`)</span>.<span class="co">[</span><span class="ot">sound</span><span class="co">](`psychopy.sound`)</span>.<span class="co">[</span><span class="ot">Sound</span><span class="co">](`psychopy.sound.Sound`)</span> | Controls attention-getting audio during calibration:                                                                                               | <span class="in">`True`</span>      |</span>
+<span id="cb14-52"><a href="#cb14-52" aria-hidden="true" tabindex="-1"></a>|                     |                                                                                                                     |                                                                                                                                                    |             |</span>
+<span id="cb14-53"><a href="#cb14-53" aria-hidden="true" tabindex="-1"></a>|                     |                                                                                                                     |  -**True** uses the built-in looping calibration sound (default).                                                                                  |             |</span>
+<span id="cb14-54"><a href="#cb14-54" aria-hidden="true" tabindex="-1"></a>|                     |                                                                                                                     |  -**False** or **None** disables audio.                                                                                                            |             |</span>
+<span id="cb14-55"><a href="#cb14-55" aria-hidden="true" tabindex="-1"></a>|                     |                                                                                                                     | A **psychopy.sound.Sound** object may be provided for custom audio                                                                                 |             |</span>
+<span id="cb14-56"><a href="#cb14-56" aria-hidden="true" tabindex="-1"></a>|                     |                                                                                                                     | (ensure it is configured appropriately, e.g., ``loops=-1`` for continuous looping).                                                                |             |</span>
+<span id="cb14-57"><a href="#cb14-57" aria-hidden="true" tabindex="-1"></a>|                     |                                                                                                                     | Audio plays when a calibration point is selected and fades out during data collection.                                                             |             |</span>
+<span id="cb14-58"><a href="#cb14-58" aria-hidden="true" tabindex="-1"></a>+---------------------+---------------------------------------------------------------------------------------------------------------------+----------------------------------------------------------------------------------------------------------------------------------------------------+-------------+</span>
+<span id="cb14-59"><a href="#cb14-59" aria-hidden="true" tabindex="-1"></a>| anim_type           | (<span class="co">[</span><span class="ot">zoom</span><span class="co">](`zoom`)</span>, <span class="co">[</span><span class="ot">trill</span><span class="co">](`trill`)</span>)                                                                                  | Animation style for calibration stimuli:                                                                                                           | <span class="in">`'zoom'`</span>    |</span>
+<span id="cb14-60"><a href="#cb14-60" aria-hidden="true" tabindex="-1"></a>|                     |                                                                                                                     |                                                                                                                                                    |             |</span>
+<span id="cb14-61"><a href="#cb14-61" aria-hidden="true" tabindex="-1"></a>|                     |                                                                                                                     |  - **'zoom'** applies smooth size oscillation using a cosine function (default).                                                                   |             |</span>
+<span id="cb14-62"><a href="#cb14-62" aria-hidden="true" tabindex="-1"></a>|                     |                                                                                                                     |  - **'trill'** uses rapid rotation with intermittent pauses.                                                                                       |             |</span>
+<span id="cb14-63"><a href="#cb14-63" aria-hidden="true" tabindex="-1"></a>+---------------------+---------------------------------------------------------------------------------------------------------------------+----------------------------------------------------------------------------------------------------------------------------------------------------+-------------+</span>
+<span id="cb14-64"><a href="#cb14-64" aria-hidden="true" tabindex="-1"></a>| stim_size           | (<span class="co">[</span><span class="ot">big</span><span class="co">](`big`)</span>, <span class="co">[</span><span class="ot">small</span><span class="co">](`small`)</span>)                                                                                    | Size preset for calibration stimuli:                                                                                                               | <span class="in">`'big'`</span>     |</span>
+<span id="cb14-65"><a href="#cb14-65" aria-hidden="true" tabindex="-1"></a>|                     |                                                                                                                     |                                                                                                                                                    |             |</span>
+<span id="cb14-66"><a href="#cb14-66" aria-hidden="true" tabindex="-1"></a>|                     |                                                                                                                     |  - **'big'** uses larger stimuli recommended for infants and children (default).                                                                   |             |</span>
+<span id="cb14-67"><a href="#cb14-67" aria-hidden="true" tabindex="-1"></a>|                     |                                                                                                                     |  -**'small'** uses smaller stimuli for adults.                                                                                                     |             |</span>
+<span id="cb14-68"><a href="#cb14-68" aria-hidden="true" tabindex="-1"></a>+---------------------+---------------------------------------------------------------------------------------------------------------------+----------------------------------------------------------------------------------------------------------------------------------------------------+-------------+</span>
+<span id="cb14-69"><a href="#cb14-69" aria-hidden="true" tabindex="-1"></a>| visualization_style | (<span class="co">[</span><span class="ot">circles</span><span class="co">](`circles`)</span>, <span class="co">[</span><span class="ot">lines</span><span class="co">](`lines`)</span>)                                                                            | How to display calibration results:                                                                                                                | <span class="in">`'circles'`</span> |</span>
+<span id="cb14-70"><a href="#cb14-70" aria-hidden="true" tabindex="-1"></a>|                     |                                                                                                                     |                                                                                                                                                    |             |</span>
+<span id="cb14-71"><a href="#cb14-71" aria-hidden="true" tabindex="-1"></a>|                     |                                                                                                                     |  - **'circles'** shows small filled circles at each gaze sample position.                                                                          |             |</span>
+<span id="cb14-72"><a href="#cb14-72" aria-hidden="true" tabindex="-1"></a>|                     |                                                                                                                     |  - **'lines'** draws lines from targets to gaze samples.                                                                                           |             |</span>
+<span id="cb14-73"><a href="#cb14-73" aria-hidden="true" tabindex="-1"></a>+---------------------+---------------------------------------------------------------------------------------------------------------------+----------------------------------------------------------------------------------------------------------------------------------------------------+-------------+</span>
+<span id="cb14-74"><a href="#cb14-74" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb14-75"><a href="#cb14-75" aria-hidden="true" tabindex="-1"></a><span class="fu">## Returns {.doc-section .doc-section-returns}</span></span>
+<span id="cb14-76"><a href="#cb14-76" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb14-77"><a href="#cb14-77" aria-hidden="true" tabindex="-1"></a>+--------+----------------+-------------------------------------------------------------------------------------------------------------------------------------------+</span>
+<span id="cb14-78"><a href="#cb14-78" aria-hidden="true" tabindex="-1"></a>| Name   | Type           | Description                                                                                                                               |</span>
+<span id="cb14-79"><a href="#cb14-79" aria-hidden="true" tabindex="-1"></a>+========+================+===========================================================================================================================================+</span>
+<span id="cb14-80"><a href="#cb14-80" aria-hidden="true" tabindex="-1"></a>|        | <span class="co">[</span><span class="ot">bool</span><span class="co">](`bool`)</span> | True if calibration completed successfully and was accepted by the user.  False if calibration was aborted (e.g., via ESC key) or failed. |</span>
+<span id="cb14-81"><a href="#cb14-81" aria-hidden="true" tabindex="-1"></a>+--------+----------------+-------------------------------------------------------------------------------------------------------------------------------------------+</span>
+<span id="cb14-82"><a href="#cb14-82" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb14-83"><a href="#cb14-83" aria-hidden="true" tabindex="-1"></a><span class="fu">## Raises {.doc-section .doc-section-raises}</span></span>
+<span id="cb14-84"><a href="#cb14-84" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb14-85"><a href="#cb14-85" aria-hidden="true" tabindex="-1"></a>+----------------------------+---------------------------------------------------------------------------------------------------------------------------------------------------------------------------------+</span>
+<span id="cb14-86"><a href="#cb14-86" aria-hidden="true" tabindex="-1"></a>| Type                       | Description                                                                                                                                                                     |</span>
+<span id="cb14-87"><a href="#cb14-87" aria-hidden="true" tabindex="-1"></a>+============================+=================================================================================================================================================================================+</span>
+<span id="cb14-88"><a href="#cb14-88" aria-hidden="true" tabindex="-1"></a>| <span class="co">[</span><span class="ot">ValueError</span><span class="co">](`ValueError`)</span> | If <span class="in">`calibration_points`</span> is not 5, 9, or a valid list of coordinate tuples;  if <span class="in">`visualization_style`</span> is not 'circles' or 'lines';  or if <span class="in">`infant_stims`</span> format is unrecognized. |</span>
+<span id="cb14-89"><a href="#cb14-89" aria-hidden="true" tabindex="-1"></a>+----------------------------+---------------------------------------------------------------------------------------------------------------------------------------------------------------------------------+</span>
+<span id="cb14-90"><a href="#cb14-90" aria-hidden="true" tabindex="-1"></a>| <span class="co">[</span><span class="ot">TypeError</span><span class="co">](`TypeError`)</span>   | If pre-loaded stimuli include unsupported types (e.g., TextStim, MovieStim).                                                                                                    |</span>
+<span id="cb14-91"><a href="#cb14-91" aria-hidden="true" tabindex="-1"></a>+----------------------------+---------------------------------------------------------------------------------------------------------------------------------------------------------------------------------+</span>
+<span id="cb14-92"><a href="#cb14-92" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb14-93"><a href="#cb14-93" aria-hidden="true" tabindex="-1"></a><span class="fu">## Examples {.doc-section .doc-section-examples}</span></span>
+<span id="cb14-94"><a href="#cb14-94" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb14-95"><a href="#cb14-95" aria-hidden="true" tabindex="-1"></a><span class="fu">### Calibration Point Patterns</span></span>
+<span id="cb14-96"><a href="#cb14-96" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb14-97"><a href="#cb14-97" aria-hidden="true" tabindex="-1"></a><span class="fu">#### Standard 5-point calibration</span></span>
+<span id="cb14-98"><a href="#cb14-98" aria-hidden="true" tabindex="-1"></a><span class="in">```python</span></span>
+<span id="cb14-99"><a href="#cb14-99" aria-hidden="true" tabindex="-1"></a>    controller.calibrate(<span class="dv">5</span>)</span>
+<span id="cb14-100"><a href="#cb14-100" aria-hidden="true" tabindex="-1"></a><span class="in">```</span></span>
+<span id="cb14-101"><a href="#cb14-101" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb14-102"><a href="#cb14-102" aria-hidden="true" tabindex="-1"></a><span class="fu">#### Comprehensive 9-point calibration</span></span>
+<span id="cb14-103"><a href="#cb14-103" aria-hidden="true" tabindex="-1"></a><span class="in">```python</span></span>
+<span id="cb14-104"><a href="#cb14-104" aria-hidden="true" tabindex="-1"></a>    controller.calibrate(<span class="dv">9</span>)</span>
+<span id="cb14-105"><a href="#cb14-105" aria-hidden="true" tabindex="-1"></a><span class="in">```</span></span>
+<span id="cb14-106"><a href="#cb14-106" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb14-107"><a href="#cb14-107" aria-hidden="true" tabindex="-1"></a><span class="fu">#### Custom calibration points</span></span>
+<span id="cb14-108"><a href="#cb14-108" aria-hidden="true" tabindex="-1"></a><span class="in">```python</span></span>
+<span id="cb14-109"><a href="#cb14-109" aria-hidden="true" tabindex="-1"></a>    custom_points <span class="op">=</span> [</span>
+<span id="cb14-110"><a href="#cb14-110" aria-hidden="true" tabindex="-1"></a>        (<span class="fl">0.0</span>, <span class="fl">0.0</span>),      <span class="co"># Center</span></span>
+<span id="cb14-111"><a href="#cb14-111" aria-hidden="true" tabindex="-1"></a>        (<span class="op">-</span><span class="fl">0.5</span>, <span class="fl">0.5</span>),     <span class="co"># Top-left</span></span>
+<span id="cb14-112"><a href="#cb14-112" aria-hidden="true" tabindex="-1"></a>        (<span class="fl">0.5</span>, <span class="fl">0.5</span>),      <span class="co"># Top-right</span></span>
+<span id="cb14-113"><a href="#cb14-113" aria-hidden="true" tabindex="-1"></a>        (<span class="op">-</span><span class="fl">0.5</span>, <span class="op">-</span><span class="fl">0.5</span>),    <span class="co"># Bottom-left</span></span>
+<span id="cb14-114"><a href="#cb14-114" aria-hidden="true" tabindex="-1"></a>        (<span class="fl">0.5</span>, <span class="op">-</span><span class="fl">0.5</span>)      <span class="co"># Bottom-right</span></span>
+<span id="cb14-115"><a href="#cb14-115" aria-hidden="true" tabindex="-1"></a>    ]</span>
+<span id="cb14-116"><a href="#cb14-116" aria-hidden="true" tabindex="-1"></a>    controller.calibrate(custom_points)</span>
+<span id="cb14-117"><a href="#cb14-117" aria-hidden="true" tabindex="-1"></a><span class="in">```</span></span>
+<span id="cb14-118"><a href="#cb14-118" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb14-119"><a href="#cb14-119" aria-hidden="true" tabindex="-1"></a><span class="fu">### Stimulus Options</span></span>
+<span id="cb14-120"><a href="#cb14-120" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb14-121"><a href="#cb14-121" aria-hidden="true" tabindex="-1"></a><span class="fu">#### Single image file</span></span>
+<span id="cb14-122"><a href="#cb14-122" aria-hidden="true" tabindex="-1"></a><span class="in">```python</span></span>
+<span id="cb14-123"><a href="#cb14-123" aria-hidden="true" tabindex="-1"></a>    controller.calibrate(<span class="dv">5</span>, infant_stims<span class="op">=</span><span class="st">'my_stimulus.png'</span>)</span>
+<span id="cb14-124"><a href="#cb14-124" aria-hidden="true" tabindex="-1"></a><span class="in">```</span></span>
+<span id="cb14-125"><a href="#cb14-125" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb14-126"><a href="#cb14-126" aria-hidden="true" tabindex="-1"></a><span class="fu">#### Multiple image files</span></span>
+<span id="cb14-127"><a href="#cb14-127" aria-hidden="true" tabindex="-1"></a><span class="in">```python</span></span>
+<span id="cb14-128"><a href="#cb14-128" aria-hidden="true" tabindex="-1"></a>    controller.calibrate(<span class="dv">5</span>, infant_stims<span class="op">=</span>[<span class="st">'stim1.png'</span>, <span class="st">'stim2.png'</span>, <span class="st">'stim3.png'</span>])</span>
+<span id="cb14-129"><a href="#cb14-129" aria-hidden="true" tabindex="-1"></a><span class="in">```</span></span>
+<span id="cb14-130"><a href="#cb14-130" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb14-131"><a href="#cb14-131" aria-hidden="true" tabindex="-1"></a><span class="fu">#### Single shape stimulus</span></span>
+<span id="cb14-132"><a href="#cb14-132" aria-hidden="true" tabindex="-1"></a><span class="in">```python</span></span>
+<span id="cb14-133"><a href="#cb14-133" aria-hidden="true" tabindex="-1"></a>    red_square <span class="op">=</span> visual.Rect(win, size<span class="op">=</span><span class="fl">0.08</span>, fillColor<span class="op">=</span><span class="st">'red'</span>, units<span class="op">=</span><span class="st">'height'</span>)</span>
+<span id="cb14-134"><a href="#cb14-134" aria-hidden="true" tabindex="-1"></a>    controller.calibrate(<span class="dv">5</span>, infant_stims<span class="op">=</span>red_square)</span>
+<span id="cb14-135"><a href="#cb14-135" aria-hidden="true" tabindex="-1"></a><span class="in">```</span></span>
+<span id="cb14-136"><a href="#cb14-136" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb14-137"><a href="#cb14-137" aria-hidden="true" tabindex="-1"></a><span class="fu">#### Multiple shape stimuli</span></span>
+<span id="cb14-138"><a href="#cb14-138" aria-hidden="true" tabindex="-1"></a><span class="in">```python</span></span>
+<span id="cb14-139"><a href="#cb14-139" aria-hidden="true" tabindex="-1"></a>    shapes <span class="op">=</span> [</span>
+<span id="cb14-140"><a href="#cb14-140" aria-hidden="true" tabindex="-1"></a>        visual.Circle(win, radius<span class="op">=</span><span class="fl">0.04</span>, fillColor<span class="op">=</span><span class="st">'red'</span>, units<span class="op">=</span><span class="st">'height'</span>),</span>
+<span id="cb14-141"><a href="#cb14-141" aria-hidden="true" tabindex="-1"></a>        visual.Rect(win, size<span class="op">=</span><span class="fl">0.08</span>, fillColor<span class="op">=</span><span class="st">'blue'</span>, units<span class="op">=</span><span class="st">'height'</span>),</span>
+<span id="cb14-142"><a href="#cb14-142" aria-hidden="true" tabindex="-1"></a>        visual.Polygon(win, edges<span class="op">=</span><span class="dv">6</span>, radius<span class="op">=</span><span class="fl">0.04</span>, fillColor<span class="op">=</span><span class="st">'green'</span>, units<span class="op">=</span><span class="st">'height'</span>)</span>
+<span id="cb14-143"><a href="#cb14-143" aria-hidden="true" tabindex="-1"></a>    ]</span>
+<span id="cb14-144"><a href="#cb14-144" aria-hidden="true" tabindex="-1"></a>    controller.calibrate(<span class="dv">5</span>, infant_stims<span class="op">=</span>shapes, shuffle<span class="op">=</span><span class="va">True</span>)</span>
+<span id="cb14-145"><a href="#cb14-145" aria-hidden="true" tabindex="-1"></a><span class="in">```</span></span>
+<span id="cb14-146"><a href="#cb14-146" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb14-147"><a href="#cb14-147" aria-hidden="true" tabindex="-1"></a><span class="fu">### Animation and Audio</span></span>
+<span id="cb14-148"><a href="#cb14-148" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb14-149"><a href="#cb14-149" aria-hidden="true" tabindex="-1"></a><span class="fu">#### Custom audio</span></span>
+<span id="cb14-150"><a href="#cb14-150" aria-hidden="true" tabindex="-1"></a><span class="in">```python</span></span>
+<span id="cb14-151"><a href="#cb14-151" aria-hidden="true" tabindex="-1"></a>    <span class="im">from</span> psychopy <span class="im">import</span> sound</span>
+<span id="cb14-152"><a href="#cb14-152" aria-hidden="true" tabindex="-1"></a>    my_sound <span class="op">=</span> sound.Sound(<span class="st">'custom_beep.wav'</span>, loops<span class="op">=-</span><span class="dv">1</span>)</span>
+<span id="cb14-153"><a href="#cb14-153" aria-hidden="true" tabindex="-1"></a>    controller.calibrate(<span class="dv">5</span>, audio<span class="op">=</span>my_sound)</span>
+<span id="cb14-154"><a href="#cb14-154" aria-hidden="true" tabindex="-1"></a><span class="in">```</span></span>
+<span id="cb14-155"><a href="#cb14-155" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb14-156"><a href="#cb14-156" aria-hidden="true" tabindex="-1"></a><span class="fu">#### Trill animation without audio</span></span>
+<span id="cb14-157"><a href="#cb14-157" aria-hidden="true" tabindex="-1"></a><span class="in">```python</span></span>
+<span id="cb14-158"><a href="#cb14-158" aria-hidden="true" tabindex="-1"></a>    controller.calibrate(<span class="dv">5</span>, audio<span class="op">=</span><span class="va">False</span>, anim_type<span class="op">=</span><span class="st">'trill'</span>)</span>
+<span id="cb14-159"><a href="#cb14-159" aria-hidden="true" tabindex="-1"></a><span class="in">```</span></span>
+<span id="cb14-160"><a href="#cb14-160" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb14-161"><a href="#cb14-161" aria-hidden="true" tabindex="-1"></a><span class="fu">### Visualization Styles</span></span>
+<span id="cb14-162"><a href="#cb14-162" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb14-163"><a href="#cb14-163" aria-hidden="true" tabindex="-1"></a><span class="fu">#### Lines visualization</span></span>
+<span id="cb14-164"><a href="#cb14-164" aria-hidden="true" tabindex="-1"></a><span class="in">```python</span></span>
+<span id="cb14-165"><a href="#cb14-165" aria-hidden="true" tabindex="-1"></a>    controller.calibrate(<span class="dv">5</span>, visualization_style<span class="op">=</span><span class="st">'lines'</span>)</span>
+<span id="cb14-166"><a href="#cb14-166" aria-hidden="true" tabindex="-1"></a><span class="in">```</span></span>
+<span id="cb14-167"><a href="#cb14-167" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb14-168"><a href="#cb14-168" aria-hidden="true" tabindex="-1"></a><span class="fu">#### Circles visualization with small stimuli</span></span>
+<span id="cb14-169"><a href="#cb14-169" aria-hidden="true" tabindex="-1"></a><span class="in">```python</span></span>
+<span id="cb14-170"><a href="#cb14-170" aria-hidden="true" tabindex="-1"></a>    controller.calibrate(<span class="dv">5</span>, stim_size<span class="op">=</span><span class="st">'small'</span>, visualization_style<span class="op">=</span><span class="st">'circles'</span>)</span>
+<span id="cb14-171"><a href="#cb14-171" aria-hidden="true" tabindex="-1"></a><span class="in">```</span></span>
+<span id="cb14-172"><a href="#cb14-172" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb14-173"><a href="#cb14-173" aria-hidden="true" tabindex="-1"></a><span class="fu">### Complete Workflows</span></span>
+<span id="cb14-174"><a href="#cb14-174" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb14-175"><a href="#cb14-175" aria-hidden="true" tabindex="-1"></a><span class="fu">#### Full calibration workflow</span></span>
+<span id="cb14-176"><a href="#cb14-176" aria-hidden="true" tabindex="-1"></a><span class="in">```python</span></span>
+<span id="cb14-177"><a href="#cb14-177" aria-hidden="true" tabindex="-1"></a>    <span class="co"># Position participant</span></span>
+<span id="cb14-178"><a href="#cb14-178" aria-hidden="true" tabindex="-1"></a>    controller.show_status()</span>
+<span id="cb14-179"><a href="#cb14-179" aria-hidden="true" tabindex="-1"></a>    </span>
+<span id="cb14-180"><a href="#cb14-180" aria-hidden="true" tabindex="-1"></a>    <span class="co"># Run calibration</span></span>
+<span id="cb14-181"><a href="#cb14-181" aria-hidden="true" tabindex="-1"></a>    success <span class="op">=</span> controller.calibrate(</span>
+<span id="cb14-182"><a href="#cb14-182" aria-hidden="true" tabindex="-1"></a>        calibration_points<span class="op">=</span><span class="dv">9</span>,</span>
+<span id="cb14-183"><a href="#cb14-183" aria-hidden="true" tabindex="-1"></a>        infant_stims<span class="op">=</span>[<span class="st">'stim1.png'</span>, <span class="st">'stim2.png'</span>],</span>
+<span id="cb14-184"><a href="#cb14-184" aria-hidden="true" tabindex="-1"></a>        shuffle<span class="op">=</span><span class="va">True</span>,</span>
+<span id="cb14-185"><a href="#cb14-185" aria-hidden="true" tabindex="-1"></a>        audio<span class="op">=</span><span class="va">True</span>,</span>
+<span id="cb14-186"><a href="#cb14-186" aria-hidden="true" tabindex="-1"></a>        anim_type<span class="op">=</span><span class="st">'zoom'</span>,</span>
+<span id="cb14-187"><a href="#cb14-187" aria-hidden="true" tabindex="-1"></a>        visualization_style<span class="op">=</span><span class="st">'circles'</span></span>
+<span id="cb14-188"><a href="#cb14-188" aria-hidden="true" tabindex="-1"></a>    )</span>
+<span id="cb14-189"><a href="#cb14-189" aria-hidden="true" tabindex="-1"></a>    </span>
+<span id="cb14-190"><a href="#cb14-190" aria-hidden="true" tabindex="-1"></a>    <span class="cf">if</span> success:</span>
+<span id="cb14-191"><a href="#cb14-191" aria-hidden="true" tabindex="-1"></a>        controller.start_recording(<span class="st">'data.h5'</span>)</span>
+<span id="cb14-192"><a href="#cb14-192" aria-hidden="true" tabindex="-1"></a>        <span class="co"># ... run experiment ...</span></span>
+<span id="cb14-193"><a href="#cb14-193" aria-hidden="true" tabindex="-1"></a>        controller.stop_recording()</span>
+<span id="cb14-194"><a href="#cb14-194" aria-hidden="true" tabindex="-1"></a><span class="in">```</span></span></code><button title="Copy to Clipboard" class="code-copy-button" data-in-quarto-modal=""><i class="bi"></i></button></pre></div>
 </div></div></div></div></div>
 </div> <!-- /content -->
 <footer class="footer">

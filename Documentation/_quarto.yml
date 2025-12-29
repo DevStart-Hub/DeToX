@@ -21,7 +21,7 @@ website:
   announcement: 
     icon: exclamation-triangle
     dismissable: true
-    content: "**Development Version** - DeToX is currently in beta. Features may change without notice. Thoroughly test before using in production studies."
+    content: "**Development Version** - DeToX is currently in beta. Features may change without notice. Thoroughly test before using."
     type: danger
     position: below-navbar
 
@@ -89,7 +89,7 @@ format:
       - sandstone
       - styles.scss  # your custom SCSS file
     toc: true
-    toc-expand: 4   
+    toc-expand: 6   
 
     # Font
     mainfont: 'Arial'
@@ -126,6 +126,7 @@ quartodoc:
   title: Reference
   package: DeToX
 
+
   style: pkgdown
   parser: numpy
   renderer:
@@ -157,6 +158,7 @@ quartodoc:
         - ETracker.stop_recording
         - ETracker.record_event
         - ETracker.save_data
+        - ETracker.set_eyetracking_settings
 
     - subtitle: Calibration
       desc: |
@@ -198,8 +200,7 @@ quartodoc:
         - psychopy_to_pixels
         - get_tobii_pos
         - pix2tobii
-        - tobii2pix
-        - get_psychopy_pos_from_trackbox
+        - get_psychopy_pos_from_user_position
 
     - title: Utilities
       desc: |

@@ -9,6 +9,7 @@ website:
         - api/ETracker.stop_recording.qmd
         - api/ETracker.record_event.qmd
         - api/ETracker.save_data.qmd
+        - api/ETracker.set_eyetracking_settings.qmd
         section: Control the Recording
       - contents:
         - api/ETracker.show_status.qmd
@@ -32,8 +33,7 @@ website:
       - api/psychopy_to_pixels.qmd
       - api/get_tobii_pos.qmd
       - api/pix2tobii.qmd
-      - api/tobii2pix.qmd
-      - api/get_psychopy_pos_from_trackbox.qmd
+      - api/get_psychopy_pos_from_user_position.qmd
       section: Coordinate Conversion
     - contents:
       - api/NicePrint.qmd

@@ -8,41 +8,60 @@ Convert Tobii ADCS coordinates to PsychoPy coordinates.
 
 Transforms eye tracker coordinates from Tobii's Active Display Coordinate System
 (ADCS) to PsychoPy's coordinate system. ADCS uses normalized coordinates where
-(0,0) is top-left and (1,1) is bottom-right, while PsychoPy typically uses
-centered coordinates with various unit systems.
+(0,0) is top-left and (1,1) is bottom-right. This function is critical for
+correctly positioning gaze data within PsychoPy stimuli.
 
-This function is critical for correctly positioning gaze data within PsychoPy
-stimuli and for accurate visualization of eye tracking results.
+Supports both single coordinate conversion and vectorized batch conversion
+for efficient processing of recorded gaze data.
 
 ## Parameters {.doc-section .doc-section-parameters}
 
-| Name   | Type                                                                                  | Description                                                                                                                                                                                                                              | Default    |
-|--------|---------------------------------------------------------------------------------------|------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------|------------|
-| win    | [psychopy](`psychopy`).[visual](`psychopy.visual`).[Window](`psychopy.visual.Window`) | The PsychoPy window which provides information about units and size. Window properties determine the target coordinate system.                                                                                                           | _required_ |
-| p      | [tuple](`tuple`) or [array](`array`) - [like](`like`)                                 | The Tobii ADCS coordinates to convert. Can be: - Single coordinate: (x, y) tuple - Multiple coordinates: (N, 2) array where N is number of samples Values should be in range [0, 1] where (0, 0) is top-left and (1, 1) is bottom-right. | _required_ |
-| units  | [str](`str`)                                                                          | The target units for the PsychoPy coordinates. If None, uses the window's default units. Supported: 'norm', 'height', 'pix', 'cm', 'deg', 'degFlat', 'degFlatPos'.                                                                       | `None`     |
++--------+---------------------------------------------------------------------------------------+--------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------+------------+
+| Name   | Type                                                                                  | Description                                                                                                                                                                                      | Default    |
++========+=======================================================================================+==================================================================================================================================================================================================+============+
+| win    | [psychopy](`psychopy`).[visual](`psychopy.visual`).[Window](`psychopy.visual.Window`) | The PsychoPy window providing unit and size information.                                                                                                                                         | _required_ |
++--------+---------------------------------------------------------------------------------------+--------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------+------------+
+| p      | [tuple](`tuple`) or [array](`array`) - [like](`like`)                                 | Tobii ADCS coordinates to convert: - Single coordinate: (x, y) tuple - Multiple coordinates: (N, 2) array where N is number of samples Values should be in range [0, 1] where (0,0) is top-left. | _required_ |
++--------+---------------------------------------------------------------------------------------+--------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------+------------+
+| units  | [str](`str`)                                                                          | Target PsychoPy units. If None, uses window's default units. Supported: 'norm', 'height', 'pix', 'cm', 'deg', 'degFlat', 'degFlatPos'.                                                           | `None`     |
++--------+---------------------------------------------------------------------------------------+--------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------+------------+
 
 ## Returns {.doc-section .doc-section-returns}
 
-| Name   | Type                                     | Description                                                                                                                                                                                 |
-|--------|------------------------------------------|---------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------|
-|        | [tuple](`tuple`) or [ndarray](`ndarray`) | The converted PsychoPy coordinates in the specified unit system. - Single input: returns (x, y) tuple - Array input: returns (N, 2) array Origin is at screen center for most unit systems. |
++--------+------------------------------------------+-------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------+
+| Name   | Type                                     | Description                                                                                                                                                                         |
++========+==========================================+=====================================================================================================================================================================================+
+|        | [tuple](`tuple`) or [ndarray](`ndarray`) | Converted PsychoPy coordinates in specified unit system: - Single input: returns (x, y) tuple - Array input: returns (N, 2) array Origin is at screen center for most unit systems. |
++--------+------------------------------------------+-------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------+
 
 ## Raises {.doc-section .doc-section-raises}
 
-| Name   | Type                       | Description                                          |
-|--------|----------------------------|------------------------------------------------------|
-|        | [ValueError](`ValueError`) | If the provided units are not supported by PsychoPy. |
++----------------------------+------------------------------------------+
+| Type                       | Description                              |
++============================+==========================================+
+| [ValueError](`ValueError`) | If the provided units are not supported. |
++----------------------------+------------------------------------------+
 
 ## Examples {.doc-section .doc-section-examples}
 
 ```python
->>> # Single coordinate
->>> pos = get_psychopy_pos(win, (0.5, 0.5))  # Returns (0, 0) in most units
-```
+from DeToX import Coords
+import numpy as np
 
-```python
->>> # Multiple coordinates (vectorized)
->>> coords = np.array([[0.5, 0.5], [0.0, 0.0], [1.0, 1.0]])
->>> positions = get_psychopy_pos(win, coords)  # Returns (N, 2) array
+# Single coordinate conversion
+tobii_gaze = (0.5, 0.5)  # Center of screen in ADCS
+psychopy_gaze = Coords.get_psychopy_pos(win, tobii_gaze)
+# Returns (0.0, 0.0) in most units - screen center
+
+# Vectorized conversion for recorded data (efficient!)
+recorded_gaze = np.array([
+    [0.5, 0.5],   # Center
+    [0.0, 0.0],   # Top-left
+    [1.0, 1.0]    # Bottom-right
+])
+psychopy_positions = Coords.get_psychopy_pos(win, recorded_gaze)
+# Returns (3, 2) array with all positions converted
+
+# Specify target units explicitly
+gaze_in_pixels = Coords.get_psychopy_pos(win, (0.5, 0.3), units='pix')
 ```

@@ -1,4 +1,7 @@
-# Reference {.doc .doc-index}
+---
+title: Reference
+
+---
 
 ## Main Eye-tracker Class
 
@@ -26,6 +29,7 @@ mark events of interest, and save collected data to disk.
 | [ETracker.stop_recording](ETracker.stop_recording.qmd#DeToX.ETracker.stop_recording) | Stop gaze data recording and finalize session. |
 | [ETracker.record_event](ETracker.record_event.qmd#DeToX.ETracker.record_event) | Record timestamped experimental event during data collection. |
 | [ETracker.save_data](ETracker.save_data.qmd#DeToX.ETracker.save_data) | Save buffered gaze and event data to file with optimized processing. |
+| [ETracker.set_eyetracking_settings](ETracker.set_eyetracking_settings.qmd#DeToX.ETracker.set_eyetracking_settings) | Configure and apply Tobii eye tracker settings. |
 
 ### Calibration
 
@@ -76,11 +80,10 @@ These are called internally by the ETracker class, but can be used independently
 | --- | --- |
 | [convert_height_to_units](convert_height_to_units.qmd#DeToX.convert_height_to_units) | Convert a size from height units to the current window units. |
 | [get_psychopy_pos](get_psychopy_pos.qmd#DeToX.get_psychopy_pos) | Convert Tobii ADCS coordinates to PsychoPy coordinates. |
-| [psychopy_to_pixels](psychopy_to_pixels.qmd#DeToX.psychopy_to_pixels) | Convert PsychoPy coordinates to pixel coordinates. |
+| [psychopy_to_pixels](psychopy_to_pixels.qmd#DeToX.psychopy_to_pixels) | Convert PsychoPy coordinates to pixel coordinates for image drawing. |
 | [get_tobii_pos](get_tobii_pos.qmd#DeToX.get_tobii_pos) | Convert PsychoPy coordinates to Tobii ADCS coordinates. |
 | [pix2tobii](pix2tobii.qmd#DeToX.pix2tobii) | Convert PsychoPy pixel coordinates to Tobii ADCS coordinates. |
-| [tobii2pix](tobii2pix.qmd#DeToX.tobii2pix) | Convert Tobii ADCS coordinates to PsychoPy pixel coordinates. |
-| [get_psychopy_pos_from_trackbox](get_psychopy_pos_from_trackbox.qmd#DeToX.get_psychopy_pos_from_trackbox) | Convert Tobii TBCS coordinates to PsychoPy coordinates. |
+| [get_psychopy_pos_from_user_position](get_psychopy_pos_from_user_position.qmd#DeToX.get_psychopy_pos_from_user_position) | Convert User Position Guide coordinates to PsychoPy coordinates. |
 
 ## Utilities
 

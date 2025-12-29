@@ -11,39 +11,66 @@ real-time gaze estimate. Handles missing or invalid data gracefully.
 
 ## Parameters {.doc-section .doc-section-parameters}
 
++--------------------+----------------+----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------+------------+
 | Name               | Type           | Description                                                                                                                                                                                                          | Default    |
-|--------------------|----------------|----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------|------------|
++====================+================+======================================================================================================================================================================================================================+============+
 | fallback_offscreen | [bool](`bool`) | If True (default), returns an offscreen position (3x screen dimensions) when no valid gaze data is available. If False, returns None.                                                                                | `True`     |
++--------------------+----------------+----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------+------------+
 | method             | [str](`str`)   | Aggregation method for combining samples and eyes. - "median" (default): Robust to outliers, good for noisy data - "mean": Smoother but sensitive to outliers - "last": Lowest latency, uses only most recent sample | `'median'` |
++--------------------+----------------+----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------+------------+
 
 ## Returns {.doc-section .doc-section-returns}
 
-| Name   | Type                     | Description                                                                                                                 |
-|--------|--------------------------|-----------------------------------------------------------------------------------------------------------------------------|
-|        | [tuple](`tuple`) or None | Gaze position (x, y) in PsychoPy coordinates (current window units), or None if no valid data and fallback_offscreen=False. |
++--------+------------------------------------+-----------------------------------------------------------------------------------------------------------------------------+
+| Name   | Type                               | Description                                                                                                                 |
++========+====================================+=============================================================================================================================+
+|        | [tuple](`tuple`) or [None](`None`) | Gaze position (x, y) in PsychoPy coordinates (current window units), or None if no valid data and fallback_offscreen=False. |
++--------+------------------------------------+-----------------------------------------------------------------------------------------------------------------------------+
 
 ## Raises {.doc-section .doc-section-raises}
 
-| Name   | Type                           | Description                                                   |
-|--------|--------------------------------|---------------------------------------------------------------|
-|        | [RuntimeError](`RuntimeError`) | If gaze_contingent() was not called to initialize the buffer. |
++--------------------------------+---------------------------------------------------------------+
+| Type                           | Description                                                   |
++================================+===============================================================+
+| [RuntimeError](`RuntimeError`) | If gaze_contingent() was not called to initialize the buffer. |
++--------------------------------+---------------------------------------------------------------+
 
 ## Examples {.doc-section .doc-section-examples}
 
+### Basic Usage
+
+#### Default behavior with median aggregation
 ```python
-# Basic usage (median aggregation)
 pos = ET_controller.get_gaze_position()
 if pos is not None:
-     circle.pos = pos
+    circle.pos = pos
+```
 
-# Use mean for smoother tracking
+### Aggregation Methods
+
+#### Mean for smoother tracking
+```python
 pos = ET_controller.get_gaze_position(method="mean")
+```
 
-# Lowest latency (last sample only)
+#### Last sample for lowest latency
+```python
 pos = ET_controller.get_gaze_position(method="last")
+```
 
-# Return None instead of offscreen position
+### Handling Missing Data
+
+#### Return None instead of offscreen position
+```python
 pos = ET_controller.get_gaze_position(fallback_offscreen=False)
 if pos is None:
-     print("No valid gaze data")
+    print("No valid gaze data")
+```
+
+#### Check for offscreen gaze
+```python
+pos = ET_controller.get_gaze_position(fallback_offscreen=True)
+# Offscreen positions will be far outside window bounds
+if abs(pos[0]) > 2.0 or abs(pos[1]) > 2.0:
+    print("Participant looking away")
 ```
