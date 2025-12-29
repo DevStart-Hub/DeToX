@@ -8,7 +8,7 @@ from .Coords import (
     get_psychopy_pos,
     get_tobii_pos,
     pix2tobii,
-    get_psychopy_pos_from_trackbox,
+    get_psychopy_pos_from_user_position,
     psychopy_to_pixels,
     convert_height_to_units,
     norm_to_window_units
@@ -28,7 +28,7 @@ __all__ = [
     'get_psychopy_pos',
     'get_tobii_pos',
     'pix2tobii',
-    'get_psychopy_pos_from_trackbox',
+    'get_psychopy_pos_from_user_position',
     'psychopy_to_pixels',
     'convert_height_to_units',
     'norm_to_window_units'
