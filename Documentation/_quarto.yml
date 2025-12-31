@@ -70,7 +70,7 @@ website:
   # Utilities
   back-to-top-navigation: true
   page-navigation: true
-  reader-mode: false
+  reader-mode: true
 
     ## Footer
   page-footer:
@@ -126,7 +126,6 @@ quartodoc:
   title: Reference
   package: DeToX
 
-
   style: pkgdown
   parser: numpy
   renderer:
@@ -180,15 +179,6 @@ quartodoc:
       contents:
         - ETracker.gaze_contingent
         - ETracker.get_gaze_position
-
-    - title: Internal Calibration 
-      desc: |
-        Classes for running eye-tracker calibration. These get called internally by the ETracker class, and are reported here only for completeness.
-        They are comprise of a base calibration class that set the common interface, and the specific implementations for Tobii and Mouse calibration.
-      contents:
-        - BaseCalibrationSession
-        - TobiiCalibrationSession
-        - MouseCalibrationSession
 
     - title: Coordinate Conversion
       desc: |
