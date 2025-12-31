@@ -171,8 +171,8 @@ class ETracker:
             If the specified FPS or illumination mode is not supported by the connected 
             device.
         
-        Notes
-        -----
+        Details
+        -------
         - Settings cannot be changed during active recording. If an ongoing recording 
         is detected, a non-blocking warning is issued and the function exits safely.
         - When `use_gui=True`, a PsychoPy dialog window appears with dropdown menus.
@@ -364,8 +364,8 @@ class ETracker:
             to fit your desired layout.
             Default True.
             
-        Notes
-        -----
+        Details
+        -------
         In simulation mode, use scroll wheel to adjust simulated distance.
         Eye positions shown as green (left) and red (right) circles.
         
@@ -947,8 +947,8 @@ class ETracker:
             True if saved successfully; False if cancelled, no data available, in
             simulation mode, or on error.
         
-        Notes
-        -----
+        Details
+        -------
         - In simulation mode, saving is skipped and a warning is issued.
         - If `use_gui` is True and the dialog is cancelled, returns False.
         
@@ -1480,8 +1480,8 @@ class ETracker:
         UserWarning
             If recording is not currently active.
             
-        Notes
-        -----
+        Details
+        -------
         - All pending data in buffers is automatically saved before completion
         - Recording duration is measured from start_recording() call
         - Quality check reads the complete saved file to analyze gaps between ALL samples,
@@ -1598,6 +1598,17 @@ class ETracker:
         ------
         RuntimeWarning
             If called when recording is not active.
+        
+        Details
+        -------
+        ### Event-Gaze Synchronization
+        
+        Events are stored separately and merged with gaze data when `save_data()` is
+        called. Each event is aligned to the next closest gaze sample (at or after the
+        event timestamp) using binary search. When multiple events occur within the same
+        sampling interval, they are concatenated with semicolon delimiters in the Events
+        column (e.g., 'fixation_offset; stimulus_onset'). This ensures no event data is
+        lost even when events occur in rapid succession.
             
         Examples
         --------
@@ -1640,9 +1651,17 @@ class ETracker:
         
         ET_controller.stop_recording()
         ```
+        
+        #### Rapid successive events
+        ```python
+        # Events occurring within same sampling interval
+        ET_controller.record_event('fixation_offset')
+        ET_controller.record_event('stimulus_onset')
+        
+        # In saved data, may appear as: "fixation_offset; stimulus_onset"
+        ```
         """
         # --- State validation ---
-        # Ensure recording is active before logging events
         if not self.recording:
             raise RuntimeWarning(
                 "Cannot record event: recording session is not active. "
@@ -1650,22 +1669,19 @@ class ETracker:
             )
         
         # --- Timestamp generation ---
-        # Use appropriate timing source based on recording mode
         if self.simulate:
-            # --- Simulation timing ---
-            # Use experiment clock for consistency with simulated gaze data
+            # Simulation timing
             timestamp = self.experiment_clock.getTime() * 1_000_000  # Convert to microseconds
         else:
-            # --- Real eye tracker timing ---
-            # Use Tobii SDK system timestamp for precise synchronization
+            # Real eye tracker timing
             timestamp = tr.get_system_time_stamp()  # Already in microseconds
         
         # --- Event storage ---
-        # Add timestamped event to buffer for later merging with gaze data
         self.event_data.append({
             'system_time_stamp': timestamp,
             'Events': label
         })
+
 
     def save_data(self):
         """
@@ -1680,15 +1696,15 @@ class ETracker:
         clear buffers. This is useful for long experiments to avoid memory buildup
         and ensure data is saved even if the program crashes.
         
-        Notes
-        -----
+        Details
+        -------
         - Automatically called by `stop_recording()`
         - Safe to call during active recording
         - Clears buffers after saving
         - Events are matched to nearest gaze sample by timestamp
         - In HDF5 format, events are saved in two places:
-        1. Merged into the main gaze table's 'Events' column
-        2. As a separate 'events' table for independent event analysis
+          1. Merged into the main gaze table's 'Events' column
+          2. As a separate 'events' table for independent event analysis
         - In CSV format, events only appear in the 'Events' column
         
         Examples
@@ -1831,15 +1847,16 @@ class ETracker:
         ----------
         N : float or int, optional
             Buffer size specification. Interpretation depends on `units` parameter:
-            - If units='seconds': Duration in seconds (e.g., 0.5 = 500ms window)
-            - If units='samples': Number of gaze samples (e.g., 5 = last 5 samples)
+
+             - If units='seconds': Duration in seconds (e.g., 0.5 = 500ms window)
+             - If units='samples': Number of gaze samples (e.g., 5 = last 5 samples)
             Default is 0.5 (seconds).
         units : str, optional
             Unit for buffer size specification: 'seconds' or 'samples'.
-            - 'seconds' (default): N specifies time duration, automatically calculates
+
+             - 'seconds' (default): N specifies time duration, automatically calculates
             required samples based on eye tracker frequency
-            - 'samples': N specifies exact number of samples
-            Default is 'seconds'.
+             - 'samples': N specifies exact number of samples
         
         Raises
         ------
@@ -1848,8 +1865,8 @@ class ETracker:
         ValueError
             If units is not 'seconds' or 'samples', or if calculated buffer size < 1.
         
-        Notes
-        -----
+        Details
+        -------
         - Call this method ONCE before your experimental loop
         - Buffer size trades off stability vs. latency:
         * Shorter duration/fewer samples: Lower latency, more noise
@@ -2215,8 +2232,8 @@ class ETracker:
             on timestamp gaps
             Returns None if file has fewer than 2 samples or cannot be read.
         
-        Notes
-        -----
+        Details
+        -------
         - Only reads the timestamp column for efficiency
         - Works with both HDF5 and CSV formats
         - Dropped sample estimation: gaps larger than expected_interval * 1.5
@@ -2263,8 +2280,8 @@ class ETracker:
         timestamp. Releases GIL during waits to allow callbacks to continue
         collecting data.
         
-        Notes
-        -----
+        Details
+        -------
         - Returns immediately if no events are buffered
         - Each wait releases GIL, allowing callback thread to run
         - Typically completes in 1-2 sample intervals
@@ -2391,8 +2408,8 @@ class ETracker:
         FileExistsError
             If target file already exists (prevents accidental overwriting).
             
-        Notes
-        -----
+        Details
+        -------
         Raw format expands tuple columns into separate x, y, z components
         for HDF5 compatibility (e.g., left_gaze_point_on_display_area becomes
         left_gaze_point_on_display_area_x and left_gaze_point_on_display_area_y).
