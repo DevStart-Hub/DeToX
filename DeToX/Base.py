@@ -1643,9 +1643,18 @@ class ETracker:
             idx = np.searchsorted(gaze_df['system_time_stamp'].values,
                                 events_df['system_time_stamp'].values,
                                 side='left')
-            
-            # Merge events into gaze data at corresponding timestamps
-            gaze_df.iloc[idx, gaze_df.columns.get_loc('Events')] = events_df['Events'].values
+
+            # Check if multiple events map to the same sample
+            if len(idx) != len(np.unique(idx)):
+                # Duplicates detected - use pandas groupby for vectorized aggregation
+                events_df['_target_idx'] = idx
+                grouped = events_df.groupby('_target_idx')['Events'].agg(lambda x: '; '.join(x))
+                
+                # Vectorized assignment to gaze_df
+                gaze_df.loc[grouped.index, 'Events'] = grouped.values
+            else:
+                # No duplicates - fast vectorized assignment
+                gaze_df.iloc[idx, gaze_df.columns.get_loc('Events')] = events_df['Events'].values
         else:
             print("|-- No new events to save --|")
             events_df = None
@@ -1829,7 +1838,7 @@ class ETracker:
         self.gaze_contingent_buffer = deque(maxlen=buffer_size)
 
 
-    def get_gaze_position(self, fallback_offscreen=True, method="median"):
+    def get_gaze_position(self, fallback_offscreen=True, method="median", coordinate_units='default'):
         """
         Get current gaze position from rolling buffer.
         
@@ -1842,31 +1851,73 @@ class ETracker:
             If True (default), returns an offscreen position (3x screen dimensions)
             when no valid gaze data is available. If False, returns None.
         method : str, optional
-            Aggregation method for combining samples and eyes.
-            - "median" (default): Robust to outliers, good for noisy data
-            - "mean": Smoother but sensitive to outliers
-            - "last": Lowest latency, uses only most recent sample
+            Aggregation method for combining samples and eyes:
+
+              - **"median"** (default): Robust to outliers, good for noisy data
+              - **"mean"**: Smoother but sensitive to outliers
+              - **"last"**: Lowest latency, uses only most recent sample
+        coordinate_units : str, optional
+            Target coordinate system for returned gaze position:
+            
+              - **'default'**: Use window's current coordinate system
+              - **'tobii'**: Tobii ADCS coordinates (0-1 range, top-left origin)
+              - **PsychoPy units**: 'pix', 'height', 'norm', 'cm', 'deg'
+            See [Coordinate System Conversion](#coordinate-system-conversion) for more information.
             
         Returns
         -------
         tuple or None
-            Gaze position (x, y) in PsychoPy coordinates (current window units),
-            or None if no valid data and fallback_offscreen=False.
+            Gaze position (x, y) in specified coordinates, or None if no valid
+            data and fallback_offscreen=False.
             
         Raises
         ------
         RuntimeError
             If gaze_contingent() was not called to initialize the buffer.
-            
+        
+        Details
+        -------
+        ### Coordinate System Conversion
+        
+        The `coordinate_units` parameter determines how gaze positions are returned from
+        the real-time buffer. By default, positions are returned in your window's current
+        coordinate system, making it seamless to assign gaze positions directly to stimulus
+        objects. For example, if your window uses height units, the returned gaze position
+        will automatically be in height units, ready to use with `stimulus.pos = gaze_pos`.
+        You can override this behavior to request gaze positions in any coordinate system
+        regardless of your window settings. Setting `coordinate_units='tobii'` returns the 
+        raw normalized coordinates from the eye tracker, where values range from 0 to 1 with
+        the origin at the top-left corner.
+
         Examples
         --------
         ### Basic Usage
         
-        #### Default behavior with median aggregation
+        #### Default behavior (window's coordinate system)
         ```python
         pos = ET_controller.get_gaze_position()
         if pos is not None:
             circle.pos = pos
+        ```
+        
+        ### Coordinate Systems
+        
+        #### Get position in Tobii coordinates (0-1 range)
+        ```python
+        pos = ET_controller.get_gaze_position(coordinate_units='tobii')
+        # Returns: (0.5, 0.3) for gaze at center-left
+        ```
+        
+        #### Get position in pixels (center origin)
+        ```python
+        pos = ET_controller.get_gaze_position(coordinate_units='pix')
+        # Returns: (120, -50) for gaze slightly right and below center
+        ```
+        
+        #### Get position in height units
+        ```python
+        pos = ET_controller.get_gaze_position(coordinate_units='height')
+        # Returns: (0.15, -0.08) in height units
         ```
         
         ### Aggregation Methods
@@ -1897,6 +1948,25 @@ class ETracker:
         if abs(pos[0]) > 2.0 or abs(pos[1]) > 2.0:
             print("Participant looking away")
         ```
+        
+        ### Complete Application
+        
+        #### Gaze-contingent stimulus in normalized coordinates
+        ```python
+        ET_controller.gaze_contingent(N=0.3, units='seconds')
+        ET_controller.start_recording('data.h5')
+        
+        circle = visual.Circle(win, radius=0.05, fillColor='red', units='norm')
+        
+        for frame in range(600):
+            # Get gaze in normalized coordinates to match circle
+            gaze_pos = ET_controller.get_gaze_position(coordinate_units='norm')
+            circle.pos = gaze_pos
+            circle.draw()
+            win.flip()
+        
+        ET_controller.stop_recording()
+        ```
         """
         # --- Buffer validation ---
         if self.gaze_contingent_buffer is None:
@@ -1909,7 +1979,13 @@ class ETracker:
         if len(self.gaze_contingent_buffer) == 0:
             if fallback_offscreen:
                 tobii_offscreen = (3.0, 3.0)
-                return Coords.convert_height_to_units(self.win, tobii_offscreen)
+                # Convert offscreen position to target units
+                if coordinate_units == 'tobii':
+                    return tobii_offscreen
+                elif coordinate_units == 'default':
+                    return Coords.get_psychopy_pos(self.win, tobii_offscreen)
+                else:
+                    return Coords.get_psychopy_pos(self.win, tobii_offscreen, units=coordinate_units)
             else:
                 return None
         
@@ -1920,7 +1996,13 @@ class ETracker:
         if np.all(np.isnan(data)):
             if fallback_offscreen:
                 tobii_offscreen = (3.0, 3.0)
-                return Coords.convert_height_to_units(self.win, tobii_offscreen)
+                # Convert offscreen position to target units
+                if coordinate_units == 'tobii':
+                    return tobii_offscreen
+                elif coordinate_units == 'default':
+                    return Coords.get_psychopy_pos(self.win, tobii_offscreen)
+                else:
+                    return Coords.get_psychopy_pos(self.win, tobii_offscreen, units=coordinate_units)
             else:
                 return None
         
@@ -1945,10 +2027,18 @@ class ETracker:
             # Use last sample only, averaged across both eyes
             mean_tobii = np.nanmean(data[-1], axis=0)
         
-        # --- Convert to PsychoPy coordinates ---
-        return Coords.get_psychopy_pos(self.win, mean_tobii)
+        # --- Convert to target coordinate system ---
+        if coordinate_units == 'tobii':
+            # Return raw Tobii ADCS coordinates (0-1 range)
+            return tuple(mean_tobii)
+        elif coordinate_units == 'default':
+            # Use window's default coordinate system
+            return Coords.get_psychopy_pos(self.win, mean_tobii)
+        else:
+            # Convert to specified coordinate system
+            return Coords.get_psychopy_pos(self.win, mean_tobii, units=coordinate_units)
 
-
+            
     # --- Interanl fucntions ---
 
 
