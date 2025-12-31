@@ -183,9 +183,14 @@ div.callout-Advanced.callout-style-default .callout-icon::before, div.callout-Ad
   </li>  
 </ul>
           </div> <!-- /navcollapse -->
-            <div class="quarto-navbar-tools">
+            <div class="quarto-navbar-tools tools-wide">
     <a href="https://bsky.app/profile/devstart.org" title="" class="quarto-navigation-tool px-1" aria-label=""><i class="bi bi-twitter"></i></a>
     <a href="https://github.com/DevStart-Hub/DeToX" title="" class="quarto-navigation-tool px-1" aria-label=""><i class="bi bi-github"></i></a>
+  <a href="" class="quarto-reader-toggle quarto-navigation-tool px-1" onclick="window.quartoToggleReader(); return false;" title="Toggle reader mode">
+  <div class="quarto-reader-toggle-btn">
+  <i class="bi"></i>
+  </div>
+</a>
 </div>
       </div> <!-- /container-fluid -->
     </nav>
@@ -334,41 +339,12 @@ div.callout-Advanced.callout-style-default .callout-icon::before, div.callout-Ad
         <li class="sidebar-item sidebar-item-section">
       <div class="sidebar-item-container"> 
             <a class="sidebar-item-text sidebar-link text-start" data-bs-toggle="collapse" data-bs-target="#quarto-sidebar-section-5" role="navigation" aria-expanded="true">
- <span class="menu-text">Internal Calibration</span></a>
+ <span class="menu-text">Coordinate Conversion</span></a>
           <a class="sidebar-item-toggle text-start" data-bs-toggle="collapse" data-bs-target="#quarto-sidebar-section-5" role="navigation" aria-expanded="true" aria-label="Toggle section">
             <i class="bi bi-chevron-right ms-2"></i>
           </a> 
       </div>
       <ul id="quarto-sidebar-section-5" class="collapse list-unstyled sidebar-section depth1 show">  
-          <li class="sidebar-item">
-  <div class="sidebar-item-container"> 
-  <a href="../api/BaseCalibrationSession.html" class="sidebar-item-text sidebar-link">
- <span class="menu-text">BaseCalibrationSession</span></a>
-  </div>
-</li>
-          <li class="sidebar-item">
-  <div class="sidebar-item-container"> 
-  <a href="../api/TobiiCalibrationSession.html" class="sidebar-item-text sidebar-link">
- <span class="menu-text">TobiiCalibrationSession</span></a>
-  </div>
-</li>
-          <li class="sidebar-item">
-  <div class="sidebar-item-container"> 
-  <a href="../api/MouseCalibrationSession.html" class="sidebar-item-text sidebar-link">
- <span class="menu-text">MouseCalibrationSession</span></a>
-  </div>
-</li>
-      </ul>
-  </li>
-        <li class="sidebar-item sidebar-item-section">
-      <div class="sidebar-item-container"> 
-            <a class="sidebar-item-text sidebar-link text-start" data-bs-toggle="collapse" data-bs-target="#quarto-sidebar-section-6" role="navigation" aria-expanded="true">
- <span class="menu-text">Coordinate Conversion</span></a>
-          <a class="sidebar-item-toggle text-start" data-bs-toggle="collapse" data-bs-target="#quarto-sidebar-section-6" role="navigation" aria-expanded="true" aria-label="Toggle section">
-            <i class="bi bi-chevron-right ms-2"></i>
-          </a> 
-      </div>
-      <ul id="quarto-sidebar-section-6" class="collapse list-unstyled sidebar-section depth1 show">  
           <li class="sidebar-item">
   <div class="sidebar-item-container"> 
   <a href="../api/convert_height_to_units.html" class="sidebar-item-text sidebar-link">
@@ -409,13 +385,13 @@ div.callout-Advanced.callout-style-default .callout-icon::before, div.callout-Ad
   </li>
         <li class="sidebar-item sidebar-item-section">
       <div class="sidebar-item-container"> 
-            <a class="sidebar-item-text sidebar-link text-start" data-bs-toggle="collapse" data-bs-target="#quarto-sidebar-section-7" role="navigation" aria-expanded="true">
+            <a class="sidebar-item-text sidebar-link text-start" data-bs-toggle="collapse" data-bs-target="#quarto-sidebar-section-6" role="navigation" aria-expanded="true">
  <span class="menu-text">Utilities</span></a>
-          <a class="sidebar-item-toggle text-start" data-bs-toggle="collapse" data-bs-target="#quarto-sidebar-section-7" role="navigation" aria-expanded="true" aria-label="Toggle section">
+          <a class="sidebar-item-toggle text-start" data-bs-toggle="collapse" data-bs-target="#quarto-sidebar-section-6" role="navigation" aria-expanded="true" aria-label="Toggle section">
             <i class="bi bi-chevron-right ms-2"></i>
           </a> 
       </div>
-      <ul id="quarto-sidebar-section-7" class="collapse list-unstyled sidebar-section depth1 show">  
+      <ul id="quarto-sidebar-section-6" class="collapse list-unstyled sidebar-section depth1 show">  
           <li class="sidebar-item">
   <div class="sidebar-item-container"> 
   <a href="../api/NicePrint.html" class="sidebar-item-text sidebar-link">
@@ -426,13 +402,13 @@ div.callout-Advanced.callout-style-default .callout-icon::before, div.callout-Ad
   </li>
         <li class="sidebar-item sidebar-item-section">
       <div class="sidebar-item-container"> 
-            <a class="sidebar-item-text sidebar-link text-start" data-bs-toggle="collapse" data-bs-target="#quarto-sidebar-section-8" role="navigation" aria-expanded="true">
+            <a class="sidebar-item-text sidebar-link text-start" data-bs-toggle="collapse" data-bs-target="#quarto-sidebar-section-7" role="navigation" aria-expanded="true">
  <span class="menu-text">Configuration Settings</span></a>
-          <a class="sidebar-item-toggle text-start" data-bs-toggle="collapse" data-bs-target="#quarto-sidebar-section-8" role="navigation" aria-expanded="true" aria-label="Toggle section">
+          <a class="sidebar-item-toggle text-start" data-bs-toggle="collapse" data-bs-target="#quarto-sidebar-section-7" role="navigation" aria-expanded="true" aria-label="Toggle section">
             <i class="bi bi-chevron-right ms-2"></i>
           </a> 
       </div>
-      <ul id="quarto-sidebar-section-8" class="collapse list-unstyled sidebar-section depth1 show">  
+      <ul id="quarto-sidebar-section-7" class="collapse list-unstyled sidebar-section depth1 show">  
           <li class="sidebar-item">
   <div class="sidebar-item-container"> 
   <a href="../api/ETSettings.AnimationSettings.html" class="sidebar-item-text sidebar-link">
@@ -472,10 +448,18 @@ div.callout-Advanced.callout-style-default .callout-icon::before, div.callout-Ad
   <li><a href="#DeToX.ETracker.start_recording" id="toc-DeToX.ETracker.start_recording" class="nav-link active" data-scroll-target="#DeToX.ETracker.start_recording">ETracker.start_recording</a>
   <ul class="collapse">
   <li><a href="#parameters" id="toc-parameters" class="nav-link" data-scroll-target="#parameters">Parameters</a></li>
+  <li><a href="#details" id="toc-details" class="nav-link" data-scroll-target="#details">Details</a>
+  <ul class="collapse">
+  <li><a href="#data-format-options" id="toc-data-format-options" class="nav-link" data-scroll-target="#data-format-options">Data Format Options</a></li>
+  <li><a href="#coordinate-system-conversion" id="toc-coordinate-system-conversion" class="nav-link" data-scroll-target="#coordinate-system-conversion">Coordinate System Conversion</a></li>
+  <li><a href="#timestamp-format" id="toc-timestamp-format" class="nav-link" data-scroll-target="#timestamp-format">Timestamp Format</a></li>
+  </ul></li>
   <li><a href="#examples" id="toc-examples" class="nav-link" data-scroll-target="#examples">Examples</a>
   <ul class="collapse">
   <li><a href="#basic-usage" id="toc-basic-usage" class="nav-link" data-scroll-target="#basic-usage">Basic Usage</a></li>
-  <li><a href="#advanced-options" id="toc-advanced-options" class="nav-link" data-scroll-target="#advanced-options">Advanced Options</a></li>
+  <li><a href="#format-options" id="toc-format-options" class="nav-link" data-scroll-target="#format-options">Format Options</a></li>
+  <li><a href="#timestamp-control" id="toc-timestamp-control" class="nav-link" data-scroll-target="#timestamp-control">Timestamp Control</a></li>
+  <li><a href="#coordinate-units" id="toc-coordinate-units" class="nav-link" data-scroll-target="#coordinate-units">Coordinate Units</a></li>
   <li><a href="#complete-workflows" id="toc-complete-workflows" class="nav-link" data-scroll-target="#complete-workflows">Complete Workflows</a></li>
   </ul></li>
   </ul></li>
@@ -490,7 +474,12 @@ div.callout-Advanced.callout-style-default .callout-icon::before, div.callout-Ad
 
 <section id="DeToX.ETracker.start_recording" class="level1">
 <h1>ETracker.start_recording</h1>
-<div class="sourceCode" id="cb1"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb1-1"><a href="#cb1-1" aria-hidden="true" tabindex="-1"></a>ETracker.start_recording(filename<span class="op">=</span><span class="va">None</span>, raw_format<span class="op">=</span><span class="va">False</span>)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="sourceCode" id="cb1"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb1-1"><a href="#cb1-1" aria-hidden="true" tabindex="-1"></a>ETracker.start_recording(</span>
+<span id="cb1-2"><a href="#cb1-2" aria-hidden="true" tabindex="-1"></a>    filename<span class="op">=</span><span class="va">None</span>,</span>
+<span id="cb1-3"><a href="#cb1-3" aria-hidden="true" tabindex="-1"></a>    raw_format<span class="op">=</span><span class="va">False</span>,</span>
+<span id="cb1-4"><a href="#cb1-4" aria-hidden="true" tabindex="-1"></a>    coordinate_units<span class="op">=</span><span class="st">'default'</span>,</span>
+<span id="cb1-5"><a href="#cb1-5" aria-hidden="true" tabindex="-1"></a>    relative_timestamps<span class="op">=</span><span class="st">'default'</span>,</span>
+<span id="cb1-6"><a href="#cb1-6" aria-hidden="true" tabindex="-1"></a>)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
 <p>Begin gaze data recording session.</p>
 <p>Initializes file structure, clears any existing buffers, and starts data collection from either the eye tracker or simulation mode. Creates HDF5 or CSV files based on filename extension.</p>
 <section id="parameters" class="level2 doc-section doc-section-parameters">
@@ -514,54 +503,148 @@ div.callout-Advanced.callout-style-default .callout-icon::before, div.callout-Ad
 <tr class="even">
 <td>raw_format</td>
 <td><a href="`bool`">bool</a></td>
-<td>If True, preserves all original Tobii SDK column names and data. If False (default), uses simplified column names and subset of columns. Raw format is useful for advanced analysis requiring full metadata.</td>
+<td>If True, preserves all original Tobii SDK column names and data (including 3D eye positions, gaze origins, etc.). If False (default), uses simplified column names and subset of columns (gaze positions, pupil diameters, validity flags only). See <a href="#data-format-options">Data Format Options</a> for more information.</td>
 <td><code>False</code></td>
+</tr>
+<tr class="odd">
+<td>coordinate_units</td>
+<td><a href="`str`">str</a></td>
+<td><p>Target coordinate system for 2D screen positions. Default is ‘default’:</p>
+<ul>
+<li><strong>‘default’</strong>: Smart defaults based on format
+<ul>
+<li>raw_format=True → ‘tobii’ (keeps 0-1 range)</li>
+<li>raw_format=False → ‘pix’ (PsychoPy pixels, center origin)</li>
+</ul></li>
+</ul>
+<p>Converts to PsychoPy coordinate systems where (0,0) is at screen center. Other options: ‘tobii’, ‘height’, ‘norm’, ‘cm’, ‘deg’. See <a href="#coordinate-system-conversion">Coordinate System Conversion</a> for more information.</p></td>
+<td><code>'default'</code></td>
+</tr>
+<tr class="even">
+<td>relative_timestamps</td>
+<td><a href="`str`">str</a> or <a href="`bool`">bool</a></td>
+<td><p>Controls timestamp format. Default is ‘default’:</p>
+<ul>
+<li><strong>‘default’</strong>: Smart defaults based on format
+<ul>
+<li>raw_format=True → False (absolute microseconds)</li>
+<li>raw_format=False → True (relative milliseconds from 0)</li>
+</ul></li>
+</ul>
+<p>Other options: True (always relative), False (always absolute). See <a href="#timestamp-format">Timestamp Format</a> for more information.</p></td>
+<td><code>'default'</code></td>
 </tr>
 </tbody>
 </table>
+</section>
+<section id="details" class="level2 doc-section doc-section-details">
+<h2 class="doc-section doc-section-details anchored" data-anchor-id="details">Details</h2>
+<section id="data-format-options" class="level3">
+<h3 class="anchored" data-anchor-id="data-format-options">Data Format Options</h3>
+<p>The <code>raw_format</code> parameter controls which columns are included in the saved data file. Raw format preserves the complete data structure from the Tobii Pro SDK, which includes both 2D screen coordinates and 3D spatial information about eye position and gaze origin in the user coordinate system. This format is useful for advanced analyses that require the full geometric relationship between the eyes and the screen, or when you need to preserve all metadata provided by the eye tracker. The simplified format extracts only the essential data needed for most eye tracking analyses: gaze positions on screen, pupil diameters, and validity flags. This results in smaller files and easier data analysis for typical gaze visualization and AOI (Area of Interest) tasks.</p>
+</section>
+<section id="coordinate-system-conversion" class="level3">
+<h3 class="anchored" data-anchor-id="coordinate-system-conversion">Coordinate System Conversion</h3>
+<p>The <code>coordinate_units</code> parameter determines how 2D screen coordinates are represented in the output file. By default, raw format keeps coordinates in Tobii’s Active Display Coordinate System (ADCS) where values range from 0 to 1 with the origin at the top-left corner. This normalized system is screen-independent and useful for comparing data across different display setups. The simplified format defaults to PsychoPy pixel coordinates, which place the origin at the screen center with the y-axis pointing upward. This matches PsychoPy’s coordinate system and makes it seamless to overlay gaze data on your experimental stimuli. You can override these defaults for either format. For example, you might want pixel coordinates in raw format for easier visualization, or keep Tobii coordinates in simplified format for cross-screen comparisons. When converting to other PsychoPy units like ‘height’ or ‘norm’, the coordinates will match your PsychoPy window’s unit system. Note that in raw format, only the 2D display coordinates are converted; the 3D spatial coordinates (eye positions and gaze origins) always remain in meters as provided by the Tobii SDK.</p>
+</section>
+<section id="timestamp-format" class="level3">
+<h3 class="anchored" data-anchor-id="timestamp-format">Timestamp Format</h3>
+<p>The <code>relative_timestamps</code> parameter controls how time is represented in your data. Absolute timestamps preserve the exact microsecond values from the Tobii system clock, which are useful when you need to synchronize eye tracking data with other recording systems or when collecting multiple data files that need to be aligned temporally. Relative timestamps convert the first sample to time zero and express all subsequent times in milliseconds relative to that starting point, making it much easier to analyze individual trials or sessions. For example, with relative timestamps you can immediately see that an event occurred at 1500ms into your recording, whereas with absolute timestamps you would need to subtract the session start time first. The default behavior chooses relative timestamps for simplified format (since most analyses focus on within-session timing) and absolute timestamps for raw format (to preserve the complete temporal information). Both gaze samples and event markers use the same timestamp format to ensure proper synchronization when analyzing your data.</p>
+</section>
 </section>
 <section id="examples" class="level2 doc-section doc-section-examples">
 <h2 class="doc-section doc-section-examples anchored" data-anchor-id="examples">Examples</h2>
 <section id="basic-usage" class="level3">
 <h3 class="anchored" data-anchor-id="basic-usage">Basic Usage</h3>
-<section id="standard-hdf5-format" class="level4">
-<h4 class="anchored" data-anchor-id="standard-hdf5-format">Standard HDF5 format</h4>
-<div class="sourceCode" id="cb2"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb2-1"><a href="#cb2-1" aria-hidden="true" tabindex="-1"></a>ET_controller.start_recording(<span class="st">'data.h5'</span>)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<section id="standard-simplified-format-psychopy-pixels-relative-timestamps" class="level4">
+<h4 class="anchored" data-anchor-id="standard-simplified-format-psychopy-pixels-relative-timestamps">Standard simplified format (PsychoPy pixels, relative timestamps)</h4>
+<div class="sourceCode" id="cb2"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb2-1"><a href="#cb2-1" aria-hidden="true" tabindex="-1"></a>ET_controller.start_recording(<span class="st">'data.h5'</span>)</span>
+<span id="cb2-2"><a href="#cb2-2" aria-hidden="true" tabindex="-1"></a><span class="co"># Creates: Left_X/Left_Y in pixels (center origin), TimeStamp from 0ms</span></span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
 </section>
 <section id="auto-generated-timestamped-filename" class="level4">
 <h4 class="anchored" data-anchor-id="auto-generated-timestamped-filename">Auto-generated timestamped filename</h4>
 <div class="sourceCode" id="cb3"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb3-1"><a href="#cb3-1" aria-hidden="true" tabindex="-1"></a>ET_controller.start_recording()  <span class="co"># Creates YYYY-MM-DD_HH-MM-SS.h5</span></span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
 </section>
-<section id="csv-format" class="level4">
-<h4 class="anchored" data-anchor-id="csv-format">CSV format</h4>
-<div class="sourceCode" id="cb4"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb4-1"><a href="#cb4-1" aria-hidden="true" tabindex="-1"></a>ET_controller.start_recording(<span class="st">'data.csv'</span>)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+</section>
+<section id="format-options" class="level3">
+<h3 class="anchored" data-anchor-id="format-options">Format Options</h3>
+<section id="raw-format-with-defaults-tobii-coords-absolute-timestamps" class="level4">
+<h4 class="anchored" data-anchor-id="raw-format-with-defaults-tobii-coords-absolute-timestamps">Raw format with defaults (Tobii coords, absolute timestamps)</h4>
+<div class="sourceCode" id="cb4"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb4-1"><a href="#cb4-1" aria-hidden="true" tabindex="-1"></a>ET_controller.start_recording(<span class="st">'data.h5'</span>, raw_format<span class="op">=</span><span class="va">True</span>)</span>
+<span id="cb4-2"><a href="#cb4-2" aria-hidden="true" tabindex="-1"></a><span class="co"># All Tobii columns, coords in 0-1 range, timestamps in microseconds</span></span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+</section>
+<section id="raw-format-with-pixel-coordinates" class="level4">
+<h4 class="anchored" data-anchor-id="raw-format-with-pixel-coordinates">Raw format with pixel coordinates</h4>
+<div class="sourceCode" id="cb5"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb5-1"><a href="#cb5-1" aria-hidden="true" tabindex="-1"></a>ET_controller.start_recording(<span class="st">'data.h5'</span>, raw_format<span class="op">=</span><span class="va">True</span>, coordinate_units<span class="op">=</span><span class="st">'pix'</span>)</span>
+<span id="cb5-2"><a href="#cb5-2" aria-hidden="true" tabindex="-1"></a><span class="co"># All Tobii columns, display coords in PsychoPy pixels</span></span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
 </section>
 </section>
-<section id="advanced-options" class="level3">
-<h3 class="anchored" data-anchor-id="advanced-options">Advanced Options</h3>
-<section id="raw-format-with-all-tobii-sdk-columns" class="level4">
-<h4 class="anchored" data-anchor-id="raw-format-with-all-tobii-sdk-columns">Raw format with all Tobii SDK columns</h4>
-<div class="sourceCode" id="cb5"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb5-1"><a href="#cb5-1" aria-hidden="true" tabindex="-1"></a>ET_controller.start_recording(<span class="st">'data_raw.h5'</span>, raw_format<span class="op">=</span><span class="va">True</span>)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<section id="timestamp-control" class="level3">
+<h3 class="anchored" data-anchor-id="timestamp-control">Timestamp Control</h3>
+<section id="raw-format-with-relative-timestamps" class="level4">
+<h4 class="anchored" data-anchor-id="raw-format-with-relative-timestamps">Raw format with relative timestamps</h4>
+<div class="sourceCode" id="cb6"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb6-1"><a href="#cb6-1" aria-hidden="true" tabindex="-1"></a>ET_controller.start_recording(<span class="st">'data.h5'</span>, raw_format<span class="op">=</span><span class="va">True</span>, relative_timestamps<span class="op">=</span><span class="va">True</span>)</span>
+<span id="cb6-2"><a href="#cb6-2" aria-hidden="true" tabindex="-1"></a><span class="co"># Raw format but timestamps start at 0ms</span></span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+</section>
+<section id="simplified-format-with-absolute-timestamps" class="level4">
+<h4 class="anchored" data-anchor-id="simplified-format-with-absolute-timestamps">Simplified format with absolute timestamps</h4>
+<div class="sourceCode" id="cb7"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb7-1"><a href="#cb7-1" aria-hidden="true" tabindex="-1"></a>ET_controller.start_recording(<span class="st">'data.h5'</span>, relative_timestamps<span class="op">=</span><span class="va">False</span>)</span>
+<span id="cb7-2"><a href="#cb7-2" aria-hidden="true" tabindex="-1"></a><span class="co"># Simplified format but keeps absolute microsecond timestamps</span></span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+</section>
+</section>
+<section id="coordinate-units" class="level3">
+<h3 class="anchored" data-anchor-id="coordinate-units">Coordinate Units</h3>
+<section id="simplified-format-with-tobii-coordinates" class="level4">
+<h4 class="anchored" data-anchor-id="simplified-format-with-tobii-coordinates">Simplified format with Tobii coordinates</h4>
+<div class="sourceCode" id="cb8"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb8-1"><a href="#cb8-1" aria-hidden="true" tabindex="-1"></a>ET_controller.start_recording(<span class="st">'data.h5'</span>, coordinate_units<span class="op">=</span><span class="st">'tobii'</span>)</span>
+<span id="cb8-2"><a href="#cb8-2" aria-hidden="true" tabindex="-1"></a><span class="co"># Simplified columns, coordinates in 0-1 range</span></span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+</section>
+<section id="simplified-format-with-height-units" class="level4">
+<h4 class="anchored" data-anchor-id="simplified-format-with-height-units">Simplified format with height units</h4>
+<div class="sourceCode" id="cb9"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb9-1"><a href="#cb9-1" aria-hidden="true" tabindex="-1"></a>ET_controller.start_recording(<span class="st">'data.h5'</span>, coordinate_units<span class="op">=</span><span class="st">'height'</span>)</span>
+<span id="cb9-2"><a href="#cb9-2" aria-hidden="true" tabindex="-1"></a><span class="co"># Simplified columns, coordinates in height units matching window</span></span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
 </section>
 </section>
 <section id="complete-workflows" class="level3">
 <h3 class="anchored" data-anchor-id="complete-workflows">Complete Workflows</h3>
-<section id="full-experiment-with-event-markers" class="level4">
-<h4 class="anchored" data-anchor-id="full-experiment-with-event-markers">Full experiment with event markers</h4>
-<div class="sourceCode" id="cb6"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb6-1"><a href="#cb6-1" aria-hidden="true" tabindex="-1"></a><span class="co"># Setup and calibration</span></span>
-<span id="cb6-2"><a href="#cb6-2" aria-hidden="true" tabindex="-1"></a>ET_controller.show_status()</span>
-<span id="cb6-3"><a href="#cb6-3" aria-hidden="true" tabindex="-1"></a>ET_controller.calibrate(<span class="dv">5</span>)</span>
-<span id="cb6-4"><a href="#cb6-4" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb6-5"><a href="#cb6-5" aria-hidden="true" tabindex="-1"></a><span class="co"># Start recording</span></span>
-<span id="cb6-6"><a href="#cb6-6" aria-hidden="true" tabindex="-1"></a>ET_controller.start_recording(<span class="st">'participant_01.h5'</span>)</span>
-<span id="cb6-7"><a href="#cb6-7" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb6-8"><a href="#cb6-8" aria-hidden="true" tabindex="-1"></a><span class="co"># Run experiment with event markers</span></span>
-<span id="cb6-9"><a href="#cb6-9" aria-hidden="true" tabindex="-1"></a>ET_controller.record_event(<span class="st">'trial_1_start'</span>)</span>
-<span id="cb6-10"><a href="#cb6-10" aria-hidden="true" tabindex="-1"></a><span class="co"># ... present stimuli ...</span></span>
-<span id="cb6-11"><a href="#cb6-11" aria-hidden="true" tabindex="-1"></a>ET_controller.record_event(<span class="st">'trial_1_end'</span>)</span>
-<span id="cb6-12"><a href="#cb6-12" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb6-13"><a href="#cb6-13" aria-hidden="true" tabindex="-1"></a><span class="co"># Stop recording</span></span>
-<span id="cb6-14"><a href="#cb6-14" aria-hidden="true" tabindex="-1"></a>ET_controller.stop_recording()</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<section id="standard-experiment-workflow" class="level4">
+<h4 class="anchored" data-anchor-id="standard-experiment-workflow">Standard experiment workflow</h4>
+<div class="sourceCode" id="cb10"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb10-1"><a href="#cb10-1" aria-hidden="true" tabindex="-1"></a><span class="co"># Setup and calibration</span></span>
+<span id="cb10-2"><a href="#cb10-2" aria-hidden="true" tabindex="-1"></a>ET_controller.show_status()</span>
+<span id="cb10-3"><a href="#cb10-3" aria-hidden="true" tabindex="-1"></a>ET_controller.calibrate(<span class="dv">5</span>)</span>
+<span id="cb10-4"><a href="#cb10-4" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb10-5"><a href="#cb10-5" aria-hidden="true" tabindex="-1"></a><span class="co"># Start recording with defaults</span></span>
+<span id="cb10-6"><a href="#cb10-6" aria-hidden="true" tabindex="-1"></a>ET_controller.start_recording(<span class="st">'participant_01.h5'</span>)</span>
+<span id="cb10-7"><a href="#cb10-7" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb10-8"><a href="#cb10-8" aria-hidden="true" tabindex="-1"></a><span class="co"># Run experiment with event markers</span></span>
+<span id="cb10-9"><a href="#cb10-9" aria-hidden="true" tabindex="-1"></a>ET_controller.record_event(<span class="st">'trial_1_start'</span>)</span>
+<span id="cb10-10"><a href="#cb10-10" aria-hidden="true" tabindex="-1"></a><span class="co"># ... present stimuli ...</span></span>
+<span id="cb10-11"><a href="#cb10-11" aria-hidden="true" tabindex="-1"></a>ET_controller.record_event(<span class="st">'trial_1_end'</span>)</span>
+<span id="cb10-12"><a href="#cb10-12" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb10-13"><a href="#cb10-13" aria-hidden="true" tabindex="-1"></a><span class="co"># Stop recording</span></span>
+<span id="cb10-14"><a href="#cb10-14" aria-hidden="true" tabindex="-1"></a>ET_controller.stop_recording()</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+</section>
+<section id="multi-file-synchronization-with-absolute-timestamps" class="level4">
+<h4 class="anchored" data-anchor-id="multi-file-synchronization-with-absolute-timestamps">Multi-file synchronization with absolute timestamps</h4>
+<div class="sourceCode" id="cb11"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb11-1"><a href="#cb11-1" aria-hidden="true" tabindex="-1"></a><span class="co"># Recording multiple synchronized files</span></span>
+<span id="cb11-2"><a href="#cb11-2" aria-hidden="true" tabindex="-1"></a>ET_controller.start_recording(<span class="st">'session1_gaze.h5'</span>, relative_timestamps<span class="op">=</span><span class="va">False</span>)</span>
+<span id="cb11-3"><a href="#cb11-3" aria-hidden="true" tabindex="-1"></a><span class="co"># ... run session 1 ...</span></span>
+<span id="cb11-4"><a href="#cb11-4" aria-hidden="true" tabindex="-1"></a>ET_controller.stop_recording()</span>
+<span id="cb11-5"><a href="#cb11-5" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb11-6"><a href="#cb11-6" aria-hidden="true" tabindex="-1"></a><span class="co"># Session 2 can be synchronized using absolute timestamps</span></span>
+<span id="cb11-7"><a href="#cb11-7" aria-hidden="true" tabindex="-1"></a>ET_controller.start_recording(<span class="st">'session2_gaze.h5'</span>, relative_timestamps<span class="op">=</span><span class="va">False</span>)</span>
+<span id="cb11-8"><a href="#cb11-8" aria-hidden="true" tabindex="-1"></a><span class="co"># ... run session 2 ...</span></span>
+<span id="cb11-9"><a href="#cb11-9" aria-hidden="true" tabindex="-1"></a>ET_controller.stop_recording()</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+</section>
+<section id="advanced-raw-data-collection" class="level4">
+<h4 class="anchored" data-anchor-id="advanced-raw-data-collection">Advanced raw data collection</h4>
+<div class="sourceCode" id="cb12"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb12-1"><a href="#cb12-1" aria-hidden="true" tabindex="-1"></a><span class="co"># Collect all data with pixel coords and relative time</span></span>
+<span id="cb12-2"><a href="#cb12-2" aria-hidden="true" tabindex="-1"></a>ET_controller.start_recording(</span>
+<span id="cb12-3"><a href="#cb12-3" aria-hidden="true" tabindex="-1"></a>    <span class="st">'advanced_analysis.h5'</span>,</span>
+<span id="cb12-4"><a href="#cb12-4" aria-hidden="true" tabindex="-1"></a>    raw_format<span class="op">=</span><span class="va">True</span>,</span>
+<span id="cb12-5"><a href="#cb12-5" aria-hidden="true" tabindex="-1"></a>    coordinate_units<span class="op">=</span><span class="st">'pix'</span>,</span>
+<span id="cb12-6"><a href="#cb12-6" aria-hidden="true" tabindex="-1"></a>    relative_timestamps<span class="op">=</span><span class="va">True</span></span>
+<span id="cb12-7"><a href="#cb12-7" aria-hidden="true" tabindex="-1"></a>)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
 
 
 <!-- -->
@@ -1055,73 +1138,203 @@ window.document.addEventListener("DOMContentLoaded", function (event) {
       </a>
   </div>
 </nav><div class="modal fade" id="quarto-embedded-source-code-modal" tabindex="-1" aria-labelledby="quarto-embedded-source-code-modal-label" aria-hidden="true"><div class="modal-dialog modal-dialog-scrollable"><div class="modal-content"><div class="modal-header"><h5 class="modal-title" id="quarto-embedded-source-code-modal-label">Source Code</h5><button class="btn-close" data-bs-dismiss="modal"></button></div><div class="modal-body"><div class="">
-<div class="sourceCode" id="cb7" data-shortcodes="false"><pre class="sourceCode markdown code-with-copy"><code class="sourceCode markdown"><span id="cb7-1"><a href="#cb7-1" aria-hidden="true" tabindex="-1"></a><span class="fu"># ETracker.start_recording { #DeToX.ETracker.start_recording }</span></span>
-<span id="cb7-2"><a href="#cb7-2" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb7-3"><a href="#cb7-3" aria-hidden="true" tabindex="-1"></a><span class="in">```python</span></span>
-<span id="cb7-4"><a href="#cb7-4" aria-hidden="true" tabindex="-1"></a>ETracker.start_recording(filename<span class="op">=</span><span class="va">None</span>, raw_format<span class="op">=</span><span class="va">False</span>)</span>
-<span id="cb7-5"><a href="#cb7-5" aria-hidden="true" tabindex="-1"></a><span class="in">```</span></span>
-<span id="cb7-6"><a href="#cb7-6" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb7-7"><a href="#cb7-7" aria-hidden="true" tabindex="-1"></a>Begin gaze data recording session.</span>
-<span id="cb7-8"><a href="#cb7-8" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb7-9"><a href="#cb7-9" aria-hidden="true" tabindex="-1"></a>Initializes file structure, clears any existing buffers, and starts</span>
-<span id="cb7-10"><a href="#cb7-10" aria-hidden="true" tabindex="-1"></a>data collection from either the eye tracker or simulation mode.</span>
-<span id="cb7-11"><a href="#cb7-11" aria-hidden="true" tabindex="-1"></a>Creates HDF5 or CSV files based on filename extension.</span>
-<span id="cb7-12"><a href="#cb7-12" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb7-13"><a href="#cb7-13" aria-hidden="true" tabindex="-1"></a><span class="fu">## Parameters {.doc-section .doc-section-parameters}</span></span>
-<span id="cb7-14"><a href="#cb7-14" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb7-15"><a href="#cb7-15" aria-hidden="true" tabindex="-1"></a>+------------+----------------+--------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------+-----------+</span>
-<span id="cb7-16"><a href="#cb7-16" aria-hidden="true" tabindex="-1"></a>| Name       | Type           | Description                                                                                                                                                                                                  | Default   |</span>
-<span id="cb7-17"><a href="#cb7-17" aria-hidden="true" tabindex="-1"></a>+============+================+==============================================================================================================================================================================================================+===========+</span>
-<span id="cb7-18"><a href="#cb7-18" aria-hidden="true" tabindex="-1"></a>| filename   | <span class="co">[</span><span class="ot">str</span><span class="co">](`str`)</span>   | Output filename for gaze data. If None, generates timestamp-based name. File extension determines format (.h5/.hdf5 for HDF5, .csv for CSV, defaults to .h5).                                                | <span class="in">`None`</span>    |</span>
-<span id="cb7-19"><a href="#cb7-19" aria-hidden="true" tabindex="-1"></a>+------------+----------------+--------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------+-----------+</span>
-<span id="cb7-20"><a href="#cb7-20" aria-hidden="true" tabindex="-1"></a>| raw_format | <span class="co">[</span><span class="ot">bool</span><span class="co">](`bool`)</span> | If True, preserves all original Tobii SDK column names and data. If False (default), uses simplified column names and subset of columns. Raw format is useful for advanced analysis requiring full metadata. | <span class="in">`False`</span>   |</span>
-<span id="cb7-21"><a href="#cb7-21" aria-hidden="true" tabindex="-1"></a>+------------+----------------+--------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------+-----------+</span>
-<span id="cb7-22"><a href="#cb7-22" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb7-23"><a href="#cb7-23" aria-hidden="true" tabindex="-1"></a><span class="fu">## Examples {.doc-section .doc-section-examples}</span></span>
-<span id="cb7-24"><a href="#cb7-24" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb7-25"><a href="#cb7-25" aria-hidden="true" tabindex="-1"></a><span class="fu">### Basic Usage</span></span>
-<span id="cb7-26"><a href="#cb7-26" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb7-27"><a href="#cb7-27" aria-hidden="true" tabindex="-1"></a><span class="fu">#### Standard HDF5 format</span></span>
-<span id="cb7-28"><a href="#cb7-28" aria-hidden="true" tabindex="-1"></a><span class="in">```python</span></span>
-<span id="cb7-29"><a href="#cb7-29" aria-hidden="true" tabindex="-1"></a>ET_controller.start_recording(<span class="st">'data.h5'</span>)</span>
-<span id="cb7-30"><a href="#cb7-30" aria-hidden="true" tabindex="-1"></a><span class="in">```</span></span>
-<span id="cb7-31"><a href="#cb7-31" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb7-32"><a href="#cb7-32" aria-hidden="true" tabindex="-1"></a><span class="fu">#### Auto-generated timestamped filename</span></span>
-<span id="cb7-33"><a href="#cb7-33" aria-hidden="true" tabindex="-1"></a><span class="in">```python</span></span>
-<span id="cb7-34"><a href="#cb7-34" aria-hidden="true" tabindex="-1"></a>ET_controller.start_recording()  <span class="co"># Creates YYYY-MM-DD_HH-MM-SS.h5</span></span>
-<span id="cb7-35"><a href="#cb7-35" aria-hidden="true" tabindex="-1"></a><span class="in">```</span></span>
-<span id="cb7-36"><a href="#cb7-36" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb7-37"><a href="#cb7-37" aria-hidden="true" tabindex="-1"></a><span class="fu">#### CSV format</span></span>
-<span id="cb7-38"><a href="#cb7-38" aria-hidden="true" tabindex="-1"></a><span class="in">```python</span></span>
-<span id="cb7-39"><a href="#cb7-39" aria-hidden="true" tabindex="-1"></a>ET_controller.start_recording(<span class="st">'data.csv'</span>)</span>
-<span id="cb7-40"><a href="#cb7-40" aria-hidden="true" tabindex="-1"></a><span class="in">```</span></span>
-<span id="cb7-41"><a href="#cb7-41" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb7-42"><a href="#cb7-42" aria-hidden="true" tabindex="-1"></a><span class="fu">### Advanced Options</span></span>
-<span id="cb7-43"><a href="#cb7-43" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb7-44"><a href="#cb7-44" aria-hidden="true" tabindex="-1"></a><span class="fu">#### Raw format with all Tobii SDK columns</span></span>
-<span id="cb7-45"><a href="#cb7-45" aria-hidden="true" tabindex="-1"></a><span class="in">```python</span></span>
-<span id="cb7-46"><a href="#cb7-46" aria-hidden="true" tabindex="-1"></a>ET_controller.start_recording(<span class="st">'data_raw.h5'</span>, raw_format<span class="op">=</span><span class="va">True</span>)</span>
-<span id="cb7-47"><a href="#cb7-47" aria-hidden="true" tabindex="-1"></a><span class="in">```</span></span>
-<span id="cb7-48"><a href="#cb7-48" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb7-49"><a href="#cb7-49" aria-hidden="true" tabindex="-1"></a><span class="fu">### Complete Workflows</span></span>
-<span id="cb7-50"><a href="#cb7-50" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb7-51"><a href="#cb7-51" aria-hidden="true" tabindex="-1"></a><span class="fu">#### Full experiment with event markers</span></span>
-<span id="cb7-52"><a href="#cb7-52" aria-hidden="true" tabindex="-1"></a><span class="in">```python</span></span>
-<span id="cb7-53"><a href="#cb7-53" aria-hidden="true" tabindex="-1"></a><span class="co"># Setup and calibration</span></span>
-<span id="cb7-54"><a href="#cb7-54" aria-hidden="true" tabindex="-1"></a>ET_controller.show_status()</span>
-<span id="cb7-55"><a href="#cb7-55" aria-hidden="true" tabindex="-1"></a>ET_controller.calibrate(<span class="dv">5</span>)</span>
-<span id="cb7-56"><a href="#cb7-56" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb7-57"><a href="#cb7-57" aria-hidden="true" tabindex="-1"></a><span class="co"># Start recording</span></span>
-<span id="cb7-58"><a href="#cb7-58" aria-hidden="true" tabindex="-1"></a>ET_controller.start_recording(<span class="st">'participant_01.h5'</span>)</span>
-<span id="cb7-59"><a href="#cb7-59" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb7-60"><a href="#cb7-60" aria-hidden="true" tabindex="-1"></a><span class="co"># Run experiment with event markers</span></span>
-<span id="cb7-61"><a href="#cb7-61" aria-hidden="true" tabindex="-1"></a>ET_controller.record_event(<span class="st">'trial_1_start'</span>)</span>
-<span id="cb7-62"><a href="#cb7-62" aria-hidden="true" tabindex="-1"></a><span class="co"># ... present stimuli ...</span></span>
-<span id="cb7-63"><a href="#cb7-63" aria-hidden="true" tabindex="-1"></a>ET_controller.record_event(<span class="st">'trial_1_end'</span>)</span>
-<span id="cb7-64"><a href="#cb7-64" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb7-65"><a href="#cb7-65" aria-hidden="true" tabindex="-1"></a><span class="co"># Stop recording</span></span>
-<span id="cb7-66"><a href="#cb7-66" aria-hidden="true" tabindex="-1"></a>ET_controller.stop_recording()</span>
-<span id="cb7-67"><a href="#cb7-67" aria-hidden="true" tabindex="-1"></a><span class="in">```</span></span></code><button title="Copy to Clipboard" class="code-copy-button" data-in-quarto-modal=""><i class="bi"></i></button></pre></div>
+<div class="sourceCode" id="cb13" data-shortcodes="false"><pre class="sourceCode markdown code-with-copy"><code class="sourceCode markdown"><span id="cb13-1"><a href="#cb13-1" aria-hidden="true" tabindex="-1"></a><span class="fu"># ETracker.start_recording { #DeToX.ETracker.start_recording }</span></span>
+<span id="cb13-2"><a href="#cb13-2" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb13-3"><a href="#cb13-3" aria-hidden="true" tabindex="-1"></a><span class="in">```python</span></span>
+<span id="cb13-4"><a href="#cb13-4" aria-hidden="true" tabindex="-1"></a>ETracker.start_recording(</span>
+<span id="cb13-5"><a href="#cb13-5" aria-hidden="true" tabindex="-1"></a>    filename<span class="op">=</span><span class="va">None</span>,</span>
+<span id="cb13-6"><a href="#cb13-6" aria-hidden="true" tabindex="-1"></a>    raw_format<span class="op">=</span><span class="va">False</span>,</span>
+<span id="cb13-7"><a href="#cb13-7" aria-hidden="true" tabindex="-1"></a>    coordinate_units<span class="op">=</span><span class="st">'default'</span>,</span>
+<span id="cb13-8"><a href="#cb13-8" aria-hidden="true" tabindex="-1"></a>    relative_timestamps<span class="op">=</span><span class="st">'default'</span>,</span>
+<span id="cb13-9"><a href="#cb13-9" aria-hidden="true" tabindex="-1"></a>)</span>
+<span id="cb13-10"><a href="#cb13-10" aria-hidden="true" tabindex="-1"></a><span class="in">```</span></span>
+<span id="cb13-11"><a href="#cb13-11" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb13-12"><a href="#cb13-12" aria-hidden="true" tabindex="-1"></a>Begin gaze data recording session.</span>
+<span id="cb13-13"><a href="#cb13-13" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb13-14"><a href="#cb13-14" aria-hidden="true" tabindex="-1"></a>Initializes file structure, clears any existing buffers, and starts</span>
+<span id="cb13-15"><a href="#cb13-15" aria-hidden="true" tabindex="-1"></a>data collection from either the eye tracker or simulation mode.</span>
+<span id="cb13-16"><a href="#cb13-16" aria-hidden="true" tabindex="-1"></a>Creates HDF5 or CSV files based on filename extension.</span>
+<span id="cb13-17"><a href="#cb13-17" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb13-18"><a href="#cb13-18" aria-hidden="true" tabindex="-1"></a><span class="fu">## Parameters {.doc-section .doc-section-parameters}</span></span>
+<span id="cb13-19"><a href="#cb13-19" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb13-20"><a href="#cb13-20" aria-hidden="true" tabindex="-1"></a>+---------------------+--------------------------------+------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------+-------------+</span>
+<span id="cb13-21"><a href="#cb13-21" aria-hidden="true" tabindex="-1"></a>| Name                | Type                           | Description                                                                                                                                                                                                                                                                                                            | Default     |</span>
+<span id="cb13-22"><a href="#cb13-22" aria-hidden="true" tabindex="-1"></a>+=====================+================================+========================================================================================================================================================================================================================================================================================================================+=============+</span>
+<span id="cb13-23"><a href="#cb13-23" aria-hidden="true" tabindex="-1"></a>| filename            | <span class="co">[</span><span class="ot">str</span><span class="co">](`str`)</span>                   | Output filename for gaze data. If None, generates timestamp-based name. File extension determines format (.h5/.hdf5 for HDF5, .csv for CSV, defaults to .h5).                                                                                                                                                          | <span class="in">`None`</span>      |</span>
+<span id="cb13-24"><a href="#cb13-24" aria-hidden="true" tabindex="-1"></a>+---------------------+--------------------------------+------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------+-------------+</span>
+<span id="cb13-25"><a href="#cb13-25" aria-hidden="true" tabindex="-1"></a>| raw_format          | <span class="co">[</span><span class="ot">bool</span><span class="co">](`bool`)</span>                 | If True, preserves all original Tobii SDK column names and data (including 3D eye positions, gaze origins, etc.). If False (default), uses simplified column names and subset of columns (gaze positions, pupil diameters, validity flags only). See <span class="co">[</span><span class="ot">Data Format Options</span><span class="co">](#data-format-options)</span> for more information. | <span class="in">`False`</span>     |</span>
+<span id="cb13-26"><a href="#cb13-26" aria-hidden="true" tabindex="-1"></a>+---------------------+--------------------------------+------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------+-------------+</span>
+<span id="cb13-27"><a href="#cb13-27" aria-hidden="true" tabindex="-1"></a>| coordinate_units    | <span class="co">[</span><span class="ot">str</span><span class="co">](`str`)</span>                   | Target coordinate system for 2D screen positions. Default is 'default':                                                                                                                                                                                                                                                | <span class="in">`'default'`</span> |</span>
+<span id="cb13-28"><a href="#cb13-28" aria-hidden="true" tabindex="-1"></a>|                     |                                |                                                                                                                                                                                                                                                                                                                        |             |</span>
+<span id="cb13-29"><a href="#cb13-29" aria-hidden="true" tabindex="-1"></a>|                     |                                | - **'default'**: Smart defaults based on format                                                                                                                                                                                                                                                                        |             |</span>
+<span id="cb13-30"><a href="#cb13-30" aria-hidden="true" tabindex="-1"></a>|                     |                                |   - raw_format=True → 'tobii' (keeps 0-1 range)                                                                                                                                                                                                                                                                        |             |</span>
+<span id="cb13-31"><a href="#cb13-31" aria-hidden="true" tabindex="-1"></a>|                     |                                |   - raw_format=False → 'pix' (PsychoPy pixels, center origin)                                                                                                                                                                                                                                                          |             |</span>
+<span id="cb13-32"><a href="#cb13-32" aria-hidden="true" tabindex="-1"></a>|                     |                                |                                                                                                                                                                                                                                                                                                                        |             |</span>
+<span id="cb13-33"><a href="#cb13-33" aria-hidden="true" tabindex="-1"></a>|                     |                                | Converts to PsychoPy coordinate systems where (0,0) is at screen center.                                                                                                                                                                                                                                               |             |</span>
+<span id="cb13-34"><a href="#cb13-34" aria-hidden="true" tabindex="-1"></a>|                     |                                | Other options: 'tobii', 'height', 'norm', 'cm', 'deg'.                                                                                                                                                                                                                                                                 |             |</span>
+<span id="cb13-35"><a href="#cb13-35" aria-hidden="true" tabindex="-1"></a>|                     |                                | See <span class="co">[</span><span class="ot">Coordinate System Conversion</span><span class="co">](#coordinate-system-conversion)</span> for more information.                                                                                                                                                                                                                                |             |</span>
+<span id="cb13-36"><a href="#cb13-36" aria-hidden="true" tabindex="-1"></a>+---------------------+--------------------------------+------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------+-------------+</span>
+<span id="cb13-37"><a href="#cb13-37" aria-hidden="true" tabindex="-1"></a>| relative_timestamps | <span class="co">[</span><span class="ot">str</span><span class="co">](`str`)</span> or <span class="co">[</span><span class="ot">bool</span><span class="co">](`bool`)</span> | Controls timestamp format. Default is 'default':                                                                                                                                                                                                                                                                       | <span class="in">`'default'`</span> |</span>
+<span id="cb13-38"><a href="#cb13-38" aria-hidden="true" tabindex="-1"></a>|                     |                                |                                                                                                                                                                                                                                                                                                                        |             |</span>
+<span id="cb13-39"><a href="#cb13-39" aria-hidden="true" tabindex="-1"></a>|                     |                                | - **'default'**: Smart defaults based on format                                                                                                                                                                                                                                                                        |             |</span>
+<span id="cb13-40"><a href="#cb13-40" aria-hidden="true" tabindex="-1"></a>|                     |                                |   - raw_format=True → False (absolute microseconds)                                                                                                                                                                                                                                                                    |             |</span>
+<span id="cb13-41"><a href="#cb13-41" aria-hidden="true" tabindex="-1"></a>|                     |                                |   - raw_format=False → True (relative milliseconds from 0)                                                                                                                                                                                                                                                             |             |</span>
+<span id="cb13-42"><a href="#cb13-42" aria-hidden="true" tabindex="-1"></a>|                     |                                |                                                                                                                                                                                                                                                                                                                        |             |</span>
+<span id="cb13-43"><a href="#cb13-43" aria-hidden="true" tabindex="-1"></a>|                     |                                | Other options: True (always relative), False (always absolute).                                                                                                                                                                                                                                                        |             |</span>
+<span id="cb13-44"><a href="#cb13-44" aria-hidden="true" tabindex="-1"></a>|                     |                                | See <span class="co">[</span><span class="ot">Timestamp Format</span><span class="co">](#timestamp-format)</span> for more information.                                                                                                                                                                                                                                                        |             |</span>
+<span id="cb13-45"><a href="#cb13-45" aria-hidden="true" tabindex="-1"></a>+---------------------+--------------------------------+------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------+-------------+</span>
+<span id="cb13-46"><a href="#cb13-46" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb13-47"><a href="#cb13-47" aria-hidden="true" tabindex="-1"></a><span class="fu">## Details {.doc-section .doc-section-details}</span></span>
+<span id="cb13-48"><a href="#cb13-48" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb13-49"><a href="#cb13-49" aria-hidden="true" tabindex="-1"></a><span class="fu">### Data Format Options</span></span>
+<span id="cb13-50"><a href="#cb13-50" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb13-51"><a href="#cb13-51" aria-hidden="true" tabindex="-1"></a>The <span class="in">`raw_format`</span> parameter controls which columns are included in the saved</span>
+<span id="cb13-52"><a href="#cb13-52" aria-hidden="true" tabindex="-1"></a>data file. Raw format preserves the complete data structure from the Tobii</span>
+<span id="cb13-53"><a href="#cb13-53" aria-hidden="true" tabindex="-1"></a>Pro SDK, which includes both 2D screen coordinates and 3D spatial information</span>
+<span id="cb13-54"><a href="#cb13-54" aria-hidden="true" tabindex="-1"></a>about eye position and gaze origin in the user coordinate system. This format</span>
+<span id="cb13-55"><a href="#cb13-55" aria-hidden="true" tabindex="-1"></a>is useful for advanced analyses that require the full geometric relationship</span>
+<span id="cb13-56"><a href="#cb13-56" aria-hidden="true" tabindex="-1"></a>between the eyes and the screen, or when you need to preserve all metadata</span>
+<span id="cb13-57"><a href="#cb13-57" aria-hidden="true" tabindex="-1"></a>provided by the eye tracker. The simplified format extracts only the essential</span>
+<span id="cb13-58"><a href="#cb13-58" aria-hidden="true" tabindex="-1"></a>data needed for most eye tracking analyses: gaze positions on screen, pupil</span>
+<span id="cb13-59"><a href="#cb13-59" aria-hidden="true" tabindex="-1"></a>diameters, and validity flags. This results in smaller files and easier data</span>
+<span id="cb13-60"><a href="#cb13-60" aria-hidden="true" tabindex="-1"></a>analysis for typical gaze visualization and AOI (Area of Interest) tasks.</span>
+<span id="cb13-61"><a href="#cb13-61" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb13-62"><a href="#cb13-62" aria-hidden="true" tabindex="-1"></a><span class="fu">### Coordinate System Conversion</span></span>
+<span id="cb13-63"><a href="#cb13-63" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb13-64"><a href="#cb13-64" aria-hidden="true" tabindex="-1"></a>The <span class="in">`coordinate_units`</span> parameter determines how 2D screen coordinates are</span>
+<span id="cb13-65"><a href="#cb13-65" aria-hidden="true" tabindex="-1"></a>represented in the output file. By default, raw format keeps coordinates in</span>
+<span id="cb13-66"><a href="#cb13-66" aria-hidden="true" tabindex="-1"></a>Tobii's Active Display Coordinate System (ADCS) where values range from 0 to 1</span>
+<span id="cb13-67"><a href="#cb13-67" aria-hidden="true" tabindex="-1"></a>with the origin at the top-left corner. This normalized system is</span>
+<span id="cb13-68"><a href="#cb13-68" aria-hidden="true" tabindex="-1"></a>screen-independent and useful for comparing data across different display</span>
+<span id="cb13-69"><a href="#cb13-69" aria-hidden="true" tabindex="-1"></a>setups. The simplified format defaults to PsychoPy pixel coordinates, which</span>
+<span id="cb13-70"><a href="#cb13-70" aria-hidden="true" tabindex="-1"></a>place the origin at the screen center with the y-axis pointing upward. This</span>
+<span id="cb13-71"><a href="#cb13-71" aria-hidden="true" tabindex="-1"></a>matches PsychoPy's coordinate system and makes it seamless to overlay gaze</span>
+<span id="cb13-72"><a href="#cb13-72" aria-hidden="true" tabindex="-1"></a>data on your experimental stimuli. You can override these defaults for either</span>
+<span id="cb13-73"><a href="#cb13-73" aria-hidden="true" tabindex="-1"></a>format. For example, you might want pixel coordinates in raw format for easier</span>
+<span id="cb13-74"><a href="#cb13-74" aria-hidden="true" tabindex="-1"></a>visualization, or keep Tobii coordinates in simplified format for cross-screen</span>
+<span id="cb13-75"><a href="#cb13-75" aria-hidden="true" tabindex="-1"></a>comparisons. When converting to other PsychoPy units like 'height' or 'norm',</span>
+<span id="cb13-76"><a href="#cb13-76" aria-hidden="true" tabindex="-1"></a>the coordinates will match your PsychoPy window's unit system. Note that in</span>
+<span id="cb13-77"><a href="#cb13-77" aria-hidden="true" tabindex="-1"></a>raw format, only the 2D display coordinates are converted; the 3D spatial</span>
+<span id="cb13-78"><a href="#cb13-78" aria-hidden="true" tabindex="-1"></a>coordinates (eye positions and gaze origins) always remain in meters as</span>
+<span id="cb13-79"><a href="#cb13-79" aria-hidden="true" tabindex="-1"></a>provided by the Tobii SDK.</span>
+<span id="cb13-80"><a href="#cb13-80" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb13-81"><a href="#cb13-81" aria-hidden="true" tabindex="-1"></a><span class="fu">### Timestamp Format</span></span>
+<span id="cb13-82"><a href="#cb13-82" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb13-83"><a href="#cb13-83" aria-hidden="true" tabindex="-1"></a>The <span class="in">`relative_timestamps`</span> parameter controls how time is represented in your</span>
+<span id="cb13-84"><a href="#cb13-84" aria-hidden="true" tabindex="-1"></a>data. Absolute timestamps preserve the exact microsecond values from the Tobii</span>
+<span id="cb13-85"><a href="#cb13-85" aria-hidden="true" tabindex="-1"></a>system clock, which are useful when you need to synchronize eye tracking data</span>
+<span id="cb13-86"><a href="#cb13-86" aria-hidden="true" tabindex="-1"></a>with other recording systems or when collecting multiple data files that need</span>
+<span id="cb13-87"><a href="#cb13-87" aria-hidden="true" tabindex="-1"></a>to be aligned temporally. Relative timestamps convert the first sample to time</span>
+<span id="cb13-88"><a href="#cb13-88" aria-hidden="true" tabindex="-1"></a>zero and express all subsequent times in milliseconds relative to that starting</span>
+<span id="cb13-89"><a href="#cb13-89" aria-hidden="true" tabindex="-1"></a>point, making it much easier to analyze individual trials or sessions. For</span>
+<span id="cb13-90"><a href="#cb13-90" aria-hidden="true" tabindex="-1"></a>example, with relative timestamps you can immediately see that an event occurred</span>
+<span id="cb13-91"><a href="#cb13-91" aria-hidden="true" tabindex="-1"></a>at 1500ms into your recording, whereas with absolute timestamps you would need</span>
+<span id="cb13-92"><a href="#cb13-92" aria-hidden="true" tabindex="-1"></a>to subtract the session start time first. The default behavior chooses relative</span>
+<span id="cb13-93"><a href="#cb13-93" aria-hidden="true" tabindex="-1"></a>timestamps for simplified format (since most analyses focus on within-session</span>
+<span id="cb13-94"><a href="#cb13-94" aria-hidden="true" tabindex="-1"></a>timing) and absolute timestamps for raw format (to preserve the complete</span>
+<span id="cb13-95"><a href="#cb13-95" aria-hidden="true" tabindex="-1"></a>temporal information). Both gaze samples and event markers use the same</span>
+<span id="cb13-96"><a href="#cb13-96" aria-hidden="true" tabindex="-1"></a>timestamp format to ensure proper synchronization when analyzing your data.</span>
+<span id="cb13-97"><a href="#cb13-97" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb13-98"><a href="#cb13-98" aria-hidden="true" tabindex="-1"></a><span class="fu">## Examples {.doc-section .doc-section-examples}</span></span>
+<span id="cb13-99"><a href="#cb13-99" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb13-100"><a href="#cb13-100" aria-hidden="true" tabindex="-1"></a><span class="fu">### Basic Usage</span></span>
+<span id="cb13-101"><a href="#cb13-101" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb13-102"><a href="#cb13-102" aria-hidden="true" tabindex="-1"></a><span class="fu">#### Standard simplified format (PsychoPy pixels, relative timestamps)</span></span>
+<span id="cb13-103"><a href="#cb13-103" aria-hidden="true" tabindex="-1"></a><span class="in">```python</span></span>
+<span id="cb13-104"><a href="#cb13-104" aria-hidden="true" tabindex="-1"></a>ET_controller.start_recording(<span class="st">'data.h5'</span>)</span>
+<span id="cb13-105"><a href="#cb13-105" aria-hidden="true" tabindex="-1"></a><span class="co"># Creates: Left_X/Left_Y in pixels (center origin), TimeStamp from 0ms</span></span>
+<span id="cb13-106"><a href="#cb13-106" aria-hidden="true" tabindex="-1"></a><span class="in">```</span></span>
+<span id="cb13-107"><a href="#cb13-107" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb13-108"><a href="#cb13-108" aria-hidden="true" tabindex="-1"></a><span class="fu">#### Auto-generated timestamped filename</span></span>
+<span id="cb13-109"><a href="#cb13-109" aria-hidden="true" tabindex="-1"></a><span class="in">```python</span></span>
+<span id="cb13-110"><a href="#cb13-110" aria-hidden="true" tabindex="-1"></a>ET_controller.start_recording()  <span class="co"># Creates YYYY-MM-DD_HH-MM-SS.h5</span></span>
+<span id="cb13-111"><a href="#cb13-111" aria-hidden="true" tabindex="-1"></a><span class="in">```</span></span>
+<span id="cb13-112"><a href="#cb13-112" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb13-113"><a href="#cb13-113" aria-hidden="true" tabindex="-1"></a><span class="fu">### Format Options</span></span>
+<span id="cb13-114"><a href="#cb13-114" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb13-115"><a href="#cb13-115" aria-hidden="true" tabindex="-1"></a><span class="fu">#### Raw format with defaults (Tobii coords, absolute timestamps)</span></span>
+<span id="cb13-116"><a href="#cb13-116" aria-hidden="true" tabindex="-1"></a><span class="in">```python</span></span>
+<span id="cb13-117"><a href="#cb13-117" aria-hidden="true" tabindex="-1"></a>ET_controller.start_recording(<span class="st">'data.h5'</span>, raw_format<span class="op">=</span><span class="va">True</span>)</span>
+<span id="cb13-118"><a href="#cb13-118" aria-hidden="true" tabindex="-1"></a><span class="co"># All Tobii columns, coords in 0-1 range, timestamps in microseconds</span></span>
+<span id="cb13-119"><a href="#cb13-119" aria-hidden="true" tabindex="-1"></a><span class="in">```</span></span>
+<span id="cb13-120"><a href="#cb13-120" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb13-121"><a href="#cb13-121" aria-hidden="true" tabindex="-1"></a><span class="fu">#### Raw format with pixel coordinates</span></span>
+<span id="cb13-122"><a href="#cb13-122" aria-hidden="true" tabindex="-1"></a><span class="in">```python</span></span>
+<span id="cb13-123"><a href="#cb13-123" aria-hidden="true" tabindex="-1"></a>ET_controller.start_recording(<span class="st">'data.h5'</span>, raw_format<span class="op">=</span><span class="va">True</span>, coordinate_units<span class="op">=</span><span class="st">'pix'</span>)</span>
+<span id="cb13-124"><a href="#cb13-124" aria-hidden="true" tabindex="-1"></a><span class="co"># All Tobii columns, display coords in PsychoPy pixels</span></span>
+<span id="cb13-125"><a href="#cb13-125" aria-hidden="true" tabindex="-1"></a><span class="in">```</span></span>
+<span id="cb13-126"><a href="#cb13-126" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb13-127"><a href="#cb13-127" aria-hidden="true" tabindex="-1"></a><span class="fu">### Timestamp Control</span></span>
+<span id="cb13-128"><a href="#cb13-128" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb13-129"><a href="#cb13-129" aria-hidden="true" tabindex="-1"></a><span class="fu">#### Raw format with relative timestamps</span></span>
+<span id="cb13-130"><a href="#cb13-130" aria-hidden="true" tabindex="-1"></a><span class="in">```python</span></span>
+<span id="cb13-131"><a href="#cb13-131" aria-hidden="true" tabindex="-1"></a>ET_controller.start_recording(<span class="st">'data.h5'</span>, raw_format<span class="op">=</span><span class="va">True</span>, relative_timestamps<span class="op">=</span><span class="va">True</span>)</span>
+<span id="cb13-132"><a href="#cb13-132" aria-hidden="true" tabindex="-1"></a><span class="co"># Raw format but timestamps start at 0ms</span></span>
+<span id="cb13-133"><a href="#cb13-133" aria-hidden="true" tabindex="-1"></a><span class="in">```</span></span>
+<span id="cb13-134"><a href="#cb13-134" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb13-135"><a href="#cb13-135" aria-hidden="true" tabindex="-1"></a><span class="fu">#### Simplified format with absolute timestamps</span></span>
+<span id="cb13-136"><a href="#cb13-136" aria-hidden="true" tabindex="-1"></a><span class="in">```python</span></span>
+<span id="cb13-137"><a href="#cb13-137" aria-hidden="true" tabindex="-1"></a>ET_controller.start_recording(<span class="st">'data.h5'</span>, relative_timestamps<span class="op">=</span><span class="va">False</span>)</span>
+<span id="cb13-138"><a href="#cb13-138" aria-hidden="true" tabindex="-1"></a><span class="co"># Simplified format but keeps absolute microsecond timestamps</span></span>
+<span id="cb13-139"><a href="#cb13-139" aria-hidden="true" tabindex="-1"></a><span class="in">```</span></span>
+<span id="cb13-140"><a href="#cb13-140" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb13-141"><a href="#cb13-141" aria-hidden="true" tabindex="-1"></a><span class="fu">### Coordinate Units</span></span>
+<span id="cb13-142"><a href="#cb13-142" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb13-143"><a href="#cb13-143" aria-hidden="true" tabindex="-1"></a><span class="fu">#### Simplified format with Tobii coordinates</span></span>
+<span id="cb13-144"><a href="#cb13-144" aria-hidden="true" tabindex="-1"></a><span class="in">```python</span></span>
+<span id="cb13-145"><a href="#cb13-145" aria-hidden="true" tabindex="-1"></a>ET_controller.start_recording(<span class="st">'data.h5'</span>, coordinate_units<span class="op">=</span><span class="st">'tobii'</span>)</span>
+<span id="cb13-146"><a href="#cb13-146" aria-hidden="true" tabindex="-1"></a><span class="co"># Simplified columns, coordinates in 0-1 range</span></span>
+<span id="cb13-147"><a href="#cb13-147" aria-hidden="true" tabindex="-1"></a><span class="in">```</span></span>
+<span id="cb13-148"><a href="#cb13-148" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb13-149"><a href="#cb13-149" aria-hidden="true" tabindex="-1"></a><span class="fu">#### Simplified format with height units</span></span>
+<span id="cb13-150"><a href="#cb13-150" aria-hidden="true" tabindex="-1"></a><span class="in">```python</span></span>
+<span id="cb13-151"><a href="#cb13-151" aria-hidden="true" tabindex="-1"></a>ET_controller.start_recording(<span class="st">'data.h5'</span>, coordinate_units<span class="op">=</span><span class="st">'height'</span>)</span>
+<span id="cb13-152"><a href="#cb13-152" aria-hidden="true" tabindex="-1"></a><span class="co"># Simplified columns, coordinates in height units matching window</span></span>
+<span id="cb13-153"><a href="#cb13-153" aria-hidden="true" tabindex="-1"></a><span class="in">```</span></span>
+<span id="cb13-154"><a href="#cb13-154" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb13-155"><a href="#cb13-155" aria-hidden="true" tabindex="-1"></a><span class="fu">### Complete Workflows</span></span>
+<span id="cb13-156"><a href="#cb13-156" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb13-157"><a href="#cb13-157" aria-hidden="true" tabindex="-1"></a><span class="fu">#### Standard experiment workflow</span></span>
+<span id="cb13-158"><a href="#cb13-158" aria-hidden="true" tabindex="-1"></a><span class="in">```python</span></span>
+<span id="cb13-159"><a href="#cb13-159" aria-hidden="true" tabindex="-1"></a><span class="co"># Setup and calibration</span></span>
+<span id="cb13-160"><a href="#cb13-160" aria-hidden="true" tabindex="-1"></a>ET_controller.show_status()</span>
+<span id="cb13-161"><a href="#cb13-161" aria-hidden="true" tabindex="-1"></a>ET_controller.calibrate(<span class="dv">5</span>)</span>
+<span id="cb13-162"><a href="#cb13-162" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb13-163"><a href="#cb13-163" aria-hidden="true" tabindex="-1"></a><span class="co"># Start recording with defaults</span></span>
+<span id="cb13-164"><a href="#cb13-164" aria-hidden="true" tabindex="-1"></a>ET_controller.start_recording(<span class="st">'participant_01.h5'</span>)</span>
+<span id="cb13-165"><a href="#cb13-165" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb13-166"><a href="#cb13-166" aria-hidden="true" tabindex="-1"></a><span class="co"># Run experiment with event markers</span></span>
+<span id="cb13-167"><a href="#cb13-167" aria-hidden="true" tabindex="-1"></a>ET_controller.record_event(<span class="st">'trial_1_start'</span>)</span>
+<span id="cb13-168"><a href="#cb13-168" aria-hidden="true" tabindex="-1"></a><span class="co"># ... present stimuli ...</span></span>
+<span id="cb13-169"><a href="#cb13-169" aria-hidden="true" tabindex="-1"></a>ET_controller.record_event(<span class="st">'trial_1_end'</span>)</span>
+<span id="cb13-170"><a href="#cb13-170" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb13-171"><a href="#cb13-171" aria-hidden="true" tabindex="-1"></a><span class="co"># Stop recording</span></span>
+<span id="cb13-172"><a href="#cb13-172" aria-hidden="true" tabindex="-1"></a>ET_controller.stop_recording()</span>
+<span id="cb13-173"><a href="#cb13-173" aria-hidden="true" tabindex="-1"></a><span class="in">```</span></span>
+<span id="cb13-174"><a href="#cb13-174" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb13-175"><a href="#cb13-175" aria-hidden="true" tabindex="-1"></a><span class="fu">#### Multi-file synchronization with absolute timestamps</span></span>
+<span id="cb13-176"><a href="#cb13-176" aria-hidden="true" tabindex="-1"></a><span class="in">```python</span></span>
+<span id="cb13-177"><a href="#cb13-177" aria-hidden="true" tabindex="-1"></a><span class="co"># Recording multiple synchronized files</span></span>
+<span id="cb13-178"><a href="#cb13-178" aria-hidden="true" tabindex="-1"></a>ET_controller.start_recording(<span class="st">'session1_gaze.h5'</span>, relative_timestamps<span class="op">=</span><span class="va">False</span>)</span>
+<span id="cb13-179"><a href="#cb13-179" aria-hidden="true" tabindex="-1"></a><span class="co"># ... run session 1 ...</span></span>
+<span id="cb13-180"><a href="#cb13-180" aria-hidden="true" tabindex="-1"></a>ET_controller.stop_recording()</span>
+<span id="cb13-181"><a href="#cb13-181" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb13-182"><a href="#cb13-182" aria-hidden="true" tabindex="-1"></a><span class="co"># Session 2 can be synchronized using absolute timestamps</span></span>
+<span id="cb13-183"><a href="#cb13-183" aria-hidden="true" tabindex="-1"></a>ET_controller.start_recording(<span class="st">'session2_gaze.h5'</span>, relative_timestamps<span class="op">=</span><span class="va">False</span>)</span>
+<span id="cb13-184"><a href="#cb13-184" aria-hidden="true" tabindex="-1"></a><span class="co"># ... run session 2 ...</span></span>
+<span id="cb13-185"><a href="#cb13-185" aria-hidden="true" tabindex="-1"></a>ET_controller.stop_recording()</span>
+<span id="cb13-186"><a href="#cb13-186" aria-hidden="true" tabindex="-1"></a><span class="in">```</span></span>
+<span id="cb13-187"><a href="#cb13-187" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb13-188"><a href="#cb13-188" aria-hidden="true" tabindex="-1"></a><span class="fu">#### Advanced raw data collection</span></span>
+<span id="cb13-189"><a href="#cb13-189" aria-hidden="true" tabindex="-1"></a><span class="in">```python</span></span>
+<span id="cb13-190"><a href="#cb13-190" aria-hidden="true" tabindex="-1"></a><span class="co"># Collect all data with pixel coords and relative time</span></span>
+<span id="cb13-191"><a href="#cb13-191" aria-hidden="true" tabindex="-1"></a>ET_controller.start_recording(</span>
+<span id="cb13-192"><a href="#cb13-192" aria-hidden="true" tabindex="-1"></a>    <span class="st">'advanced_analysis.h5'</span>,</span>
+<span id="cb13-193"><a href="#cb13-193" aria-hidden="true" tabindex="-1"></a>    raw_format<span class="op">=</span><span class="va">True</span>,</span>
+<span id="cb13-194"><a href="#cb13-194" aria-hidden="true" tabindex="-1"></a>    coordinate_units<span class="op">=</span><span class="st">'pix'</span>,</span>
+<span id="cb13-195"><a href="#cb13-195" aria-hidden="true" tabindex="-1"></a>    relative_timestamps<span class="op">=</span><span class="va">True</span></span>
+<span id="cb13-196"><a href="#cb13-196" aria-hidden="true" tabindex="-1"></a>)</span>
+<span id="cb13-197"><a href="#cb13-197" aria-hidden="true" tabindex="-1"></a><span class="in">```</span></span></code><button title="Copy to Clipboard" class="code-copy-button" data-in-quarto-modal=""><i class="bi"></i></button></pre></div>
 </div></div></div></div></div>
 </div> <!-- /content -->
 <footer class="footer">

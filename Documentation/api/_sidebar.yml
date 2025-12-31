@@ -23,11 +23,6 @@ website:
         section: Gaze Contingent
       section: Main Eye-tracker Class
     - contents:
-      - api/BaseCalibrationSession.qmd
-      - api/TobiiCalibrationSession.qmd
-      - api/MouseCalibrationSession.qmd
-      section: Internal Calibration
-    - contents:
       - api/convert_height_to_units.qmd
       - api/get_psychopy_pos.qmd
       - api/psychopy_to_pixels.qmd

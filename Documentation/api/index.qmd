@@ -58,18 +58,6 @@ positions for experimental logic.
 | [ETracker.gaze_contingent](ETracker.gaze_contingent.qmd#DeToX.ETracker.gaze_contingent) | Initialize real-time gaze buffer for contingent applications. |
 | [ETracker.get_gaze_position](ETracker.get_gaze_position.qmd#DeToX.ETracker.get_gaze_position) | Get current gaze position from rolling buffer. |
 
-## Internal Calibration
-
-Classes for running eye-tracker calibration. These get called internally by the ETracker class, and are reported here only for completeness.
-They are comprise of a base calibration class that set the common interface, and the specific implementations for Tobii and Mouse calibration.
-
-
-| | |
-| --- | --- |
-| [BaseCalibrationSession](BaseCalibrationSession.qmd#DeToX.BaseCalibrationSession) | Base class with common functionality for both calibration types. |
-| [TobiiCalibrationSession](TobiiCalibrationSession.qmd#DeToX.TobiiCalibrationSession) | Tobii-based calibration session for real eye tracking. |
-| [MouseCalibrationSession](MouseCalibrationSession.qmd#DeToX.MouseCalibrationSession) | Mouse-based calibration session for simulation mode. |
-
 ## Coordinate Conversion
 
 A collection of utility functions designed to help the conversion of the data from different formats.

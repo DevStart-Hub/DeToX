@@ -37,7 +37,7 @@ and saves it as a binary file. This can be reloaded later with
 |        | [bool](`bool`) | True if saved successfully; False if cancelled, no data available, in simulation mode, or on error. |
 +--------+----------------+-----------------------------------------------------------------------------------------------------+
 
-## Notes {.doc-section .doc-section-notes}
+## Details {.doc-section .doc-section-details}
 
 - In simulation mode, saving is skipped and a warning is issued.
 - If `use_gui` is True and the dialog is cancelled, returns False.

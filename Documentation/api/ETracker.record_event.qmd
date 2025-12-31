@@ -26,6 +26,17 @@ simulation vs. real eye tracker modes.
 | [RuntimeWarning](`RuntimeWarning`) | If called when recording is not active. |
 +------------------------------------+-----------------------------------------+
 
+## Details {.doc-section .doc-section-details}
+
+### Event-Gaze Synchronization
+
+Events are stored separately and merged with gaze data when `save_data()` is
+called. Each event is aligned to the next closest gaze sample (at or after the
+event timestamp) using binary search. When multiple events occur within the same
+sampling interval, they are concatenated with semicolon delimiters in the Events
+column (e.g., 'fixation_offset; stimulus_onset'). This ensures no event data is
+lost even when events occur in rapid succession.
+
 ## Examples {.doc-section .doc-section-examples}
 
 ### Basic Usage
@@ -66,4 +77,13 @@ for trial_num in range(10):
     ET_controller.record_event(f'trial_{trial_num}_end')
 
 ET_controller.stop_recording()
+```
+
+#### Rapid successive events
+```python
+# Events occurring within same sampling interval
+ET_controller.record_event('fixation_offset')
+ET_controller.record_event('stimulus_onset')
+
+# In saved data, may appear as: "fixation_offset; stimulus_onset"
 ```

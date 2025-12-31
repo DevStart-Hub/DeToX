@@ -45,7 +45,7 @@ and which remained the same.
 | [ValueError](`ValueError`)     | If the specified FPS or illumination mode is not supported by the connected  device.      |
 +--------------------------------+-------------------------------------------------------------------------------------------+
 
-## Notes {.doc-section .doc-section-notes}
+## Details {.doc-section .doc-section-details}
 
 - Settings cannot be changed during active recording. If an ongoing recording 
 is detected, a non-blocking warning is issued and the function exits safely.

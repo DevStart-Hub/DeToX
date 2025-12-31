@@ -16,13 +16,21 @@ aggregating across multiple samples.
 
 ## Parameters {.doc-section .doc-section-parameters}
 
-+--------+----------------------------------+---------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------+-------------+
-| Name   | Type                             | Description                                                                                                                                                                                                                                                   | Default     |
-+========+==================================+===============================================================================================================================================================================================================================================================+=============+
-| N      | [float](`float`) or [int](`int`) | Buffer size specification. Interpretation depends on `units` parameter: - If units='seconds': Duration in seconds (e.g., 0.5 = 500ms window) - If units='samples': Number of gaze samples (e.g., 5 = last 5 samples) Default is 0.5 (seconds).                | `0.5`       |
-+--------+----------------------------------+---------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------+-------------+
-| units  | [str](`str`)                     | Unit for buffer size specification: 'seconds' or 'samples'. - 'seconds' (default): N specifies time duration, automatically calculates required samples based on eye tracker frequency - 'samples': N specifies exact number of samples Default is 'seconds'. | `'seconds'` |
-+--------+----------------------------------+---------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------+-------------+
++--------+----------------------------------+-----------------------------------------------------------------------------+-------------+
+| Name   | Type                             | Description                                                                 | Default     |
++========+==================================+=============================================================================+=============+
+| N      | [float](`float`) or [int](`int`) | Buffer size specification. Interpretation depends on `units` parameter:     | `0.5`       |
+|        |                                  |                                                                             |             |
+|        |                                  |  - If units='seconds': Duration in seconds (e.g., 0.5 = 500ms window)       |             |
+|        |                                  |  - If units='samples': Number of gaze samples (e.g., 5 = last 5 samples)    |             |
+|        |                                  | Default is 0.5 (seconds).                                                   |             |
++--------+----------------------------------+-----------------------------------------------------------------------------+-------------+
+| units  | [str](`str`)                     | Unit for buffer size specification: 'seconds' or 'samples'.                 | `'seconds'` |
+|        |                                  |                                                                             |             |
+|        |                                  |  - 'seconds' (default): N specifies time duration, automatically calculates |             |
+|        |                                  | required samples based on eye tracker frequency                             |             |
+|        |                                  |  - 'samples': N specifies exact number of samples                           |             |
++--------+----------------------------------+-----------------------------------------------------------------------------+-------------+
 
 ## Raises {.doc-section .doc-section-raises}
 
@@ -34,7 +42,7 @@ aggregating across multiple samples.
 | [ValueError](`ValueError`) | If units is not 'seconds' or 'samples', or if calculated buffer size < 1. |
 +----------------------------+---------------------------------------------------------------------------+
 
-## Notes {.doc-section .doc-section-notes}
+## Details {.doc-section .doc-section-details}
 
 - Call this method ONCE before your experimental loop
 - Buffer size trades off stability vs. latency:

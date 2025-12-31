@@ -15,15 +15,15 @@ can be called manually during recording to periodically save data and
 clear buffers. This is useful for long experiments to avoid memory buildup
 and ensure data is saved even if the program crashes.
 
-## Notes {.doc-section .doc-section-notes}
+## Details {.doc-section .doc-section-details}
 
 - Automatically called by `stop_recording()`
 - Safe to call during active recording
 - Clears buffers after saving
 - Events are matched to nearest gaze sample by timestamp
 - In HDF5 format, events are saved in two places:
-1. Merged into the main gaze table's 'Events' column
-2. As a separate 'events' table for independent event analysis
+  1. Merged into the main gaze table's 'Events' column
+  2. As a separate 'events' table for independent event analysis
 - In CSV format, events only appear in the 'Events' column
 
 ## Examples {.doc-section .doc-section-examples}

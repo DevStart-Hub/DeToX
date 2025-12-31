@@ -1,7 +1,11 @@
 # ETracker.get_gaze_position { #DeToX.ETracker.get_gaze_position }
 
 ```python
-ETracker.get_gaze_position(fallback_offscreen=True, method='median')
+ETracker.get_gaze_position(
+    fallback_offscreen=True,
+    method='median',
+    coordinate_units='default',
+)
 ```
 
 Get current gaze position from rolling buffer.
@@ -11,21 +15,32 @@ real-time gaze estimate. Handles missing or invalid data gracefully.
 
 ## Parameters {.doc-section .doc-section-parameters}
 
-+--------------------+----------------+----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------+------------+
-| Name               | Type           | Description                                                                                                                                                                                                          | Default    |
-+====================+================+======================================================================================================================================================================================================================+============+
-| fallback_offscreen | [bool](`bool`) | If True (default), returns an offscreen position (3x screen dimensions) when no valid gaze data is available. If False, returns None.                                                                                | `True`     |
-+--------------------+----------------+----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------+------------+
-| method             | [str](`str`)   | Aggregation method for combining samples and eyes. - "median" (default): Robust to outliers, good for noisy data - "mean": Smoother but sensitive to outliers - "last": Lowest latency, uses only most recent sample | `'median'` |
-+--------------------+----------------+----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------+------------+
++--------------------+----------------+---------------------------------------------------------------------------------------------------------------------------------------+-------------+
+| Name               | Type           | Description                                                                                                                           | Default     |
++====================+================+=======================================================================================================================================+=============+
+| fallback_offscreen | [bool](`bool`) | If True (default), returns an offscreen position (3x screen dimensions) when no valid gaze data is available. If False, returns None. | `True`      |
++--------------------+----------------+---------------------------------------------------------------------------------------------------------------------------------------+-------------+
+| method             | [str](`str`)   | Aggregation method for combining samples and eyes:                                                                                    | `'median'`  |
+|                    |                |                                                                                                                                       |             |
+|                    |                |   - **"median"** (default): Robust to outliers, good for noisy data                                                                   |             |
+|                    |                |   - **"mean"**: Smoother but sensitive to outliers                                                                                    |             |
+|                    |                |   - **"last"**: Lowest latency, uses only most recent sample                                                                          |             |
++--------------------+----------------+---------------------------------------------------------------------------------------------------------------------------------------+-------------+
+| coordinate_units   | [str](`str`)   | Target coordinate system for returned gaze position:                                                                                  | `'default'` |
+|                    |                |                                                                                                                                       |             |
+|                    |                |   - **'default'**: Use window's current coordinate system                                                                             |             |
+|                    |                |   - **'tobii'**: Tobii ADCS coordinates (0-1 range, top-left origin)                                                                  |             |
+|                    |                |   - **PsychoPy units**: 'pix', 'height', 'norm', 'cm', 'deg'                                                                          |             |
+|                    |                | See [Coordinate System Conversion](#coordinate-system-conversion) for more information.                                               |             |
++--------------------+----------------+---------------------------------------------------------------------------------------------------------------------------------------+-------------+
 
 ## Returns {.doc-section .doc-section-returns}
 
-+--------+------------------------------------+-----------------------------------------------------------------------------------------------------------------------------+
-| Name   | Type                               | Description                                                                                                                 |
-+========+====================================+=============================================================================================================================+
-|        | [tuple](`tuple`) or [None](`None`) | Gaze position (x, y) in PsychoPy coordinates (current window units), or None if no valid data and fallback_offscreen=False. |
-+--------+------------------------------------+-----------------------------------------------------------------------------------------------------------------------------+
++--------+------------------------------------+-------------------------------------------------------------------------------------------------------+
+| Name   | Type                               | Description                                                                                           |
++========+====================================+=======================================================================================================+
+|        | [tuple](`tuple`) or [None](`None`) | Gaze position (x, y) in specified coordinates, or None if no valid data and fallback_offscreen=False. |
++--------+------------------------------------+-------------------------------------------------------------------------------------------------------+
 
 ## Raises {.doc-section .doc-section-raises}
 
@@ -35,15 +50,49 @@ real-time gaze estimate. Handles missing or invalid data gracefully.
 | [RuntimeError](`RuntimeError`) | If gaze_contingent() was not called to initialize the buffer. |
 +--------------------------------+---------------------------------------------------------------+
 
+## Details {.doc-section .doc-section-details}
+
+### Coordinate System Conversion
+
+The `coordinate_units` parameter determines how gaze positions are returned from
+the real-time buffer. By default, positions are returned in your window's current
+coordinate system, making it seamless to assign gaze positions directly to stimulus
+objects. For example, if your window uses height units, the returned gaze position
+will automatically be in height units, ready to use with `stimulus.pos = gaze_pos`.
+You can override this behavior to request gaze positions in any coordinate system
+regardless of your window settings. Setting `coordinate_units='tobii'` returns the 
+raw normalized coordinates from the eye tracker, where values range from 0 to 1 with
+the origin at the top-left corner.
+
 ## Examples {.doc-section .doc-section-examples}
 
 ### Basic Usage
 
-#### Default behavior with median aggregation
+#### Default behavior (window's coordinate system)
 ```python
 pos = ET_controller.get_gaze_position()
 if pos is not None:
     circle.pos = pos
+```
+
+### Coordinate Systems
+
+#### Get position in Tobii coordinates (0-1 range)
+```python
+pos = ET_controller.get_gaze_position(coordinate_units='tobii')
+# Returns: (0.5, 0.3) for gaze at center-left
+```
+
+#### Get position in pixels (center origin)
+```python
+pos = ET_controller.get_gaze_position(coordinate_units='pix')
+# Returns: (120, -50) for gaze slightly right and below center
+```
+
+#### Get position in height units
+```python
+pos = ET_controller.get_gaze_position(coordinate_units='height')
+# Returns: (0.15, -0.08) in height units
 ```
 
 ### Aggregation Methods
@@ -73,4 +122,23 @@ pos = ET_controller.get_gaze_position(fallback_offscreen=True)
 # Offscreen positions will be far outside window bounds
 if abs(pos[0]) > 2.0 or abs(pos[1]) > 2.0:
     print("Participant looking away")
+```
+
+### Complete Application
+
+#### Gaze-contingent stimulus in normalized coordinates
+```python
+ET_controller.gaze_contingent(N=0.3, units='seconds')
+ET_controller.start_recording('data.h5')
+
+circle = visual.Circle(win, radius=0.05, fillColor='red', units='norm')
+
+for frame in range(600):
+    # Get gaze in normalized coordinates to match circle
+    gaze_pos = ET_controller.get_gaze_position(coordinate_units='norm')
+    circle.pos = gaze_pos
+    circle.draw()
+    win.flip()
+
+ET_controller.stop_recording()
 ```

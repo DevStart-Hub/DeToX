@@ -64,7 +64,7 @@ pre > code.sourceCode > span > a:first-child::before { text-decoration: underlin
 <script src="../site_libs/quarto-search/fuse.min.js"></script>
 <script src="../site_libs/quarto-search/quarto-search.js"></script>
 <meta name="quarto:offset" content="../">
-<link href="../api/BaseCalibrationSession.html" rel="next">
+<link href="../api/convert_height_to_units.html" rel="next">
 <link href="../api/ETracker.gaze_contingent.html" rel="prev">
 <script src="../site_libs/cookie-consent/cookie-consent.js"></script>
 <link href="../site_libs/cookie-consent/cookie-consent.css" rel="stylesheet">
@@ -183,9 +183,14 @@ div.callout-Advanced.callout-style-default .callout-icon::before, div.callout-Ad
   </li>  
 </ul>
           </div> <!-- /navcollapse -->
-            <div class="quarto-navbar-tools">
+            <div class="quarto-navbar-tools tools-wide">
     <a href="https://bsky.app/profile/devstart.org" title="" class="quarto-navigation-tool px-1" aria-label=""><i class="bi bi-twitter"></i></a>
     <a href="https://github.com/DevStart-Hub/DeToX" title="" class="quarto-navigation-tool px-1" aria-label=""><i class="bi bi-github"></i></a>
+  <a href="" class="quarto-reader-toggle quarto-navigation-tool px-1" onclick="window.quartoToggleReader(); return false;" title="Toggle reader mode">
+  <div class="quarto-reader-toggle-btn">
+  <i class="bi"></i>
+  </div>
+</a>
 </div>
       </div> <!-- /container-fluid -->
     </nav>
@@ -334,41 +339,12 @@ div.callout-Advanced.callout-style-default .callout-icon::before, div.callout-Ad
         <li class="sidebar-item sidebar-item-section">
       <div class="sidebar-item-container"> 
             <a class="sidebar-item-text sidebar-link text-start" data-bs-toggle="collapse" data-bs-target="#quarto-sidebar-section-5" role="navigation" aria-expanded="true">
- <span class="menu-text">Internal Calibration</span></a>
+ <span class="menu-text">Coordinate Conversion</span></a>
           <a class="sidebar-item-toggle text-start" data-bs-toggle="collapse" data-bs-target="#quarto-sidebar-section-5" role="navigation" aria-expanded="true" aria-label="Toggle section">
             <i class="bi bi-chevron-right ms-2"></i>
           </a> 
       </div>
       <ul id="quarto-sidebar-section-5" class="collapse list-unstyled sidebar-section depth1 show">  
-          <li class="sidebar-item">
-  <div class="sidebar-item-container"> 
-  <a href="../api/BaseCalibrationSession.html" class="sidebar-item-text sidebar-link">
- <span class="menu-text">BaseCalibrationSession</span></a>
-  </div>
-</li>
-          <li class="sidebar-item">
-  <div class="sidebar-item-container"> 
-  <a href="../api/TobiiCalibrationSession.html" class="sidebar-item-text sidebar-link">
- <span class="menu-text">TobiiCalibrationSession</span></a>
-  </div>
-</li>
-          <li class="sidebar-item">
-  <div class="sidebar-item-container"> 
-  <a href="../api/MouseCalibrationSession.html" class="sidebar-item-text sidebar-link">
- <span class="menu-text">MouseCalibrationSession</span></a>
-  </div>
-</li>
-      </ul>
-  </li>
-        <li class="sidebar-item sidebar-item-section">
-      <div class="sidebar-item-container"> 
-            <a class="sidebar-item-text sidebar-link text-start" data-bs-toggle="collapse" data-bs-target="#quarto-sidebar-section-6" role="navigation" aria-expanded="true">
- <span class="menu-text">Coordinate Conversion</span></a>
-          <a class="sidebar-item-toggle text-start" data-bs-toggle="collapse" data-bs-target="#quarto-sidebar-section-6" role="navigation" aria-expanded="true" aria-label="Toggle section">
-            <i class="bi bi-chevron-right ms-2"></i>
-          </a> 
-      </div>
-      <ul id="quarto-sidebar-section-6" class="collapse list-unstyled sidebar-section depth1 show">  
           <li class="sidebar-item">
   <div class="sidebar-item-container"> 
   <a href="../api/convert_height_to_units.html" class="sidebar-item-text sidebar-link">
@@ -409,13 +385,13 @@ div.callout-Advanced.callout-style-default .callout-icon::before, div.callout-Ad
   </li>
         <li class="sidebar-item sidebar-item-section">
       <div class="sidebar-item-container"> 
-            <a class="sidebar-item-text sidebar-link text-start" data-bs-toggle="collapse" data-bs-target="#quarto-sidebar-section-7" role="navigation" aria-expanded="true">
+            <a class="sidebar-item-text sidebar-link text-start" data-bs-toggle="collapse" data-bs-target="#quarto-sidebar-section-6" role="navigation" aria-expanded="true">
  <span class="menu-text">Utilities</span></a>
-          <a class="sidebar-item-toggle text-start" data-bs-toggle="collapse" data-bs-target="#quarto-sidebar-section-7" role="navigation" aria-expanded="true" aria-label="Toggle section">
+          <a class="sidebar-item-toggle text-start" data-bs-toggle="collapse" data-bs-target="#quarto-sidebar-section-6" role="navigation" aria-expanded="true" aria-label="Toggle section">
             <i class="bi bi-chevron-right ms-2"></i>
           </a> 
       </div>
-      <ul id="quarto-sidebar-section-7" class="collapse list-unstyled sidebar-section depth1 show">  
+      <ul id="quarto-sidebar-section-6" class="collapse list-unstyled sidebar-section depth1 show">  
           <li class="sidebar-item">
   <div class="sidebar-item-container"> 
   <a href="../api/NicePrint.html" class="sidebar-item-text sidebar-link">
@@ -426,13 +402,13 @@ div.callout-Advanced.callout-style-default .callout-icon::before, div.callout-Ad
   </li>
         <li class="sidebar-item sidebar-item-section">
       <div class="sidebar-item-container"> 
-            <a class="sidebar-item-text sidebar-link text-start" data-bs-toggle="collapse" data-bs-target="#quarto-sidebar-section-8" role="navigation" aria-expanded="true">
+            <a class="sidebar-item-text sidebar-link text-start" data-bs-toggle="collapse" data-bs-target="#quarto-sidebar-section-7" role="navigation" aria-expanded="true">
  <span class="menu-text">Configuration Settings</span></a>
-          <a class="sidebar-item-toggle text-start" data-bs-toggle="collapse" data-bs-target="#quarto-sidebar-section-8" role="navigation" aria-expanded="true" aria-label="Toggle section">
+          <a class="sidebar-item-toggle text-start" data-bs-toggle="collapse" data-bs-target="#quarto-sidebar-section-7" role="navigation" aria-expanded="true" aria-label="Toggle section">
             <i class="bi bi-chevron-right ms-2"></i>
           </a> 
       </div>
-      <ul id="quarto-sidebar-section-8" class="collapse list-unstyled sidebar-section depth1 show">  
+      <ul id="quarto-sidebar-section-7" class="collapse list-unstyled sidebar-section depth1 show">  
           <li class="sidebar-item">
   <div class="sidebar-item-container"> 
   <a href="../api/ETSettings.AnimationSettings.html" class="sidebar-item-text sidebar-link">
@@ -474,11 +450,17 @@ div.callout-Advanced.callout-style-default .callout-icon::before, div.callout-Ad
   <li><a href="#parameters" id="toc-parameters" class="nav-link" data-scroll-target="#parameters">Parameters</a></li>
   <li><a href="#returns" id="toc-returns" class="nav-link" data-scroll-target="#returns">Returns</a></li>
   <li><a href="#raises" id="toc-raises" class="nav-link" data-scroll-target="#raises">Raises</a></li>
+  <li><a href="#details" id="toc-details" class="nav-link" data-scroll-target="#details">Details</a>
+  <ul class="collapse">
+  <li><a href="#coordinate-system-conversion" id="toc-coordinate-system-conversion" class="nav-link" data-scroll-target="#coordinate-system-conversion">Coordinate System Conversion</a></li>
+  </ul></li>
   <li><a href="#examples" id="toc-examples" class="nav-link" data-scroll-target="#examples">Examples</a>
   <ul class="collapse">
   <li><a href="#basic-usage" id="toc-basic-usage" class="nav-link" data-scroll-target="#basic-usage">Basic Usage</a></li>
+  <li><a href="#coordinate-systems" id="toc-coordinate-systems" class="nav-link" data-scroll-target="#coordinate-systems">Coordinate Systems</a></li>
   <li><a href="#aggregation-methods" id="toc-aggregation-methods" class="nav-link" data-scroll-target="#aggregation-methods">Aggregation Methods</a></li>
   <li><a href="#handling-missing-data" id="toc-handling-missing-data" class="nav-link" data-scroll-target="#handling-missing-data">Handling Missing Data</a></li>
+  <li><a href="#complete-application" id="toc-complete-application" class="nav-link" data-scroll-target="#complete-application">Complete Application</a></li>
   </ul></li>
   </ul></li>
   </ul>
@@ -492,7 +474,11 @@ div.callout-Advanced.callout-style-default .callout-icon::before, div.callout-Ad
 
 <section id="DeToX.ETracker.get_gaze_position" class="level1">
 <h1>ETracker.get_gaze_position</h1>
-<div class="sourceCode" id="cb1"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb1-1"><a href="#cb1-1" aria-hidden="true" tabindex="-1"></a>ETracker.get_gaze_position(fallback_offscreen<span class="op">=</span><span class="va">True</span>, method<span class="op">=</span><span class="st">'median'</span>)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="sourceCode" id="cb1"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb1-1"><a href="#cb1-1" aria-hidden="true" tabindex="-1"></a>ETracker.get_gaze_position(</span>
+<span id="cb1-2"><a href="#cb1-2" aria-hidden="true" tabindex="-1"></a>    fallback_offscreen<span class="op">=</span><span class="va">True</span>,</span>
+<span id="cb1-3"><a href="#cb1-3" aria-hidden="true" tabindex="-1"></a>    method<span class="op">=</span><span class="st">'median'</span>,</span>
+<span id="cb1-4"><a href="#cb1-4" aria-hidden="true" tabindex="-1"></a>    coordinate_units<span class="op">=</span><span class="st">'default'</span>,</span>
+<span id="cb1-5"><a href="#cb1-5" aria-hidden="true" tabindex="-1"></a>)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
 <p>Get current gaze position from rolling buffer.</p>
 <p>Aggregates recent gaze samples from both eyes to provide a stable, real-time gaze estimate. Handles missing or invalid data gracefully.</p>
 <section id="parameters" class="level2 doc-section doc-section-parameters">
@@ -516,8 +502,24 @@ div.callout-Advanced.callout-style-default .callout-icon::before, div.callout-Ad
 <tr class="even">
 <td>method</td>
 <td><a href="`str`">str</a></td>
-<td>Aggregation method for combining samples and eyes. - “median” (default): Robust to outliers, good for noisy data - “mean”: Smoother but sensitive to outliers - “last”: Lowest latency, uses only most recent sample</td>
+<td><p>Aggregation method for combining samples and eyes:</p>
+<ul>
+<li><strong>“median”</strong> (default): Robust to outliers, good for noisy data</li>
+<li><strong>“mean”</strong>: Smoother but sensitive to outliers</li>
+<li><strong>“last”</strong>: Lowest latency, uses only most recent sample</li>
+</ul></td>
 <td><code>'median'</code></td>
+</tr>
+<tr class="odd">
+<td>coordinate_units</td>
+<td><a href="`str`">str</a></td>
+<td><p>Target coordinate system for returned gaze position:</p>
+<ul>
+<li><strong>‘default’</strong>: Use window’s current coordinate system</li>
+<li><strong>‘tobii’</strong>: Tobii ADCS coordinates (0-1 range, top-left origin)</li>
+<li><strong>PsychoPy units</strong>: ‘pix’, ‘height’, ‘norm’, ‘cm’, ‘deg’ See <a href="#coordinate-system-conversion">Coordinate System Conversion</a> for more information.</li>
+</ul></td>
+<td><code>'default'</code></td>
 </tr>
 </tbody>
 </table>
@@ -536,7 +538,7 @@ div.callout-Advanced.callout-style-default .callout-icon::before, div.callout-Ad
 <tr class="odd">
 <td></td>
 <td><a href="`tuple`">tuple</a> or <a href="`None`">None</a></td>
-<td>Gaze position (x, y) in PsychoPy coordinates (current window units), or None if no valid data and fallback_offscreen=False.</td>
+<td>Gaze position (x, y) in specified coordinates, or None if no valid data and fallback_offscreen=False.</td>
 </tr>
 </tbody>
 </table>
@@ -558,42 +560,86 @@ div.callout-Advanced.callout-style-default .callout-icon::before, div.callout-Ad
 </tbody>
 </table>
 </section>
+<section id="details" class="level2 doc-section doc-section-details">
+<h2 class="doc-section doc-section-details anchored" data-anchor-id="details">Details</h2>
+<section id="coordinate-system-conversion" class="level3">
+<h3 class="anchored" data-anchor-id="coordinate-system-conversion">Coordinate System Conversion</h3>
+<p>The <code>coordinate_units</code> parameter determines how gaze positions are returned from the real-time buffer. By default, positions are returned in your window’s current coordinate system, making it seamless to assign gaze positions directly to stimulus objects. For example, if your window uses height units, the returned gaze position will automatically be in height units, ready to use with <code>stimulus.pos = gaze_pos</code>. You can override this behavior to request gaze positions in any coordinate system regardless of your window settings. Setting <code>coordinate_units='tobii'</code> returns the raw normalized coordinates from the eye tracker, where values range from 0 to 1 with the origin at the top-left corner.</p>
+</section>
+</section>
 <section id="examples" class="level2 doc-section doc-section-examples">
 <h2 class="doc-section doc-section-examples anchored" data-anchor-id="examples">Examples</h2>
 <section id="basic-usage" class="level3">
 <h3 class="anchored" data-anchor-id="basic-usage">Basic Usage</h3>
-<section id="default-behavior-with-median-aggregation" class="level4">
-<h4 class="anchored" data-anchor-id="default-behavior-with-median-aggregation">Default behavior with median aggregation</h4>
+<section id="default-behavior-windows-coordinate-system" class="level4">
+<h4 class="anchored" data-anchor-id="default-behavior-windows-coordinate-system">Default behavior (window’s coordinate system)</h4>
 <div class="sourceCode" id="cb2"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb2-1"><a href="#cb2-1" aria-hidden="true" tabindex="-1"></a>pos <span class="op">=</span> ET_controller.get_gaze_position()</span>
 <span id="cb2-2"><a href="#cb2-2" aria-hidden="true" tabindex="-1"></a><span class="cf">if</span> pos <span class="kw">is</span> <span class="kw">not</span> <span class="va">None</span>:</span>
 <span id="cb2-3"><a href="#cb2-3" aria-hidden="true" tabindex="-1"></a>    circle.pos <span class="op">=</span> pos</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+</section>
+</section>
+<section id="coordinate-systems" class="level3">
+<h3 class="anchored" data-anchor-id="coordinate-systems">Coordinate Systems</h3>
+<section id="get-position-in-tobii-coordinates-0-1-range" class="level4">
+<h4 class="anchored" data-anchor-id="get-position-in-tobii-coordinates-0-1-range">Get position in Tobii coordinates (0-1 range)</h4>
+<div class="sourceCode" id="cb3"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb3-1"><a href="#cb3-1" aria-hidden="true" tabindex="-1"></a>pos <span class="op">=</span> ET_controller.get_gaze_position(coordinate_units<span class="op">=</span><span class="st">'tobii'</span>)</span>
+<span id="cb3-2"><a href="#cb3-2" aria-hidden="true" tabindex="-1"></a><span class="co"># Returns: (0.5, 0.3) for gaze at center-left</span></span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+</section>
+<section id="get-position-in-pixels-center-origin" class="level4">
+<h4 class="anchored" data-anchor-id="get-position-in-pixels-center-origin">Get position in pixels (center origin)</h4>
+<div class="sourceCode" id="cb4"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb4-1"><a href="#cb4-1" aria-hidden="true" tabindex="-1"></a>pos <span class="op">=</span> ET_controller.get_gaze_position(coordinate_units<span class="op">=</span><span class="st">'pix'</span>)</span>
+<span id="cb4-2"><a href="#cb4-2" aria-hidden="true" tabindex="-1"></a><span class="co"># Returns: (120, -50) for gaze slightly right and below center</span></span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+</section>
+<section id="get-position-in-height-units" class="level4">
+<h4 class="anchored" data-anchor-id="get-position-in-height-units">Get position in height units</h4>
+<div class="sourceCode" id="cb5"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb5-1"><a href="#cb5-1" aria-hidden="true" tabindex="-1"></a>pos <span class="op">=</span> ET_controller.get_gaze_position(coordinate_units<span class="op">=</span><span class="st">'height'</span>)</span>
+<span id="cb5-2"><a href="#cb5-2" aria-hidden="true" tabindex="-1"></a><span class="co"># Returns: (0.15, -0.08) in height units</span></span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
 </section>
 </section>
 <section id="aggregation-methods" class="level3">
 <h3 class="anchored" data-anchor-id="aggregation-methods">Aggregation Methods</h3>
 <section id="mean-for-smoother-tracking" class="level4">
 <h4 class="anchored" data-anchor-id="mean-for-smoother-tracking">Mean for smoother tracking</h4>
-<div class="sourceCode" id="cb3"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb3-1"><a href="#cb3-1" aria-hidden="true" tabindex="-1"></a>pos <span class="op">=</span> ET_controller.get_gaze_position(method<span class="op">=</span><span class="st">"mean"</span>)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="sourceCode" id="cb6"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb6-1"><a href="#cb6-1" aria-hidden="true" tabindex="-1"></a>pos <span class="op">=</span> ET_controller.get_gaze_position(method<span class="op">=</span><span class="st">"mean"</span>)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
 </section>
 <section id="last-sample-for-lowest-latency" class="level4">
 <h4 class="anchored" data-anchor-id="last-sample-for-lowest-latency">Last sample for lowest latency</h4>
-<div class="sourceCode" id="cb4"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb4-1"><a href="#cb4-1" aria-hidden="true" tabindex="-1"></a>pos <span class="op">=</span> ET_controller.get_gaze_position(method<span class="op">=</span><span class="st">"last"</span>)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="sourceCode" id="cb7"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb7-1"><a href="#cb7-1" aria-hidden="true" tabindex="-1"></a>pos <span class="op">=</span> ET_controller.get_gaze_position(method<span class="op">=</span><span class="st">"last"</span>)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
 </section>
 </section>
 <section id="handling-missing-data" class="level3">
 <h3 class="anchored" data-anchor-id="handling-missing-data">Handling Missing Data</h3>
 <section id="return-none-instead-of-offscreen-position" class="level4">
 <h4 class="anchored" data-anchor-id="return-none-instead-of-offscreen-position">Return None instead of offscreen position</h4>
-<div class="sourceCode" id="cb5"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb5-1"><a href="#cb5-1" aria-hidden="true" tabindex="-1"></a>pos <span class="op">=</span> ET_controller.get_gaze_position(fallback_offscreen<span class="op">=</span><span class="va">False</span>)</span>
-<span id="cb5-2"><a href="#cb5-2" aria-hidden="true" tabindex="-1"></a><span class="cf">if</span> pos <span class="kw">is</span> <span class="va">None</span>:</span>
-<span id="cb5-3"><a href="#cb5-3" aria-hidden="true" tabindex="-1"></a>    <span class="bu">print</span>(<span class="st">"No valid gaze data"</span>)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="sourceCode" id="cb8"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb8-1"><a href="#cb8-1" aria-hidden="true" tabindex="-1"></a>pos <span class="op">=</span> ET_controller.get_gaze_position(fallback_offscreen<span class="op">=</span><span class="va">False</span>)</span>
+<span id="cb8-2"><a href="#cb8-2" aria-hidden="true" tabindex="-1"></a><span class="cf">if</span> pos <span class="kw">is</span> <span class="va">None</span>:</span>
+<span id="cb8-3"><a href="#cb8-3" aria-hidden="true" tabindex="-1"></a>    <span class="bu">print</span>(<span class="st">"No valid gaze data"</span>)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
 </section>
 <section id="check-for-offscreen-gaze" class="level4">
 <h4 class="anchored" data-anchor-id="check-for-offscreen-gaze">Check for offscreen gaze</h4>
-<div class="sourceCode" id="cb6"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb6-1"><a href="#cb6-1" aria-hidden="true" tabindex="-1"></a>pos <span class="op">=</span> ET_controller.get_gaze_position(fallback_offscreen<span class="op">=</span><span class="va">True</span>)</span>
-<span id="cb6-2"><a href="#cb6-2" aria-hidden="true" tabindex="-1"></a><span class="co"># Offscreen positions will be far outside window bounds</span></span>
-<span id="cb6-3"><a href="#cb6-3" aria-hidden="true" tabindex="-1"></a><span class="cf">if</span> <span class="bu">abs</span>(pos[<span class="dv">0</span>]) <span class="op">&gt;</span> <span class="fl">2.0</span> <span class="kw">or</span> <span class="bu">abs</span>(pos[<span class="dv">1</span>]) <span class="op">&gt;</span> <span class="fl">2.0</span>:</span>
-<span id="cb6-4"><a href="#cb6-4" aria-hidden="true" tabindex="-1"></a>    <span class="bu">print</span>(<span class="st">"Participant looking away"</span>)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="sourceCode" id="cb9"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb9-1"><a href="#cb9-1" aria-hidden="true" tabindex="-1"></a>pos <span class="op">=</span> ET_controller.get_gaze_position(fallback_offscreen<span class="op">=</span><span class="va">True</span>)</span>
+<span id="cb9-2"><a href="#cb9-2" aria-hidden="true" tabindex="-1"></a><span class="co"># Offscreen positions will be far outside window bounds</span></span>
+<span id="cb9-3"><a href="#cb9-3" aria-hidden="true" tabindex="-1"></a><span class="cf">if</span> <span class="bu">abs</span>(pos[<span class="dv">0</span>]) <span class="op">&gt;</span> <span class="fl">2.0</span> <span class="kw">or</span> <span class="bu">abs</span>(pos[<span class="dv">1</span>]) <span class="op">&gt;</span> <span class="fl">2.0</span>:</span>
+<span id="cb9-4"><a href="#cb9-4" aria-hidden="true" tabindex="-1"></a>    <span class="bu">print</span>(<span class="st">"Participant looking away"</span>)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+</section>
+</section>
+<section id="complete-application" class="level3">
+<h3 class="anchored" data-anchor-id="complete-application">Complete Application</h3>
+<section id="gaze-contingent-stimulus-in-normalized-coordinates" class="level4">
+<h4 class="anchored" data-anchor-id="gaze-contingent-stimulus-in-normalized-coordinates">Gaze-contingent stimulus in normalized coordinates</h4>
+<div class="sourceCode" id="cb10"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb10-1"><a href="#cb10-1" aria-hidden="true" tabindex="-1"></a>ET_controller.gaze_contingent(N<span class="op">=</span><span class="fl">0.3</span>, units<span class="op">=</span><span class="st">'seconds'</span>)</span>
+<span id="cb10-2"><a href="#cb10-2" aria-hidden="true" tabindex="-1"></a>ET_controller.start_recording(<span class="st">'data.h5'</span>)</span>
+<span id="cb10-3"><a href="#cb10-3" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb10-4"><a href="#cb10-4" aria-hidden="true" tabindex="-1"></a>circle <span class="op">=</span> visual.Circle(win, radius<span class="op">=</span><span class="fl">0.05</span>, fillColor<span class="op">=</span><span class="st">'red'</span>, units<span class="op">=</span><span class="st">'norm'</span>)</span>
+<span id="cb10-5"><a href="#cb10-5" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb10-6"><a href="#cb10-6" aria-hidden="true" tabindex="-1"></a><span class="cf">for</span> frame <span class="kw">in</span> <span class="bu">range</span>(<span class="dv">600</span>):</span>
+<span id="cb10-7"><a href="#cb10-7" aria-hidden="true" tabindex="-1"></a>    <span class="co"># Get gaze in normalized coordinates to match circle</span></span>
+<span id="cb10-8"><a href="#cb10-8" aria-hidden="true" tabindex="-1"></a>    gaze_pos <span class="op">=</span> ET_controller.get_gaze_position(coordinate_units<span class="op">=</span><span class="st">'norm'</span>)</span>
+<span id="cb10-9"><a href="#cb10-9" aria-hidden="true" tabindex="-1"></a>    circle.pos <span class="op">=</span> gaze_pos</span>
+<span id="cb10-10"><a href="#cb10-10" aria-hidden="true" tabindex="-1"></a>    circle.draw()</span>
+<span id="cb10-11"><a href="#cb10-11" aria-hidden="true" tabindex="-1"></a>    win.flip()</span>
+<span id="cb10-12"><a href="#cb10-12" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb10-13"><a href="#cb10-13" aria-hidden="true" tabindex="-1"></a>ET_controller.stop_recording()</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
 
 
 <!-- -->
@@ -1082,87 +1128,155 @@ window.document.addEventListener("DOMContentLoaded", function (event) {
       </a>          
   </div>
   <div class="nav-page nav-page-next">
-      <a href="../api/BaseCalibrationSession.html" class="pagination-link" aria-label="BaseCalibrationSession">
-        <span class="nav-page-text">BaseCalibrationSession</span> <i class="bi bi-arrow-right-short"></i>
+      <a href="../api/convert_height_to_units.html" class="pagination-link" aria-label="convert_height_to_units">
+        <span class="nav-page-text">convert_height_to_units</span> <i class="bi bi-arrow-right-short"></i>
       </a>
   </div>
 </nav><div class="modal fade" id="quarto-embedded-source-code-modal" tabindex="-1" aria-labelledby="quarto-embedded-source-code-modal-label" aria-hidden="true"><div class="modal-dialog modal-dialog-scrollable"><div class="modal-content"><div class="modal-header"><h5 class="modal-title" id="quarto-embedded-source-code-modal-label">Source Code</h5><button class="btn-close" data-bs-dismiss="modal"></button></div><div class="modal-body"><div class="">
-<div class="sourceCode" id="cb7" data-shortcodes="false"><pre class="sourceCode markdown code-with-copy"><code class="sourceCode markdown"><span id="cb7-1"><a href="#cb7-1" aria-hidden="true" tabindex="-1"></a><span class="fu"># ETracker.get_gaze_position { #DeToX.ETracker.get_gaze_position }</span></span>
-<span id="cb7-2"><a href="#cb7-2" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb7-3"><a href="#cb7-3" aria-hidden="true" tabindex="-1"></a><span class="in">```python</span></span>
-<span id="cb7-4"><a href="#cb7-4" aria-hidden="true" tabindex="-1"></a>ETracker.get_gaze_position(fallback_offscreen<span class="op">=</span><span class="va">True</span>, method<span class="op">=</span><span class="st">'median'</span>)</span>
-<span id="cb7-5"><a href="#cb7-5" aria-hidden="true" tabindex="-1"></a><span class="in">```</span></span>
-<span id="cb7-6"><a href="#cb7-6" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb7-7"><a href="#cb7-7" aria-hidden="true" tabindex="-1"></a>Get current gaze position from rolling buffer.</span>
-<span id="cb7-8"><a href="#cb7-8" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb7-9"><a href="#cb7-9" aria-hidden="true" tabindex="-1"></a>Aggregates recent gaze samples from both eyes to provide a stable,</span>
-<span id="cb7-10"><a href="#cb7-10" aria-hidden="true" tabindex="-1"></a>real-time gaze estimate. Handles missing or invalid data gracefully.</span>
-<span id="cb7-11"><a href="#cb7-11" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb7-12"><a href="#cb7-12" aria-hidden="true" tabindex="-1"></a><span class="fu">## Parameters {.doc-section .doc-section-parameters}</span></span>
-<span id="cb7-13"><a href="#cb7-13" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb7-14"><a href="#cb7-14" aria-hidden="true" tabindex="-1"></a>+--------------------+----------------+----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------+------------+</span>
-<span id="cb7-15"><a href="#cb7-15" aria-hidden="true" tabindex="-1"></a>| Name               | Type           | Description                                                                                                                                                                                                          | Default    |</span>
-<span id="cb7-16"><a href="#cb7-16" aria-hidden="true" tabindex="-1"></a>+====================+================+======================================================================================================================================================================================================================+============+</span>
-<span id="cb7-17"><a href="#cb7-17" aria-hidden="true" tabindex="-1"></a>| fallback_offscreen | <span class="co">[</span><span class="ot">bool</span><span class="co">](`bool`)</span> | If True (default), returns an offscreen position (3x screen dimensions) when no valid gaze data is available. If False, returns None.                                                                                | <span class="in">`True`</span>     |</span>
-<span id="cb7-18"><a href="#cb7-18" aria-hidden="true" tabindex="-1"></a>+--------------------+----------------+----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------+------------+</span>
-<span id="cb7-19"><a href="#cb7-19" aria-hidden="true" tabindex="-1"></a>| method             | <span class="co">[</span><span class="ot">str</span><span class="co">](`str`)</span>   | Aggregation method for combining samples and eyes. - "median" (default): Robust to outliers, good for noisy data - "mean": Smoother but sensitive to outliers - "last": Lowest latency, uses only most recent sample | <span class="in">`'median'`</span> |</span>
-<span id="cb7-20"><a href="#cb7-20" aria-hidden="true" tabindex="-1"></a>+--------------------+----------------+----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------+------------+</span>
-<span id="cb7-21"><a href="#cb7-21" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb7-22"><a href="#cb7-22" aria-hidden="true" tabindex="-1"></a><span class="fu">## Returns {.doc-section .doc-section-returns}</span></span>
-<span id="cb7-23"><a href="#cb7-23" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb7-24"><a href="#cb7-24" aria-hidden="true" tabindex="-1"></a>+--------+------------------------------------+-----------------------------------------------------------------------------------------------------------------------------+</span>
-<span id="cb7-25"><a href="#cb7-25" aria-hidden="true" tabindex="-1"></a>| Name   | Type                               | Description                                                                                                                 |</span>
-<span id="cb7-26"><a href="#cb7-26" aria-hidden="true" tabindex="-1"></a>+========+====================================+=============================================================================================================================+</span>
-<span id="cb7-27"><a href="#cb7-27" aria-hidden="true" tabindex="-1"></a>|        | <span class="co">[</span><span class="ot">tuple</span><span class="co">](`tuple`)</span> or <span class="co">[</span><span class="ot">None</span><span class="co">](`None`)</span> | Gaze position (x, y) in PsychoPy coordinates (current window units), or None if no valid data and fallback_offscreen=False. |</span>
-<span id="cb7-28"><a href="#cb7-28" aria-hidden="true" tabindex="-1"></a>+--------+------------------------------------+-----------------------------------------------------------------------------------------------------------------------------+</span>
-<span id="cb7-29"><a href="#cb7-29" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb7-30"><a href="#cb7-30" aria-hidden="true" tabindex="-1"></a><span class="fu">## Raises {.doc-section .doc-section-raises}</span></span>
-<span id="cb7-31"><a href="#cb7-31" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb7-32"><a href="#cb7-32" aria-hidden="true" tabindex="-1"></a>+--------------------------------+---------------------------------------------------------------+</span>
-<span id="cb7-33"><a href="#cb7-33" aria-hidden="true" tabindex="-1"></a>| Type                           | Description                                                   |</span>
-<span id="cb7-34"><a href="#cb7-34" aria-hidden="true" tabindex="-1"></a>+================================+===============================================================+</span>
-<span id="cb7-35"><a href="#cb7-35" aria-hidden="true" tabindex="-1"></a>| <span class="co">[</span><span class="ot">RuntimeError</span><span class="co">](`RuntimeError`)</span> | If gaze_contingent() was not called to initialize the buffer. |</span>
-<span id="cb7-36"><a href="#cb7-36" aria-hidden="true" tabindex="-1"></a>+--------------------------------+---------------------------------------------------------------+</span>
-<span id="cb7-37"><a href="#cb7-37" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb7-38"><a href="#cb7-38" aria-hidden="true" tabindex="-1"></a><span class="fu">## Examples {.doc-section .doc-section-examples}</span></span>
-<span id="cb7-39"><a href="#cb7-39" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb7-40"><a href="#cb7-40" aria-hidden="true" tabindex="-1"></a><span class="fu">### Basic Usage</span></span>
-<span id="cb7-41"><a href="#cb7-41" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb7-42"><a href="#cb7-42" aria-hidden="true" tabindex="-1"></a><span class="fu">#### Default behavior with median aggregation</span></span>
-<span id="cb7-43"><a href="#cb7-43" aria-hidden="true" tabindex="-1"></a><span class="in">```python</span></span>
-<span id="cb7-44"><a href="#cb7-44" aria-hidden="true" tabindex="-1"></a>pos <span class="op">=</span> ET_controller.get_gaze_position()</span>
-<span id="cb7-45"><a href="#cb7-45" aria-hidden="true" tabindex="-1"></a><span class="cf">if</span> pos <span class="kw">is</span> <span class="kw">not</span> <span class="va">None</span>:</span>
-<span id="cb7-46"><a href="#cb7-46" aria-hidden="true" tabindex="-1"></a>    circle.pos <span class="op">=</span> pos</span>
-<span id="cb7-47"><a href="#cb7-47" aria-hidden="true" tabindex="-1"></a><span class="in">```</span></span>
-<span id="cb7-48"><a href="#cb7-48" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb7-49"><a href="#cb7-49" aria-hidden="true" tabindex="-1"></a><span class="fu">### Aggregation Methods</span></span>
-<span id="cb7-50"><a href="#cb7-50" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb7-51"><a href="#cb7-51" aria-hidden="true" tabindex="-1"></a><span class="fu">#### Mean for smoother tracking</span></span>
-<span id="cb7-52"><a href="#cb7-52" aria-hidden="true" tabindex="-1"></a><span class="in">```python</span></span>
-<span id="cb7-53"><a href="#cb7-53" aria-hidden="true" tabindex="-1"></a>pos <span class="op">=</span> ET_controller.get_gaze_position(method<span class="op">=</span><span class="st">"mean"</span>)</span>
-<span id="cb7-54"><a href="#cb7-54" aria-hidden="true" tabindex="-1"></a><span class="in">```</span></span>
-<span id="cb7-55"><a href="#cb7-55" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb7-56"><a href="#cb7-56" aria-hidden="true" tabindex="-1"></a><span class="fu">#### Last sample for lowest latency</span></span>
-<span id="cb7-57"><a href="#cb7-57" aria-hidden="true" tabindex="-1"></a><span class="in">```python</span></span>
-<span id="cb7-58"><a href="#cb7-58" aria-hidden="true" tabindex="-1"></a>pos <span class="op">=</span> ET_controller.get_gaze_position(method<span class="op">=</span><span class="st">"last"</span>)</span>
-<span id="cb7-59"><a href="#cb7-59" aria-hidden="true" tabindex="-1"></a><span class="in">```</span></span>
-<span id="cb7-60"><a href="#cb7-60" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb7-61"><a href="#cb7-61" aria-hidden="true" tabindex="-1"></a><span class="fu">### Handling Missing Data</span></span>
-<span id="cb7-62"><a href="#cb7-62" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb7-63"><a href="#cb7-63" aria-hidden="true" tabindex="-1"></a><span class="fu">#### Return None instead of offscreen position</span></span>
-<span id="cb7-64"><a href="#cb7-64" aria-hidden="true" tabindex="-1"></a><span class="in">```python</span></span>
-<span id="cb7-65"><a href="#cb7-65" aria-hidden="true" tabindex="-1"></a>pos <span class="op">=</span> ET_controller.get_gaze_position(fallback_offscreen<span class="op">=</span><span class="va">False</span>)</span>
-<span id="cb7-66"><a href="#cb7-66" aria-hidden="true" tabindex="-1"></a><span class="cf">if</span> pos <span class="kw">is</span> <span class="va">None</span>:</span>
-<span id="cb7-67"><a href="#cb7-67" aria-hidden="true" tabindex="-1"></a>    <span class="bu">print</span>(<span class="st">"No valid gaze data"</span>)</span>
-<span id="cb7-68"><a href="#cb7-68" aria-hidden="true" tabindex="-1"></a><span class="in">```</span></span>
-<span id="cb7-69"><a href="#cb7-69" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb7-70"><a href="#cb7-70" aria-hidden="true" tabindex="-1"></a><span class="fu">#### Check for offscreen gaze</span></span>
-<span id="cb7-71"><a href="#cb7-71" aria-hidden="true" tabindex="-1"></a><span class="in">```python</span></span>
-<span id="cb7-72"><a href="#cb7-72" aria-hidden="true" tabindex="-1"></a>pos <span class="op">=</span> ET_controller.get_gaze_position(fallback_offscreen<span class="op">=</span><span class="va">True</span>)</span>
-<span id="cb7-73"><a href="#cb7-73" aria-hidden="true" tabindex="-1"></a><span class="co"># Offscreen positions will be far outside window bounds</span></span>
-<span id="cb7-74"><a href="#cb7-74" aria-hidden="true" tabindex="-1"></a><span class="cf">if</span> <span class="bu">abs</span>(pos[<span class="dv">0</span>]) <span class="op">&gt;</span> <span class="fl">2.0</span> <span class="kw">or</span> <span class="bu">abs</span>(pos[<span class="dv">1</span>]) <span class="op">&gt;</span> <span class="fl">2.0</span>:</span>
-<span id="cb7-75"><a href="#cb7-75" aria-hidden="true" tabindex="-1"></a>    <span class="bu">print</span>(<span class="st">"Participant looking away"</span>)</span>
-<span id="cb7-76"><a href="#cb7-76" aria-hidden="true" tabindex="-1"></a><span class="in">```</span></span></code><button title="Copy to Clipboard" class="code-copy-button" data-in-quarto-modal=""><i class="bi"></i></button></pre></div>
+<div class="sourceCode" id="cb11" data-shortcodes="false"><pre class="sourceCode markdown code-with-copy"><code class="sourceCode markdown"><span id="cb11-1"><a href="#cb11-1" aria-hidden="true" tabindex="-1"></a><span class="fu"># ETracker.get_gaze_position { #DeToX.ETracker.get_gaze_position }</span></span>
+<span id="cb11-2"><a href="#cb11-2" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb11-3"><a href="#cb11-3" aria-hidden="true" tabindex="-1"></a><span class="in">```python</span></span>
+<span id="cb11-4"><a href="#cb11-4" aria-hidden="true" tabindex="-1"></a>ETracker.get_gaze_position(</span>
+<span id="cb11-5"><a href="#cb11-5" aria-hidden="true" tabindex="-1"></a>    fallback_offscreen<span class="op">=</span><span class="va">True</span>,</span>
+<span id="cb11-6"><a href="#cb11-6" aria-hidden="true" tabindex="-1"></a>    method<span class="op">=</span><span class="st">'median'</span>,</span>
+<span id="cb11-7"><a href="#cb11-7" aria-hidden="true" tabindex="-1"></a>    coordinate_units<span class="op">=</span><span class="st">'default'</span>,</span>
+<span id="cb11-8"><a href="#cb11-8" aria-hidden="true" tabindex="-1"></a>)</span>
+<span id="cb11-9"><a href="#cb11-9" aria-hidden="true" tabindex="-1"></a><span class="in">```</span></span>
+<span id="cb11-10"><a href="#cb11-10" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb11-11"><a href="#cb11-11" aria-hidden="true" tabindex="-1"></a>Get current gaze position from rolling buffer.</span>
+<span id="cb11-12"><a href="#cb11-12" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb11-13"><a href="#cb11-13" aria-hidden="true" tabindex="-1"></a>Aggregates recent gaze samples from both eyes to provide a stable,</span>
+<span id="cb11-14"><a href="#cb11-14" aria-hidden="true" tabindex="-1"></a>real-time gaze estimate. Handles missing or invalid data gracefully.</span>
+<span id="cb11-15"><a href="#cb11-15" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb11-16"><a href="#cb11-16" aria-hidden="true" tabindex="-1"></a><span class="fu">## Parameters {.doc-section .doc-section-parameters}</span></span>
+<span id="cb11-17"><a href="#cb11-17" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb11-18"><a href="#cb11-18" aria-hidden="true" tabindex="-1"></a>+--------------------+----------------+---------------------------------------------------------------------------------------------------------------------------------------+-------------+</span>
+<span id="cb11-19"><a href="#cb11-19" aria-hidden="true" tabindex="-1"></a>| Name               | Type           | Description                                                                                                                           | Default     |</span>
+<span id="cb11-20"><a href="#cb11-20" aria-hidden="true" tabindex="-1"></a>+====================+================+=======================================================================================================================================+=============+</span>
+<span id="cb11-21"><a href="#cb11-21" aria-hidden="true" tabindex="-1"></a>| fallback_offscreen | <span class="co">[</span><span class="ot">bool</span><span class="co">](`bool`)</span> | If True (default), returns an offscreen position (3x screen dimensions) when no valid gaze data is available. If False, returns None. | <span class="in">`True`</span>      |</span>
+<span id="cb11-22"><a href="#cb11-22" aria-hidden="true" tabindex="-1"></a>+--------------------+----------------+---------------------------------------------------------------------------------------------------------------------------------------+-------------+</span>
+<span id="cb11-23"><a href="#cb11-23" aria-hidden="true" tabindex="-1"></a>| method             | <span class="co">[</span><span class="ot">str</span><span class="co">](`str`)</span>   | Aggregation method for combining samples and eyes:                                                                                    | <span class="in">`'median'`</span>  |</span>
+<span id="cb11-24"><a href="#cb11-24" aria-hidden="true" tabindex="-1"></a>|                    |                |                                                                                                                                       |             |</span>
+<span id="cb11-25"><a href="#cb11-25" aria-hidden="true" tabindex="-1"></a>|                    |                |   - **"median"** (default): Robust to outliers, good for noisy data                                                                   |             |</span>
+<span id="cb11-26"><a href="#cb11-26" aria-hidden="true" tabindex="-1"></a>|                    |                |   - **"mean"**: Smoother but sensitive to outliers                                                                                    |             |</span>
+<span id="cb11-27"><a href="#cb11-27" aria-hidden="true" tabindex="-1"></a>|                    |                |   - **"last"**: Lowest latency, uses only most recent sample                                                                          |             |</span>
+<span id="cb11-28"><a href="#cb11-28" aria-hidden="true" tabindex="-1"></a>+--------------------+----------------+---------------------------------------------------------------------------------------------------------------------------------------+-------------+</span>
+<span id="cb11-29"><a href="#cb11-29" aria-hidden="true" tabindex="-1"></a>| coordinate_units   | <span class="co">[</span><span class="ot">str</span><span class="co">](`str`)</span>   | Target coordinate system for returned gaze position:                                                                                  | <span class="in">`'default'`</span> |</span>
+<span id="cb11-30"><a href="#cb11-30" aria-hidden="true" tabindex="-1"></a>|                    |                |                                                                                                                                       |             |</span>
+<span id="cb11-31"><a href="#cb11-31" aria-hidden="true" tabindex="-1"></a>|                    |                |   - **'default'**: Use window's current coordinate system                                                                             |             |</span>
+<span id="cb11-32"><a href="#cb11-32" aria-hidden="true" tabindex="-1"></a>|                    |                |   - **'tobii'**: Tobii ADCS coordinates (0-1 range, top-left origin)                                                                  |             |</span>
+<span id="cb11-33"><a href="#cb11-33" aria-hidden="true" tabindex="-1"></a>|                    |                |   - **PsychoPy units**: 'pix', 'height', 'norm', 'cm', 'deg'                                                                          |             |</span>
+<span id="cb11-34"><a href="#cb11-34" aria-hidden="true" tabindex="-1"></a>|                    |                | See <span class="co">[</span><span class="ot">Coordinate System Conversion</span><span class="co">](#coordinate-system-conversion)</span> for more information.                                               |             |</span>
+<span id="cb11-35"><a href="#cb11-35" aria-hidden="true" tabindex="-1"></a>+--------------------+----------------+---------------------------------------------------------------------------------------------------------------------------------------+-------------+</span>
+<span id="cb11-36"><a href="#cb11-36" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb11-37"><a href="#cb11-37" aria-hidden="true" tabindex="-1"></a><span class="fu">## Returns {.doc-section .doc-section-returns}</span></span>
+<span id="cb11-38"><a href="#cb11-38" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb11-39"><a href="#cb11-39" aria-hidden="true" tabindex="-1"></a>+--------+------------------------------------+-------------------------------------------------------------------------------------------------------+</span>
+<span id="cb11-40"><a href="#cb11-40" aria-hidden="true" tabindex="-1"></a>| Name   | Type                               | Description                                                                                           |</span>
+<span id="cb11-41"><a href="#cb11-41" aria-hidden="true" tabindex="-1"></a>+========+====================================+=======================================================================================================+</span>
+<span id="cb11-42"><a href="#cb11-42" aria-hidden="true" tabindex="-1"></a>|        | <span class="co">[</span><span class="ot">tuple</span><span class="co">](`tuple`)</span> or <span class="co">[</span><span class="ot">None</span><span class="co">](`None`)</span> | Gaze position (x, y) in specified coordinates, or None if no valid data and fallback_offscreen=False. |</span>
+<span id="cb11-43"><a href="#cb11-43" aria-hidden="true" tabindex="-1"></a>+--------+------------------------------------+-------------------------------------------------------------------------------------------------------+</span>
+<span id="cb11-44"><a href="#cb11-44" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb11-45"><a href="#cb11-45" aria-hidden="true" tabindex="-1"></a><span class="fu">## Raises {.doc-section .doc-section-raises}</span></span>
+<span id="cb11-46"><a href="#cb11-46" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb11-47"><a href="#cb11-47" aria-hidden="true" tabindex="-1"></a>+--------------------------------+---------------------------------------------------------------+</span>
+<span id="cb11-48"><a href="#cb11-48" aria-hidden="true" tabindex="-1"></a>| Type                           | Description                                                   |</span>
+<span id="cb11-49"><a href="#cb11-49" aria-hidden="true" tabindex="-1"></a>+================================+===============================================================+</span>
+<span id="cb11-50"><a href="#cb11-50" aria-hidden="true" tabindex="-1"></a>| <span class="co">[</span><span class="ot">RuntimeError</span><span class="co">](`RuntimeError`)</span> | If gaze_contingent() was not called to initialize the buffer. |</span>
+<span id="cb11-51"><a href="#cb11-51" aria-hidden="true" tabindex="-1"></a>+--------------------------------+---------------------------------------------------------------+</span>
+<span id="cb11-52"><a href="#cb11-52" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb11-53"><a href="#cb11-53" aria-hidden="true" tabindex="-1"></a><span class="fu">## Details {.doc-section .doc-section-details}</span></span>
+<span id="cb11-54"><a href="#cb11-54" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb11-55"><a href="#cb11-55" aria-hidden="true" tabindex="-1"></a><span class="fu">### Coordinate System Conversion</span></span>
+<span id="cb11-56"><a href="#cb11-56" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb11-57"><a href="#cb11-57" aria-hidden="true" tabindex="-1"></a>The <span class="in">`coordinate_units`</span> parameter determines how gaze positions are returned from</span>
+<span id="cb11-58"><a href="#cb11-58" aria-hidden="true" tabindex="-1"></a>the real-time buffer. By default, positions are returned in your window's current</span>
+<span id="cb11-59"><a href="#cb11-59" aria-hidden="true" tabindex="-1"></a>coordinate system, making it seamless to assign gaze positions directly to stimulus</span>
+<span id="cb11-60"><a href="#cb11-60" aria-hidden="true" tabindex="-1"></a>objects. For example, if your window uses height units, the returned gaze position</span>
+<span id="cb11-61"><a href="#cb11-61" aria-hidden="true" tabindex="-1"></a>will automatically be in height units, ready to use with <span class="in">`stimulus.pos = gaze_pos`</span>.</span>
+<span id="cb11-62"><a href="#cb11-62" aria-hidden="true" tabindex="-1"></a>You can override this behavior to request gaze positions in any coordinate system</span>
+<span id="cb11-63"><a href="#cb11-63" aria-hidden="true" tabindex="-1"></a>regardless of your window settings. Setting <span class="in">`coordinate_units='tobii'`</span> returns the </span>
+<span id="cb11-64"><a href="#cb11-64" aria-hidden="true" tabindex="-1"></a>raw normalized coordinates from the eye tracker, where values range from 0 to 1 with</span>
+<span id="cb11-65"><a href="#cb11-65" aria-hidden="true" tabindex="-1"></a>the origin at the top-left corner.</span>
+<span id="cb11-66"><a href="#cb11-66" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb11-67"><a href="#cb11-67" aria-hidden="true" tabindex="-1"></a><span class="fu">## Examples {.doc-section .doc-section-examples}</span></span>
+<span id="cb11-68"><a href="#cb11-68" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb11-69"><a href="#cb11-69" aria-hidden="true" tabindex="-1"></a><span class="fu">### Basic Usage</span></span>
+<span id="cb11-70"><a href="#cb11-70" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb11-71"><a href="#cb11-71" aria-hidden="true" tabindex="-1"></a><span class="fu">#### Default behavior (window's coordinate system)</span></span>
+<span id="cb11-72"><a href="#cb11-72" aria-hidden="true" tabindex="-1"></a><span class="in">```python</span></span>
+<span id="cb11-73"><a href="#cb11-73" aria-hidden="true" tabindex="-1"></a>pos <span class="op">=</span> ET_controller.get_gaze_position()</span>
+<span id="cb11-74"><a href="#cb11-74" aria-hidden="true" tabindex="-1"></a><span class="cf">if</span> pos <span class="kw">is</span> <span class="kw">not</span> <span class="va">None</span>:</span>
+<span id="cb11-75"><a href="#cb11-75" aria-hidden="true" tabindex="-1"></a>    circle.pos <span class="op">=</span> pos</span>
+<span id="cb11-76"><a href="#cb11-76" aria-hidden="true" tabindex="-1"></a><span class="in">```</span></span>
+<span id="cb11-77"><a href="#cb11-77" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb11-78"><a href="#cb11-78" aria-hidden="true" tabindex="-1"></a><span class="fu">### Coordinate Systems</span></span>
+<span id="cb11-79"><a href="#cb11-79" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb11-80"><a href="#cb11-80" aria-hidden="true" tabindex="-1"></a><span class="fu">#### Get position in Tobii coordinates (0-1 range)</span></span>
+<span id="cb11-81"><a href="#cb11-81" aria-hidden="true" tabindex="-1"></a><span class="in">```python</span></span>
+<span id="cb11-82"><a href="#cb11-82" aria-hidden="true" tabindex="-1"></a>pos <span class="op">=</span> ET_controller.get_gaze_position(coordinate_units<span class="op">=</span><span class="st">'tobii'</span>)</span>
+<span id="cb11-83"><a href="#cb11-83" aria-hidden="true" tabindex="-1"></a><span class="co"># Returns: (0.5, 0.3) for gaze at center-left</span></span>
+<span id="cb11-84"><a href="#cb11-84" aria-hidden="true" tabindex="-1"></a><span class="in">```</span></span>
+<span id="cb11-85"><a href="#cb11-85" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb11-86"><a href="#cb11-86" aria-hidden="true" tabindex="-1"></a><span class="fu">#### Get position in pixels (center origin)</span></span>
+<span id="cb11-87"><a href="#cb11-87" aria-hidden="true" tabindex="-1"></a><span class="in">```python</span></span>
+<span id="cb11-88"><a href="#cb11-88" aria-hidden="true" tabindex="-1"></a>pos <span class="op">=</span> ET_controller.get_gaze_position(coordinate_units<span class="op">=</span><span class="st">'pix'</span>)</span>
+<span id="cb11-89"><a href="#cb11-89" aria-hidden="true" tabindex="-1"></a><span class="co"># Returns: (120, -50) for gaze slightly right and below center</span></span>
+<span id="cb11-90"><a href="#cb11-90" aria-hidden="true" tabindex="-1"></a><span class="in">```</span></span>
+<span id="cb11-91"><a href="#cb11-91" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb11-92"><a href="#cb11-92" aria-hidden="true" tabindex="-1"></a><span class="fu">#### Get position in height units</span></span>
+<span id="cb11-93"><a href="#cb11-93" aria-hidden="true" tabindex="-1"></a><span class="in">```python</span></span>
+<span id="cb11-94"><a href="#cb11-94" aria-hidden="true" tabindex="-1"></a>pos <span class="op">=</span> ET_controller.get_gaze_position(coordinate_units<span class="op">=</span><span class="st">'height'</span>)</span>
+<span id="cb11-95"><a href="#cb11-95" aria-hidden="true" tabindex="-1"></a><span class="co"># Returns: (0.15, -0.08) in height units</span></span>
+<span id="cb11-96"><a href="#cb11-96" aria-hidden="true" tabindex="-1"></a><span class="in">```</span></span>
+<span id="cb11-97"><a href="#cb11-97" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb11-98"><a href="#cb11-98" aria-hidden="true" tabindex="-1"></a><span class="fu">### Aggregation Methods</span></span>
+<span id="cb11-99"><a href="#cb11-99" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb11-100"><a href="#cb11-100" aria-hidden="true" tabindex="-1"></a><span class="fu">#### Mean for smoother tracking</span></span>
+<span id="cb11-101"><a href="#cb11-101" aria-hidden="true" tabindex="-1"></a><span class="in">```python</span></span>
+<span id="cb11-102"><a href="#cb11-102" aria-hidden="true" tabindex="-1"></a>pos <span class="op">=</span> ET_controller.get_gaze_position(method<span class="op">=</span><span class="st">"mean"</span>)</span>
+<span id="cb11-103"><a href="#cb11-103" aria-hidden="true" tabindex="-1"></a><span class="in">```</span></span>
+<span id="cb11-104"><a href="#cb11-104" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb11-105"><a href="#cb11-105" aria-hidden="true" tabindex="-1"></a><span class="fu">#### Last sample for lowest latency</span></span>
+<span id="cb11-106"><a href="#cb11-106" aria-hidden="true" tabindex="-1"></a><span class="in">```python</span></span>
+<span id="cb11-107"><a href="#cb11-107" aria-hidden="true" tabindex="-1"></a>pos <span class="op">=</span> ET_controller.get_gaze_position(method<span class="op">=</span><span class="st">"last"</span>)</span>
+<span id="cb11-108"><a href="#cb11-108" aria-hidden="true" tabindex="-1"></a><span class="in">```</span></span>
+<span id="cb11-109"><a href="#cb11-109" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb11-110"><a href="#cb11-110" aria-hidden="true" tabindex="-1"></a><span class="fu">### Handling Missing Data</span></span>
+<span id="cb11-111"><a href="#cb11-111" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb11-112"><a href="#cb11-112" aria-hidden="true" tabindex="-1"></a><span class="fu">#### Return None instead of offscreen position</span></span>
+<span id="cb11-113"><a href="#cb11-113" aria-hidden="true" tabindex="-1"></a><span class="in">```python</span></span>
+<span id="cb11-114"><a href="#cb11-114" aria-hidden="true" tabindex="-1"></a>pos <span class="op">=</span> ET_controller.get_gaze_position(fallback_offscreen<span class="op">=</span><span class="va">False</span>)</span>
+<span id="cb11-115"><a href="#cb11-115" aria-hidden="true" tabindex="-1"></a><span class="cf">if</span> pos <span class="kw">is</span> <span class="va">None</span>:</span>
+<span id="cb11-116"><a href="#cb11-116" aria-hidden="true" tabindex="-1"></a>    <span class="bu">print</span>(<span class="st">"No valid gaze data"</span>)</span>
+<span id="cb11-117"><a href="#cb11-117" aria-hidden="true" tabindex="-1"></a><span class="in">```</span></span>
+<span id="cb11-118"><a href="#cb11-118" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb11-119"><a href="#cb11-119" aria-hidden="true" tabindex="-1"></a><span class="fu">#### Check for offscreen gaze</span></span>
+<span id="cb11-120"><a href="#cb11-120" aria-hidden="true" tabindex="-1"></a><span class="in">```python</span></span>
+<span id="cb11-121"><a href="#cb11-121" aria-hidden="true" tabindex="-1"></a>pos <span class="op">=</span> ET_controller.get_gaze_position(fallback_offscreen<span class="op">=</span><span class="va">True</span>)</span>
+<span id="cb11-122"><a href="#cb11-122" aria-hidden="true" tabindex="-1"></a><span class="co"># Offscreen positions will be far outside window bounds</span></span>
+<span id="cb11-123"><a href="#cb11-123" aria-hidden="true" tabindex="-1"></a><span class="cf">if</span> <span class="bu">abs</span>(pos[<span class="dv">0</span>]) <span class="op">&gt;</span> <span class="fl">2.0</span> <span class="kw">or</span> <span class="bu">abs</span>(pos[<span class="dv">1</span>]) <span class="op">&gt;</span> <span class="fl">2.0</span>:</span>
+<span id="cb11-124"><a href="#cb11-124" aria-hidden="true" tabindex="-1"></a>    <span class="bu">print</span>(<span class="st">"Participant looking away"</span>)</span>
+<span id="cb11-125"><a href="#cb11-125" aria-hidden="true" tabindex="-1"></a><span class="in">```</span></span>
+<span id="cb11-126"><a href="#cb11-126" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb11-127"><a href="#cb11-127" aria-hidden="true" tabindex="-1"></a><span class="fu">### Complete Application</span></span>
+<span id="cb11-128"><a href="#cb11-128" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb11-129"><a href="#cb11-129" aria-hidden="true" tabindex="-1"></a><span class="fu">#### Gaze-contingent stimulus in normalized coordinates</span></span>
+<span id="cb11-130"><a href="#cb11-130" aria-hidden="true" tabindex="-1"></a><span class="in">```python</span></span>
+<span id="cb11-131"><a href="#cb11-131" aria-hidden="true" tabindex="-1"></a>ET_controller.gaze_contingent(N<span class="op">=</span><span class="fl">0.3</span>, units<span class="op">=</span><span class="st">'seconds'</span>)</span>
+<span id="cb11-132"><a href="#cb11-132" aria-hidden="true" tabindex="-1"></a>ET_controller.start_recording(<span class="st">'data.h5'</span>)</span>
+<span id="cb11-133"><a href="#cb11-133" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb11-134"><a href="#cb11-134" aria-hidden="true" tabindex="-1"></a>circle <span class="op">=</span> visual.Circle(win, radius<span class="op">=</span><span class="fl">0.05</span>, fillColor<span class="op">=</span><span class="st">'red'</span>, units<span class="op">=</span><span class="st">'norm'</span>)</span>
+<span id="cb11-135"><a href="#cb11-135" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb11-136"><a href="#cb11-136" aria-hidden="true" tabindex="-1"></a><span class="cf">for</span> frame <span class="kw">in</span> <span class="bu">range</span>(<span class="dv">600</span>):</span>
+<span id="cb11-137"><a href="#cb11-137" aria-hidden="true" tabindex="-1"></a>    <span class="co"># Get gaze in normalized coordinates to match circle</span></span>
+<span id="cb11-138"><a href="#cb11-138" aria-hidden="true" tabindex="-1"></a>    gaze_pos <span class="op">=</span> ET_controller.get_gaze_position(coordinate_units<span class="op">=</span><span class="st">'norm'</span>)</span>
+<span id="cb11-139"><a href="#cb11-139" aria-hidden="true" tabindex="-1"></a>    circle.pos <span class="op">=</span> gaze_pos</span>
+<span id="cb11-140"><a href="#cb11-140" aria-hidden="true" tabindex="-1"></a>    circle.draw()</span>
+<span id="cb11-141"><a href="#cb11-141" aria-hidden="true" tabindex="-1"></a>    win.flip()</span>
+<span id="cb11-142"><a href="#cb11-142" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb11-143"><a href="#cb11-143" aria-hidden="true" tabindex="-1"></a>ET_controller.stop_recording()</span>
+<span id="cb11-144"><a href="#cb11-144" aria-hidden="true" tabindex="-1"></a><span class="in">```</span></span></code><button title="Copy to Clipboard" class="code-copy-button" data-in-quarto-modal=""><i class="bi"></i></button></pre></div>
 </div></div></div></div></div>
 </div> <!-- /content -->
 <footer class="footer">
