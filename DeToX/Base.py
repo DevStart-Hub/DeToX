@@ -1198,7 +1198,7 @@ class ETracker:
         
     # --- Recording Methods ---
 
-    def start_recording(self, filename=None, raw_format=False):
+    def start_recording(self, filename=None, raw_format=False, coordinate_units='default', relative_timestamps='default'):
         """
         Begin gaze data recording session.
         
@@ -1213,17 +1213,90 @@ class ETracker:
             name. File extension determines format (.h5/.hdf5 for HDF5,
             .csv for CSV, defaults to .h5).
         raw_format : bool, optional
-            If True, preserves all original Tobii SDK column names and data.
-            If False (default), uses simplified column names and subset of columns.
-            Raw format is useful for advanced analysis requiring full metadata.
+            If True, preserves all original Tobii SDK column names and data
+            (including 3D eye positions, gaze origins, etc.).
+            If False (default), uses simplified column names and subset of columns
+            (gaze positions, pupil diameters, validity flags only).
+            See [Data Format Options](#data-format-options) for more information.
+        coordinate_units : str, optional
+            Target coordinate system for 2D screen positions. Default is 'default':
+            
+            - **'default'**: Smart defaults based on format
+              - raw_format=True → 'tobii' (keeps 0-1 range)
+              - raw_format=False → 'pix' (PsychoPy pixels, center origin)
+            
+            Converts to PsychoPy coordinate systems where (0,0) is at screen center.
+            Other options: 'tobii', 'height', 'norm', 'cm', 'deg'.
+            See [Coordinate System Conversion](#coordinate-system-conversion) for more information.
+        relative_timestamps : str or bool, optional
+            Controls timestamp format. Default is 'default':
+            
+            - **'default'**: Smart defaults based on format
+              - raw_format=True → False (absolute microseconds)
+              - raw_format=False → True (relative milliseconds from 0)
+            
+            Other options: True (always relative), False (always absolute).
+            See [Timestamp Format](#timestamp-format) for more information.
+        
+        Details
+        -------
+        ### Data Format Options
+        
+        The `raw_format` parameter controls which columns are included in the saved
+        data file. Raw format preserves the complete data structure from the Tobii
+        Pro SDK, which includes both 2D screen coordinates and 3D spatial information
+        about eye position and gaze origin in the user coordinate system. This format
+        is useful for advanced analyses that require the full geometric relationship
+        between the eyes and the screen, or when you need to preserve all metadata
+        provided by the eye tracker. The simplified format extracts only the essential
+        data needed for most eye tracking analyses: gaze positions on screen, pupil
+        diameters, and validity flags. This results in smaller files and easier data
+        analysis for typical gaze visualization and AOI (Area of Interest) tasks.
+        
+        ### Coordinate System Conversion
+        
+        The `coordinate_units` parameter determines how 2D screen coordinates are
+        represented in the output file. By default, raw format keeps coordinates in
+        Tobii's Active Display Coordinate System (ADCS) where values range from 0 to 1
+        with the origin at the top-left corner. This normalized system is
+        screen-independent and useful for comparing data across different display
+        setups. The simplified format defaults to PsychoPy pixel coordinates, which
+        place the origin at the screen center with the y-axis pointing upward. This
+        matches PsychoPy's coordinate system and makes it seamless to overlay gaze
+        data on your experimental stimuli. You can override these defaults for either
+        format. For example, you might want pixel coordinates in raw format for easier
+        visualization, or keep Tobii coordinates in simplified format for cross-screen
+        comparisons. When converting to other PsychoPy units like 'height' or 'norm',
+        the coordinates will match your PsychoPy window's unit system. Note that in
+        raw format, only the 2D display coordinates are converted; the 3D spatial
+        coordinates (eye positions and gaze origins) always remain in meters as
+        provided by the Tobii SDK.
+        
+        ### Timestamp Format
+        
+        The `relative_timestamps` parameter controls how time is represented in your
+        data. Absolute timestamps preserve the exact microsecond values from the Tobii
+        system clock, which are useful when you need to synchronize eye tracking data
+        with other recording systems or when collecting multiple data files that need
+        to be aligned temporally. Relative timestamps convert the first sample to time
+        zero and express all subsequent times in milliseconds relative to that starting
+        point, making it much easier to analyze individual trials or sessions. For
+        example, with relative timestamps you can immediately see that an event occurred
+        at 1500ms into your recording, whereas with absolute timestamps you would need
+        to subtract the session start time first. The default behavior chooses relative
+        timestamps for simplified format (since most analyses focus on within-session
+        timing) and absolute timestamps for raw format (to preserve the complete
+        temporal information). Both gaze samples and event markers use the same
+        timestamp format to ensure proper synchronization when analyzing your data.
         
         Examples
         --------
         ### Basic Usage
         
-        #### Standard HDF5 format
+        #### Standard simplified format (PsychoPy pixels, relative timestamps)
         ```python
         ET_controller.start_recording('data.h5')
+        # Creates: Left_X/Left_Y in pixels (center origin), TimeStamp from 0ms
         ```
         
         #### Auto-generated timestamped filename
@@ -1231,27 +1304,57 @@ class ETracker:
         ET_controller.start_recording()  # Creates YYYY-MM-DD_HH-MM-SS.h5
         ```
         
-        #### CSV format
+        ### Format Options
+        
+        #### Raw format with defaults (Tobii coords, absolute timestamps)
         ```python
-        ET_controller.start_recording('data.csv')
+        ET_controller.start_recording('data.h5', raw_format=True)
+        # All Tobii columns, coords in 0-1 range, timestamps in microseconds
         ```
         
-        ### Advanced Options
-        
-        #### Raw format with all Tobii SDK columns
+        #### Raw format with pixel coordinates
         ```python
-        ET_controller.start_recording('data_raw.h5', raw_format=True)
+        ET_controller.start_recording('data.h5', raw_format=True, coordinate_units='pix')
+        # All Tobii columns, display coords in PsychoPy pixels
+        ```
+        
+        ### Timestamp Control
+        
+        #### Raw format with relative timestamps
+        ```python
+        ET_controller.start_recording('data.h5', raw_format=True, relative_timestamps=True)
+        # Raw format but timestamps start at 0ms
+        ```
+        
+        #### Simplified format with absolute timestamps
+        ```python
+        ET_controller.start_recording('data.h5', relative_timestamps=False)
+        # Simplified format but keeps absolute microsecond timestamps
+        ```
+        
+        ### Coordinate Units
+        
+        #### Simplified format with Tobii coordinates
+        ```python
+        ET_controller.start_recording('data.h5', coordinate_units='tobii')
+        # Simplified columns, coordinates in 0-1 range
+        ```
+        
+        #### Simplified format with height units
+        ```python
+        ET_controller.start_recording('data.h5', coordinate_units='height')
+        # Simplified columns, coordinates in height units matching window
         ```
         
         ### Complete Workflows
         
-        #### Full experiment with event markers
+        #### Standard experiment workflow
         ```python
         # Setup and calibration
         ET_controller.show_status()
         ET_controller.calibrate(5)
         
-        # Start recording
+        # Start recording with defaults
         ET_controller.start_recording('participant_01.h5')
         
         # Run experiment with event markers
@@ -1262,9 +1365,32 @@ class ETracker:
         # Stop recording
         ET_controller.stop_recording()
         ```
+        
+        #### Multi-file synchronization with absolute timestamps
+        ```python
+        # Recording multiple synchronized files
+        ET_controller.start_recording('session1_gaze.h5', relative_timestamps=False)
+        # ... run session 1 ...
+        ET_controller.stop_recording()
+        
+        # Session 2 can be synchronized using absolute timestamps
+        ET_controller.start_recording('session2_gaze.h5', relative_timestamps=False)
+        # ... run session 2 ...
+        ET_controller.stop_recording()
+        ```
+        
+        #### Advanced raw data collection
+        ```python
+        # Collect all data with pixel coords and relative time
+        ET_controller.start_recording(
+            'advanced_analysis.h5',
+            raw_format=True,
+            coordinate_units='pix',
+            relative_timestamps=True
+        )
+        ```
         """
         # --- State validation ---
-        # Check current recording status and handle conflicts
         if self.recording:
             warnings.warn(
                 "Recording is already in progress – start_recording() call ignored",
@@ -1272,53 +1398,64 @@ class ETracker:
             )
             return
         
-        # --- Format flag --- 
+        # --- Format flag ---
         self.raw_format = raw_format
+        
+        # --- Smart coordinate unit defaults ---
+        if coordinate_units == 'default':
+            self.coordinate_units = 'tobii' if raw_format else 'pix'
+        else:
+            # Validate coordinate_units
+            valid_units = ['tobii', 'pix', 'height', 'norm', 'cm', 'deg', 'degFlat', 'degFlatPos']
+            if coordinate_units not in valid_units:
+                raise ValueError(
+                    f"Invalid coordinate_units: '{coordinate_units}'. "
+                    f"Must be one of {valid_units}"
+                )
+            self.coordinate_units = coordinate_units
+        
+        # --- Smart timestamp format defaults ---
+        if relative_timestamps == 'default':
+            self.relative_timestamps = False if raw_format else True
+        else:
+            if not isinstance(relative_timestamps, bool):
+                raise TypeError(
+                    f"relative_timestamps must be 'default', True, or False. "
+                    f"Got: {type(relative_timestamps).__name__}"
+                )
+            self.relative_timestamps = relative_timestamps
 
         # --- Buffer initialization ---
-        # Clear any residual data from previous sessions
         if self.gaze_data and not self.recording:
             self.gaze_data.clear()
         
         # --- Timing setup ---
-        # Reset experiment clock for relative timestamp calculation
         self.experiment_clock.reset()
         
         # --- File preparation ---
-        # Create output file structure and determine format
         self._prepare_recording(filename)
         
-        # --- Recording info display ---  #
+        # --- Recording info display ---
         self._get_info(moment='recording')
 
         # --- Data collection startup ---
-        # Configure and start appropriate data collection method
         if self.simulate:
-            # --- Simulation mode setup ---
-            # Initialize threading controls for mouse-based simulation
+            # Simulation mode setup
             self._stop_simulation = threading.Event()
-            
-            # Create simulation thread for gaze data generation
             self._simulation_thread = threading.Thread(
                 target=self._simulate_data_loop,
-                args=('gaze',),  # Specify gaze data type for simulation
+                args=('gaze',),
                 daemon=True
             )
-            
-            # Activate recording and start simulation thread
             self.recording = True
             self._simulation_thread.start()
-            
         else:
-            # --- Real eye tracker setup ---
-            # Subscribe to Tobii SDK gaze data stream
+            # Real eye tracker setup
             self.eyetracker.subscribe_to(
                 tr.EYETRACKER_GAZE_DATA, 
                 self._on_gaze_data, 
                 as_dictionary=True
             )
-            
-            # Allow eye tracker to stabilize before setting recording flag
             core.wait(1)
             self.recording = True
 
