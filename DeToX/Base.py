@@ -2297,12 +2297,19 @@ class ETracker:
 
     def _adapt_gaze_data(self, df, df_ev):
         """
-        Transform raw gaze data based on format flag.
+        Transform raw gaze data based on format, coordinate, and timestamp settings.
         
-        In raw format mode, expands tuple columns into separate x, y, z components
-        for HDF5 compatibility while preserving all Tobii SDK data. In simplified 
-        format mode, converts coordinates to PsychoPy units and selects only 
-        essential columns.
+        Handles three main transformations:
+        1. Format conversion (raw vs simplified columns)
+        2. Coordinate conversion (Tobii ADCS to target units)
+        3. Timestamp conversion (absolute vs relative timing)
+        
+        In raw format, expands tuple columns into separate x, y, z components
+        for HDF5 compatibility while optionally converting display coordinates
+        and timestamps.
+        
+        In simplified format, extracts essential columns and converts coordinates
+        and timestamps to specified formats.
         
         Parameters
         ----------
@@ -2315,91 +2322,132 @@ class ETracker:
         -------
         tuple of pandas.DataFrame
             (adapted_gaze_df, adapted_events_df)
-            - Raw format: all Tobii columns with tuples expanded to x, y, z
-            - Simplified format: extracted coordinates in PsychoPy units
             
-        Notes
-        -----
-        TimeStamp normalization is always performed regardless of format.
-        The first sample's timestamp becomes the reference (time 0).
+            Raw format returns all Tobii columns with tuples expanded to x, y, z
+            components, display coordinates converted based on coordinate_units,
+            3D spatial coordinates preserved in meters, and timestamps converted
+            if relative_timestamps is True.
+            
+            Simplified format returns essential columns (TimeStamp, Left_X, Left_Y,
+            Right_X, Right_Y, pupil diameters, validity flags, Events) with
+            coordinates converted based on coordinate_units and timestamps converted
+            if relative_timestamps is True.
+            
+        Details
+        -------
+        Timestamp conversion transforms absolute Tobii system timestamps (microseconds
+        since system epoch) into relative timestamps starting from zero and expressed
+        in milliseconds. The first sample in each recording session becomes time zero,
+        making it straightforward to identify when events occurred relative to the
+        start of data collection. This conversion is applied consistently to both gaze
+        samples and event markers to maintain temporal synchronization.
         
-        Raw format expands columns like:
-            left_gaze_point_on_display_area: (0.5, 0.3)
-        Into:
-            left_gaze_point_on_display_area_x: 0.5
-            left_gaze_point_on_display_area_y: 0.3
-            
-        Column order is enforced using ETSettings column specifications for
-        HDF5 compatibility.
+        Coordinate conversion in raw format affects only the 2D display coordinates
+        (left_gaze_point_on_display_area and right_gaze_point_on_display_area), while
+        3D spatial coordinates (left/right_gaze_point_in_user_coordinate_system and
+        left/right_gaze_origin_in_user_coordinate_system) always remain in meters as
+        provided by the Tobii SDK. These spatial coordinates represent the 3D position
+        of the eyes and gaze vectors in the user coordinate system and are not
+        meaningful to convert to screen-based units.
         """
 
-        # --- Format-specific processing ---
-        if self.raw_format:
-            # =====================================================================
-            # RAW FORMAT: Expand tuples into x, y, z columns
-            # =====================================================================
+        # --- Timestamp conversion (if enabled) ---
+        if self.relative_timestamps:
+            # Set reference timestamp from first sample
+            if self.first_timestamp is None:
+                self.first_timestamp = df.iloc[0]['system_time_stamp']
             
-            # Define which columns contain 2D tuples (x, y)
-            tuple_2d_columns = [
+            # Convert to milliseconds starting from 0
+            df['system_time_stamp'] = ((df['system_time_stamp'] - self.first_timestamp) / 1000.0).astype(int)
+            
+            # Convert event timestamps if present
+            if df_ev is not None:
+                df_ev['system_time_stamp'] = ((df_ev['system_time_stamp'] - self.first_timestamp) / 1000.0).astype(int)
+
+        if self.raw_format:
+            # --- Raw format processing ---
+            # Preserve all Tobii SDK columns with optional coordinate conversion
+            
+            # Define column categories for processing
+            display_columns = [
                 'left_gaze_point_on_display_area',
                 'right_gaze_point_on_display_area'
             ]
-
-            # Define which columns contain 3D tuples (x, y, z)
-            tuple_3d_columns = [
+            
+            spatial_columns = [
                 'left_gaze_point_in_user_coordinate_system',
                 'left_gaze_origin_in_user_coordinate_system',
                 'right_gaze_point_in_user_coordinate_system',
                 'right_gaze_origin_in_user_coordinate_system',
             ]
 
-            # --- Expand 2D tuples ---
-            for col in tuple_2d_columns:
-                arr = np.array(df[col].tolist())
-                df[f'{col}_x'] = arr[:, 0]
-                df[f'{col}_y'] = arr[:, 1]
+            # Process 2D display coordinates with optional conversion
+            for col in display_columns:
+                if self.coordinate_units == 'tobii':
+                    # Keep original Tobii ADCS coordinates (0-1 range)
+                    coords = np.array(df[col].tolist())
+                else:
+                    # Extract and convert to target coordinate system
+                    coords_tobii = np.array(df[col].tolist())
+                    coords = Coords.get_psychopy_pos(
+                        self.win, 
+                        coords_tobii, 
+                        units=self.coordinate_units
+                    )
+                
+                # Split into separate x and y columns
+                df[f'{col}_x'] = coords[:, 0]
+                df[f'{col}_y'] = coords[:, 1]
 
-            # --- Expand 3D tuples ---
-            for col in tuple_3d_columns:
-                arr = np.array(df[col].tolist())
-                df[f'{col}_x'] = arr[:, 0]
-                df[f'{col}_y'] = arr[:, 1]
-                df[f'{col}_z'] = arr[:, 2]
+            # Process 3D spatial coordinates (always in meters, never converted)
+            for col in spatial_columns:
+                coords_3d = np.array(df[col].tolist())
+                df[f'{col}_x'] = coords_3d[:, 0]
+                df[f'{col}_y'] = coords_3d[:, 1]
+                df[f'{col}_z'] = coords_3d[:, 2]
 
-            # Drop all original tuple columns at once
-            df = df.drop(columns=tuple_2d_columns + tuple_3d_columns)
-
+            # Remove original tuple columns
+            df = df.drop(columns=display_columns + spatial_columns)
+            
+            # Return with enforced column order
             return (df[cfg.RawDataColumns.ORDER], df_ev)
             
         else:
-            # =====================================================================
-            # SIMPLIFIED FORMAT: Extract, convert, rename for ease of use
-            # =====================================================================
+            # --- Simplified format processing ---
+            # Extract essential columns with optional coordinate conversion
 
-            # --- Df timestamp and event normalization ---
-            if self.first_timestamp is None:
-                self.first_timestamp = df.iloc[0]['system_time_stamp']
+            # Create TimeStamp column (relative or absolute based on flag)
+            if self.relative_timestamps:
+                # Already converted above, just rename
+                df['TimeStamp'] = df['system_time_stamp']
+                if df_ev is not None:
+                    df_ev['TimeStamp'] = df_ev['system_time_stamp']
+            else:
+                # Keep absolute timestamps in microseconds
+                df['TimeStamp'] = df['system_time_stamp']
+                if df_ev is not None:
+                    df_ev['TimeStamp'] = df_ev['system_time_stamp']
             
-            df['TimeStamp'] = ((df['system_time_stamp'] - self.first_timestamp) / 1000.0).astype(int) # normalize to ms and 0
+            # Process gaze coordinates with optional conversion
+            if self.coordinate_units == 'tobii':
+                # Keep original Tobii ADCS coordinates (0-1 range)
+                left_coords = np.array(df['left_gaze_point_on_display_area'].tolist())
+                right_coords = np.array(df['right_gaze_point_on_display_area'].tolist())
+            else:
+                # Extract and convert to target coordinate system
+                left_tobii = np.array(df['left_gaze_point_on_display_area'].tolist())
+                right_tobii = np.array(df['right_gaze_point_on_display_area'].tolist())
+                
+                left_coords = Coords.get_psychopy_pos(self.win, left_tobii, units=self.coordinate_units)
+                right_coords = Coords.get_psychopy_pos(self.win, right_tobii, units=self.coordinate_units)
 
-            if df_ev is not None:
-                df_ev['TimeStamp'] = ((df_ev['system_time_stamp'] - self.first_timestamp) / 1000.0).astype(int) # normalize to ms and 0
+            # Add converted coordinates to dataframe
+            df['Left_X'] = left_coords[:, 0]
+            df['Left_Y'] = left_coords[:, 1]
+            df['Right_X'] = right_coords[:, 0]
+            df['Right_Y'] = right_coords[:, 1]
             
-            # --- Coordinate extraction ---
-            left_coords = np.array(df['left_gaze_point_on_display_area'].tolist())
-            right_coords = np.array(df['right_gaze_point_on_display_area'].tolist())
-
-            # --- Coordinate conversion to PsychoPy units (VECTORIZED!) ---
-            left_psychopy = Coords.get_psychopy_pos(self.win, left_coords)
-            right_psychopy = Coords.get_psychopy_pos(self.win, right_coords)
-
-            # Add converted coordinates
-            df['Left_X'] = left_psychopy[:, 0]
-            df['Left_Y'] = left_psychopy[:, 1]
-            df['Right_X'] = right_psychopy[:, 0]
-            df['Right_Y'] = right_psychopy[:, 1]
-            
-            # --- Column renaming ---
+            # Rename remaining columns to simplified format
             df = df.rename(columns={
                 'left_gaze_point_validity': 'Left_Validity',
                 'left_pupil_diameter': 'Left_Pupil',
@@ -2413,7 +2461,9 @@ class ETracker:
             validity_dtypes = cfg.SimplifiedDataColumns.get_validity_dtypes()
             df = df.astype(validity_dtypes)
             
+            # Return with enforced column order
             return (df[cfg.SimplifiedDataColumns.ORDER], df_ev)
+
 
     def _save_csv_data(self, gaze_df):
         """
