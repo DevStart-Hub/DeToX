@@ -121,6 +121,10 @@ class ETracker:
             self.eyetracker = eyetrackers[self.eyetracker_id]
             self.calibration = tr.ScreenBasedCalibration(self.eyetracker)
 
+            # Check Tobii SDK version for feature compatibility
+            self.sdk_version = tr.__version__
+            self.sdk_major = int(self.sdk_version.split('.')[0])
+
         # --- Finalization ---
         # Display connection info and register the cleanup function to run on exit.
         self._get_info(moment='connection')
@@ -1451,11 +1455,18 @@ class ETracker:
             self._simulation_thread.start()
         else:
             # Real eye tracker setup
+
+            # Subscribe to warnings
+            self._subscribe_warnings()
+
+            # Subscribe to gaze data stream
             self.eyetracker.subscribe_to(
                 tr.EYETRACKER_GAZE_DATA, 
                 self._on_gaze_data, 
                 as_dictionary=True
             )
+
+            # Small delay to ensure subscription is active before data starts arriving
             core.wait(1)
             self.recording = True
 
@@ -1551,6 +1562,10 @@ class ETracker:
                 
         else:
             # --- Real eye tracker cleanup ---
+
+            # Unsubscribe from warnings
+            self._unsubscribe_warnings()
+
             # Unsubscribe from Tobii SDK data stream
             self.eyetracker.unsubscribe_from(tr.EYETRACKER_GAZE_DATA, self._on_gaze_data)
         
@@ -2271,6 +2286,7 @@ class ETracker:
             'dropped_samples': dropped_samples
         }
 
+
     def _check_gaze_samples(self):
         """
         Wait until gaze data has caught up to the last recorded event.
@@ -2384,6 +2400,83 @@ class ETracker:
 
             # Use the custom NicePrint utility to display the formatted information.
             NicePrint(text, title, verbose=self.verbose)
+
+
+    def _subscribe_warnings(self):
+        """
+        Subscribe to critical warnings during recording.
+        
+        Monitors three types of warnings:
+          - Connection lost/restored (hardware disconnection)
+          - Stream buffer overflow (data loss from processing bottleneck)
+        
+        Automatically called by start_recording() for real eye trackers.
+        Uses SDK version detection to handle API changes between versions 1.x and 2.x.
+        """
+        # Connection warnings (all SDK versions)
+        self.eyetracker.subscribe_to(
+            tr.EYETRACKER_NOTIFICATION_CONNECTION_LOST,
+            lambda x: self._on_warning('CONNECTION_LOST', x)
+        )
+        self.eyetracker.subscribe_to(
+            tr.EYETRACKER_NOTIFICATION_CONNECTION_RESTORED,
+            lambda x: self._on_warning('CONNECTION_RESTORED', x)
+        )
+        
+        # Stream buffer warnings (version dependent)
+        if self.sdk_major >= 2:
+            # SDK 2.0+: use new name
+            self.eyetracker.subscribe_to(
+                tr.EYETRACKER_NOTIFICATION_STREAM_BUFFER_OVERFLOW,
+                lambda x: self._on_warning('STREAM_BUFFER_OVERFLOW', x)
+            )
+        else:
+            # SDK 1.x: use old name
+            self.eyetracker.subscribe_to(
+                tr.EYETRACKER_STREAM_ERRORS,
+                lambda x: self._on_warning('STREAM_ERRORS', x)
+            )
+    
+    
+    def _unsubscribe_warnings(self):
+        """
+        Unsubscribe from warning notifications.
+        
+        Cleans up warning subscriptions after recording completes.
+        Automatically called by stop_recording() for real eye trackers.
+        Must match the subscription pattern from _subscribe_warnings().
+        """
+        # Connection warnings (all SDK versions)
+        self.eyetracker.unsubscribe_from(tr.EYETRACKER_NOTIFICATION_CONNECTION_LOST)
+        self.eyetracker.unsubscribe_from(tr.EYETRACKER_NOTIFICATION_CONNECTION_RESTORED)
+        
+        # Stream buffer warnings (version dependent)
+        if self.sdk_major >= 2:
+            self.eyetracker.unsubscribe_from(tr.EYETRACKER_NOTIFICATION_STREAM_BUFFER_OVERFLOW)
+        else:
+            self.eyetracker.unsubscribe_from(tr.EYETRACKER_STREAM_ERRORS)
+    
+    
+    def _on_warning(self, notification_type, data):
+        """
+        Unified callback for all eye tracker warnings.
+        
+        Prints Python warning to console when eye tracker issues occur:
+          - CONNECTION_LOST: Hardware disconnected during recording
+          - CONNECTION_RESTORED: Hardware reconnected (data was lost)
+          - STREAM_BUFFER_OVERFLOW: Data loss from processing bottleneck
+        
+        Parameters
+        ----------
+        notification_type : str
+            Type of warning (CONNECTION_LOST, CONNECTION_RESTORED, etc.)
+        data : dict
+            Warning data including system_time_stamp
+        """
+        warnings.warn(
+            f"Eye tracker {notification_type} at timestamp {data.system_time_stamp}",
+            RuntimeWarning
+        )
 
 
     def _prepare_recording(self, filename=None):
