@@ -12,7 +12,7 @@ from psychopy import core, event, visual
 # Local imports
 from . import ETSettings as cfg
 from .Utils import NicePrint
-from .Coords import get_tobii_pos, psychopy_to_pixels, tobii2pix, convert_height_to_units, norm_to_window_units, get_psychopy_pos
+from .Coords import get_tobii_pos, psychopy_to_pixels, convert_height_to_units, get_psychopy_pos, norm_to_window_units
 
 
 class BaseCalibrationSession:
@@ -115,63 +115,50 @@ class BaseCalibrationSession:
         win_width = self.win.size[0]
         win_height = self.win.size[1]
         
-        # --- Border Scaling ---
-        # Convert border thickness from height units to current units
-        border_thickness = convert_height_to_units(self.win, cfg.ui_sizes.border)
-        
-        # --- Unit-Specific Dimension Conversion ---
-        # Convert to appropriate units for consistent sizing
-        if self.win.units == 'height':
-            # In height units, width is adjusted by aspect ratio
-            border_width = win_width / win_height  # Full width in height units
-            border_height = 1.0  # Full height in height units
-        elif self.win.units == 'norm':
-            border_width = 2.0  # Full width in norm units (-1 to 1)
-            border_height = 2.0  # Full height in norm units
-        else:
-            border_width = win_width
-            border_height = win_height
+        border_width = win_width / win_height  # Full width in height units
+        border_height = 1.0  # Full height in height units
+
         
         # --- Border Segment Creation ---
         # Create four rectangles for the border
         self.border_top = visual.Rect(
             self.win,
             width=border_width,
-            height=border_thickness,
-            pos=(0, border_height/2 - border_thickness/2),
+            height=cfg.ui_sizes.border,
+            pos=(0, border_height/2 - cfg.ui_sizes.border/2),
             fillColor='red',
             lineColor=None,
-            units=self.win.units  # Use same units as window
+            units= 'height'
         )
         
         self.border_bottom = visual.Rect(
             self.win,
             width=border_width,
-            height=border_thickness,
-            pos=(0, -border_height/2 + border_thickness/2),
+            height=cfg.ui_sizes.border,
+            pos=(0, -border_height/2 + cfg.ui_sizes.border/2),
             fillColor='red',
             lineColor=None,
-            units=self.win.units
+            units= 'height'
         )
         
         self.border_left = visual.Rect(
             self.win,
-            width=border_thickness,
+            width=cfg.ui_sizes.border,
             height=border_height,
-            pos=(-border_width/2 + border_thickness/2, 0),
+            pos=(-border_width/2 + cfg.ui_sizes.border/2, 0),
             fillColor='red',
             lineColor=None,
-            units=self.win.units
+            units= 'height'
         )
         
         self.border_right = visual.Rect(
             self.win,
-            width=border_thickness,
+            width=cfg.ui_sizes.border,
             height=border_height,
-            pos=(border_width/2 - border_thickness/2, 0),
+            pos=(border_width/2 - cfg.ui_sizes.border/2, 0),
             fillColor='red',
             lineColor=None,
-            units=self.win.units
+            units= 'height'
         )
     
     
@@ -215,11 +202,11 @@ class BaseCalibrationSession:
             text=formatted_text,
             pos=pos,
             color='white',
-            height=convert_height_to_units(self.win, cfg.ui_sizes.instruction_text),
+            height= cfg.ui_sizes.instruction_text,
             alignText='center',
             anchorHoriz='center',
             anchorVert='center',
-            units=self.win.units,
+            units='height', #self.win.units,
             font='Consolas',
             languageStyle='LTR'
         )
@@ -296,27 +283,48 @@ class BaseCalibrationSession:
                 for path in self.infant_stims
             ]
 
-        # --- Store Calibration Points for Visualization ---
-        self.calibration_points = calibration_points  
+        # --- Store Stimulus Units ---
+        self.calstim_units = self.stim_objects[0].units  # Store units of stimuli
+
+        # --- Convert Calibration Points ---
+        self.calibration_points = norm_to_window_units(self.win, calibration_points, target_units=self.calstim_units)
         
         # --- Point Tracking Setup ---
         self.remaining_points = list(range(len(calibration_points)))
     
         
     def _animate(self, stim, clock, point_idx):
-        """..."""
+        """
+        Animate calibration stimulus with automatic unit conversion.
+        
+        Converts animation sizes from config (height units) to match the
+        stimulus's unit system, preserving the user's original stimulus size.
+        
+        Parameters
+        ----------
+        stim : psychopy.visual stimulus
+            The stimulus object to animate
+        clock : psychopy.core.Clock
+            Clock for timing the animation
+        point_idx : int
+            Index of the current calibration point
+        """
         
         if self.anim_type == 'zoom':
             # --- Zoom Animation: Smooth Size Oscillation ---
             elapsed_time = clock.getTime() * cfg.animation.zoom_speed
             
-            # Select size settings based on stim_size preset
+            # Select size settings based on stim_size preset (in height units)
             if self.stim_size == 'big':
-                min_size = convert_height_to_units(self.win, cfg.animation.min_zoom_size_big)
-                max_size = convert_height_to_units(self.win, cfg.animation.max_zoom_size_big)
+                min_size_height = cfg.animation.min_zoom_size_big
+                max_size_height = cfg.animation.max_zoom_size_big
             else:  # 'small'
-                min_size = convert_height_to_units(self.win, cfg.animation.min_zoom_size_small)
-                max_size = convert_height_to_units(self.win, cfg.animation.max_zoom_size_small)
+                min_size_height = cfg.animation.min_zoom_size_small
+                max_size_height = cfg.animation.max_zoom_size_small
+            
+            # Convert config sizes to stimulus's units
+            min_size = convert_height_to_units(self.win, min_size_height, target_units=stim.units)
+            max_size = convert_height_to_units(self.win, max_size_height, target_units=stim.units)
             
             # Calculate smooth oscillation
             size_range = max_size - min_size
@@ -327,15 +335,18 @@ class BaseCalibrationSession:
             
         elif self.anim_type == 'trill':
             # --- Trill Animation: Rapid Rotation with Pauses ---
-            # Select size setting based on stim_size preset
+            # Select size setting based on stim_size preset (in height units)
             if self.stim_size == 'big':
-                trill_size = convert_height_to_units(self.win, cfg.animation.trill_size_big)
+                trill_size_height = cfg.animation.trill_size_big
             else:  # 'small'
-                trill_size = convert_height_to_units(self.win, cfg.animation.trill_size_small)
+                trill_size_height = cfg.animation.trill_size_small
+            
+            # Convert config size to stimulus's units
+            trill_size = convert_height_to_units(self.win, trill_size_height, target_units=stim.units)
             
             stim.setSize(trill_size)
             
-            # Rotation logic (unchanged)
+            # Rotation logic
             elapsed_time = clock.getTime()
             cycle_position = elapsed_time % cfg.animation.trill_cycle_duration
             
@@ -402,60 +413,49 @@ class BaseCalibrationSession:
         list
             List of PsychoPy visual elements ready for drawing.
         """
-        # Eye shape dimensions (wider than tall for almond shape)
-        eye_width = convert_height_to_units(self.win, 0.025)   # Width of eye
-        eye_height = convert_height_to_units(self.win, 0.012)  # Height of eye
-        
-        legend_spacing = convert_height_to_units(self.win, 0.10)  # Horizontal spacing between eyes
-        text_offset = convert_height_to_units(self.win, 0.025)   # Vertical offset above eye
-        
-        # Convert RGBA colors to RGB for PsychoPy (drop alpha channel)
-        left_eye_color_rgb = tuple(c / 255.0 for c in cfg.colors.left_eye[:3])   # Normalize to 0-1
-        right_eye_color_rgb = tuple(c / 255.0 for c in cfg.colors.right_eye[:3])  # Normalize to 0-1
-        
         # Left eye legend (green ellipse + text)
         left_eye_legend = visual.Circle(
             self.win,
-            size=(eye_width, eye_height),  # Ellipse shape (width, height)
-            pos=(-legend_spacing, base_y_pos),
+            size=(cfg.ui_sizes.legend_eye_width, cfg.ui_sizes.legend_eye_height),  # Ellipse shape (width, height)
+            pos=(-cfg.ui_sizes.legend_spacing, base_y_pos),
             fillColor= cfg.colors.left_eye,
             colorSpace='rgb255',
             lineColor='black',
-            units=self.win.units
+            units= 'height'
         )
         
         left_eye_text = visual.TextStim(
             self.win,
             text='Left Eye',
-            pos=(-legend_spacing, base_y_pos + text_offset),
+            pos=(-cfg.ui_sizes.legend_spacing, base_y_pos + cfg.ui_sizes.legend_text_offset),
             color='white',
-            height=convert_height_to_units(self.win, cfg.ui_sizes.legend_text),  # ← NEW
+            height= cfg.ui_sizes.legend_text,
             anchorHoriz='center',
             anchorVert='center',
-            units=self.win.units,
+            units= 'height',
             font='Consolas'
         )
         
         # Right eye legend (red ellipse + text)
         right_eye_legend = visual.Circle(
             self.win,
-            size=(eye_width, eye_height),  # Ellipse shape (width, height)
-            pos=(legend_spacing, base_y_pos),
+            size=(cfg.ui_sizes.legend_eye_width, cfg.ui_sizes.legend_eye_height), 
+            pos=(cfg.ui_sizes.legend_spacing, base_y_pos),
             fillColor= cfg.colors.right_eye,
             colorSpace='rgb255',
             lineColor='black',
-            units=self.win.units
+            units= 'height'
         )
         
         right_eye_text = visual.TextStim(
             self.win,
             text='Right Eye',
-            pos=(legend_spacing, base_y_pos + text_offset),
+            pos=(cfg.ui_sizes.legend_spacing, base_y_pos + cfg.ui_sizes.legend_text_offset),
             color='white',
-            height=convert_height_to_units(self.win, cfg.ui_sizes.legend_text),  # ← NEW
+            height=cfg.ui_sizes.legend_text,
             anchorHoriz='center',
             anchorVert='center',
-            units=self.win.units,
+            units= 'height',
             font='Consolas'
         )
         
@@ -488,11 +488,11 @@ class BaseCalibrationSession:
             text=formatted_instructions,
             pos=(0, -0.25),
             color='white',
-            height=convert_height_to_units(self.win, cfg.ui_sizes.instruction_text),  # ← NEW
+            height= cfg.ui_sizes.instruction_text,
             alignText='center',
             anchorHoriz='center',
             anchorVert='center',
-            units=self.win.units,
+            units='height', 
             font='Consolas',
             languageStyle='LTR'
         )
@@ -511,7 +511,7 @@ class BaseCalibrationSession:
             
             for retry_idx in retries:
                 if retry_idx < len(calibration_points):
-                    highlight_radius = convert_height_to_units(self.win, cfg.ui_sizes.highlight)
+                    highlight_radius = cfg.ui_sizes.highlight 
                     line_width_pixels = cfg.ui_sizes.line_width * self.win.size[1]
                     
                     highlight = visual.Circle(
@@ -522,7 +522,7 @@ class BaseCalibrationSession:
                         fillColor=None,
                         lineWidth=max(1, int(line_width_pixels)),
                         edges=128,
-                        units=self.win.units
+                        units= 'height' #self.win.units
                     )
                     highlight.draw()
             self.win.flip()
@@ -634,51 +634,70 @@ class BaseCalibrationSession:
             self.win.flip()
     
     
-    def _create_calibration_result_image(self, calibration_points, sample_data):
-        """
-        Common function to create calibration result visualization.
-        
-        Generates a visual representation of calibration quality by drawing
-        lines from each target to collected gaze samples. Uses color coding
-        to distinguish left eye, right eye, and mouse data.
-        
-        Parameters
-        ----------
-        calibration_points : list of (float, float)
-            List of calibration target coordinates in window units.
-        sample_data : dict
-            Dictionary mapping point indices to lists of (target_pos, sample_pos, color)
-            tuples. Each tuple represents one gaze sample with its deviation from target.
+    def _create_calibration_result_image(self, sample_data):
+            """
+            Common function to create calibration result visualization.
             
-        Returns
-        -------
-        visual.SimpleImageStim
-            PsychoPy image stimulus containing the rendered calibration results.
-        """
-        # --- Image Canvas Creation ---
-        # Create blank RGBA image matching window size (transparent background like Tobii)
-        img = Image.new("RGBA", tuple(self.win.size))
-        img_draw = ImageDraw.Draw(img)
+            ALWAYS draws target circles for ALL calibration points from 
+            self.calibration_points, then draws sample lines only for points
+            that have valid data in sample_data.
+            """
+            # --- Image Canvas Creation ---
+            img = Image.new("RGBA", tuple(self.win.size))
+            img_draw = ImageDraw.Draw(img)
+            
+            # --- Configuration ---
+            # Convert sizes to pixels
+            line_width_pixels = cfg.ui_sizes.plot_line * self.win.size[1]
+            target_circle_radius_pixels = cfg.ui_sizes.target_circle * self.win.size[1]
+            target_circle_width_pixels = cfg.ui_sizes.target_circle_width * self.win.size[1]
+            
+            # --- STEP 1: Draw Samples (Style-Dependent) ---
+            
+            ## Warning and default to circles if unknown style
+            if self.visualization_style not in ['lines', 'circles']:
+                warnings.warn(
+                    f"Unknown visualization style: '{self.visualization_style}'. "
+                    f"Defaulting to 'circles'.",
+                    UserWarning
+                )
+                self.visualization_style = 'circles'
+
+            ## LINES STYLE: Draw lines from targets to samples
+            elif self.visualization_style == 'lines':
+                for point_idx, samples in sample_data.items():
+                    if point_idx < len(self.calibration_points):
+                        target_pos = self.calibration_points[point_idx]
+                        target_pix = psychopy_to_pixels(self.win, target_pos)
+                        
+                        for sample_pix, line_color in samples:
+                            img_draw.line(
+                                (target_pix[0], target_pix[1], 
+                                sample_pix[0], sample_pix[1]),
+                                fill=line_color,
+                                width=max(1, int(line_width_pixels))
+                            )
         
-        # --- Line Width Configuration ---
-        # Convert plot line width from height units to pixels
-        line_width_pixels = cfg.ui_sizes.plot_line * self.win.size[1]
-        
-        # --- Target Circle Configuration ---
-        # Convert target circle size and line width from height units to pixels
-        target_circle_radius_pixels = cfg.ui_sizes.target_circle * self.win.size[1]
-        target_circle_width_pixels = cfg.ui_sizes.target_circle_width * self.win.size[1]
-        
-        # --- Calibration Data Rendering ---
-        # Draw calibration data for each point
-        for point_idx, samples in sample_data.items():
-            if point_idx < len(calibration_points):
-                # --- Target Position Processing ---
-                target_pos = calibration_points[point_idx]
+            ## CIRCLES STYLE: Draw filled circles at sample positions
+            elif self.visualization_style == 'circles':
+                sample_marker_radius = cfg.ui_sizes.sample_marker * self.win.size[1]
+                for point_idx, samples in sample_data.items():
+                    for sample_pix, fill_color in samples:
+                        img_draw.ellipse(
+                            (sample_pix[0] - sample_marker_radius,
+                            sample_pix[1] - sample_marker_radius,
+                            sample_pix[0] + sample_marker_radius,
+                            sample_pix[1] + sample_marker_radius),
+                            fill=fill_color,
+                            outline=None
+                        )
+
+            # --- STEP 2: Draw ALL Target Circles (Always) ---
+            for point_idx, target_pos in enumerate(self.calibration_points):
+                # Convert to pixels
                 target_pix = psychopy_to_pixels(self.win, target_pos)
                 
-                # --- Target Circle Drawing ---
-                # Draw target circle with configurable size and line width
+                # Draw target circle
                 img_draw.ellipse(
                     (target_pix[0] - target_circle_radius_pixels, 
                     target_pix[1] - target_circle_radius_pixels,
@@ -687,25 +706,8 @@ class BaseCalibrationSession:
                     outline=cfg.colors.target_outline,
                     width=max(1, int(target_circle_width_pixels))
                 )
-                
-                # --- Vectorized Sample Position Conversion ---
-                # Extract all sample positions and convert at once (efficient!)
-                sample_positions = np.array([sample_pos for _, sample_pos, _ in samples])
-                samples_pix = psychopy_to_pixels(self.win, sample_positions)
-                
-                # --- Sample Lines Drawing ---
-                # Draw lines from target to samples using converted positions
-                for i, (_, _, line_color) in enumerate(samples):
-                    sample_pix = samples_pix[i]
-                    img_draw.line(
-                        (target_pix[0], target_pix[1], sample_pix[0], sample_pix[1]),
-                        fill=line_color,
-                        width=max(1, int(line_width_pixels))
-                    )
-        
-        # --- Image Stimulus Creation ---
-        # Wrap in SimpleImageStim and return
-        return visual.SimpleImageStim(self.win, img, autoLog=False)
+
+            return visual.SimpleImageStim(self.win, img, autoLog=False)
 
 
 class TobiiCalibrationSession(BaseCalibrationSession):
@@ -831,35 +833,33 @@ class TobiiCalibrationSession(BaseCalibrationSession):
 
         self.show_message_and_wait(instructions_text, "Eye Tracker Calibration")
 
-        # --- 3. Convert from Normalized to Window Units ---
-        cal_points_window = norm_to_window_units(self.win, calibration_points)
-
-        # --- 4. Setup and Validation ---
-        self.check_points(cal_points_window)
-        self._prepare_session(cal_points_window)
+        # --- 3. Setup and Validation ---
+        self.check_points(calibration_points)
+        self._prepare_session(calibration_points)
         
-        # --- 5. Pre-convert to Tobii ADCS Coordinates (Once!) ---
-        self.tobii_points = [get_tobii_pos(self.win, pt) for pt in cal_points_window]
+        # --- 4. Pre-convert to Tobii ADCS Coordinates (Once!) ---
+        self.tobii_points = get_tobii_pos(self.win, self.calibration_points, source_units = self.calstim_units)  
+        # self.tobii_points = [get_tobii_pos(self.win, pt) for pt in cal_points_window]
 
-        # --- 6. Main Calibration Loop ---
+        # --- 5. Main Calibration Loop ---
         while True:
-            # --- 6a. Data Collection ---
-            success = self._collection_phase(cal_points_window)
+            # --- 5a. Data Collection ---
+            success = self._collection_phase(self.calibration_points)
             
             if not success:
                 self.calibration.leave_calibration_mode()
                 return False
 
-            # --- 6b. Calibration Computation ---
+            # --- 5b. Calibration Computation ---
             self.calibration_result = self.calibration.compute_and_apply()
             result_img = self._show_calibration_result()
 
-            # --- 6c. User Review and Selection ---
-            retries = self._selection_phase(cal_points_window, result_img)
+            # --- 5c. User Review and Selection ---
+            retries = self._selection_phase(self.calibration_points, result_img)
 
             if retries is None:
                 # Restart all: reset remaining points and clear data
-                self.remaining_points = list(range(len(cal_points_window)))
+                self.remaining_points = list(range(len(self.calibration_points)))
                 self._clear_collected_data()
                 continue
             elif not retries:
@@ -868,12 +868,12 @@ class TobiiCalibrationSession(BaseCalibrationSession):
             else:
                 # Retry specific points: update remaining points and discard data
                 self.remaining_points = retries.copy()
-                self._discard_phase(cal_points_window, retries)
+                self._discard_phase(self.calibration_points, retries)
 
-        # --- 7. Calibration Mode Deactivation ---
+        # --- 6. Calibration Mode Deactivation ---
         self.calibration.leave_calibration_mode()
 
-        # --- 8. Final Success Check ---
+        # --- 7. Final Success Check ---
         success = (self.calibration_result.status == tr.CALIBRATION_STATUS_SUCCESS)
 
         return success
@@ -958,58 +958,60 @@ class TobiiCalibrationSession(BaseCalibrationSession):
 
 
     def _show_calibration_result(self):
-        """
-        Show Tobii calibration results.
-        
-        Extracts sample data from Tobii results and builds line data only.
-        Circles are drawn automatically by base class from self.calibration_points.
-        
-        Returns
-        -------
-        SimpleImageStim
-            PsychoPy stimulus containing the rendered calibration results image.
-        """
-        # --- Initialize Sample Data (lines only) ---
-        sample_data = {}
-        
-        # --- Extract Lines from Tobii Results ---
-        if self.calibration_result.status != tr.CALIBRATION_STATUS_FAILURE:
-            for point in self.calibration_result.calibration_points:
-                # Find which point_idx this corresponds to
-                target_adcs = point.position_on_display_area
-                
-                # Match to original points by finding closest ADCS coordinate
-                for point_idx in range(len(self.tobii_points)):
-                    if (abs(self.tobii_points[point_idx][0] - target_adcs[0]) < 0.01 and
-                        abs(self.tobii_points[point_idx][1] - target_adcs[1]) < 0.01):
-                        
-                        # Collect sample lines for this point
+            """
+            Show Tobii calibration results.
+            
+            Extracts sample data from Tobii results, converts to pixels, and 
+            formats as (pixel_pos, color) tuples for the base class.
+            """
+            # --- Initialize Sample Data ---
+            sample_data = {}
+            
+            # --- Extract Lines from Tobii Results ---
+            if self.calibration_result.status != tr.CALIBRATION_STATUS_FAILURE:
+                for point in self.calibration_result.calibration_points:
+                    # Get the target position in ADCS (0-1)
+                    target_adcs = point.position_on_display_area
+                    
+                    # Match to our original points to find the correct point_idx
+                    # (We match by proximity because floats might not be identical)
+                    found_idx = -1
+                    for idx, tobii_pt in enumerate(self.tobii_points):
+                        if (abs(tobii_pt[0] - target_adcs[0]) < 0.001 and
+                            abs(tobii_pt[1] - target_adcs[1]) < 0.001):
+                            found_idx = idx
+                            break
+                    
+                    if found_idx != -1:
+                        # Collect samples for this point
                         samples = []
                         for sample in point.calibration_samples:
-                            # Left eye
+                            # --- Process Left Eye ---
                             if sample.left_eye.validity == tr.VALIDITY_VALID_AND_USED:
                                 left_adcs = sample.left_eye.position_on_display_area
+                                # 1. Convert ADCS to PsychoPy units
                                 left_psychopy = get_psychopy_pos(self.win, left_adcs)
+                                # 2. Convert PsychoPy to Pixels (integers)
                                 left_pix = psychopy_to_pixels(self.win, left_psychopy)
+                                # 3. Add to list as 2-item tuple
                                 samples.append((left_pix, cfg.colors.left_eye))
 
-                            # Right eye
+                            # --- Process Right Eye ---
                             if sample.right_eye.validity == tr.VALIDITY_VALID_AND_USED:
                                 right_adcs = sample.right_eye.position_on_display_area
+                                # 1. Convert ADCS to PsychoPy units
                                 right_psychopy = get_psychopy_pos(self.win, right_adcs)
+                                # 2. Convert PsychoPy to Pixels (integers)
                                 right_pix = psychopy_to_pixels(self.win, right_psychopy)
+                                # 3. Add to list as 2-item tuple
                                 samples.append((right_pix, cfg.colors.right_eye))
                         
-                        # Store lines (if any)
+                        # Store if we have samples
                         if samples:
-                            sample_data[point_idx] = samples
-                        
-                        break  # Found the match, move to next point
-        
-        # --- Generate Visualization ---
-        # Base class will draw ALL circles + lines from sample_data
-        return self._create_calibration_result_image(sample_data)
-
+                            sample_data[found_idx] = samples
+            
+            # --- Generate Visualization ---
+            return self._create_calibration_result_image(sample_data)
 
 
 class MouseCalibrationSession(BaseCalibrationSession):
@@ -1098,6 +1100,7 @@ class MouseCalibrationSession(BaseCalibrationSession):
         self.calibration_data = {}  # point_idx -> list of (target_pos, sample_pos, timestamp)
         self.verbose = verbose
 
+
     def run(self, calibration_points):
         """
         Main function to run the mouse-based calibration routine.
@@ -1132,29 +1135,26 @@ class MouseCalibrationSession(BaseCalibrationSession):
         
         self.show_message_and_wait(instructions_text, "Calibration Setup")
         
-        # --- 2. Convert from Normalized to Window Units ---
-        # Import here to avoid circular imports
-        cal_points_window = norm_to_window_units(self.win, calibration_points)
         
         # --- 3. Setup and Validation ---
-        self.check_points(cal_points_window)
-        self._prepare_session(cal_points_window)
+        self.check_points(calibration_points)
+        self._prepare_session(calibration_points)
         
         # --- 4. Main Calibration Loop ---
         while True:
             # --- 5a. Data Collection ---
-            success = self._collection_phase(cal_points_window, num_samples=cfg.calibration.num_samples_mouse)
+            success = self._collection_phase(self.calibration_points, num_samples=cfg.calibration.num_samples_mouse)
             if not success:
                 return False
                 
             # --- 4b. Results Visualization ---
-            result_img = self._show_results(cal_points_window)
+            result_img = self._show_results(self.calibration_points)
             
             # --- 4c. User Review and Selection ---
-            retries = self._selection_phase(cal_points_window, result_img)
+            retries = self._selection_phase(self.calibration_points, result_img)
 
             if retries is None:
-                self.remaining_points = list(range(len(cal_points_window)))
+                self.remaining_points = list(range(len(self.calibration_points)))
                 self.calibration_data.clear()
                 continue
             elif not retries:
@@ -1241,38 +1241,31 @@ class MouseCalibrationSession(BaseCalibrationSession):
 
 
     def _show_results(self, calibration_points):
-        """
-        Visualize mouse calibration results.
-        
-        Builds sample line data only. Circles are drawn automatically 
-        by base class from self.calibration_points.
-        
-        Parameters
-        ----------
-        calibration_points : list of (float, float)
-            Calibration targets in window units (kept for API compatibility).
+            """
+            Visualize mouse calibration results.
             
-        Returns
-        -------
-        visual.SimpleImageStim
-            PsychoPy image stimulus with calibration results.
-        """
-        # --- Initialize Sample Data (lines only) ---
-        sample_data = {}
+            Converts stored mouse samples to pixels and formats as 
+            (pixel_pos, color) tuples for the base class.
+            """
+            # --- Initialize Sample Data ---
+            sample_data = {}
 
-        # --- Extract Lines from Mouse Data ---
-        for point_idx, samples in self.calibration_data.items():
-            formatted_samples = []
-            
-            for _, sample_pos, _ in samples:  # (target, sample, timestamp)
-                # Convert sample to pixels
-                sample_pix = psychopy_to_pixels(self.win, sample_pos)
-                formatted_samples.append((sample_pix, cfg.colors.mouse))
-            
-            # Store lines
-            if formatted_samples:
-                sample_data[point_idx] = formatted_samples
+            # --- Extract Lines from Mouse Data ---
+            for point_idx, samples in self.calibration_data.items():
+                formatted_samples = []
+                
+                # Iterate raw stored data: (target_pos, sample_pos, timestamp)
+                for _, sample_pos, _ in samples:
+                    # 1. Convert PsychoPy position to Pixels (integers)
+                    sample_pix = psychopy_to_pixels(self.win, sample_pos)
+                    
+                    # 2. Add to list as 2-item tuple: (pixels, color)
+                    #    No dummy "None" value is needed anymore!
+                    formatted_samples.append((sample_pix, cfg.colors.mouse))
+                
+                # Store if we have samples
+                if formatted_samples:
+                    sample_data[point_idx] = formatted_samples
 
-        # --- Generate Visualization ---
-        # Base class will draw ALL circles + lines from sample_data
-        return self._create_calibration_result_image(sample_data)
+            # --- Generate Visualization ---
+            return self._create_calibration_result_image(sample_data)

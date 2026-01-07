@@ -782,14 +782,17 @@ class ETracker:
         
         # --- Calibration Points Processing ---
         if isinstance(calibration_points, int):
+            # Load standard pattern from config
             if calibration_points == 5:
                 norm_points = cfg.calibration.points_5
             elif calibration_points == 9:
                 norm_points = cfg.calibration.points_9
             else:
                 raise ValueError(
-                    f"calibration_points must be 5, 9, or a list of tuples. Got: {calibration_points}"
+                    f"Invalid calibration_points={calibration_points}. "
+                    f"Must be 5, 9, or a list of (x, y) coordinates."
                 )
+
         elif isinstance(calibration_points, list):
             if not calibration_points:
                 raise ValueError("calibration_points list cannot be empty.")
@@ -803,14 +806,16 @@ class ETracker:
                     raise ValueError(
                         f"Point {i} ({x}, {y}) out of range [-1, 1]."
                     )
-            
+            # ✅ Set norm_points to the user-provided list
             norm_points = calibration_points
+            
         else:
             raise ValueError(
                 f"calibration_points must be int (5 or 9) or list of tuples. "
                 f"Got: {type(calibration_points).__name__}"
             )
         
+        # Number of calibration points
         num_points = len(norm_points)
 
 
@@ -888,7 +893,7 @@ class ETracker:
             elif audio is True:
                 audio_path = os.path.join(os.path.dirname(__file__), 'stimuli', 'CalibrationSound.wav')
                 audio_stim = sound.Sound(audio_path, loops=-1)
-        
+
         # --- Mode-specific calibration setup ---
         if self.simulate:
             session = MouseCalibrationSession(
@@ -912,10 +917,10 @@ class ETracker:
                 visualization_style=visualization_style,
                 verbose=self.verbose
             )
-        
+
         # --- Run calibration ---
         success = session.run(norm_points)
-        
+
         return success
 
     def save_calibration(self, filename=None, use_gui=False, screen=-1, alwaysOnTop=True):
@@ -2238,6 +2243,9 @@ class ETracker:
         including potential gaps between save_data() calls that wouldn't be
         detected by incremental checking.
         
+        Automatically adapts to data format (raw vs simplified) and timestamp
+        format (relative vs absolute) based on recording settings.
+        
         Returns
         -------
         dict or None
@@ -2251,34 +2259,43 @@ class ETracker:
         -------
         - Only reads the timestamp column for efficiency
         - Works with both HDF5 and CSV formats
+        - Handles both raw format ('system_time_stamp') and simplified format ('TimeStamp')
+        - Handles both absolute timestamps (microseconds) and relative timestamps (milliseconds)
         - Dropped sample estimation: gaps larger than expected_interval * 1.5
         are flagged, and the number of missing samples is calculated based
         on gap duration
-        - At 120Hz: expected interval = 8333microS, tolerance = ±4167microS
-        - At 60Hz: expected interval = 16667microS, tolerance = ±8333microS
+        - At 120Hz: expected interval = 8333µs (or 8.33ms), tolerance = ±50%
+        - At 60Hz: expected interval = 16667µs (or 16.67ms), tolerance = ±50%
         """
+        # --- Determine correct timestamp column name based on format ---
+        if self.raw_format:
+            timestamp_col = 'system_time_stamp'
+        else:
+            timestamp_col = 'TimeStamp'
+        
         # --- Read timestamps from saved file ---
         if self.file_format == 'hdf5':
             with tables.open_file(self.filename, mode='r') as f:
-                timestamps = f.root.gaze.col('system_time_stamp')
+                timestamps = f.root.gaze.col(timestamp_col)
         elif self.file_format == 'csv':
-            # Read only timestamp column for efficiency
-            df = pd.read_csv(self.filename, usecols=['system_time_stamp'])
-            timestamps = df['system_time_stamp'].values
+            df = pd.read_csv(self.filename, usecols=[timestamp_col])
+            timestamps = df[timestamp_col].values
         
         if len(timestamps) < 2:
             return None
         
-        # --- Calculate quality metrics ---
-        expected_interval_us = 1_000_000 / self.fps
+        # --- Calculate expected interval (ALWAYS in milliseconds) ---
+        expected_interval = 1000.0 / self.fps  # ms per sample
+        
+        # --- Calculate intervals between consecutive samples ---
         intervals = np.diff(timestamps)
         
-        # Detect gaps (allow 50% tolerance for jitter)
-        tolerance = expected_interval_us * 0.5
-        gaps = intervals > (expected_interval_us + tolerance)
+        # --- Detect gaps (allow 50% tolerance for jitter) ---
+        tolerance = expected_interval * 0.5
+        gaps = intervals > (expected_interval + tolerance)
         
-        # Estimate dropped samples
-        dropped_samples = int(np.sum((intervals[gaps] / expected_interval_us) - 1))
+        # --- Estimate dropped samples ---
+        dropped_samples = int(np.sum((intervals[gaps] / expected_interval) - 1))
         total_samples = len(timestamps)
         
         return {
@@ -2481,31 +2498,39 @@ class ETracker:
 
     def _prepare_recording(self, filename=None):
         """
-        Initialize file structure and validate recording setup.
+        Initialize file structure with metadata and validate recording setup.
         
-        Determines output filename and format, creates empty file structure
-        with proper schema based on raw_format flag. Uses dummy-row technique 
-        for HDF5 table creation to ensure pandas compatibility.
+        Creates output file immediately with comprehensive metadata for HDF5 format
+        or column headers for CSV format. This ensures metadata is preserved even
+        if the program crashes before the first data save.
+        
+        For HDF5, creates file with root-level metadata including session info,
+        hardware configuration, recording settings, and display configuration.
+        Data tables (gaze, events) are created later on first save_data() call.
+        
+        For CSV, writes header row with column names based on raw_format setting.
+        Data is appended in subsequent save_data() calls.
         
         Parameters
         ----------
         filename : str, optional
             Output filename with optional extension (.csv, .h5, .hdf5).
-            If None, generates timestamp-based name. Missing extensions
-            default to .h5 format.
+            If None, generates timestamp-based name (YYYY-MM-DD_HH-MM-SS.h5).
+            Missing extensions default to .h5 format.
             
         Raises
         ------
         ValueError
             If file extension is not supported (.csv, .h5, .hdf5 only).
-        FileExistsError
-            If target file already exists (prevents accidental overwriting).
             
-        Details
-        -------
-        Raw format expands tuple columns into separate x, y, z components
-        for HDF5 compatibility (e.g., left_gaze_point_on_display_area becomes
-        left_gaze_point_on_display_area_x and left_gaze_point_on_display_area_y).
+        Notes
+        -----
+        If specified filename already exists, a datetime suffix is automatically
+        appended to prevent overwriting existing data.
+        
+        HDF5 metadata is stored at root level (_v_attrs) and persists even if
+        no gaze data is collected. This enables post-hoc quality assessment and
+        troubleshooting of failed recording sessions.
         """
         # --- Filename and format determination ---
         if filename is None:
@@ -2531,9 +2556,7 @@ class ETracker:
         
         # --- File conflict prevention ---
         if os.path.exists(self.filename):
-            # Extract base name and extension
             base, ext = os.path.splitext(self.filename)
-            
             warnings.warn(
                 f"File '{self.filename}' already exists. "
                 f"Attaching datetime suffix to avoid overwriting.",
@@ -2541,6 +2564,49 @@ class ETracker:
             )
             self.filename = f"{base}_{datetime.now().strftime('%Y-%m-%d_%H-%M-%S')}{ext}"
         
+        # --- Create file structure with metadata ---
+        if self.file_format == 'hdf5':
+            # --- HDF5: Create file with root-level metadata ---
+            with tables.open_file(self.filename, mode='w') as f:
+                
+                # === FILE-LEVEL METADATA (Session Info) ===
+                f.root._v_attrs.filename = self.filename                                    # Output filename
+                f.root._v_attrs.collection_date = datetime.now().strftime('%Y-%m-%d_%H-%M-%S')  # Recording timestamp
+                
+                # === HARDWARE INFORMATION ===
+                if not self.simulate:
+                    f.root._v_attrs.eyetracker_model = self.eyetracker.model              # Tobii model name
+                    f.root._v_attrs.eyetracker_serial = self.eyetracker.serial_number     # Unique device ID
+                    f.root._v_attrs.illumination_mode = self.illum_mode                   # Eye tracking mode
+                else:
+                    f.root._v_attrs.eyetracker_model = "Simulation"                       # Simulation mode indicator
+                
+                # === RECORDING SETTINGS ===
+                f.root._v_attrs.framerate = int(self.fps)                                 # Sampling frequency (Hz)
+                
+                # === DISPLAY CONFIGURATION ===
+                f.root._v_attrs.screen_size = str(self.win.size)                          # Screen resolution (pixels)
+                f.root._v_attrs.window_units = str(self.win.units)                        # PsychoPy coordinate system
+                
+                # === DATA FORMAT SETTINGS ===
+                f.root._v_attrs.raw_format = str(self.raw_format)                         # Full vs simplified columns
+                f.root._v_attrs.coordinate_units = str(self.coordinate_units)             # Coordinate system used
+                f.root._v_attrs.relative_timestamps = str(self.relative_timestamps)       # Timestamp format
+        
+        elif self.file_format == 'csv':
+            # --- CSV: Write column headers ---
+            # Determine column names based on format
+            if self.raw_format:
+                columns = cfg.RawDataColumns.ORDER
+            else:
+                columns = cfg.SimplifiedDataColumns.ORDER
+            
+            # Write header row
+            import csv
+            with open(self.filename, 'w', newline='') as f:
+                writer = csv.writer(f)
+                writer.writerow(columns)
+
 
     def _adapt_gaze_data(self, df, df_ev):
         """
@@ -2549,7 +2615,7 @@ class ETracker:
         Handles three main transformations:
         1. Format conversion (raw vs simplified columns)
         2. Coordinate conversion (Tobii ADCS to target units)
-        3. Timestamp conversion (absolute vs relative timing)
+        3. Timestamp conversion (always to milliseconds, relative or absolute)
         
         In raw format, expands tuple columns into separate x, y, z components
         for HDF5 compatibility while optionally converting display coordinates
@@ -2573,21 +2639,20 @@ class ETracker:
             Raw format returns all Tobii columns with tuples expanded to x, y, z
             components, display coordinates converted based on coordinate_units,
             3D spatial coordinates preserved in meters, and timestamps converted
-            if relative_timestamps is True.
+            to milliseconds.
             
             Simplified format returns essential columns (TimeStamp, Left_X, Left_Y,
             Right_X, Right_Y, pupil diameters, validity flags, Events) with
             coordinates converted based on coordinate_units and timestamps converted
-            if relative_timestamps is True.
+            to milliseconds.
             
         Details
         -------
-        Timestamp conversion transforms absolute Tobii system timestamps (microseconds
-        since system epoch) into relative timestamps starting from zero and expressed
-        in milliseconds. The first sample in each recording session becomes time zero,
-        making it straightforward to identify when events occurred relative to the
-        start of data collection. This conversion is applied consistently to both gaze
-        samples and event markers to maintain temporal synchronization.
+        Timestamp conversion transforms Tobii system timestamps (microseconds) into
+        milliseconds for consistency and readability. Relative mode starts from zero
+        (first sample becomes time 0), while absolute mode preserves original timing
+        in milliseconds. This conversion is applied consistently to both gaze samples
+        and event markers to maintain temporal synchronization.
         
         Coordinate conversion in raw format affects only the 2D display coordinates
         (left_gaze_point_on_display_area and right_gaze_point_on_display_area), while
@@ -2598,22 +2663,27 @@ class ETracker:
         meaningful to convert to screen-based units.
         """
 
-        # --- Timestamp conversion (if enabled) ---
+        # --- Timestamp conversion to milliseconds (ALWAYS) ---
         if self.relative_timestamps:
-            # Set reference timestamp from first sample
+            # Relative: Convert to ms starting from 0
             if self.first_timestamp is None:
                 self.first_timestamp = df.iloc[0]['system_time_stamp']
             
-            # Convert to milliseconds starting from 0
             df['system_time_stamp'] = ((df['system_time_stamp'] - self.first_timestamp) / 1000.0).astype(int)
             
-            # Convert event timestamps if present
             if df_ev is not None:
                 df_ev['system_time_stamp'] = ((df_ev['system_time_stamp'] - self.first_timestamp) / 1000.0).astype(int)
+        else:
+            # Absolute: Convert to ms but keep original timing
+            df['system_time_stamp'] = (df['system_time_stamp'] / 1000.0).astype(int)
+            
+            if df_ev is not None:
+                df_ev['system_time_stamp'] = (df_ev['system_time_stamp'] / 1000.0).astype(int)
 
         if self.raw_format:
-            # --- Raw format processing ---
-            # Preserve all Tobii SDK columns with optional coordinate conversion
+            # =====================================================================
+            # RAW FORMAT: Expand tuples into x, y, z columns
+            # =====================================================================
             
             # Define column categories for processing
             display_columns = [
@@ -2660,20 +2730,14 @@ class ETracker:
             return (df[cfg.RawDataColumns.ORDER], df_ev)
             
         else:
-            # --- Simplified format processing ---
-            # Extract essential columns with optional coordinate conversion
+            # =====================================================================
+            # SIMPLIFIED FORMAT: Extract, convert, rename for ease of use
+            # =====================================================================
 
-            # Create TimeStamp column (relative or absolute based on flag)
-            if self.relative_timestamps:
-                # Already converted above, just rename
-                df['TimeStamp'] = df['system_time_stamp']
-                if df_ev is not None:
-                    df_ev['TimeStamp'] = df_ev['system_time_stamp']
-            else:
-                # Keep absolute timestamps in microseconds
-                df['TimeStamp'] = df['system_time_stamp']
-                if df_ev is not None:
-                    df_ev['TimeStamp'] = df_ev['system_time_stamp']
+            # Create TimeStamp column (always in milliseconds)
+            df['TimeStamp'] = df['system_time_stamp']
+            if df_ev is not None:
+                df_ev['TimeStamp'] = df_ev['system_time_stamp']
             
             # Process gaze coordinates with optional conversion
             if self.coordinate_units == 'tobii':
@@ -2716,21 +2780,25 @@ class ETracker:
         """
         Save data in CSV format with append mode.
         
+        Appends data to existing file. Header was already written in
+        _create_csv_header().
+        
         Parameters
         ----------
         gaze_df : pandas.DataFrame
             DataFrame containing gaze data with events merged in Events column.
-        events_df : pandas.DataFrame or None
-            DataFrame containing raw event data (not used for CSV).
         """
-        # Check if file exists to determine if we should write header
-        write_header = not os.path.exists(self.filename)
-        
-        # Always append to file, write header only if file doesn't exist
-        gaze_df.to_csv(self.filename, index=False, mode='a', header=write_header)
+        # Always append without header (header already written)
+        gaze_df.to_csv(self.filename, index=False, mode='a', header=False)
+
 
     def _save_hdf5_data(self, gaze_df, events_df):
-        """Save gaze and event data to HDF5 using PyTables."""
+        """
+        Save gaze and event data to HDF5 using PyTables.
+        
+        Creates tables on first call if they don't exist. Metadata is already
+        present in the file from _create_hdf5_structure().
+        """
         
         # Convert string columns to fixed-width bytes
         gaze_df['Events'] = gaze_df['Events'].astype('S50')
@@ -2741,21 +2809,23 @@ class ETracker:
             events_array = events_df.to_records(index=False)
         
         with tables.open_file(self.filename, mode='a') as f:
-            # Gaze table
+            # --- Gaze table ---
             if hasattr(f.root, 'gaze'):
+                # Table exists - just append data
                 f.root.gaze.append(gaze_array)
             else:
-                gaze_table = f.create_table(f.root, 'gaze', obj=gaze_array)
-                gaze_table.attrs.screen_size = tuple(self.win.size)
-                gaze_table.attrs.framerate = self.fps or cfg.simulation_framerate
-                gaze_table.attrs.raw_format = self.raw_format
+                # First save - create table
+                # Note: Metadata already exists at root level from _create_hdf5_structure()
+                f.create_table(f.root, 'gaze', obj=gaze_array, title='Gaze data samples')
             
-            # Events table
+            # --- Events table ---
             if events_df is not None:
                 if hasattr(f.root, 'events'):
+                    # Table exists - just append data
                     f.root.events.append(events_array)
                 else:
-                    f.create_table(f.root, 'events', obj=events_array)
+                    # First save - create table
+                    f.create_table(f.root, 'events', obj=events_array, title='Event markers')
 
 
     def _on_gaze_data(self, gaze_data):
@@ -2879,45 +2949,55 @@ class ETracker:
 
 
     def _simulate_user_position_guide(self):
-        """
-        Generate user position data for track box visualization.
-        
-        Creates position data mimicking Tobii's user position guide,
-        with realistic eye separation and interactive Z-position control
-        via scroll wheel. Used specifically for show_status() display.
-        """
-        try:
-            # --- Interactive Z-position control ---
-            scroll = self.mouse.getWheelRel()
-            if scroll[1] != 0:  # Vertical scroll detected
-                current_z = getattr(self, 'sim_z_position', 0.6)
-                self.sim_z_position = current_z + scroll[1] * 0.05
-                self.sim_z_position = max(0.2, min(1.0, self.sim_z_position))  # Clamp range
+            """
+            Generate user position data for track box visualization.
             
-            # --- Position calculation ---
-            pos = self.mouse.getPos()
-            center_tobii_pos = Coords.get_tobii_pos(self.win, pos)
-            
-            # --- Realistic eye separation ---
-            # Simulate typical interpupillary distance (~6-7cm at 65cm distance)
-            eye_offset = 0.035  # Horizontal offset in TBCS coordinates
-            left_tobii_pos = (center_tobii_pos[0] - eye_offset, center_tobii_pos[1])
-            right_tobii_pos = (center_tobii_pos[0] + eye_offset, center_tobii_pos[1])
-            
-            # --- Data structure creation ---
-            timestamp = time.time() * 1_000_000
-            tbcs_z = getattr(self, 'sim_z_position', 0.6)
-            
-            gaze_data = {
-                'system_time_stamp': timestamp,
-                'left_user_position': (left_tobii_pos[0], left_tobii_pos[1], tbcs_z),
-                'right_user_position': (right_tobii_pos[0], right_tobii_pos[1], tbcs_z),
-                'left_user_position_validity': 1,
-                'right_user_position_validity': 1
-            }
-            
-            # --- Data storage ---
-            self.gaze_data.append(gaze_data)
-            
-        except Exception as e:
-            print(f"Simulated user position error: {e}")
+            Creates position data mimicking Tobii's user position guide,
+            with realistic eye separation and interactive Z-position control
+            via scroll wheel. Used specifically for show_status() display.
+            """
+            try:
+                # --- Interactive Z-position control ---
+                scroll = self.mouse.getWheelRel()
+                if scroll[1] != 0:  # Vertical scroll detected
+                    current_z = getattr(self, 'sim_z_position', 0.6)
+                    self.sim_z_position = current_z + scroll[1] * 0.05
+                    self.sim_z_position = max(0.2, min(1.0, self.sim_z_position))  # Clamp range
+                
+                # --- Position calculation ---
+                pos = self.mouse.getPos()
+                
+                # Get ADCS coordinates (0=Left, 1=Right)
+                center_adcs_pos = Coords.get_tobii_pos(self.win, pos)
+                
+                # FIX: Invert X because User Position coordinates are 0=Right, 1=Left
+                center_user_x = 1.0 - center_adcs_pos[0]
+                center_user_y = center_adcs_pos[1]  # Y axis (0=Top) matches
+                
+                # --- Realistic eye separation ---
+                # Simulate typical interpupillary distance (~6-7cm at 65cm distance)
+                eye_offset = 0.035  # Horizontal offset in TBCS coordinates
+                
+                # Apply offset to the INVERTED x position
+                # Note: Since 0 is Right and 1 is Left, "Left Eye" is actually +offset (closer to 1)
+                # and "Right Eye" is -offset (closer to 0) from the user's perspective.
+                left_user_pos = (center_user_x + eye_offset, center_user_y)
+                right_user_pos = (center_user_x - eye_offset, center_user_y)
+                
+                # --- Data structure creation ---
+                timestamp = time.time() * 1_000_000
+                tbcs_z = getattr(self, 'sim_z_position', 0.6)
+                
+                gaze_data = {
+                    'system_time_stamp': timestamp,
+                    'left_user_position': (left_user_pos[0], left_user_pos[1], tbcs_z),
+                    'right_user_position': (right_user_pos[0], right_user_pos[1], tbcs_z),
+                    'left_user_position_validity': 1,
+                    'right_user_position_validity': 1
+                }
+                
+                # --- Data storage ---
+                self.gaze_data.append(gaze_data)
+                
+            except Exception as e:
+                print(f"Simulated user position error: {e}")

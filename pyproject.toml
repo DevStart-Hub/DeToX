@@ -6,7 +6,7 @@ build-backend = "setuptools.build_meta"
 # This is the PYPI name (what users pip install)
 name = "dvst-detox"
 
-version = "0.2.0b1"
+version = "0.2.0"
 description = "Lightweight Python wrapper around tobii-researcher"
 readme = "README.md"
 requires-python = ">=3.10"

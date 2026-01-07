@@ -28,70 +28,42 @@ Typical usage:
 import numpy as np
 from psychopy.tools.monitorunittools import cm2pix, deg2pix, pix2cm, pix2deg
 
-
-def convert_height_to_units(win, height_value):
+def convert_height_to_units(win, height_value, target_units=None):
     """
-    Convert a size from height units to the current window units.
-    
-    Provides unit-agnostic size conversion for consistent visual appearance across
-    different PsychoPy coordinate systems. Essential for maintaining proper stimulus
-    sizing when window units differ from the standard height units used in
-    configuration files.
+    Convert a size from height units to the specified units.
     
     Parameters
     ----------
     win : psychopy.visual.Window
         The PsychoPy window providing unit and size information.
     height_value : float
-        Size in height units (fraction of screen height). For example, 0.1
-        represents 10% of the screen height.
+        Size in height units (fraction of screen height).
+    target_units : str, optional
+        Target unit system. If None, uses window's current units.
         
     Returns
     -------
     float
-        Size converted to current window units, maintaining the same visual
-        size on screen.
-        
-    Notes
-    -----
-    Height units are PsychoPy's recommended unit system for maintaining consistent
-    appearance across different screen sizes and aspect ratios.
-    
-    Supported conversions: height, norm, pix, cm, deg, degFlat, degFlatPos
-    
-    Examples
-    --------
-    ```python
-    from DeToX import Coords
-    from DeToX import ETSettings as cfg
-    
-    # Convert border thickness from config to current window units
-    border_size = Coords.convert_height_to_units(win, cfg.ui_sizes.border)
-    
-    # Convert text height (works regardless of window units)
-    text_height = Coords.convert_height_to_units(win, 0.03)  # 3% of screen height
-    
-    # Use in stimulus creation
-    circle = visual.Circle(win, radius=border_size)
-    ```
+        Size converted to target units.
     """
-    current_units = win.units
+    if target_units is None:
+        target_units = win.units
     
-    if current_units == "height":
+    if target_units == "height":
         return height_value
         
-    elif current_units == "norm":
+    elif target_units == "norm":
         return height_value * 2.0
         
-    elif current_units == "pix":
+    elif target_units == "pix":
         return height_value * win.size[1]
         
-    elif current_units in ["cm", "deg", "degFlat", "degFlatPos"]:
+    elif target_units in ["cm", "deg", "degFlat", "degFlatPos"]:
         height_pixels = height_value * win.size[1]
         
-        if current_units == "cm":
+        if target_units == "cm":
             return pix2cm(height_pixels, win.monitor)
-        elif current_units == "deg":
+        elif target_units == "deg":
             return pix2deg(height_pixels, win.monitor)
         else:  # degFlat, degFlatPos
             return pix2deg(np.array([height_pixels]), win.monitor, correctFlat=True)[0]
@@ -207,6 +179,7 @@ def get_psychopy_pos(win, p, units=None):
     else:
         return np.column_stack([result_x, result_y])
 
+
 def psychopy_to_pixels(win, pos):
     """
     Convert PsychoPy coordinates to pixel coordinates for image drawing.
@@ -244,38 +217,38 @@ def psychopy_to_pixels(win, pos):
     
     Examples
     --------
-```python
-    from DeToX import Coords
-    from PIL import Image, ImageDraw
-    import numpy as np
-    
-    # Single coordinate conversion
-    target_pos = (0.2, -0.1)  # PsychoPy coordinates (height units)
-    pixel_pos = Coords.psychopy_to_pixels(win, target_pos)
-    # Returns (1152, 432) for 1920x1080 display
-    
-    # Vectorized batch conversion (efficient!)
-    gaze_positions = np.array([
-        [0.2, -0.1],
-        [-0.1, 0.3],
-        [0.0, 0.0]
-    ])
-    pixel_positions = Coords.psychopy_to_pixels(win, gaze_positions)
-    # Returns (3, 2) array: [[1152, 432], [864, 216], [960, 540]]
-    
-    # Use for drawing calibration results with multiple samples
-    img = Image.new("RGBA", tuple(win.size))
-    draw = ImageDraw.Draw(img)
-    
-    # Convert all sample positions at once (vectorized!)
-    sample_positions = np.array([(0.1, 0.2), (-0.1, 0.1), (0.3, -0.2)])
-    samples_pix = Coords.psychopy_to_pixels(win, sample_positions)
-    
-    # Draw circles at each sample position
-    for sample_pix in samples_pix:
-        draw.ellipse([sample_pix[0]-5, sample_pix[1]-5, 
-                      sample_pix[0]+5, sample_pix[1]+5], fill='red')
-```
+    ```python
+        from DeToX import Coords
+        from PIL import Image, ImageDraw
+        import numpy as np
+        
+        # Single coordinate conversion
+        target_pos = (0.2, -0.1)  # PsychoPy coordinates (height units)
+        pixel_pos = Coords.psychopy_to_pixels(win, target_pos)
+        # Returns (1152, 432) for 1920x1080 display
+        
+        # Vectorized batch conversion (efficient!)
+        gaze_positions = np.array([
+            [0.2, -0.1],
+            [-0.1, 0.3],
+            [0.0, 0.0]
+        ])
+        pixel_positions = Coords.psychopy_to_pixels(win, gaze_positions)
+        # Returns (3, 2) array: [[1152, 432], [864, 216], [960, 540]]
+        
+        # Use for drawing calibration results with multiple samples
+        img = Image.new("RGBA", tuple(win.size))
+        draw = ImageDraw.Draw(img)
+        
+        # Convert all sample positions at once (vectorized!)
+        sample_positions = np.array([(0.1, 0.2), (-0.1, 0.1), (0.3, -0.2)])
+        samples_pix = Coords.psychopy_to_pixels(win, sample_positions)
+        
+        # Draw circles at each sample position
+        for sample_pix in samples_pix:
+            draw.ellipse([sample_pix[0]-5, sample_pix[1]-5, 
+                        sample_pix[0]+5, sample_pix[1]+5], fill='red')
+    ```
     """
     # Check if input is single coordinate or array
     pos_array = np.asarray(pos)
@@ -312,8 +285,8 @@ def psychopy_to_pixels(win, pos):
     else:
         return np.column_stack([x_pix, y_pix])
         
-
-def get_tobii_pos(win, p, units=None):
+        
+def get_tobii_pos(win, p, source_units=None):
     """
     Convert PsychoPy coordinates to Tobii ADCS coordinates.
     
@@ -323,21 +296,28 @@ def get_tobii_pos(win, p, units=None):
     
     ADCS uses normalized coordinates where (0,0) is top-left and (1,1) is
     bottom-right, providing a hardware-independent coordinate system.
+    
+    Supports both single coordinate conversion and vectorized batch conversion
+    for efficient processing of multiple positions.
 
     Parameters
     ----------
     win : psychopy.visual.Window
         The PsychoPy window providing unit and size information.
-    p : tuple
-        PsychoPy coordinates to convert as (x, y) in specified units.
-    units : str, optional
+    p : tuple or array-like
+        PsychoPy coordinates to convert:
+        - Single coordinate: (x, y) tuple in specified units
+        - Multiple coordinates: (N, 2) array where N is number of positions
+    source_units : str, optional
         Units of the input coordinates. If None, uses window's default units.
         Supported: 'norm', 'height', 'pix', 'cm', 'deg', 'degFlat', 'degFlatPos'.
 
     Returns
     -------
-    tuple
-        Tobii ADCS coordinates as (x, y) where both values are in range [0, 1].
+    tuple or ndarray
+        Tobii ADCS coordinates where values are in range [0, 1]:
+        - Single input: returns (x, y) tuple
+        - Array input: returns (N, 2) array
         (0, 0) is top-left, (1, 1) is bottom-right.
 
     Raises
@@ -353,50 +333,88 @@ def get_tobii_pos(win, p, units=None):
     Examples
     --------
     ```python
-    from DeToX import Coords
-    
-    # Convert calibration target position
-    target_psychopy = (0.2, -0.1)  # Height units
-    target_tobii = Coords.get_tobii_pos(win, target_psychopy)
-    # Returns (x, y) in [0, 1] range for Tobii SDK
-    
-    # Use during calibration
-    calibration.collect_data(target_tobii[0], target_tobii[1])
-    
-    # Convert from different unit systems
-    target_norm = (-0.5, 0.5)  # Normalized units
-    tobii_pos = Coords.get_tobii_pos(win, target_norm, units='norm')
-    
-    # Works with pixel coordinates too
-    target_pix = (960, 540)  # Center of 1920x1080 screen
-    tobii_pos = Coords.get_tobii_pos(win, target_pix, units='pix')
-    # Returns (0.5, 0.5) - center in ADCS
+        from DeToX import Coords
+        import numpy as np
+        
+        # Single coordinate conversion
+        target_psychopy = (0.2, -0.1)  # Height units
+        target_tobii = Coords.get_tobii_pos(win, target_psychopy, source_units='height')
+        # Returns (x, y) in [0, 1] range for Tobii SDK
+        
+        # Vectorized conversion for multiple points (efficient!)
+        targets = np.array([
+            [0.2, -0.1],
+            [-0.1, 0.3],
+            [0.0, 0.0]
+        ])
+        tobii_positions = Coords.get_tobii_pos(win, targets, source_units='height')
+        # Returns (3, 2) array with all positions converted
+        
+        # Use during calibration
+        target_tobii = Coords.get_tobii_pos(win, target_psychopy, source_units='height')
+        calibration.collect_data(target_tobii[0], target_tobii[1])
+        
+        # Convert from different unit systems
+        target_norm = (-0.5, 0.5)  # Normalized units
+        tobii_pos = Coords.get_tobii_pos(win, target_norm, source_units='norm')
+        
+        # Works with pixel coordinates too
+        target_pix = (960, 540)  # Center of 1920x1080 screen
+        tobii_pos = Coords.get_tobii_pos(win, target_pix, source_units='pix')
+        # Returns (0.5, 0.5) - center in ADCS
     ```
     """
-    if units is None:
-        units = win.units
-
-    if units == "norm":
-        return (p[0] / 2 + 0.5, p[1] / -2 + 0.5)
+    # --- Units Detection ---
+    if source_units is None:
+        source_units = win.units
+    
+    # --- Vectorization Setup ---
+    p_array = np.asarray(p)
+    is_single = (p_array.ndim == 1)
+    
+    if is_single:
+        p_array = p_array.reshape(1, -1)
+    
+    x = p_array[:, 0]
+    y = p_array[:, 1]
+    
+    # --- Unit-Specific Conversion ---
+    if source_units == "norm":
+        result_x = x / 2 + 0.5
+        result_y = -y / 2 + 0.5
         
-    elif units == "height":
-        return (p[0] * (win.size[1] / win.size[0]) + 0.5, -p[1] + 0.5)
+    elif source_units == "height":
+        aspect_ratio = win.size[1] / win.size[0]
+        result_x = x * aspect_ratio + 0.5
+        result_y = -y + 0.5
         
-    elif units == "pix":
-        return pix2tobii(win, p)
+    elif source_units == "pix":
+        result_x = x / win.size[0] + 0.5
+        result_y = -y / win.size[1] + 0.5
         
-    elif units in ["cm", "deg", "degFlat", "degFlatPos"]:
-        if units == "cm":
-            p_pix = (cm2pix(p[0], win.monitor), cm2pix(p[1], win.monitor))
-        elif units == "deg":
-            p_pix = (deg2pix(p[0], win.monitor), deg2pix(p[1], win.monitor))
-        elif units in ["degFlat", "degFlatPos"]:
-            p_pix = deg2pix(np.array(p), win.monitor, correctFlat=True)
-            
-        p_pix = tuple(round(pos, 0) for pos in p_pix)
-        return pix2tobii(win, p_pix)
+    elif source_units in ["cm", "deg", "degFlat", "degFlatPos"]:
+        # Convert to pixels first
+        if source_units == "cm":
+            x_pix = cm2pix(x, win.monitor)
+            y_pix = cm2pix(y, win.monitor)
+        elif source_units == "deg":
+            x_pix = deg2pix(x, win.monitor)
+            y_pix = deg2pix(y, win.monitor)
+        else:  # degFlat, degFlatPos
+            x_pix = deg2pix(x, win.monitor, correctFlat=True)
+            y_pix = deg2pix(y, win.monitor, correctFlat=True)
+        
+        # Convert pixels to Tobii
+        result_x = x_pix / win.size[0] + 0.5
+        result_y = -y_pix / win.size[1] + 0.5
     else:
-        raise ValueError(f"unit ({units}) is not supported")
+        raise ValueError(f"unit ({source_units}) is not supported")
+    
+    # --- Return in Original Format ---
+    if is_single:
+        return (float(result_x[0]), float(result_y[0]))
+    else:
+        return np.column_stack([result_x, result_y])
 
 
 def pix2tobii(win, p):
@@ -546,3 +564,67 @@ def get_psychopy_pos_from_user_position(win, p, units=None):
             return tuple(pix2deg(np.array(p_pix), win.monitor, correctFlat=True))
     else:
         raise ValueError(f"unit ({units}) is not supported")
+
+
+def norm_to_window_units(win, norm_coords, target_units=None):
+    """
+    Convert normalized coordinates to specified units.
+    
+    Parameters
+    ----------
+    win : psychopy.visual.Window
+        PsychoPy window providing unit and size information.
+    norm_coords : list of tuple or tuple
+        Calibration points as (x, y) tuples in normalized coordinates [-1, 1].
+    target_units : str, optional
+        Target unit system. If None, uses window's current units.
+        Options: 'height', 'norm', 'pix', 'cm', 'deg', 'degFlat', 'degFlatPos'
+        
+    Returns
+    -------
+    list of tuple or tuple
+        Points converted to target units.
+    """
+    # --- Input Format Detection ---
+    single_point = isinstance(norm_coords[0], (int, float))
+    if single_point:
+        norm_coords = [norm_coords]
+    
+    # --- Unit System Detection ---
+    current_units = target_units if target_units is not None else win.units
+    
+    # --- Vectorized Conversion ---
+    if current_units == "norm":
+        converted = norm_coords
+        
+    elif current_units == "height":
+        aspect = win.size[0] / win.size[1]
+        converted = [(x * aspect / 2.0, y * 0.5) for x, y in norm_coords]
+        
+    elif current_units == "pix":
+        half_w = win.size[0] / 2.0
+        half_h = win.size[1] / 2.0
+        converted = [(x * half_w, y * half_h) for x, y in norm_coords]
+        
+    elif current_units in ["cm", "deg", "degFlat", "degFlatPos"]:
+        # Convert to pixels first
+        half_w = win.size[0] / 2.0
+        half_h = win.size[1] / 2.0
+        pix_coords = [(x * half_w, y * half_h) for x, y in norm_coords]
+        
+        if current_units == "cm":
+            converted = [(pix2cm(x, win.monitor), pix2cm(y, win.monitor)) 
+                        for x, y in pix_coords]
+        elif current_units == "deg":
+            converted = [(pix2deg(x, win.monitor), pix2deg(y, win.monitor)) 
+                        for x, y in pix_coords]
+        else:  # degFlat, degFlatPos
+            converted = [(pix2deg(x, win.monitor, correctFlat=True), 
+                         pix2deg(y, win.monitor, correctFlat=True)) 
+                        for x, y in pix_coords]
+    else:
+        # Fallback: return as-is
+        converted = norm_coords
+    
+    # --- Return Original Format ---
+    return converted[0] if single_point else converted

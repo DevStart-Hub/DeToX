@@ -288,6 +288,12 @@ class UIElementSizes:
     title_text: float = 0.018         # Title text
     legend_text: float = 0.015        # Legend labels
 
+    # Eye legend sizes
+    legend_eye_width = 0.025 
+    legend_eye_height = 0.012
+    legend_spacing =0.10
+    legend_text_offset = 0.025 
+
 
 class RawDataColumns:
     """
