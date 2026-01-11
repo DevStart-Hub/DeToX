@@ -15,7 +15,7 @@ from .Coords import (
 )
 
 # Define the version
-__version__ = '0.2.0'
+__version__ = '0.2.1'
 
 # Define what gets exported with "from DeToX import *"
 __all__ = [
