@@ -179,81 +179,38 @@ def get_psychopy_pos(win, p, units=None):
     else:
         return np.column_stack([result_x, result_y])
 
+# Coords.py
 
-def psychopy_to_pixels(win, pos):
+def psychopy_to_pixels(win, pos, source_units=None):
     """
     Convert PsychoPy coordinates to pixel coordinates for image drawing.
     
     Transforms coordinates from any PsychoPy coordinate system to pixel coordinates
-    with top-left origin, suitable for PIL image drawing operations. Essential for
-    creating calibration result visualizations.
-    
-    Supports both single coordinate conversion and vectorized batch conversion
-    for efficient processing of multiple positions.
+    with top-left origin, suitable for PIL image drawing operations.
     
     Parameters
     ----------
     win : psychopy.visual.Window
         The PsychoPy window providing unit and size information.
     pos : tuple or array-like
-        PsychoPy coordinates to convert:
-        - Single coordinate: (x, y) tuple in current window units
-        - Multiple coordinates: (N, 2) array where N is number of positions
+        PsychoPy coordinates to convert.
+    source_units : str, optional
+        Units of the input coordinates. If None, uses window's default units.
+        Supported: 'norm', 'height', 'pix', 'cm', 'deg', 'degFlat', 'degFlatPos'.
     
     Returns
     -------
     tuple or ndarray
-        Pixel coordinates with origin at top-left:
-        - Single input: returns (int, int) tuple
-        - Array input: returns (N, 2) array of integers
-        Values are rounded to nearest integer for pixel alignment.
-    
-    Notes
-    -----
-    The output uses standard image coordinates where (0,0) is top-left and
-    y increases downward, suitable for PIL and similar libraries.
-    
-    Supported input units: height, norm, pix, and others (treated as centered)
-    
-    Examples
-    --------
-    ```python
-        from DeToX import Coords
-        from PIL import Image, ImageDraw
-        import numpy as np
-        
-        # Single coordinate conversion
-        target_pos = (0.2, -0.1)  # PsychoPy coordinates (height units)
-        pixel_pos = Coords.psychopy_to_pixels(win, target_pos)
-        # Returns (1152, 432) for 1920x1080 display
-        
-        # Vectorized batch conversion (efficient!)
-        gaze_positions = np.array([
-            [0.2, -0.1],
-            [-0.1, 0.3],
-            [0.0, 0.0]
-        ])
-        pixel_positions = Coords.psychopy_to_pixels(win, gaze_positions)
-        # Returns (3, 2) array: [[1152, 432], [864, 216], [960, 540]]
-        
-        # Use for drawing calibration results with multiple samples
-        img = Image.new("RGBA", tuple(win.size))
-        draw = ImageDraw.Draw(img)
-        
-        # Convert all sample positions at once (vectorized!)
-        sample_positions = np.array([(0.1, 0.2), (-0.1, 0.1), (0.3, -0.2)])
-        samples_pix = Coords.psychopy_to_pixels(win, sample_positions)
-        
-        # Draw circles at each sample position
-        for sample_pix in samples_pix:
-            draw.ellipse([sample_pix[0]-5, sample_pix[1]-5, 
-                        sample_pix[0]+5, sample_pix[1]+5], fill='red')
-    ```
+        Pixel coordinates with origin at top-left.
     """
     # Check if input is single coordinate or array
     pos_array = np.asarray(pos)
     is_single = (pos_array.ndim == 1)
     
+    # Determine source units
+    if source_units is None:
+        source_units = win.units
+
     # Reshape single input for vectorized processing
     if is_single:
         pos_array = pos_array.reshape(1, -1)
@@ -262,16 +219,36 @@ def psychopy_to_pixels(win, pos):
     x = pos_array[:, 0]
     y = pos_array[:, 1]
     
-    # Vectorized conversion based on window units
-    if win.units == 'height':
+    # Vectorized conversion based on units
+    if source_units == 'height':
         x_pix = x * win.size[1] + win.size[0] / 2
         y_pix = -y * win.size[1] + win.size[1] / 2
         
-    elif win.units == 'norm':
+    elif source_units == 'norm':
         x_pix = (x + 1) * win.size[0] / 2
         y_pix = (1 - y) * win.size[1] / 2
         
+    elif source_units == 'pix':
+        x_pix = x + win.size[0] / 2
+        y_pix = -y + win.size[1] / 2
+
+    elif source_units in ["cm", "deg", "degFlat", "degFlatPos"]:
+         # Convert to pixels (centered) first
+        if source_units == "cm":
+            x_centered = cm2pix(x, win.monitor)
+            y_centered = cm2pix(y, win.monitor)
+        elif source_units == "deg":
+            x_centered = deg2pix(x, win.monitor)
+            y_centered = deg2pix(y, win.monitor)
+        else: # degFlat
+            x_centered = deg2pix(x, win.monitor, correctFlat=True)
+            y_centered = deg2pix(y, win.monitor, correctFlat=True)
+            
+        x_pix = x_centered + win.size[0] / 2
+        y_pix = -y_centered + win.size[1] / 2
+        
     else:
+        # Fallback (treat as pixels/centered)
         x_pix = x + win.size[0] / 2
         y_pix = -y + win.size[1] / 2
     
@@ -284,7 +261,7 @@ def psychopy_to_pixels(win, pos):
         return (int(x_pix[0]), int(y_pix[0]))
     else:
         return np.column_stack([x_pix, y_pix])
-        
+                
         
 def get_tobii_pos(win, p, source_units=None):
     """

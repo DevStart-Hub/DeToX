@@ -289,6 +289,9 @@ class BaseCalibrationSession:
         # --- Convert Calibration Points ---
         self.calibration_points = norm_to_window_units(self.win, calibration_points, target_units=self.calstim_units)
         
+        # --- Store the target points in pixels ---
+        self.calibration_targets_pixels = psychopy_to_pixels(self.win, self.calibration_points, source_units='height')
+
         # --- Point Tracking Setup ---
         self.remaining_points = list(range(len(calibration_points)))
     
@@ -693,9 +696,9 @@ class BaseCalibrationSession:
                         )
 
             # --- STEP 2: Draw ALL Target Circles (Always) ---
-            for point_idx, target_pos in enumerate(self.calibration_points):
+            for point_idx, target_pix in enumerate(self.calibration_targets_pixels):
                 # Convert to pixels
-                target_pix = psychopy_to_pixels(self.win, target_pos)
+                # target_pix = psychopy_to_pixels(self.win, target_pos)
                 
                 # Draw target circle
                 img_draw.ellipse(
