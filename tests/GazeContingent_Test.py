@@ -6,7 +6,7 @@ from DeToX import ETracker
 
 # Create window - adjust size based on your monitor
 win = visual.Window(
-    size=[1920, 1080], 
+    size=[1920/2, 1080/2], 
     units='height', 
     fullscr=False,      # Set to True for real experiments
     allowGUI=True,      # Allows window controls for debugging
@@ -34,6 +34,8 @@ controller = ETracker(win, simulate=True)
 
 ## Start recording
 controller.start_recording('TEST.h5', raw_format=True) # save to hdf5 ( set to csv for easier debug)
+
+controller.enable_live_monitor()
 
 ## Start gaze contingent
 controller.gaze_contingent()

@@ -1,0 +1,81 @@
+Found: Tobii Pro Fusion (TPFC2-010202754074)
+
+============================================================
+ALL FIELDS IN GAZE SAMPLE:
+============================================================
+
+device_time_stamp:
+    Type:  int
+    Value: 19397423
+
+left_gaze_origin_in_trackbox_coordinate_system:
+    Type:  tuple
+    Value: (nan, nan, nan)
+
+left_gaze_origin_in_user_coordinate_system:
+    Type:  tuple
+    Value: (nan, nan, nan)
+
+left_gaze_origin_validity:
+    Type:  int
+    Value: 0
+
+left_gaze_point_in_user_coordinate_system:
+    Type:  tuple
+    Value: (nan, nan, nan)
+
+left_gaze_point_on_display_area:
+    Type:  tuple
+    Value: (nan, nan)
+
+left_gaze_point_validity:
+    Type:  int
+    Value: 0
+
+left_pupil_diameter:
+    Type:  float
+    Value: nan
+
+left_pupil_validity:
+    Type:  int
+    Value: 0
+
+right_gaze_origin_in_trackbox_coordinate_system:
+    Type:  tuple
+    Value: (nan, nan, nan)
+
+right_gaze_origin_in_user_coordinate_system:
+    Type:  tuple
+    Value: (nan, nan, nan)
+
+right_gaze_origin_validity:
+    Type:  int
+    Value: 0
+
+right_gaze_point_in_user_coordinate_system:
+    Type:  tuple
+    Value: (nan, nan, nan)
+
+right_gaze_point_on_display_area:
+    Type:  tuple
+    Value: (nan, nan)
+
+right_gaze_point_validity:
+    Type:  int
+    Value: 0
+
+right_pupil_diameter:
+    Type:  float
+    Value: nan
+
+right_pupil_validity:
+    Type:  int
+    Value: 0
+
+system_time_stamp:
+    Type:  int
+    Value: 3862919416
+
+============================================================
+Total fields: 18
+============================================================

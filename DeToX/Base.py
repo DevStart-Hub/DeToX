@@ -89,6 +89,10 @@ class ETracker:
         self.event_data = deque()       # Buffer for timestamped experimental events.
         self.gaze_contingent_buffer = None # Buffer for real-time gaze-contingent logic.
 
+        # live monitor attributes
+        self._simulation_thread = None  # Thread object for running simulations.
+        self.live_monitor = None        # Live eye position monitor window.
+
         # --- Timing ---
         # Clocks for managing experiment timing.
         self.experiment_clock = core.Clock()
@@ -1574,6 +1578,10 @@ class ETracker:
             # Unsubscribe from Tobii SDK data stream
             self.eyetracker.unsubscribe_from(tr.EYETRACKER_GAZE_DATA, self._on_gaze_data)
         
+        # --- Live monitor cleanup ---  # ← ADD THIS
+        if self.live_monitor is not None:
+            self.stop_live_monitor()
+
         # --- Save final batch ---
         self.save_data()
         
@@ -1600,6 +1608,12 @@ class ETracker:
         
         NicePrint(summary, title="Recording Complete")
 
+
+    def stop_live_monitor(self):
+        # --- Live monitor cleanup ---  # ← ADD THIS
+        if self.live_monitor is not None:
+            self.live_monitor.stop()
+            self.live_monitor = None
 
     def record_event(self, label):
         """
@@ -2211,6 +2225,34 @@ class ETracker:
         else:
             # Convert to specified coordinate system
             return Coords.get_psychopy_pos(self.win, mean_tobii, units=coordinate_units)
+
+
+    def enable_live_monitor(self):
+        """
+        Enable real-time eye position monitor window.
+        
+        Opens a small overlay window showing the participant's eye position
+        relative to the track box. Useful for participant setup and monitoring
+        during recording. The monitor runs in a separate process and does not
+        affect experiment timing.
+        
+        The monitor displays:
+        - X/Y position: Top-down view of eye positions in the track box
+        - Z distance: Bar showing how far the participant is from optimal range
+        - Status: Text feedback ("Position: Good", "Too Close", "Too Far", etc.)
+        
+        Call this after start_recording() to begin receiving data.
+        
+        Examples
+        --------
+        >>> ET.start_recording('data.h5')
+        >>> ET.enable_live_monitor()
+        >>> # ... run experiment ...
+        >>> ET.stop_recording()  # Automatically closes monitor
+        """
+        if self.live_monitor is None:
+            from .LiveMonitor import LiveMonitor
+            self.live_monitor = LiveMonitor()
 
             
     # --- Interanl fucntions ---
@@ -2857,6 +2899,18 @@ class ETracker:
                     gaze_data.get('left_gaze_point_on_display_area'),
                     gaze_data.get('right_gaze_point_on_display_area')
                 ])
+            
+            # --- Live monitor buffer ---
+            if self.live_monitor is not None:
+                left = gaze_data.get('left_gaze_origin_in_trackbox_coordinate_system')
+                right = gaze_data.get('right_gaze_origin_in_trackbox_coordinate_system')
+                left_valid = gaze_data.get('left_gaze_origin_validity', 0)
+                right_valid = gaze_data.get('right_gaze_origin_validity', 0)
+                
+                self.live_monitor.push(
+                    left if left_valid else None,
+                    right if right_valid else None
+                )
 
 
     # --- Simulation Methods ---
@@ -2902,6 +2956,13 @@ class ETracker:
     def _simulate_gaze_data(self):
         """Generate single gaze sample from current mouse position."""
         try:
+            # --- Interactive Z-position control ---
+            scroll = self.mouse.getWheelRel()
+            if scroll[1] != 0:  # Vertical scroll detected
+                current_z = getattr(self, 'sim_z_position', 0.6)
+                self.sim_z_position = current_z + scroll[1] * 0.05
+                self.sim_z_position = max(0.2, min(1.0, self.sim_z_position))  # Clamp range
+            
             pos = self.mouse.getPos()
             tobii_pos = Coords.get_tobii_pos(self.win, pos)
             tbcs_z = getattr(self, 'sim_z_position', 0.6)
@@ -2910,14 +2971,15 @@ class ETracker:
             
             # Create full Tobii-compatible structure
             gaze_data = {
-                'device_time_stamp': timestamp,      # ← DEVICE FIRST
-                'system_time_stamp': timestamp,      # ← SYSTEM SECOND
+                'device_time_stamp': timestamp,
+                'system_time_stamp': timestamp,
                 'left_gaze_point_on_display_area': tobii_pos,
                 'left_gaze_point_in_user_coordinate_system': (tobii_pos[0], tobii_pos[1], tbcs_z),
                 'left_gaze_point_validity': 1,
                 'left_pupil_diameter': 3.0,
                 'left_pupil_validity': 1,
                 'left_gaze_origin_in_user_coordinate_system': (tobii_pos[0], tobii_pos[1], tbcs_z),
+                'left_gaze_origin_in_trackbox_coordinate_system': (tobii_pos[0], tobii_pos[1], tbcs_z),
                 'left_gaze_origin_validity': 1,
                 'right_gaze_point_on_display_area': tobii_pos,
                 'right_gaze_point_in_user_coordinate_system': (tobii_pos[0], tobii_pos[1], tbcs_z),
@@ -2925,8 +2987,9 @@ class ETracker:
                 'right_pupil_diameter': 3.0,
                 'right_pupil_validity': 1,
                 'right_gaze_origin_in_user_coordinate_system': (tobii_pos[0], tobii_pos[1], tbcs_z),
+                'right_gaze_origin_in_trackbox_coordinate_system': (tobii_pos[0], tobii_pos[1], tbcs_z),
                 'right_gaze_origin_validity': 1,
-                # These aren't needed for raw format but keep for show_status compatibility:
+                # For show_status compatibility:
                 'left_user_position': (tobii_pos[0], tobii_pos[1], tbcs_z),
                 'right_user_position': (tobii_pos[0], tobii_pos[1], tbcs_z),
                 'left_user_position_validity': 1,
@@ -2936,13 +2999,18 @@ class ETracker:
             self.gaze_data.append(gaze_data)
 
             # --- Real-time gaze-contingent buffer ---
-            # Update rolling buffer for immediate gaze-contingent applications
             if self.gaze_contingent_buffer is not None:
                 self.gaze_contingent_buffer.append([
                     gaze_data.get('left_gaze_point_on_display_area'),
                     gaze_data.get('right_gaze_point_on_display_area')
                 ])
 
+            # --- Live monitor buffer ---
+            if self.live_monitor is not None:
+                self.live_monitor.push(
+                    (tobii_pos[0], tobii_pos[1], tbcs_z),
+                    (tobii_pos[0], tobii_pos[1], tbcs_z)
+                )
             
         except Exception as e:
             print(f"Simulated gaze error: {e}")
