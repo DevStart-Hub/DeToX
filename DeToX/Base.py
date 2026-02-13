@@ -1578,9 +1578,8 @@ class ETracker:
             # Unsubscribe from Tobii SDK data stream
             self.eyetracker.unsubscribe_from(tr.EYETRACKER_GAZE_DATA, self._on_gaze_data)
         
-        # --- Live monitor cleanup ---  # ← ADD THIS
-        if self.live_monitor is not None:
-            self.stop_live_monitor()
+        # --- Live monitor cleanup ---
+        self.stop_live_monitor()
 
         # --- Save final batch ---
         self.save_data()
@@ -1610,7 +1609,27 @@ class ETracker:
 
 
     def stop_live_monitor(self):
-        # --- Live monitor cleanup ---  # ← ADD THIS
+        """
+        Disable the real-time eye position monitor window.
+        
+        Gracefully terminates the separate monitor process and closes its window.
+        This method is safe to call even if the monitor is not currently running.
+        It is automatically called by `stop_recording()` to ensure proper cleanup.
+        
+        Details
+        -------
+        Sends a stop signal to the monitor process and waits briefly for it to
+        close before terminating it to prevent zombie processes.
+        
+        Examples
+        --------
+        ```python
+        ET.enable_live_monitor()
+        # ... monitor is visible ...
+        ET.stop_live_monitor()  # Window closes immediately
+        ```
+        """
+        # --- Live monitor cleanup ---  
         if self.live_monitor is not None:
             self.live_monitor.stop()
             self.live_monitor = None
@@ -2227,32 +2246,37 @@ class ETracker:
             return Coords.get_psychopy_pos(self.win, mean_tobii, units=coordinate_units)
 
 
-    def enable_live_monitor(self):
+    def enable_live_monitor(self, scale=1.0, screen=0, update_rate=20):
         """
         Enable real-time eye position monitor window.
         
-        Opens a small overlay window showing the participant's eye position
-        relative to the track box. Useful for participant setup and monitoring
-        during recording. The monitor runs in a separate process and does not
-        affect experiment timing.
-        
-        The monitor displays:
-        - X/Y position: Top-down view of eye positions in the track box
-        - Z distance: Bar showing how far the participant is from optimal range
-        - Status: Text feedback ("Position: Good", "Too Close", "Too Far", etc.)
-        
-        Call this after start_recording() to begin receiving data.
+        Parameters
+        ----------
+        scale : float, optional
+            Scale factor for window size. Default is 1.0 (220x300 pixels).
+            Use 1.5 for 330x450, 2.0 for 440x600, etc.
+        screen : int, optional
+            Screen number to display on. Default is 0 (primary monitor).
+            Use 1 for secondary monitor, 2 for third, etc.
+        update_rate : int or float, optional
+            Display refresh rate in Hz. Default is 20.
         
         Examples
         --------
-        >>> ET.start_recording('data.h5')
         >>> ET.enable_live_monitor()
-        >>> # ... run experiment ...
-        >>> ET.stop_recording()  # Automatically closes monitor
+        >>> ET.enable_live_monitor(scale=1.5, screen=1)
+        >>> ET.enable_live_monitor(screen=1, update_rate=10)
         """
         if self.live_monitor is None:
             from .LiveMonitor import LiveMonitor
-            self.live_monitor = LiveMonitor()
+            self.live_monitor = LiveMonitor(
+                scale=scale,
+                screen=screen,
+                update_rate=update_rate,
+                left_eye_color=cfg.colors.left_eye,
+                right_eye_color=cfg.colors.right_eye
+            )
+
 
             
     # --- Interanl fucntions ---
