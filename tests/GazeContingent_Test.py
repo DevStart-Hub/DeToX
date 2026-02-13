@@ -7,6 +7,7 @@ from DeToX import ETracker
 # Create window - adjust size based on your monitor
 win = visual.Window(
     size=[1920/2, 1080/2], 
+    screen=1,
     units='height', 
     fullscr=False,      # Set to True for real experiments
     allowGUI=True,      # Allows window controls for debugging
@@ -24,18 +25,17 @@ circle = visual.Circle(
     pos=(0, 0)               # position (x, y)
 )
 
-circle.draw()
 win.flip()
 
 #%% Initialize eye tracker
 
 ## Create controller in simulation mode
-controller = ETracker(win, simulate=True)
+controller = ETracker(win, simulate=False)
 
 ## Start recording
 controller.start_recording('TEST.h5', raw_format=True) # save to hdf5 ( set to csv for easier debug)
 
-controller.enable_live_monitor()
+controller.enable_live_monitor(screen=1, scale=1.5, update_rate=100)  # No arguments - use defaults (screen=0)
 
 ## Start gaze contingent
 controller.gaze_contingent()
