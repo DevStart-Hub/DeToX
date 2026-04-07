@@ -85,9 +85,11 @@ class ETracker:
         # --- Data Buffers ---
         # Use deques for efficient appending and popping from both ends.
         self._buf_lock = threading.Lock()  # Lock for thread-safe access to buffers.
-        self.gaze_data = deque()        # Main buffer for incoming gaze data.
-        self.event_data = deque()       # Buffer for timestamped experimental events.
+        self.gaze_data = deque()           # Buffer for EYETRACKER_GAZE_DATA only.
+        self._position_data = deque()      # Buffer for EYETRACKER_USER_POSITION_GUIDE only.
+        self.event_data = deque()          # Buffer for timestamped experimental events.
         self.gaze_contingent_buffer = None # Buffer for real-time gaze-contingent logic.
+        self._position_guide_subscribed = False  # Tracks USER_POSITION_GUIDE subscription state.
 
         # --- Timing ---
         # Clocks for managing experiment timing.
@@ -503,9 +505,7 @@ class ETracker:
         else:
             # --- Real eye tracker setup ---
             # Subscribe to user position guide data stream
-            self.eyetracker.subscribe_to(tr.EYETRACKER_USER_POSITION_GUIDE,
-                                        self._on_gaze_data,
-                                        as_dictionary=True)
+            self._subscribe_position_guide()
         
         # --- System stabilization ---
         core.wait(1)  # Allow data stream to stabilize
@@ -524,7 +524,7 @@ class ETracker:
             zc.draw()
             
             # --- Get latest position data ---
-            gaze_data = self.gaze_data[-1] if self.gaze_data else None
+            gaze_data = self._position_data[-1] if self._position_data else None
             
             if gaze_data:
                 # --- Extract eye position data ---
@@ -574,8 +574,7 @@ class ETracker:
                 self._simulation_thread.join(timeout=1.0)
         else:
             # --- Real eye tracker cleanup ---
-            self.eyetracker.unsubscribe_from(tr.EYETRACKER_USER_POSITION_GUIDE,
-                                            self._on_gaze_data)
+            self._unsubscribe_position_guide()
         
         core.wait(0.5)  # Brief pause before return
 
@@ -2859,6 +2858,81 @@ class ETracker:
                 ])
 
 
+    def _on_user_position(self, position_data: dict) -> None:
+        """
+        Thread-safe callback for User Position Guide stream.
+
+        Stores position data in a dedicated buffer separate from gaze
+        recording data. This callback is used exclusively for
+        EYETRACKER_USER_POSITION_GUIDE subscriptions.
+
+        Parameters
+        ----------
+        position_data : dict
+            User position sample from Tobii SDK (as_dictionary=True).
+            Contains keys:
+
+            - 'left_user_position' : (x, y, z) tuple, normalized 0-1
+            - 'left_user_position_validity' : bool
+            - 'right_user_position' : (x, y, z) tuple, normalized 0-1
+            - 'right_user_position_validity' : bool
+
+        Notes
+        -----
+        Called on the Tobii SDK's internal background thread, NOT the
+        main PsychoPy thread. Must be fast and thread-safe.
+
+        This callback does NOT touch self.gaze_data, self._buf_lock, or
+        the gaze-contingent buffer. The complete separation from
+        _on_gaze_data() ensures zero interference with the gaze recording
+        path during dual-subscription scenarios (e.g., recording with
+        the Live Monitor active).
+        """
+        # --- Store in dedicated position buffer ---
+        self._position_data.append(position_data)
+
+
+    def _subscribe_position_guide(self) -> None:
+        """
+        Subscribe to EYETRACKER_USER_POSITION_GUIDE if not already subscribed.
+
+        Safe to call multiple times. Tracks subscription state internally
+        via self._position_guide_subscribed to prevent double subscription.
+        Skipped in simulation mode (no real eye tracker to subscribe to).
+
+        Notes
+        -----
+        Subscription requires Tobii Pro SDK 1.11.0 or newer for safe
+        co-existence with EYETRACKER_GAZE_DATA subscriptions.
+        """
+        if not self._position_guide_subscribed and not self.simulate:
+            self.eyetracker.subscribe_to(
+                tr.EYETRACKER_USER_POSITION_GUIDE,
+                self._on_user_position,
+                as_dictionary=True
+            )
+            self._position_guide_subscribed = True
+
+
+    def _unsubscribe_position_guide(self) -> None:
+        """
+        Unsubscribe from EYETRACKER_USER_POSITION_GUIDE if currently subscribed.
+
+        Safe to call multiple times. Wraps the unsubscribe call in a
+        try/except to handle the case where the tracker has been
+        disconnected. Skipped in simulation mode.
+        """
+        if self._position_guide_subscribed and not self.simulate:
+            try:
+                self.eyetracker.unsubscribe_from(
+                    tr.EYETRACKER_USER_POSITION_GUIDE,
+                    self._on_user_position
+                )
+            except Exception:
+                pass  # Tracker may already be disconnected
+            self._position_guide_subscribed = False
+
+
     # --- Simulation Methods ---
 
 
@@ -2926,11 +3000,6 @@ class ETracker:
                 'right_pupil_validity': 1,
                 'right_gaze_origin_in_user_coordinate_system': (tobii_pos[0], tobii_pos[1], tbcs_z),
                 'right_gaze_origin_validity': 1,
-                # These aren't needed for raw format but keep for show_status compatibility:
-                'left_user_position': (tobii_pos[0], tobii_pos[1], tbcs_z),
-                'right_user_position': (tobii_pos[0], tobii_pos[1], tbcs_z),
-                'left_user_position_validity': 1,
-                'right_user_position_validity': 1,
             }
             
             self.gaze_data.append(gaze_data)
@@ -2997,7 +3066,7 @@ class ETracker:
                 }
                 
                 # --- Data storage ---
-                self.gaze_data.append(gaze_data)
+                self._position_data.append(gaze_data)
                 
             except Exception as e:
                 print(f"Simulated user position error: {e}")
