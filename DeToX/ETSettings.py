@@ -33,6 +33,9 @@ from dataclasses import dataclass, field
 from typing import Tuple
 
 
+HDF5_EVENT_DTYPE = 'S256'
+
+
 @dataclass
 class AnimationSettings:
     """Animation parameters for calibration stimuli.
@@ -297,164 +300,48 @@ class UIElementSizes:
 
 class RawDataColumns:
     """
-    Column specifications for raw Tobii SDK data format.
-    
-    This class defines the complete structure for raw format data including:
-    - Column order (matching pandas' dtype grouping for HDF5 compatibility)
-    - Data types for each column
-    - Default values for dummy data creation
-    
-    The order is optimized for HDF5 storage where related measurements
-    (coordinates + validity) are grouped together for easier analysis.
+    Schema constants for the DeToX raw gaze export format.
+
+    Raw export preserves fields from Tobii's ``EYETRACKER_GAZE_DATA`` callback
+    as closely as possible while converting tuple/list values into scalar
+    columns in ``Base.py``. Known Tobii gaze fields are written first in a
+    stable order; unknown future fields are appended after the known fields.
+
+    Notes
+    -----
+    This schema covers the gaze stream only. Other Tobii streams, such as
+    ``EYETRACKER_USER_POSITION_GUIDE`` or eye images, are intentionally not
+    included in raw gaze exports.
     """
-    
-    # Column order (list)
-    ORDER = [
-        # Timestamps
-        'device_time_stamp', 'system_time_stamp',
-        
-        # Left gaze point on display + validity
-        'left_gaze_point_on_display_area_x', 
-        'left_gaze_point_on_display_area_y',
+
+    EVENT_COLUMN = 'Events'
+    EVENT_DTYPE = HDF5_EVENT_DTYPE
+    VALIDITY_DTYPE = 'int8'
+    INTEGER_DTYPE = 'int64'
+    FLOAT_DTYPE = 'float64'
+    STRING_DTYPE = 'string'
+
+    # Known Tobii gaze callback keys. Tuple/list keys are flattened at runtime.
+    KNOWN_INPUT_ORDER = [
+        'device_time_stamp',
+        'system_time_stamp',
+        'left_gaze_point_on_display_area',
+        'left_gaze_point_in_user_coordinate_system',
         'left_gaze_point_validity',
-        
-        # Right gaze point on display + validity
-        'right_gaze_point_on_display_area_x', 
-        'right_gaze_point_on_display_area_y',
-        'right_gaze_point_validity',
-        
-        # Left gaze point in user coords
-        'left_gaze_point_in_user_coordinate_system_x',
-        'left_gaze_point_in_user_coordinate_system_y',
-        'left_gaze_point_in_user_coordinate_system_z',
-        
-        # Right gaze point in user coords
-        'right_gaze_point_in_user_coordinate_system_x',
-        'right_gaze_point_in_user_coordinate_system_y',
-        'right_gaze_point_in_user_coordinate_system_z',
-        
-        # Left pupil + validity
         'left_pupil_diameter',
         'left_pupil_validity',
-        
-        # Right pupil + validity
+        'left_gaze_origin_in_user_coordinate_system',
+        'left_gaze_origin_validity',
+        'right_gaze_point_on_display_area',
+        'right_gaze_point_in_user_coordinate_system',
+        'right_gaze_point_validity',
         'right_pupil_diameter',
         'right_pupil_validity',
-        
-        # Left gaze origin in user coords + validity
-        'left_gaze_origin_in_user_coordinate_system_x',
-        'left_gaze_origin_in_user_coordinate_system_y',
-        'left_gaze_origin_in_user_coordinate_system_z',
-        'left_gaze_origin_validity',
-        
-        # Right gaze origin in user coords + validity
-        'right_gaze_origin_in_user_coordinate_system_x',
-        'right_gaze_origin_in_user_coordinate_system_y',
-        'right_gaze_origin_in_user_coordinate_system_z',
+        'right_gaze_origin_in_user_coordinate_system',
         'right_gaze_origin_validity',
-        
-        # Events
-        'Events'
     ]
-    
-    # Data types (dict)
-    DTYPES = {
-        # Timestamps and validity - int64
-        'device_time_stamp': 'int64',
-        'system_time_stamp': 'int64',
-        'left_gaze_point_validity': 'int64',
-        'right_gaze_point_validity': 'int64',
-        'left_pupil_validity': 'int64',
-        'right_pupil_validity': 'int64',
-        'left_gaze_origin_validity': 'int64',
-        'right_gaze_origin_validity': 'int64',
-        
-        # All coordinate and diameter values - float64
-        'left_gaze_point_on_display_area_x': 'float64',
-        'left_gaze_point_on_display_area_y': 'float64',
-        'right_gaze_point_on_display_area_x': 'float64',
-        'right_gaze_point_on_display_area_y': 'float64',
-        'left_gaze_point_in_user_coordinate_system_x': 'float64',
-        'left_gaze_point_in_user_coordinate_system_y': 'float64',
-        'left_gaze_point_in_user_coordinate_system_z': 'float64',
-        'right_gaze_point_in_user_coordinate_system_x': 'float64',
-        'right_gaze_point_in_user_coordinate_system_y': 'float64',
-        'right_gaze_point_in_user_coordinate_system_z': 'float64',
-        'left_pupil_diameter': 'float64',
-        'right_pupil_diameter': 'float64',
-        'left_gaze_origin_in_user_coordinate_system_x': 'float64',
-        'left_gaze_origin_in_user_coordinate_system_y': 'float64',
-        'left_gaze_origin_in_user_coordinate_system_z': 'float64',
-        'right_gaze_origin_in_user_coordinate_system_x': 'float64',
-        'right_gaze_origin_in_user_coordinate_system_y': 'float64',
-        'right_gaze_origin_in_user_coordinate_system_z': 'float64',
-        
-        # Events - string
-        'Events': 'string'
-    }
-    
-    # Default values for dummy data creation (dict)
-    DEFAULTS = {
-        # Timestamps
-        'device_time_stamp': -999999,
-        'system_time_stamp': -999999,
-        
-        # Validity flags
-        'left_gaze_point_validity': 0,
-        'right_gaze_point_validity': 0,
-        'left_pupil_validity': 0,
-        'right_pupil_validity': 0,
-        'left_gaze_origin_validity': 0,
-        'right_gaze_origin_validity': 0,
-        
-        # All float columns default to NaN
-        'left_gaze_point_on_display_area_x': float('nan'),
-        'left_gaze_point_on_display_area_y': float('nan'),
-        'right_gaze_point_on_display_area_x': float('nan'),
-        'right_gaze_point_on_display_area_y': float('nan'),
-        'left_gaze_point_in_user_coordinate_system_x': float('nan'),
-        'left_gaze_point_in_user_coordinate_system_y': float('nan'),
-        'left_gaze_point_in_user_coordinate_system_z': float('nan'),
-        'right_gaze_point_in_user_coordinate_system_x': float('nan'),
-        'right_gaze_point_in_user_coordinate_system_y': float('nan'),
-        'right_gaze_point_in_user_coordinate_system_z': float('nan'),
-        'left_pupil_diameter': float('nan'),
-        'right_pupil_diameter': float('nan'),
-        'left_gaze_origin_in_user_coordinate_system_x': float('nan'),
-        'left_gaze_origin_in_user_coordinate_system_y': float('nan'),
-        'left_gaze_origin_in_user_coordinate_system_z': float('nan'),
-        'right_gaze_origin_in_user_coordinate_system_x': float('nan'),
-        'right_gaze_origin_in_user_coordinate_system_y': float('nan'),
-        'right_gaze_origin_in_user_coordinate_system_z': float('nan'),
-        
-        # Events
-        'Events': '__DUMMY__'
-    }
-    
-    @classmethod
-    def get_dummy_dict(cls):
-        """
-        Get dictionary for creating dummy DataFrame with proper structure.
-        
-        Returns
-        -------
-        dict
-            Dictionary with column names as keys and lists containing default
-            values as values, ready for pd.DataFrame() constructor.
-        """
-        return {col: [cls.DEFAULTS[col]] for col in cls.ORDER}
-    
-    @classmethod
-    def get_validity_dtypes(cls):
-        """
-        Get dictionary of validity column dtypes for optimization.
-        
-        Returns
-        -------
-        dict
-            Dictionary mapping validity column names to 'int8' dtype.
-        """
-        return {col: dtype for col, dtype in cls.DTYPES.items() if 'validity' in col}
+
+    COMPONENT_NAMES = ('x', 'y', 'z')
 
 
 class SimplifiedDataColumns:
@@ -494,10 +381,10 @@ class SimplifiedDataColumns:
         'Right_Pupil': 'float64',
         
         # Validity flags
-        'Left_Validity': 'int64',
-        'Right_Validity': 'int64',
-        'Left_Pupil_Validity': 'int64',
-        'Right_Pupil_Validity': 'int64',
+        'Left_Validity': 'int8',
+        'Right_Validity': 'int8',
+        'Left_Pupil_Validity': 'int8',
+        'Right_Pupil_Validity': 'int8',
         
         # Events - string
         'Events': 'string'
@@ -543,6 +430,33 @@ class SimplifiedDataColumns:
             Dictionary mapping validity column names to 'int8' dtype.
         """
         return {col: dtype for col, dtype in cls.DTYPES.items() if 'Validity' in col}
+
+    @classmethod
+    def cast_dataframe(cls, df):
+        """
+        Cast simplified gaze data to the fixed DeToX export schema.
+        
+        Parameters
+        ----------
+        df : pandas.DataFrame
+            DataFrame containing the simplified gaze export columns.
+            
+        Returns
+        -------
+        pandas.DataFrame
+            DataFrame ordered according to ``ORDER`` and cast according to
+            ``DTYPES``. ``Events`` remains a pandas string column until the HDF5
+            writer converts it to fixed-width bytes.
+        """
+        df = df[cls.ORDER].copy()
+        numeric_dtypes = {
+            col: dtype
+            for col, dtype in cls.DTYPES.items()
+            if col != 'Events'
+        }
+        df = df.astype(numeric_dtypes)
+        df['Events'] = df['Events'].astype('string')
+        return df
 
 
 
@@ -640,4 +554,5 @@ __all__ = [
     'simulation_framerate',
     'RawDataColumns',
     'SimplifiedDataColumns',
+    'HDF5_EVENT_DTYPE',
 ]

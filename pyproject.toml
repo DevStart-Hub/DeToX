@@ -11,11 +11,6 @@ description = "Lightweight Python wrapper around tobii-researcher"
 readme = "README.md"
 requires-python = ">=3.10"
 
-dependencies = [
-    "tobii-research",
-    "psychopy",
-]
-
 authors = [
     { name = "Tommaso Ghilardi", email = "tommaso.ghilardi93@gmail.com" },
 ]
@@ -26,3 +21,21 @@ packages = ["DeToX"]
 
 [tool.setuptools.package-data]
 DeToX = ["stimuli/*.png", "stimuli/*.mp4", "stimuli/*.wav"]
+[tool.pixi.workspace]
+channels = ["conda-forge"]
+platforms = ["win-64"]
+
+[tool.pixi.environments]
+dev = ["dev"]
+docs = { features = ["docs"], no-default-feature = true }
+
+[tool.pixi.feature.dev.dependencies]
+python = "3.10.*"
+
+[tool.pixi.feature.docs.dependencies]
+python = "3.11.*"
+
+[dependency-groups]
+dev = ["psychopy", "tobii-research"]
+docs = ["great-docs"]
+

@@ -1,5 +1,6 @@
 import os
 import time
+import json
 import tables
 import atexit
 import warnings
@@ -81,6 +82,7 @@ class ETracker:
         # Flags and variables to track the current state of the controller.
         self.recording = False          # True when data is being collected.
         self.first_timestamp = None     # Stores the timestamp of the first gaze sample for relative timing.
+        self.raw_format = False         # Current recording output mode; set by start_recording().
 
         # --- Data Buffers ---
         # Use deques for efficient appending and popping from both ends.
@@ -90,6 +92,16 @@ class ETracker:
         self.event_data = deque()          # Buffer for timestamped experimental events.
         self.gaze_contingent_buffer = None # Buffer for real-time gaze-contingent logic.
         self._position_guide_subscribed = False  # Tracks USER_POSITION_GUIDE subscription state.
+
+        # --- Raw Export Schema State ---
+        # Raw HDF5/CSV schemas are locked once per recording from the first
+        # gaze sample. This keeps save_data() lightweight while preserving any
+        # Tobii fields that exist at recording start.
+        self._raw_schema_columns = None
+        self._raw_schema_dtypes = None
+        self._raw_schema_locked = False
+        self._raw_schema_extra_columns_warned = False
+        self._csv_header_written = False
 
         # --- Timing ---
         # Clocks for managing experiment timing.
@@ -104,6 +116,9 @@ class ETracker:
         self.illum_mode = None          # Illumination mode of the tracker.
         self._stop_simulation = None    # Threading event to stop simulation loops.
         self._simulation_thread = None  # Thread object for running simulations.
+        self._sim_mouse_pos = (0.0, 0.0)  # Mouse position cache: written by main thread, read by sim thread.
+        self._sim_scroll_acc = 0.0        # Accumulated scroll delta: written by main thread, consumed by sim thread.
+        self.live_monitor = None          # Live eye position monitor subprocess (LiveMonitor instance).
 
         # --- Setup based on Mode (Real vs. Simulation) ---
         # Configure the controller for either a real eyetracker or simulation.
@@ -345,18 +360,18 @@ class ETracker:
 
     # --- Calibration Methods ---
 
-    def show_status(self, decision_key="space", video_help=True):
+    def show_status(self, decision_key="space", video_help=True, use_monitor=False):
         """
         Real-time visualization of participant's eye position in track box.
-        
+
         Creates interactive display showing left/right eye positions and distance
         from screen. Useful for positioning participants before data collection.
         Updates continuously until exit key is pressed.
-        
+
         Optionally displays an instructional video in the background to help guide
         participant positioning. You can use the built-in video, disable the video,
         or provide your own custom MovieStim object.
-        
+
         Parameters
         ----------
         decision_key : str, optional
@@ -369,6 +384,15 @@ class ETracker:
             responsible for scaling (size) and positioning (pos) the MovieStim
             to fit your desired layout.
             Default True.
+        use_monitor : bool, optional
+            If True, the PsychoPy window shows ONLY the attention video (no
+            trackbox overlay), and eye position visualization appears on the
+            separate Live Monitor window. The Live Monitor is started
+            automatically if not already running.
+
+            If False (default), the trackbox is drawn directly on the PsychoPy
+            window in classic mode.
+            Default False.
             
         Details
         -------
@@ -440,6 +464,10 @@ class ETracker:
         """
 
         NicePrint(instructions_text, title="Participant Positioning", verbose=self.verbose)
+
+        # --- Auto-enable monitor if requested ---
+        if use_monitor and self.live_monitor is None:
+            self.enable_live_monitor()
 
         # --- Video setup (if enabled) ---
         status_movie = None
@@ -514,43 +542,51 @@ class ETracker:
         b_show_status = True
         while b_show_status:
 
+            # --- Update simulation mouse cache (simulation mode only) ---
+            # Must happen at the top of the loop, on the main thread, before
+            # the background simulation thread reads the cached position.
+            self.update_sim_mouse()
+
             # --- Draw video first ---
             if status_movie:
                 status_movie.draw()
 
-            # --- Draw static elements ---
-            bgrect.draw()
-            zbar.draw()
-            zc.draw()
-            
-            # --- Get latest position data ---
-            gaze_data = self._position_data[-1] if self._position_data else None
-            
-            if gaze_data:
-                # --- Extract eye position data ---
-                lv = gaze_data["left_user_position_validity"]
-                rv = gaze_data["right_user_position_validity"]
-                lx, ly, lz = gaze_data["left_user_position"]
-                rx, ry, rz = gaze_data["right_user_position"]
-                
-                # --- Draw left eye position ---
-                if lv:
-                    lx_conv, ly_conv = Coords.get_psychopy_pos_from_user_position(self.win, [lx, ly], "height")
-                    leye.setPos((round(lx_conv * 0.25, 4), round(ly_conv * 0.2 + 0.4, 4)))
-                    leye.draw()
-                
-                # --- Draw right eye position ---
-                if rv:
-                    rx_conv, ry_conv = Coords.get_psychopy_pos_from_user_position(self.win, [rx, ry], "height")
-                    reye.setPos((round(rx_conv * 0.25, 4), round(ry_conv * 0.2 + 0.4, 4)))
-                    reye.draw()
-                
-                # --- Draw distance indicator ---
-                if lv or rv:
-                    # Calculate weighted average z-position
-                    avg_z = (lz * int(lv) + rz * int(rv)) / (int(lv) + int(rv))
-                    zpos.setPos((round((avg_z - 0.5) * 0.125, 4), 0.28))
-                    zpos.draw()
+            # --- Draw trackbox overlay (classic mode only) ---
+            # When use_monitor=True the experimenter watches the Live Monitor
+            # window; the PsychoPy window shows only the video for the infant.
+            if not use_monitor:
+                bgrect.draw()
+                zbar.draw()
+                zc.draw()
+
+                # --- Get latest position data ---
+                gaze_data = self._position_data[-1] if self._position_data else None
+
+                if gaze_data:
+                    # --- Extract eye position data ---
+                    lv = gaze_data["left_user_position_validity"]
+                    rv = gaze_data["right_user_position_validity"]
+                    lx, ly, lz = gaze_data["left_user_position"]
+                    rx, ry, rz = gaze_data["right_user_position"]
+
+                    # --- Draw left eye position ---
+                    if lv:
+                        lx_conv, ly_conv = Coords.get_psychopy_pos_from_user_position(self.win, [lx, ly], "height")
+                        leye.setPos((round(lx_conv * 0.25, 4), round(ly_conv * 0.2 + 0.4, 4)))
+                        leye.draw()
+
+                    # --- Draw right eye position ---
+                    if rv:
+                        rx_conv, ry_conv = Coords.get_psychopy_pos_from_user_position(self.win, [rx, ry], "height")
+                        reye.setPos((round(rx_conv * 0.25, 4), round(ry_conv * 0.2 + 0.4, 4)))
+                        reye.draw()
+
+                    # --- Draw distance indicator ---
+                    if lv or rv:
+                        # Calculate weighted average z-position
+                        avg_z = (lz * int(lv) + rz * int(rv)) / (int(lv) + int(rv))
+                        zpos.setPos((round((avg_z - 0.5) * 0.125, 4), 0.28))
+                        zpos.draw()
             
             # --- Check for exit input ---
             for key in event.getKeys():
@@ -1015,11 +1051,8 @@ class ETracker:
                 # Use the computed name as the suggested default
                 save_path = gui.fileSaveDlg(
                     prompt='Save calibration data as…',
-                    # Psychopy expects a string path; supply our suggested default
                     initFilePath=str(path),
-                    allowed='*.dat',
-                    screen=screen,
-                    alwaysOnTop=alwaysOnTop
+                    allowed='*.dat'
                 )
                 if not save_path:
                     print("|-- Save calibration cancelled by user. --|")
@@ -1155,9 +1188,7 @@ class ETracker:
             file_list = gui.fileOpenDlg(
                 prompt='Select calibration file to load…',
                 allowed='*.dat',
-                tryFilePath=start_path,
-                screen=screen,
-                alwaysOnTop=alwaysOnTop
+                tryFilePath=start_path
             )
                 
             # The dialog returns a list; if cancelled, it's None.
@@ -1221,8 +1252,9 @@ class ETracker:
             name. File extension determines format (.h5/.hdf5 for HDF5,
             .csv for CSV, defaults to .h5).
         raw_format : bool, optional
-            If True, preserves all original Tobii SDK column names and data
-            (including 3D eye positions, gaze origins, etc.).
+            If True, preserves the Tobii ``EYETRACKER_GAZE_DATA`` callback
+            fields available at the start of recording, flattening tuple/list
+            values into scalar ``_x``, ``_y``, ``_z`` columns for HDF5/CSV.
             If False (default), uses simplified column names and subset of columns
             (gaze positions, pupil diameters, validity flags only).
             See [Data Format Options](#data-format-options) for more information.
@@ -1251,12 +1283,13 @@ class ETracker:
         ### Data Format Options
         
         The `raw_format` parameter controls which columns are included in the saved
-        data file. Raw format preserves the complete data structure from the Tobii
-        Pro SDK, which includes both 2D screen coordinates and 3D spatial information
-        about eye position and gaze origin in the user coordinate system. This format
-        is useful for advanced analyses that require the full geometric relationship
-        between the eyes and the screen, or when you need to preserve all metadata
-        provided by the eye tracker. The simplified format extracts only the essential
+        data file. Raw format preserves gaze callback fields from Tobii's
+        ``EYETRACKER_GAZE_DATA`` stream while making them storage-friendly:
+        tuple/list values are expanded into scalar component columns, known Tobii
+        fields are written first, and unknown future fields are appended after the
+        known fields. The schema is locked from the first gaze sample in each
+        recording because HDF5 tables cannot add columns after creation. The
+        simplified format extracts only the essential
         data needed for most eye tracking analyses: gaze positions on screen, pupil
         diameters, and validity flags. This results in smaller files and easier data
         analysis for typical gaze visualization and AOI (Area of Interest) tasks.
@@ -1408,6 +1441,17 @@ class ETracker:
         
         # --- Format flag ---
         self.raw_format = raw_format
+
+        # --- Raw Schema State Reset ---
+        # Each recording gets its own raw schema because different Tobii SDK
+        # versions/devices may expose different gaze callback fields. The schema
+        # is locked from the first sample only when raw_format=True.
+        self._raw_schema_columns = None
+        self._raw_schema_dtypes = None
+        self._raw_schema_locked = False
+        self._raw_schema_extra_columns_warned = False
+        self._csv_header_written = False
+        self.first_timestamp = None
         
         # --- Smart coordinate unit defaults ---
         if coordinate_units == 'default':
@@ -1450,9 +1494,15 @@ class ETracker:
         if self.simulate:
             # Simulation mode setup
             self._stop_simulation = threading.Event()
+
+            # --- Choose simulation mode based on monitor state ---
+            # If the Live Monitor is active, generate BOTH gaze and position
+            # data so the monitor receives position updates while recording
+            sim_mode = 'both' if self.live_monitor is not None else 'gaze'
+
             self._simulation_thread = threading.Thread(
                 target=self._simulate_data_loop,
-                args=('gaze',),
+                args=(sim_mode,),
                 daemon=True
             )
             self.recording = True
@@ -1465,10 +1515,18 @@ class ETracker:
 
             # Subscribe to gaze data stream
             self.eyetracker.subscribe_to(
-                tr.EYETRACKER_GAZE_DATA, 
-                self._on_gaze_data, 
+                tr.EYETRACKER_GAZE_DATA,
+                self._on_gaze_data,
                 as_dictionary=True
             )
+
+            # --- Subscribe to position guide for LiveMonitor ---
+            # If the monitor is active, also subscribe to the User Position
+            # Guide stream so the monitor receives position data during
+            # recording. Safe since SDK 1.11.0 fixed the interference bug
+            # between the two streams.
+            if self.live_monitor is not None:
+                self._subscribe_position_guide()
 
             # Small delay to ensure subscription is active before data starts arriving
             core.wait(1)
@@ -1548,6 +1606,9 @@ class ETracker:
             )
             return
         
+        # --- Save final batch ---
+        self.save_data()
+
         # --- Stop data collection ---
         # Set flag to halt data collection immediately
         self.recording = False
@@ -1572,9 +1633,10 @@ class ETracker:
 
             # Unsubscribe from Tobii SDK data stream
             self.eyetracker.unsubscribe_from(tr.EYETRACKER_GAZE_DATA, self._on_gaze_data)
-        
-        # --- Save final batch ---
-        self.save_data()
+
+            # --- Unsubscribe position guide (monitor process stays alive) ---
+            # The monitor persists across sessions; only the subscription is dropped.
+            self._unsubscribe_position_guide()
         
         # --- Quality check ---
         if data_check:
@@ -1598,6 +1660,80 @@ class ETracker:
             )
         
         NicePrint(summary, title="Recording Complete")
+
+
+    def enable_live_monitor(self, scale: float = 1.5, screen: int = None,
+                            update_rate: int = 20) -> None:
+        """
+        Enable the real-time eye position monitor window.
+
+        Spawns a separate subprocess showing a tkinter Track Box window with
+        two eye dots and a distance bar. The monitor updates independently of
+        the PsychoPy window, making it ideal for the experimenter to watch while
+        the participant sees the experiment.
+
+        Safe to call multiple times — does nothing if the monitor is already
+        running.
+
+        Parameters
+        ----------
+        scale : float, optional
+            Scale factor for the monitor window size. 1.0 = ~150×110 px Track
+            Box; 1.5 gives a comfortable experimenter view. Default 1.5.
+        screen : int or None, optional
+            Screen number to open the monitor on. ``None`` (default) auto-selects
+            the screen that is NOT the PsychoPy window (e.g., the secondary
+            monitor). Pass ``0`` for the primary monitor, ``1`` for secondary, etc.
+        update_rate : int, optional
+            Maximum display refresh rate in Hz. Eye tracker data arrives at up to
+            ~60 Hz; the monitor GUI does not need that frequency. Default 20.
+
+        Examples
+        --------
+        >>> ET.enable_live_monitor()
+        >>> ET.enable_live_monitor(scale=2.0, screen=1, update_rate=10)
+        """
+        if self.live_monitor is None:
+            from .LiveMonitor import LiveMonitor
+
+            # --- Auto-select screen opposite to PsychoPy window ---
+            if screen is None:
+                psychopy_screen = getattr(self.win, 'screen', 0) or 0
+                screen = 1 if psychopy_screen == 0 else 0
+
+            self.live_monitor = LiveMonitor(
+                scale=scale,
+                screen=screen,
+                update_rate=update_rate,
+                left_eye_color=cfg.colors.left_eye,
+                right_eye_color=cfg.colors.right_eye
+            )
+
+
+    def stop_live_monitor(self) -> None:
+        """
+        Stop the real-time eye position monitor window.
+
+        Gracefully terminates the monitor subprocess and frees the
+        ``self.live_monitor`` reference. Safe to call even if the monitor is
+        not currently running.
+
+        Notes
+        -----
+        This method is NOT called automatically by ``stop_recording()``.
+        The monitor intentionally persists across recording sessions so the
+        experimenter can watch throughout the experiment. Call this explicitly
+        when you are done (e.g., after the last trial block).
+
+        Examples
+        --------
+        >>> ET.enable_live_monitor()
+        >>> # ... run experiment ...
+        >>> ET.stop_live_monitor()  # window closes
+        """
+        if self.live_monitor is not None:
+            self.live_monitor.stop()
+            self.live_monitor = None
 
 
     def record_event(self, label):
@@ -2227,6 +2363,16 @@ class ETracker:
         if self.recording:
             self.stop_recording()
 
+        # --- Position guide cleanup ---
+        # Ensure the position guide stream is unsubscribed even if show_status
+        # or start_recording exited abnormally.
+        self._unsubscribe_position_guide()
+
+        # --- Monitor cleanup ---
+        if self.live_monitor is not None:
+            self.live_monitor.stop()
+            self.live_monitor = None
+
 
     def _check_continuity(self):
         """
@@ -2360,62 +2506,58 @@ class ETracker:
                 for the current recording session.
             Default is 'connection'.
         """
-        if self.verbose:
-            # --- Handle Simulation Mode ---
-            if self.simulate:
-                # Set the simulated frames per second (fps) if not already set.
-                if self.fps is None:
-                    self.fps = cfg.simulation_framerate
+        # --- Always fetch/set tracker properties ---
+        if self.simulate:
+            if self.fps is None:
+                self.fps = cfg.simulation_framerate
+        else:
+            if self.fps is None:
+                self.fps = self.eyetracker.get_gaze_output_frequency()
+                self.freqs = self.eyetracker.get_all_gaze_output_frequencies()
 
-                # Display information specific to the simulation context.
-                if moment == 'connection':
-                    text = (
-                        "Simulating eyetracker:\n"
-                        f" - Simulated frequency: {self.fps} Hz"
-                    )
-                    title = "Simulated Eyetracker Info"
-                else:  # Assumes 'recording' context
-                    text = (
-                        "Recording mouse position:\n"
-                        f" - frequency: {self.fps} Hz"
-                    )
-                    title = "Recording Info"
+            if self.illum_mode is None:
+                self.illum_mode = self.eyetracker.get_eye_tracking_mode()
+                self.illum_modes = self.eyetracker.get_all_eye_tracking_modes()
 
-            # --- Handle Real Eyetracker Mode ---
+        # --- Display information (only when verbose) ---
+        if not self.verbose:
+            return
+
+        if self.simulate:
+            if moment == 'connection':
+                text = (
+                    "Simulating eyetracker:\n"
+                    f" - Simulated frequency: {self.fps} Hz"
+                )
+                title = "Simulated Eyetracker Info"
             else:
-                # On the first call, query the eyetracker for its properties and cache them.
-                # This avoids redundant SDK calls on subsequent `get_info` invocations.
-                if self.fps is None:
-                    self.fps = self.eyetracker.get_gaze_output_frequency()
-                    self.freqs = self.eyetracker.get_all_gaze_output_frequencies()
+                text = (
+                    "Recording mouse position:\n"
+                    f" - frequency: {self.fps} Hz"
+                )
+                title = "Recording Info"
+        else:
+            if moment == 'connection':
+                text = (
+                    "Connected to the eyetracker:\n"
+                    f"    - Model: {self.eyetracker.model}\n"
+                    f"    - Current frequency: {self.fps} Hz\n"
+                    f"    - Current illumination mode: {self.illum_mode}"
+                    "\nOther options:\n"
+                    f"    - Possible frequencies: {self.freqs}\n"
+                    f"    - Possible illumination modes: {self.illum_modes}"
+                )
+                title = "Eyetracker Info"
+            else:
+                text = (
+                    "Starting recording with:\n"
+                    f"    - Model: {self.eyetracker.model}\n"
+                    f"    - With frequency: {self.fps} Hz\n"
+                    f"    - With illumination mode: {self.illum_mode}"
+                )
+                title = "Recording Info"
 
-                if self.illum_mode is None:
-                    self.illum_mode = self.eyetracker.get_eye_tracking_mode()
-                    self.illum_modes = self.eyetracker.get_all_eye_tracking_modes()
-
-                # Display detailed information upon initial connection.
-                if moment == 'connection':
-                    text = (
-                        "Connected to the eyetracker:\n"
-                        f"    - Model: {self.eyetracker.model}\n"
-                        f"    - Current frequency: {self.fps} Hz\n"
-                        f"    - Current illumination mode: {self.illum_mode}"
-                        "\nOther options:\n"
-                        f"    - Possible frequencies: {self.freqs}\n"
-                        f"    - Possible illumination modes: {self.illum_modes}"
-                    )
-                    title = "Eyetracker Info"
-                else:  # Assumes 'recording' context, shows a concise summary.
-                    text = (
-                        "Starting recording with:\n"
-                        f"    - Model: {self.eyetracker.model}\n"
-                        f"    - With frequency: {self.fps} Hz\n"
-                        f"    - With illumination mode: {self.illum_mode}"
-                    )
-                    title = "Recording Info"
-
-            # Use the custom NicePrint utility to display the formatted information.
-            NicePrint(text, title, verbose=self.verbose)
+        NicePrint(text, title, verbose=self.verbose)
 
 
     def _subscribe_warnings(self):
@@ -2594,17 +2736,18 @@ class ETracker:
         
         elif self.file_format == 'csv':
             # --- CSV: Write column headers ---
-            # Determine column names based on format
+            # Simplified CSV headers are fixed and can be written immediately.
+            # Raw CSV headers are dynamic, so they are written on first save
+            # after the first gaze sample has locked the raw schema.
             if self.raw_format:
-                columns = cfg.RawDataColumns.ORDER
+                open(self.filename, 'w').close()
             else:
                 columns = cfg.SimplifiedDataColumns.ORDER
-            
-            # Write header row
-            import csv
-            with open(self.filename, 'w', newline='') as f:
-                writer = csv.writer(f)
-                writer.writerow(columns)
+                import csv
+                with open(self.filename, 'w', newline='') as f:
+                    writer = csv.writer(f)
+                    writer.writerow(columns)
+                self._csv_header_written = True
 
 
     def _adapt_gaze_data(self, df, df_ev):
@@ -2635,10 +2778,11 @@ class ETracker:
         tuple of pandas.DataFrame
             (adapted_gaze_df, adapted_events_df)
             
-            Raw format returns all Tobii columns with tuples expanded to x, y, z
-            components, display coordinates converted based on coordinate_units,
-            3D spatial coordinates preserved in meters, and timestamps converted
-            to milliseconds.
+            Raw format returns the locked DeToX raw gaze export schema: Tobii
+            gaze callback fields available at recording start with tuple/list
+            values expanded to component columns, display coordinates converted
+            based on coordinate_units, 3D spatial coordinates preserved in
+            meters, and timestamps converted to milliseconds.
             
             Simplified format returns essential columns (TimeStamp, Left_X, Left_Y,
             Right_X, Right_Y, pupil diameters, validity flags, Events) with
@@ -2680,54 +2824,7 @@ class ETracker:
                 df_ev['system_time_stamp'] = (df_ev['system_time_stamp'] / 1000.0).astype(int)
 
         if self.raw_format:
-            # =====================================================================
-            # RAW FORMAT: Expand tuples into x, y, z columns
-            # =====================================================================
-            
-            # Define column categories for processing
-            display_columns = [
-                'left_gaze_point_on_display_area',
-                'right_gaze_point_on_display_area'
-            ]
-            
-            spatial_columns = [
-                'left_gaze_point_in_user_coordinate_system',
-                'left_gaze_origin_in_user_coordinate_system',
-                'right_gaze_point_in_user_coordinate_system',
-                'right_gaze_origin_in_user_coordinate_system',
-            ]
-
-            # Process 2D display coordinates with optional conversion
-            for col in display_columns:
-                if self.coordinate_units == 'tobii':
-                    # Keep original Tobii ADCS coordinates (0-1 range)
-                    coords = np.array(df[col].tolist())
-                else:
-                    # Extract and convert to target coordinate system
-                    coords_tobii = np.array(df[col].tolist())
-                    coords = Coords.get_psychopy_pos(
-                        self.win, 
-                        coords_tobii, 
-                        units=self.coordinate_units
-                    )
-                
-                # Split into separate x and y columns
-                df[f'{col}_x'] = coords[:, 0]
-                df[f'{col}_y'] = coords[:, 1]
-
-            # Process 3D spatial coordinates (always in meters, never converted)
-            for col in spatial_columns:
-                coords_3d = np.array(df[col].tolist())
-                df[f'{col}_x'] = coords_3d[:, 0]
-                df[f'{col}_y'] = coords_3d[:, 1]
-                df[f'{col}_z'] = coords_3d[:, 2]
-
-            # Remove original tuple columns
-            df = df.drop(columns=display_columns + spatial_columns)
-            
-            # Return with enforced column order
-            return (df[cfg.RawDataColumns.ORDER], df_ev)
-            
+            return (self._adapt_raw_gaze_dataframe(df), df_ev)
         else:
             # =====================================================================
             # SIMPLIFIED FORMAT: Extract, convert, rename for ease of use
@@ -2767,12 +2864,8 @@ class ETracker:
                 'right_pupil_validity': 'Right_Pupil_Validity'
             })
             
-            # --- Data type optimization ---
-            validity_dtypes = cfg.SimplifiedDataColumns.get_validity_dtypes()
-            df = df.astype(validity_dtypes)
-            
-            # Return with enforced column order
-            return (df[cfg.SimplifiedDataColumns.ORDER], df_ev)
+            # Return with fixed simplified column order and explicit dtypes.
+            return (cfg.SimplifiedDataColumns.cast_dataframe(df), df_ev)
 
 
     def _save_csv_data(self, gaze_df):
@@ -2787,8 +2880,11 @@ class ETracker:
         gaze_df : pandas.DataFrame
             DataFrame containing gaze data with events merged in Events column.
         """
-        # Always append without header (header already written)
-        gaze_df.to_csv(self.filename, index=False, mode='a', header=False)
+        # Simplified CSV headers are written during _prepare_recording(). Raw
+        # headers are dynamic and are written here after schema locking.
+        write_header = not self._csv_header_written
+        gaze_df.to_csv(self.filename, index=False, mode='a', header=write_header)
+        self._csv_header_written = True
 
 
     def _save_hdf5_data(self, gaze_df, events_df):
@@ -2799,12 +2895,13 @@ class ETracker:
         present in the file from _create_hdf5_structure().
         """
         
-        # Convert string columns to fixed-width bytes
-        gaze_df['Events'] = gaze_df['Events'].astype('S50')
+        # Convert string columns to fixed-width bytes. PyTables cannot store
+        # pandas string extension columns directly in table records.
+        gaze_df['Events'] = gaze_df['Events'].astype(cfg.HDF5_EVENT_DTYPE)
         gaze_array = gaze_df.to_records(index=False)
         
         if events_df is not None:
-            events_df['Events'] = events_df['Events'].astype('S50')
+            events_df['Events'] = events_df['Events'].astype(cfg.HDF5_EVENT_DTYPE)
             events_array = events_df.to_records(index=False)
         
         with tables.open_file(self.filename, mode='a') as f:
@@ -2815,7 +2912,11 @@ class ETracker:
             else:
                 # First save - create table
                 # Note: Metadata already exists at root level from _create_hdf5_structure()
-                f.create_table(f.root, 'gaze', obj=gaze_array, title='Gaze data samples')
+                table = f.create_table(f.root, 'gaze', obj=gaze_array, title='Gaze data samples')
+                if self.raw_format and self._raw_schema_locked:
+                    table.attrs.raw_schema_columns = json.dumps(self._raw_schema_columns)
+                    table.attrs.raw_schema_dtypes = json.dumps(self._raw_schema_dtypes)
+                    table.attrs.raw_schema_locked_from = 'first_gaze_sample'
             
             # --- Events table ---
             if events_df is not None:
@@ -2841,6 +2942,15 @@ class ETracker:
             Gaze sample from Tobii SDK containing timestamps, coordinates,
             validity flags, and pupil data.
         """
+        # --- Raw Schema Locking (first raw sample only) ---
+        # The first raw gaze sample is used solely to lock the export schema
+        # and is NOT stored in the gaze buffer. All subsequent samples are
+        # stored and saved normally. This keeps save_data() lean since the
+        # schema is always ready before data arrives.
+        if self.raw_format and not self._raw_schema_locked:
+            self._lock_raw_schema_from_sample(gaze_data)
+            return
+
         # --- Thread-safe data storage ---
         # Use lock since this is called from Tobii SDK thread
         with self._buf_lock:
@@ -2856,6 +2966,161 @@ class ETracker:
                     gaze_data.get('left_gaze_point_on_display_area'),
                     gaze_data.get('right_gaze_point_on_display_area')
                 ])
+
+
+    def _lock_raw_schema_from_sample(self, gaze_data: dict) -> None:
+        """
+        Lock the raw export schema from the first gaze sample.
+
+        This one-time dict inspection keeps ``save_data()`` from having to
+        infer column names/dtypes while still preserving any Tobii gaze
+        callback fields available at recording start. Known Tobii fields are
+        ordered first; unknown fields are appended alphabetically after them.
+
+        Parameters
+        ----------
+        gaze_data : dict
+            First ``EYETRACKER_GAZE_DATA`` callback sample received after
+            ``start_recording(raw_format=True)``.
+
+        Notes
+        -----
+        Called on the Tobii SDK's internal background thread for real trackers,
+        and on DeToX's simulation thread in simulation mode. This method must
+        remain lightweight: it only inspects one Python dictionary and stores
+        column/dtype metadata. It must not create DataFrames, touch disk, or
+        call HDF5/PyTables.
+        """
+        R = cfg.RawDataColumns
+
+        # --- Flatten the first sample into scalar components ---
+        flat = {}
+        for key, value in gaze_data.items():
+            if isinstance(value, (tuple, list, np.ndarray)) and not isinstance(value, (str, bytes)):
+                vals = list(value)
+                for suffix, v in zip(R.COMPONENT_NAMES[:len(vals)], vals):
+                    flat[f'{key}_{suffix}'] = v
+            else:
+                flat[key] = value
+
+        # --- Known columns in stable Tobii order ---
+        known = []
+        for key in R.KNOWN_INPUT_ORDER:
+            if key not in gaze_data:
+                continue
+            value = gaze_data[key]
+            if isinstance(value, (tuple, list, np.ndarray)) and not isinstance(value, (str, bytes)):
+                for suffix in R.COMPONENT_NAMES[:len(value)]:
+                    known.append(f'{key}_{suffix}')
+            else:
+                known.append(key)
+
+        # --- Unknown columns after, Events last ---
+        unknown = sorted(col for col in flat if col not in known)
+        columns = known + unknown + [R.EVENT_COLUMN]
+
+        # --- Infer dtypes from constants + runtime type checks ---
+        dtypes = {}
+        for col in columns:
+            if col == R.EVENT_COLUMN:
+                dtypes[col] = R.STRING_DTYPE
+            elif 'validity' in col.lower():
+                dtypes[col] = R.VALIDITY_DTYPE
+            elif col in ('device_time_stamp', 'system_time_stamp'):
+                dtypes[col] = R.INTEGER_DTYPE
+            elif col.endswith(('_x', '_y', '_z')) or 'pupil_diameter' in col:
+                dtypes[col] = R.FLOAT_DTYPE
+            else:
+                val = flat.get(col, '')
+                if isinstance(val, (bool, np.bool_)):
+                    dtypes[col] = R.VALIDITY_DTYPE
+                elif isinstance(val, (int, np.integer)):
+                    dtypes[col] = R.INTEGER_DTYPE
+                elif isinstance(val, (float, np.floating)):
+                    dtypes[col] = R.FLOAT_DTYPE
+                else:
+                    dtypes[col] = R.STRING_DTYPE
+
+        self._raw_schema_columns = columns
+        self._raw_schema_dtypes = dtypes
+        self._raw_schema_locked = True
+
+
+    def _adapt_raw_gaze_dataframe(self, df: pd.DataFrame) -> pd.DataFrame:
+        """
+        Convert a raw gaze DataFrame to the locked DeToX raw export schema.
+
+        Applies coordinate conversion, flattening, schema enforcement, and
+        dtype casting. Callers get a DataFrame ready for HDF5/CSV saving.
+
+        Parameters
+        ----------
+        df : pandas.DataFrame
+            Raw gaze DataFrame built from buffered Tobii callback data.
+
+        Returns
+        -------
+        pandas.DataFrame
+            Ordered, typed DataFrame matching the locked raw schema.
+        """
+        R = cfg.RawDataColumns
+
+        # --- Convert known 2D display coordinates if requested ---
+        for col in ('left_gaze_point_on_display_area', 'right_gaze_point_on_display_area'):
+            if col not in df:
+                continue
+            if self.coordinate_units != 'tobii':
+                coords_tobii = np.array(df[col].tolist())
+                coords = Coords.get_psychopy_pos(self.win, coords_tobii, units=self.coordinate_units)
+                df[col] = [tuple(row) for row in coords]
+
+        # --- Flatten tuple/list columns into scalar _x, _y, _z components ---
+        out = pd.DataFrame(index=df.index)
+        for col in df.columns:
+            non_null = df[col].dropna()
+            first = non_null.iloc[0] if len(non_null) else None
+            if isinstance(first, (tuple, list, np.ndarray)) and not isinstance(first, (str, bytes)):
+                width = len(first)
+                suffixes = R.COMPONENT_NAMES[:width]
+                values = df[col].apply(
+                    lambda v: list(v) if isinstance(v, (tuple, list, np.ndarray))
+                    and not isinstance(v, (str, bytes)) else [np.nan] * width
+                )
+                expanded = pd.DataFrame(values.tolist(), index=df.index)
+                expanded.columns = [f'{col}_{s}' for s in suffixes]
+                out = pd.concat([out, expanded], axis=1)
+            else:
+                out[col] = df[col]
+        df = out
+
+        # --- Warn once and drop columns that appeared after schema was locked ---
+        extra = sorted(set(df.columns) - set(self._raw_schema_columns))
+        if extra and not self._raw_schema_extra_columns_warned:
+            warnings.warn(
+                "New raw gaze columns appeared after the schema was locked "
+                "and will be ignored: {0}. Raw HDF5/CSV schemas are fixed "
+                "per recording.".format(extra),
+                UserWarning
+            )
+            self._raw_schema_extra_columns_warned = True
+
+        # --- Fill missing columns with appropriate defaults ---
+        df = df.copy()
+        for col in self._raw_schema_columns:
+            if col not in df:
+                dtype = self._raw_schema_dtypes[col]
+                if dtype == R.STRING_DTYPE:
+                    df[col] = ''
+                elif dtype == R.VALIDITY_DTYPE:
+                    df[col] = 0
+                elif dtype == R.INTEGER_DTYPE:
+                    df[col] = -999999
+                else:
+                    df[col] = np.nan
+
+        # --- Order columns and cast dtypes ---
+        df = df[self._raw_schema_columns]
+        return df.astype(self._raw_schema_dtypes)
 
 
     def _on_user_position(self, position_data: dict) -> None:
@@ -2887,9 +3152,21 @@ class ETracker:
         _on_gaze_data() ensures zero interference with the gaze recording
         path during dual-subscription scenarios (e.g., recording with
         the Live Monitor active).
+
+        The LiveMonitor push goes through a subprocess pipe with rate
+        limiting on the LiveMonitor side, so high sample rates will not
+        overwhelm the monitor GUI.
         """
         # --- Store in dedicated position buffer ---
         self._position_data.append(position_data)
+
+        # --- Forward to LiveMonitor if active ---
+        if self.live_monitor is not None:
+            left_valid = position_data.get('left_user_position_validity', 0)
+            right_valid = position_data.get('right_user_position_validity', 0)
+            left = position_data.get('left_user_position') if left_valid else None
+            right = position_data.get('right_user_position') if right_valid else None
+            self.live_monitor.push(left, right)
 
 
     def _subscribe_position_guide(self) -> None:
@@ -2936,23 +3213,75 @@ class ETracker:
     # --- Simulation Methods ---
 
 
+    def update_sim_mouse(self) -> None:
+        """
+        Capture mouse state on the main thread for use by simulation callbacks.
+
+        PsychoPy's mouse events are only processed when the main thread
+        runs the event loop (``win.flip()``, ``event.getKeys()``). Simulation
+        callbacks run on a background thread and cannot reliably call
+        ``self.mouse.getPos()`` — they read stale values between flips.
+
+        Call this method once per frame from your experiment loop (before
+        ``win.flip()``) whenever the Live Monitor or gaze-contingent code
+        must track mouse position in simulation mode:
+
+        .. code-block:: python
+
+            while True:
+                ET.update_sim_mouse()   # capture fresh position
+                # ... draw stimuli ...
+                win.flip()
+
+        Notes
+        -----
+        - No-op when ``simulate`` is ``False`` or ``mouse`` is ``None``.
+        - Automatically called each frame inside ``show_status()``'s loop.
+        - Scroll-wheel deltas are accumulated in ``self._sim_scroll_acc``
+          and consumed by ``_simulate_user_position_guide()`` on the
+          background thread. Because Python attribute assignment is
+          atomic under the GIL, no explicit lock is needed.
+        """
+        if not self.simulate or self.mouse is None:
+            return
+        # --- Capture position (window units → stored as-is for Coords conversion) ---
+        self._sim_mouse_pos = self.mouse.getPos()
+        # --- Accumulate scroll delta so background thread can consume it ---
+        scroll = self.mouse.getWheelRel()
+        self._sim_scroll_acc += scroll[1]
+
+
     def _simulate_data_loop(self, data_type='gaze'):
         """
         Flexible simulation loop for different data types.
-        
-        Runs continuously in separate thread, generating either gaze data
-        or user position data at fixed framerate. Stops when recording
-        flag is cleared or stop event is set.
-        
+
+        Runs continuously in a separate thread, generating gaze data,
+        user position data, or both at fixed framerate. Stops when
+        recording flag is cleared or stop event is set.
+
         Parameters
         ----------
         data_type : str
-            Type of data to simulate: 'gaze' (for recording) or 
-            'user_position' (for show_status).
+            Type of data to simulate:
+
+            - 'gaze' : gaze samples for start_recording() (no monitor)
+            - 'user_position' : position samples for show_status()
+            - 'both' : gaze samples AND position samples — used by
+              start_recording() when the Live Monitor is active, so the
+              monitor keeps receiving position data during recording
+
+        Notes
+        -----
+        Uses self.recording and self._stop_simulation as loop conditions
+        for compatibility with both show_status() and start_recording().
+
+        The 'both' mode generates each sample type on every iteration,
+        so both buffers (self.gaze_data and self._position_data) get
+        samples at the same simulation framerate.
         """
         # --- Timing setup ---
         interval = 1.0 / cfg.simulation_framerate
-        
+
         try:
             # --- Main simulation loop ---
             while self.recording and not self._stop_simulation.is_set():
@@ -2961,12 +3290,18 @@ class ETracker:
                     self._simulate_gaze_data()
                 elif data_type == 'user_position':
                     self._simulate_user_position_guide()
+                elif data_type == 'both':
+                    # Generate both streams in the same iteration so the
+                    # monitor receives position data while gaze data is
+                    # being recorded
+                    self._simulate_gaze_data()
+                    self._simulate_user_position_guide()
                 else:
                     raise ValueError(f"Unknown data_type: {data_type}")
-                
+
                 # --- Frame rate control ---
                 time.sleep(interval)
-                
+
         except Exception as e:
             # --- Error handling ---
             print(f"Simulation error: {e}")
@@ -2974,15 +3309,19 @@ class ETracker:
 
 
     def _simulate_gaze_data(self):
-        """Generate single gaze sample from current mouse position."""
+        """Generate single gaze sample from cached mouse position."""
         try:
-            pos = self.mouse.getPos()
+            # --- Read from main-thread cache, not directly from mouse ---
+            # self.mouse.getPos() is only reliable on the main thread.
+            # update_sim_mouse() writes self._sim_mouse_pos each frame;
+            # reading it here avoids stale-value issues on the bg thread.
+            pos = self._sim_mouse_pos
             tobii_pos = Coords.get_tobii_pos(self.win, pos)
             tbcs_z = getattr(self, 'sim_z_position', 0.6)
-            
-            timestamp = int(self.experiment_clock.getTime() * 1_000_000) 
-            
-            # Create full Tobii-compatible structure
+
+            timestamp = int(self.experiment_clock.getTime() * 1_000_000)
+
+            # --- Create full Tobii-compatible structure ---
             gaze_data = {
                 'device_time_stamp': timestamp,      # ← DEVICE FIRST
                 'system_time_stamp': timestamp,      # ← SYSTEM SECOND
@@ -3001,16 +3340,23 @@ class ETracker:
                 'right_gaze_origin_in_user_coordinate_system': (tobii_pos[0], tobii_pos[1], tbcs_z),
                 'right_gaze_origin_validity': 1,
             }
-            
-            self.gaze_data.append(gaze_data)
 
-            # --- Real-time gaze-contingent buffer ---
-            # Update rolling buffer for immediate gaze-contingent applications
-            if self.gaze_contingent_buffer is not None:
-                self.gaze_contingent_buffer.append([
-                    gaze_data.get('left_gaze_point_on_display_area'),
-                    gaze_data.get('right_gaze_point_on_display_area')
-                ])
+            # --- Raw Schema Locking (first sample only, mirrors _on_gaze_data) ---
+            if self.raw_format and not self._raw_schema_locked:
+                self._lock_raw_schema_from_sample(gaze_data)
+                return  # Probe sample is not stored in the recording buffer
+
+            # --- Thread-safe buffer writes (mirrors _on_gaze_data) ---
+            with self._buf_lock:
+                self.gaze_data.append(gaze_data)
+
+                # --- Real-time gaze-contingent buffer ---
+                # Update rolling buffer for immediate gaze-contingent applications
+                if self.gaze_contingent_buffer is not None:
+                    self.gaze_contingent_buffer.append([
+                        gaze_data.get('left_gaze_point_on_display_area'),
+                        gaze_data.get('right_gaze_point_on_display_area')
+                    ])
 
             
         except Exception as e:
@@ -3020,21 +3366,33 @@ class ETracker:
     def _simulate_user_position_guide(self):
             """
             Generate user position data for track box visualization.
-            
+
             Creates position data mimicking Tobii's user position guide,
             with realistic eye separation and interactive Z-position control
             via scroll wheel. Used specifically for show_status() display.
+
+            Notes
+            -----
+            Reads mouse state from main-thread caches (self._sim_mouse_pos,
+            self._sim_scroll_acc) rather than calling self.mouse directly.
+            Mouse events are only processed by PsychoPy when the main thread
+            runs the event loop; calling mouse methods here (background thread)
+            would read stale values. update_sim_mouse() must be called each
+            frame from the main thread to keep these caches fresh.
             """
             try:
                 # --- Interactive Z-position control ---
-                scroll = self.mouse.getWheelRel()
-                if scroll[1] != 0:  # Vertical scroll detected
+                # Consume accumulated scroll delta captured by update_sim_mouse()
+                scroll_delta = self._sim_scroll_acc
+                self._sim_scroll_acc = 0.0
+                if scroll_delta != 0:
                     current_z = getattr(self, 'sim_z_position', 0.6)
-                    self.sim_z_position = current_z + scroll[1] * 0.05
+                    self.sim_z_position = current_z + scroll_delta * 0.05
                     self.sim_z_position = max(0.2, min(1.0, self.sim_z_position))  # Clamp range
-                
+
                 # --- Position calculation ---
-                pos = self.mouse.getPos()
+                # Read from main-thread cache rather than polling mouse directly
+                pos = self._sim_mouse_pos
                 
                 # Get ADCS coordinates (0=Left, 1=Right)
                 center_adcs_pos = Coords.get_tobii_pos(self.win, pos)
@@ -3067,6 +3425,14 @@ class ETracker:
                 
                 # --- Data storage ---
                 self._position_data.append(gaze_data)
-                
+
+                # --- Feed LiveMonitor ---
+                # Mirrors what _on_user_position() does for real data
+                if self.live_monitor is not None:
+                    self.live_monitor.push(
+                        gaze_data['left_user_position'],
+                        gaze_data['right_user_position']
+                    )
+
             except Exception as e:
                 print(f"Simulated user position error: {e}")
