@@ -14,7 +14,8 @@ or for the latest version:
 pip install git+https://github.com/DevStart-Hub/DeToX.git
 ```
 
-<sub>Coming soon to PyPI for even easier installation!</sub>
+To more detailed instructions check [Installation](docs-src/vignettes/00-installation.qmd)
+
 
 ## Why We Built DeToX
 

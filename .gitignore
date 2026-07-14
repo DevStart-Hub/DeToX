@@ -3,3 +3,10 @@
 .RData
 .Ruserdata
 *.egg-info/
+
+# pixi environments
+.pixi/*
+!.pixi/config.toml
+
+# generated documentation
+great-docs/

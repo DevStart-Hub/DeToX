@@ -1,0 +1,189 @@
+/* =============================================================================
+   DeToX fixed-colour Great Docs styling
+   =============================================================================
+   This keeps the general feeling of the old Quarto DeToX theme:
+   - fixed dark blue branding
+   - no gradients
+   - blue links
+   - stronger API/function blocks
+   - simple card styling
+============================================================================= */
+
+
+/* -----------------------------------------------------------------------------
+   Global colour variables
+----------------------------------------------------------------------------- */
+
+:root {
+  --bs-primary: #2e5576;
+  --bs-link-color: #17649e;
+  --bs-link-hover-color: #0d3656;
+
+  --detox-blue: #2e5576;
+  --detox-blue-dark: #1c3952;
+  --detox-link: #17649e;
+  --detox-link-hover: #0d3656;
+  --detox-border: rgba(46, 85, 118, 0.25);
+}
+
+
+/* -----------------------------------------------------------------------------
+   Links
+----------------------------------------------------------------------------- */
+
+a {
+  color: var(--detox-link);
+}
+
+a:hover {
+  color: var(--detox-link-hover);
+}
+
+
+/* -----------------------------------------------------------------------------
+   Sidebar
+----------------------------------------------------------------------------- */
+
+.sidebar a {
+  color: var(--detox-link);
+}
+
+.sidebar a:hover {
+  color: var(--detox-link-hover);
+}
+
+/* Make first-level sidebar entries a bit stronger */
+.sidebar .sidebar-item > .sidebar-link,
+.sidebar .sidebar-item-container > a {
+  font-weight: 600;
+}
+
+
+/* -----------------------------------------------------------------------------
+   API/function signatures
+----------------------------------------------------------------------------- */
+
+.doc-signature,
+.signature,
+code.sig,
+.highlight {
+  border-left: 4px solid var(--detox-blue);
+}
+
+/* Inline code */
+p code,
+li code,
+td code {
+  color: var(--detox-blue-dark);
+  background-color: rgba(46, 85, 118, 0.08);
+  border-radius: 4px;
+  padding: 0.1rem 0.25rem;
+}
+
+
+/* -----------------------------------------------------------------------------
+   Code blocks
+----------------------------------------------------------------------------- */
+
+pre,
+div.sourceCode {
+  border-left: 4px solid var(--detox-blue);
+  border-radius: 6px;
+}
+
+
+/* -----------------------------------------------------------------------------
+   Cards / content blocks
+----------------------------------------------------------------------------- */
+
+.card {
+  border-radius: 8px;
+  border: 1px solid var(--detox-border);
+  box-shadow: 0 4px 8px rgba(0, 0, 0, 0.06);
+}
+
+.card-header {
+  background-color: var(--detox-blue);
+  color: #ffffff;
+  font-weight: 600;
+}
+
+
+/* -----------------------------------------------------------------------------
+   Buttons
+----------------------------------------------------------------------------- */
+
+.btn-primary {
+  background-color: var(--detox-blue);
+  border-color: var(--detox-blue);
+}
+
+.btn-primary:hover {
+  background-color: var(--detox-blue-dark);
+  border-color: var(--detox-blue-dark);
+}
+
+
+/* -----------------------------------------------------------------------------
+   Announcement / alert-like elements
+----------------------------------------------------------------------------- */
+
+.alert-danger,
+.alert-warning {
+  border-left: 5px solid var(--detox-blue-dark);
+}
+
+
+/* -----------------------------------------------------------------------------
+   Tables
+----------------------------------------------------------------------------- */
+
+table {
+  border-color: var(--detox-border);
+}
+
+thead {
+  border-bottom: 2px solid var(--detox-blue);
+}
+
+
+/* -----------------------------------------------------------------------------
+   Dark mode
+----------------------------------------------------------------------------- */
+
+[data-bs-theme="dark"] {
+  --bs-primary: #6fa7cf;
+  --bs-link-color: #8dc7ee;
+  --bs-link-hover-color: #b9def5;
+
+  --detox-blue: #6fa7cf;
+  --detox-blue-dark: #9fc6e2;
+  --detox-link: #8dc7ee;
+  --detox-link-hover: #b9def5;
+  --detox-border: rgba(141, 199, 238, 0.3);
+}
+
+[data-bs-theme="dark"] p code,
+[data-bs-theme="dark"] li code,
+[data-bs-theme="dark"] td code {
+  color: #b9def5;
+  background-color: rgba(141, 199, 238, 0.12);
+}
+
+[data-bs-theme="dark"] .doc-signature,
+[data-bs-theme="dark"] .signature,
+[data-bs-theme="dark"] code.sig,
+[data-bs-theme="dark"] .highlight,
+[data-bs-theme="dark"] pre,
+[data-bs-theme="dark"] div.sourceCode {
+  border-left-color: #8dc7ee;
+}
+
+[data-bs-theme="dark"] .card {
+  border-color: rgba(141, 199, 238, 0.25);
+}
+
+[data-bs-theme="dark"] .card-header {
+  background-color: #1c3952;
+  color: #ffffff;
+}

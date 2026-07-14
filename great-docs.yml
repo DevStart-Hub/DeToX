@@ -1,0 +1,239 @@
+# =============================================================================
+# DeToX documentation configuration
+# =============================================================================
+# This file controls how Great Docs builds the documentation website for DeToX.
+# It defines:
+#   - package/module metadata
+#   - website links and branding
+#   - UI options
+#   - sidebar behaviour
+#   - vignette/tutorial sections
+#   - API reference sections
+# =============================================================================
+
+
+# -----------------------------------------------------------------------------
+# Package / module metadata
+# -----------------------------------------------------------------------------
+
+# Name of the Python module/package that Great Docs should document.
+# This should match the importable package name
+module: DeToX
+
+# Human-readable name shown in the documentation website.
+display_name: DeToX
+
+# Parser used by Great Docs to inspect the package.
+parser: numpy
+
+# Whether the documentation should be generated dynamically.
+dynamic: false
+
+
+# -----------------------------------------------------------------------------
+# Project links
+# -----------------------------------------------------------------------------
+
+# GitHub repository for the project.
+# This is usually shown somewhere in the documentation header/navbar.
+repo: https://github.com/DevStart-Hub/DeToX
+
+# Public URL where the documentation website will be hosted.
+site_url: https://devstart-hub.github.io/DeToX/
+
+
+# -----------------------------------------------------------------------------
+# Branding and appearance
+# -----------------------------------------------------------------------------
+
+# Logo shown in the documentation website.
+# Path should be relative to the project root.
+logo: docs-src/assets/Logosvg.png
+
+# Show a dark/light mode toggle in the documentation website.
+# Enabled by default, but keeping it explicit makes the config easier to read.
+dark_mode_toggle: true
+
+# Keep DeToX on a fixed blue brand colour instead of a Great Docs gradient preset.
+navbar_color: "#2e5576"
+nav_icons:
+  navbar:
+    Vignettes: book-open
+    Reference: code-2
+
+
+# -----------------------------------------------------------------------------
+# Announcement banner
+# -----------------------------------------------------------------------------
+# This creates a banner at the top of the documentation site.
+# Useful for warnings, beta notices, important updates, or migration messages.
+
+announcement:
+  # Markdown content shown in the banner.
+  content: "**Development Version** - DeToX is currently in beta. Features may change without notice. Thoroughly test before using."
+
+  # Banner style/type.
+  # Common values are usually things like: info, warning, danger, success.
+  type: warning
+
+  # Whether users can close/dismiss the announcement banner.
+  dismissable: false
+
+
+# -----------------------------------------------------------------------------
+# Changelog page
+# -----------------------------------------------------------------------------
+# Controls whether Great Docs should include a changelog page.
+# Set to true if you want the documentation site to show release notes.
+
+changelog:
+  enabled: false
+
+
+# -----------------------------------------------------------------------------
+# Sidebar search/filter
+# -----------------------------------------------------------------------------
+# Controls the filter box shown in the sidebar.
+# This is helpful when the API reference becomes long.
+
+sidebar_filter:
+  # Whether the sidebar filter/search box is enabled.
+  enabled: true
+
+  # Minimum number of sidebar items required before the filter appears.
+  # Here, the filter appears only if the sidebar has 20 or more items.
+  min_items: 20
+
+
+# -----------------------------------------------------------------------------
+# Narrative documentation sections
+# -----------------------------------------------------------------------------
+# These are non-API documentation pages, such as tutorials, guides, and examples.
+# In this case, Great Docs will look for files inside docs-src/vignettes.
+
+sections:
+  - title: Vignettes
+    dir: docs-src/vignettes
+
+
+# -----------------------------------------------------------------------------
+# API reference documentation
+# -----------------------------------------------------------------------------
+# This section controls how the automatically generated reference pages are
+# organised. Each section below groups related classes, methods, or functions.
+# -----------------------------------------------------------------------------
+
+reference:
+  # Main title of the API reference section.
+  title: Reference
+
+  # Short description shown at the top of the reference page.
+  desc: Complete reference for DeToX's public API.
+
+  sections:
+
+    # -------------------------------------------------------------------------
+    # Main class
+    # -------------------------------------------------------------------------
+    # The central class users interact with when using DeToX.
+    # members: false means only the class itself is documented here,
+    # while its methods are documented in the more specific sections below.
+
+    - title: Main Eye-tracker Class
+      desc: The central class for connecting to and managing Tobii eye trackers.
+      contents:
+        - name: ETracker.__init__
+
+
+    # -------------------------------------------------------------------------
+    # Recording control
+    # -------------------------------------------------------------------------
+    # Methods used to start, stop, annotate, save, and configure recordings.
+
+    - title: Recording Control
+      desc: Methods for starting, stopping, and managing eye-tracking recordings.
+      contents:
+        - ETracker.start_recording
+        - ETracker.stop_recording
+        - ETracker.record_event
+        - ETracker.save_data
+        - ETracker.set_eyetracking_settings
+
+
+    # -------------------------------------------------------------------------
+    # Calibration
+    # -------------------------------------------------------------------------
+    # Classes and methods used to run, save, load, and inspect calibration.
+    # This includes real Tobii calibration sessions and mouse-based test sessions.
+
+    - title: Calibration
+      desc: Classes and methods for running and managing calibration.
+      contents:
+        - ETracker.show_status
+        - ETracker.calibrate
+        - ETracker.save_calibration
+        - ETracker.load_calibration
+        - BaseCalibrationSession
+        - TobiiCalibrationSession
+        - MouseCalibrationSession
+
+
+    # -------------------------------------------------------------------------
+    # Gaze-contingent logic
+    # -------------------------------------------------------------------------
+    # Methods for experiments where stimuli or behaviour depend on live gaze.
+
+    - title: Gaze Contingent
+      desc: Methods for live gaze-contingent experiment logic.
+      contents:
+        - ETracker.gaze_contingent
+        - ETracker.get_gaze_position
+
+
+    # -------------------------------------------------------------------------
+    # Coordinate conversion
+    # -------------------------------------------------------------------------
+    # Utility functions for converting gaze/object positions between:
+    #   - Tobii normalised coordinates
+    #   - pixel coordinates
+    #   - PsychoPy window units
+    #
+    # These are especially useful when linking Tobii data to PsychoPy stimuli.
+
+    - title: Coordinate Conversion
+      desc: Utilities for converting between Tobii, pixel, and PsychoPy coordinates.
+      contents:
+        - convert_height_to_units
+        - get_psychopy_pos
+        - psychopy_to_pixels
+        - get_tobii_pos
+        - pix2tobii
+        - get_psychopy_pos_from_user_position
+        - norm_to_window_units
+
+
+    # -------------------------------------------------------------------------
+    # General utilities
+    # -------------------------------------------------------------------------
+    # Helper functions/classes that do not belong to one specific eye-tracking
+    # workflow but are useful across the package.
+
+    - title: Utilities
+      desc: Helper functions for user-facing output.
+      contents:
+        - NicePrint
+
+
+    # -------------------------------------------------------------------------
+    # Configuration settings
+    # -------------------------------------------------------------------------
+    # Dataclasses/settings containers used to customise calibration appearance,
+    # visual patterns, colours, animations, and interface element sizes.
+
+    - title: Configuration Settings
+      desc: Dataclasses for calibration animation, color, pattern, and UI settings.
+      contents:
+        - ETSettings.AnimationSettings
+        - ETSettings.CalibrationPatterns
+        - ETSettings.CalibrationColors
+        - ETSettings.UIElementSizes
