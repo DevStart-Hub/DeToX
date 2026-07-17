@@ -1,6 +1,15 @@
 [build-system]
+# Build backend used by pip/build/PyPI to create the installable package.
 requires = ["setuptools", "wheel"]
 build-backend = "setuptools.build_meta"
+
+
+# =============================================================================
+# Python package metadata
+# =============================================================================
+# These fields describe the package that users install with pip:
+#   pip install dvst-detox
+# They are used by PyPI, pip, build tools, and setuptools.
 
 [project]
 # This is the PYPI name (what users pip install)
@@ -8,8 +17,10 @@ name = "dvst-detox"
 version = "0.2.1"
 description = "Lightweight Python wrapper around tobii-researcher"
 readme = "README.md"
+# Runtime Python version required by the package itself.
 requires-python = "==3.10"
 
+# Runtime dependencies installed when users install dvst-detox with pip.
 dependencies = [
     "tobii-research",
     "psychopy",
@@ -20,36 +31,87 @@ authors = [
 ]
 
 [tool.setuptools]
+
 # This tells setuptools to package your folder named "DeToX"
 packages = ["DeToX"]
 
 [tool.setuptools.package-data]
+
+# Non-Python files bundled inside the installed DeToX package.
 DeToX = ["stimuli/*.png", "stimuli/*.mp4", "stimuli/*.wav"]
 
-[tool.pixi.workspace]
-channels = ["conda-forge"]
-platforms = ["linux-64"]
 
-[tool.pixi.dependencies]
+# =============================================================================
+# Pixi workspace
+# =============================================================================
+# Pixi uses the [tool.pixi.*] tables to create local development environments.
+# This is separate from the package metadata above: pip reads [project], while
+# Pixi reads these tables when you run commands such as `pixi install`.
+
+[tool.pixi.workspace]
+# Conda channel used for Pixi-managed dependencies.
+channels = ["conda-forge"]
+# Platforms solved into pixi.lock. This lets Windows and Linux users share one
+# lockfile and lets `pixi lock` check both platforms.
+platforms = ["linux-64", "win-64"]
+
+
+# -----------------------------------------------------------------------------
+# Base environment: package/runtime development
+# -----------------------------------------------------------------------------
+# This environment is for working with the DeToX package itself. It installs the
+# local package in editable mode, so code changes in DeToX/ are picked up without
+# reinstalling the package.
+
+[tool.pixi.feature.base]
+platforms = ["linux-64", "win-64"]
+
+[tool.pixi.feature.base.dependencies]
+# Match the package runtime Python requirement from [project].
 python = "==3.10"
 
-[tool.pixi.pypi-dependencies]
+[tool.pixi.feature.base.pypi-dependencies]
+# Editable local install of this package. Because this uses the package metadata
+# above, pip/Pixi will also install the [project] dependencies unless configured
+# otherwise.
 dvst-detox = { path = ".", editable = true }
 
-[tool.pixi.tasks]
+
+# -----------------------------------------------------------------------------
+# Docs environment: Great Docs documentation site
+# -----------------------------------------------------------------------------
+# This environment is intentionally separate from `base`. It is for building the
+# documentation site only, so it does not install PsychoPy/Tobii unless you add
+# them here explicitly. This keeps docs setup lighter and more portable.
+
+[tool.pixi.feature.docs]
+platforms = ["linux-64", "win-64"]
 
 [tool.pixi.feature.docs.dependencies]
+# Python used by Great Docs. This does not have to match the package runtime
+# Python, because the docs use static introspection (`dynamic: false`).
 python = "==3.12"
-quarto = "*"
 
 [tool.pixi.feature.docs.pypi-dependencies]
+# Great Docs generates the Quarto documentation project from great-docs.yml,
+# README.md, docs-src/, and the Python API/docstrings.
 great-docs = ">=0.14.1,<0.15"
 
 [tool.pixi.feature.docs.tasks]
+# Convenience commands. Run them with `pixi run -e docs <task-name>`.
 docs-scan = "great-docs scan --verbose"
 docs-build = "great-docs build"
 docs-preview = "great-docs preview"
 
+
+# -----------------------------------------------------------------------------
+# Named Pixi environments
+# -----------------------------------------------------------------------------
+# `default` is the package/runtime environment.
+# `docs` is the isolated documentation environment.
+# `no-default-feature = true` prevents dependencies from accidentally leaking
+# between these environments.
+
 [tool.pixi.environments]
-default = { solve-group = "default" }
+default = { features = ["base"], no-default-feature = true, solve-group = "default" }
 docs = { features = ["docs"], no-default-feature = true, solve-group = "docs" }

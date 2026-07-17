@@ -24,7 +24,7 @@ Get these right, and everything else falls into place.
 Every eye tracker has a track box—an invisible 3D zone where it can accurately detect eyes. Step outside this zone, and tracking quality drops fast! While we try to seat everyone consistently, even small differences in posture or chair height can matter. The good news? DeToX makes checking position as easy as calling a single method.
 
 ::: callout-warning
-This tutorial assumes you've completed [Getting started](01-getting-started.qmd). If not, start there first!!!
+This tutorial assumes you've completed [Getting started](02-getting-started.qmd). If not, start there first!!!
 :::
 
 ### Setup Code
@@ -70,7 +70,7 @@ When you call `show_status()`, an animated video of animals appears to keep infa
 
 Below the rectangle, a green bar with a moving black line indicates distance from the screen. The line should be centered on the bar (about 65 cm distance).
 
-![](../assets/Vids/ShowStatus.gif){fig-align="center" width="960"}
+![](../assets/videos/ShowStatus.gif){fig-align="center" width="960px"}
 
 ::: callout-important
 ### Simulation Mode

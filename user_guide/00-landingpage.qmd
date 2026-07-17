@@ -1,3 +1,8 @@
+---
+title: "landing"
+description: "landing page DeToX"
+---
+
 # DeToX
 
 DeToX (Developmental Tobii Experiment) is a user-friendly Python wrapper for the tobii-researcher library. It is designed to simplify the integration of Tobii eye-tracking hardware with PsychoPy, particularly for conducting developmental studies involving infants. By streamlining the process of data collection, DeToX aims to enhance the efficiency of developmental eye-tracking experiments.
@@ -14,7 +19,7 @@ or for the latest version:
 pip install git+https://github.com/DevStart-Hub/DeToX.git
 ```
 
-To more detailed instructions check [Installation](https://detox.devstart.org/user-guide/01-installation.html)
+To more detailed instructions check [Installation](user-guide/installation.qmd)
 
 ## Why We Built DeToX
 

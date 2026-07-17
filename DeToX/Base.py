@@ -37,6 +37,36 @@ class ETracker:
      - **Seamless Integration**: Built specifically to integrate with PsychoPy's experimental loop, making it a natural fit for your existing research designs.
 
     This class is intended to be the first object you instantiate in your experiment script. It provides a minimal yet powerful set of methods that are essential for conducting a reliable and reproducible eye-tracking study.
+
+    Attributes
+    ----------
+    win : psychopy.visual.Window
+        The PsychoPy window object used for stimulus display and coordinate
+        conversions.
+    simulate : bool
+        Whether the controller runs in simulation mode (mouse as gaze proxy).
+    etracker_id : int
+        Index of the Tobii eye tracker selected at initialization.
+    verbose : bool
+        Whether informational messages are printed to the console.
+    recording : bool
+        True while a gaze data recording is in progress.
+    eyetracker : tobii_research.EyeTracker or None
+        The connected Tobii eye tracker object, or None in simulation mode.
+    calibration : tobii_research.ScreenBasedCalibration or None
+        The Tobii calibration API object, or None in simulation mode.
+    mouse : psychopy.event.Mouse or None
+        PsychoPy mouse object used in simulation mode, otherwise None.
+    fps : float or None
+        Current sampling frequency (Hz) of the eye tracker (or simulated fps).
+    illum_mode : str or None
+        Current illumination mode of the eye tracker (e.g., 'Auto', 'Bright').
+    gaze_data : collections.deque
+        Buffer of incoming gaze samples from the eye tracker or simulation.
+    event_data : collections.deque
+        Buffer of timestamped experimental event markers.
+    gaze_contingent_buffer : collections.deque or None
+        Rolling buffer of recent gaze samples for real-time gaze-contingent use.
     """
 
     # --- Core Methods ---
@@ -55,7 +85,7 @@ class ETracker:
         win : psychopy.visual.Window
             The PsychoPy window object where stimuli will be displayed. This is
             required for coordinate conversions.
-        id : int, optional
+        etracker_id : int, optional
             The index of the Tobii eye tracker to use if multiple are found.
             Default is 0. Ignored if `simulate` is True.
         simulate : bool, optional
@@ -175,8 +205,8 @@ class ETracker:
             If the specified FPS or illumination mode is not supported by the connected 
             device.
         
-        Details
-        -------
+        Notes
+        -----
         - Settings cannot be changed during active recording. If an ongoing recording 
         is detected, a non-blocking warning is issued and the function exits safely.
         - When `use_gui=True`, a PsychoPy dialog window appears with dropdown menus.
@@ -368,8 +398,8 @@ class ETracker:
             to fit your desired layout.
             Default True.
             
-        Details
-        -------
+        Notes
+        -----
         In simulation mode, use scroll wheel to adjust simulated distance.
         Eye positions shown as green (left) and red (right) circles.
         
@@ -605,8 +635,8 @@ class ETracker:
 
              - Use **5** for the standard 5-point pattern (4 corners + center; default). 
              - Use **9** for a comprehensive 9-point pattern (3x3 grid). 
-             - Alternatively, provide a **list of tuples** with custom points in normalized 
-             - coordinates [-1, 1]. Example: ``[(-0.4, 0.4), (0.4, 0.4), (0.0, 0.0)]``.
+             - Alternatively, provide a **list of tuples** with custom points in
+             normalized coordinates [-1, 1]. Example: ``[(-0.4, 0.4), (0.4, 0.4), (0.0, 0.0)]``.
 
         infant_stims : True or str or list or visual stimulus, optional
             Calibration stimulus specification. Accepts multiple formats
@@ -615,8 +645,8 @@ class ETracker:
              - **False** uses a default blue square; 
              - a **str** specifies a single image file path (e.g., ``'stimulus.png'``); 
              - a **list of str** provides multiple image paths; 
-             - a **PsychoPy visual stimulus** (e.g., Circle, Rect, Polygon, ImageStim, ShapeStim) 
-            can be used as a single object; 
+             - a **PsychoPy visual stimulus** (e.g., Circle, Rect, Polygon, ImageStim,
+             ShapeStim) can be used as a single object;
              - or a **list of visual stimuli** may be provided. 
             If fewer stimuli than calibration points are given, they are automatically 
             repeated and optionally shuffled to cover all points. 
@@ -630,8 +660,8 @@ class ETracker:
         audio : True or False or None or psychopy.sound.Sound, optional
             Controls attention-getting audio during calibration:
 
-             -**True** uses the built-in looping calibration sound (default). 
-             -**False** or **None** disables audio. 
+             - **True** uses the built-in looping calibration sound (default).
+             - **False** or **None** disables audio. 
             A **psychopy.sound.Sound** object may be provided for custom audio 
             (ensure it is configured appropriately, e.g., ``loops=-1`` for continuous looping). 
             Audio plays when a calibration point is selected and fades out during data collection.
@@ -645,8 +675,8 @@ class ETracker:
         stim_size : {'big', 'small'}, optional
             Size preset for calibration stimuli:
 
-             - **'big'** uses larger stimuli recommended for infants and children (default). 
-             -**'small'** uses smaller stimuli for adults.
+             - **'big'** uses larger stimuli recommended for infants and children (default).
+             - **'small'** uses smaller stimuli for adults.
 
         visualization_style : {'circles', 'lines'}, optional
             How to display calibration results:
@@ -956,8 +986,8 @@ class ETracker:
             True if saved successfully; False if cancelled, no data available, in
             simulation mode, or on error.
         
-        Details
-        -------
+        Notes
+        -----
         - In simulation mode, saving is skipped and a warning is issued.
         - If `use_gui` is True and the dialog is cancelled, returns False.
         
@@ -1247,8 +1277,8 @@ class ETracker:
             Other options: True (always relative), False (always absolute).
             See [Timestamp Format](#timestamp-format) for more information.
         
-        Details
-        -------
+        Notes
+        -----
         ### Data Format Options
         
         The `raw_format` parameter controls which columns are included in the saved
@@ -1496,8 +1526,8 @@ class ETracker:
         UserWarning
             If recording is not currently active.
             
-        Details
-        -------
+        Notes
+        -----
         - All pending data in buffers is automatically saved before completion
         - Recording duration is measured from start_recording() call
         - Quality check reads the complete saved file to analyze gaps between ALL samples,
@@ -1619,8 +1649,8 @@ class ETracker:
         RuntimeWarning
             If called when recording is not active.
         
-        Details
-        -------
+        Notes
+        -----
         ### Event-Gaze Synchronization
         
         Events are stored separately and merged with gaze data when `save_data()` is
@@ -1716,8 +1746,8 @@ class ETracker:
         clear buffers. This is useful for long experiments to avoid memory buildup
         and ensure data is saved even if the program crashes.
         
-        Details
-        -------
+        Notes
+        -----
         - Automatically called by `stop_recording()`
         - Safe to call during active recording
         - Clears buffers after saving
@@ -1885,8 +1915,8 @@ class ETracker:
         ValueError
             If units is not 'seconds' or 'samples', or if calculated buffer size < 1.
         
-        Details
-        -------
+        Notes
+        -----
         - Call this method ONCE before your experimental loop
         - Buffer size trades off stability vs. latency:
         * Shorter duration/fewer samples: Lower latency, more noise
@@ -2049,8 +2079,8 @@ class ETracker:
         RuntimeError
             If gaze_contingent() was not called to initialize the buffer.
         
-        Details
-        -------
+        Notes
+        -----
         ### Coordinate System Conversion
         
         The `coordinate_units` parameter determines how gaze positions are returned from
@@ -2255,8 +2285,8 @@ class ETracker:
             on timestamp gaps
             Returns None if file has fewer than 2 samples or cannot be read.
         
-        Details
-        -------
+        Notes
+        -----
         - Only reads the timestamp column for efficiency
         - Works with both HDF5 and CSV formats
         - Handles both raw format ('system_time_stamp') and simplified format ('TimeStamp')
@@ -2313,8 +2343,8 @@ class ETracker:
         timestamp. Releases GIL during waits to allow callbacks to continue
         collecting data.
         
-        Details
-        -------
+        Notes
+        -----
         - Returns immediately if no events are buffered
         - Each wait releases GIL, allowing callback thread to run
         - Typically completes in 1-2 sample intervals
@@ -2646,8 +2676,8 @@ class ETracker:
             coordinates converted based on coordinate_units and timestamps converted
             to milliseconds.
             
-        Details
-        -------
+        Notes
+        -----
         Timestamp conversion transforms Tobii system timestamps (microseconds) into
         milliseconds for consistency and readability. Relative mode starts from zero
         (first sample becomes time 0), while absolute mode preserves original timing
@@ -2781,7 +2811,7 @@ class ETracker:
         Save data in CSV format with append mode.
         
         Appends data to existing file. Header was already written in
-        _create_csv_header().
+        _prepare_recording().
         
         Parameters
         ----------
@@ -2797,7 +2827,7 @@ class ETracker:
         Save gaze and event data to HDF5 using PyTables.
         
         Creates tables on first call if they don't exist. Metadata is already
-        present in the file from _create_hdf5_structure().
+        present in the file from _prepare_recording().
         """
         
         # Convert string columns to fixed-width bytes
@@ -2815,7 +2845,7 @@ class ETracker:
                 f.root.gaze.append(gaze_array)
             else:
                 # First save - create table
-                # Note: Metadata already exists at root level from _create_hdf5_structure()
+                # Note: Metadata already exists at root level from _prepare_recording()
                 f.create_table(f.root, 'gaze', obj=gaze_array, title='Gaze data samples')
             
             # --- Events table ---

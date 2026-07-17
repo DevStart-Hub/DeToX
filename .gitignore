@@ -1,8 +1,18 @@
+# R/RStudio local files
 .Rproj.user
 .Rhistory
 .RData
 .Ruserdata
+
+# Python build/cache artifacts
+__pycache__/
+*.py[cod]
 *.egg-info/
+build/
+dist/
+.pytest_cache/
+.ruff_cache/
+.venv/
 
 # pixi environments
 .pixi/*
@@ -10,3 +20,10 @@
 
 # generated documentation
 great-docs/
+Documentation/
+.quarto/
+_site/
+
+# local eye-tracking/calibration outputs
+*.h5
+*.dat

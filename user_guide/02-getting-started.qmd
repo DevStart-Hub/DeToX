@@ -129,7 +129,7 @@ ET_controller.start_recording(filename="testing.h5")
 
 The `start_recording` method accepts a `filename` parameter for naming your data file. If you don't specify one, DeToX automatically generates a timestamp-based filename.
 
-Your eye-tracking data is now being collected continuously and will be later saved in a HDF5 format, which is ideal for storing large datasets efficiently. For details on the data structure and how to analyze your files, see our [DataFormats](DataFormats.qmd) guide.
+Your eye-tracking data is now being collected continuously and will be later saved in a HDF5 format, which is ideal for storing large datasets efficiently. We are still working on a dedicated data format guide, but DeToX stores recordings in HDF5 so gaze samples, events, and metadata can be inspected and analysed after the experiment.
 
 ## Events
 

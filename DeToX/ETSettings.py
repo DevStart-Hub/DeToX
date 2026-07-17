@@ -11,17 +11,19 @@ Examples
 --------
 Modify settings in your experiment script:
 
->>> from DeToX import ETSettings as cfg
->>> 
->>> # Access animation settings
->>> cfg.animation.max_zoom_size = 0.15
->>> cfg.animation.focus_time = 1.0
->>> 
->>> # Change colors
->>> cfg.colors.highlight = (0, 255, 255, 255)  # Cyan
->>> 
->>> # Modify UI sizes
->>> cfg.ui_sizes.text = 0.035
+```python
+from DeToX import ETSettings as cfg
+
+# Access animation settings
+cfg.animation.max_zoom_size = 0.15
+cfg.animation.focus_time = 1.0
+
+# Change colors
+cfg.colors.highlight = (0, 255, 255, 255)  # Cyan
+
+# Modify UI sizes
+cfg.ui_sizes.text = 0.035
+```
 
 Notes
 -----
@@ -86,9 +88,11 @@ class AnimationSettings:
     
     Examples
     --------
-    >>> settings = AnimationSettings()
-    >>> settings.max_zoom_size_big = 0.18  # Increase big max size to 18%
-    >>> settings.trill_frequency = 5.0  # Faster trill
+    ```python
+    settings = AnimationSettings()
+    settings.max_zoom_size_big = 0.18  # Increase big max size to 18%
+    settings.trill_frequency = 5.0  # Faster trill
+    ```
     """
     
     focus_time: float = 0.5
@@ -139,11 +143,13 @@ class CalibrationPatterns:
     
     Examples
     --------
-    >>> from DeToX import ETSettings as cfg
-    >>> from DeToX.Coords import norm_to_window_units
-    >>> 
-    >>> # Change number of mouse samples collected per point
-    >>> cfg.calibration.num_samples_mouse = 10
+    ```python
+    from DeToX import ETSettings as cfg
+    from DeToX.Coords import norm_to_window_units
+
+    # Change number of mouse samples collected per point
+    cfg.calibration.num_samples_mouse = 10
+    ```
     """
     
     points_5: list = field(default_factory=lambda: [
@@ -195,9 +201,11 @@ class CalibrationColors:
     
     Examples
     --------
-    >>> colors = CalibrationColors()
-    >>> colors.highlight = (0, 255, 255, 255)  # Change to cyan
-    >>> colors.left_eye = (0, 200, 0, 200)  # Semi-transparent green
+    ```python
+    colors = CalibrationColors()
+    colors.highlight = (0, 255, 255, 255)  # Change to cyan
+    colors.left_eye = (0, 200, 0, 200)  # Semi-transparent green
+    ```
     """
     
     left_eye: Tuple[int, int, int, int] = (100, 200, 255, 120)
@@ -266,9 +274,11 @@ class UIElementSizes:
     
     Examples
     --------
-    >>> ui_sizes = UIElementSizes()
-    >>> ui_sizes.highlight = 0.06  # Larger highlight circles
-    >>> ui_sizes.instruction_text = 0.025  # Larger instructions
+    ```python
+    ui_sizes = UIElementSizes()
+    ui_sizes.highlight = 0.06  # Larger highlight circles
+    ui_sizes.instruction_text = 0.025  # Larger instructions
+    ```
     """
     
     # Visual element sizes

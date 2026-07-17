@@ -29,6 +29,7 @@ parser: numpy
 # Whether the documentation should be generated dynamically.
 dynamic: false
 
+homepage: "user_guide"
 
 # -----------------------------------------------------------------------------
 # Project links
@@ -39,7 +40,7 @@ dynamic: false
 repo: https://github.com/DevStart-Hub/DeToX
 
 # Public URL where the documentation website will be hosted.
-site_url: https://devstart-hub.github.io/DeToX/
+site_url: https://detox.devstart.org/
 
 
 # -----------------------------------------------------------------------------
@@ -48,7 +49,7 @@ site_url: https://devstart-hub.github.io/DeToX/
 
 # Logo shown in the documentation website.
 # Path should be relative to the project root.
-logo: docs-src/assets/Logosvg.png
+logo: assets/Logosvg.png
 
 # Show a dark/light mode toggle in the documentation website.
 # Enabled by default, but keeping it explicit makes the config easier to read.
@@ -106,17 +107,6 @@ sidebar_filter:
 
 
 # -----------------------------------------------------------------------------
-# Narrative documentation sections
-# -----------------------------------------------------------------------------
-# These are non-API documentation pages, such as tutorials, guides, and examples.
-# In this case, Great Docs will look for files inside docs-src/vignettes.
-
-sections:
-  - title: Vignettes
-    dir: docs-src/vignettes
-
-
-# -----------------------------------------------------------------------------
 # API reference documentation
 # -----------------------------------------------------------------------------
 # This section controls how the automatically generated reference pages are
@@ -142,7 +132,8 @@ reference:
     - title: Main Eye-tracker Class
       desc: The central class for connecting to and managing Tobii eye trackers.
       contents:
-        - name: ETracker.__init__
+        - name: ETracker
+          members: false       # Don't document methods here
 
 
     # -------------------------------------------------------------------------
