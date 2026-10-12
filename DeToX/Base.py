@@ -1451,6 +1451,7 @@ class ETracker:
             self.gaze_data.clear()
         
         # --- Timing setup ---
+        self.first_timestamp = None  # Each recording gets its own time origin.
         self.experiment_clock.reset()
         
         # --- File preparation ---
