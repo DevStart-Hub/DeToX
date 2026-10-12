@@ -338,7 +338,7 @@ class ETracker:
         
         # --- Print summary ---
         summary = "\n".join(changes)
-        NicePrint(summary, title="Applied Changes")
+        NicePrint(summary, title="Applied Changes", verbose=self.verbose)
 
 
     # --- Calibration Methods ---
@@ -1598,7 +1598,7 @@ class ETracker:
                 f'  - Dropped samples: {quality["dropped_samples"]}\n'
             )
         
-        NicePrint(summary, title="Recording Complete")
+        NicePrint(summary, title="Recording Complete", verbose=self.verbose)
 
 
     def record_event(self, label):
