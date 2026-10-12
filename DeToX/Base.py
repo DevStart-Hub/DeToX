@@ -54,7 +54,9 @@ class ETracker:
         ----------
         win : psychopy.visual.Window
             The PsychoPy window object where stimuli will be displayed. This is
-            required for coordinate conversions.
+            required for coordinate conversions. Real tracking requires fullscreen
+            on the display configured for the tracker; keep it fullscreen for the
+            lifetime of this controller. Simulation also supports windowed mode.
         id : int, optional
             The index of the Tobii eye tracker to use if multiple are found.
             Default is 0. Ignored if `simulate` is True.
@@ -67,6 +69,8 @@ class ETracker:
 
         Raises
         ------
+        ValueError
+            If real tracking is requested with a non-fullscreen window.
         RuntimeError
             If `simulate` is False and no Tobii eye trackers can be found.
         """
@@ -74,6 +78,14 @@ class ETracker:
         # Store essential configuration parameters provided at initialization.
         self.win = win
         self.simulate = simulate
+
+        if not self.simulate and not self.win.fullscr:
+            raise ValueError(
+                "Real eye tracking currently requires a fullscreen window "
+                "on the display configured for the tracker. "
+                "Windowed mode is supported for simulation only."
+            )
+
         self.eyetracker_id = etracker_id
         self.verbose = verbose
 
