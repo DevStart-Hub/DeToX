@@ -2420,58 +2420,59 @@ class ETracker:
 
 
     def _subscribe_warnings(self):
-        """
-        Subscribe to critical warnings during recording.
-        
-        Monitors three types of warnings:
-          - Connection lost/restored (hardware disconnection)
-          - Stream buffer overflow (data loss from processing bottleneck)
-        
-        Automatically called by start_recording() for real eye trackers.
-        Uses SDK version detection to handle API changes between versions 1.x and 2.x.
-        """
-        # Connection warnings (all SDK versions)
+        """Subscribe to critical warnings during recording."""
+        self._cb_conn_lost = lambda x: self._on_warning('CONNECTION_LOST', x)
+        self._cb_conn_rest = lambda x: self._on_warning('CONNECTION_RESTORED', x)
+        self._cb_stream_err = lambda x: self._on_warning(
+            'STREAM_BUFFER_OVERFLOW' if self.sdk_major >= 2 else 'STREAM_ERRORS', x
+        )
+
         self.eyetracker.subscribe_to(
             tr.EYETRACKER_NOTIFICATION_CONNECTION_LOST,
-            lambda x: self._on_warning('CONNECTION_LOST', x)
+            self._cb_conn_lost
         )
         self.eyetracker.subscribe_to(
             tr.EYETRACKER_NOTIFICATION_CONNECTION_RESTORED,
-            lambda x: self._on_warning('CONNECTION_RESTORED', x)
+            self._cb_conn_rest
         )
         
-        # Stream buffer warnings (version dependent)
         if self.sdk_major >= 2:
-            # SDK 2.0+: use new name
             self.eyetracker.subscribe_to(
                 tr.EYETRACKER_NOTIFICATION_STREAM_BUFFER_OVERFLOW,
-                lambda x: self._on_warning('STREAM_BUFFER_OVERFLOW', x)
+                self._cb_stream_err
             )
         else:
-            # SDK 1.x: use old name
             self.eyetracker.subscribe_to(
                 tr.EYETRACKER_STREAM_ERRORS,
-                lambda x: self._on_warning('STREAM_ERRORS', x)
+                self._cb_stream_err
             )
     
     
     def _unsubscribe_warnings(self):
-        """
-        Unsubscribe from warning notifications.
-        
-        Cleans up warning subscriptions after recording completes.
-        Automatically called by stop_recording() for real eye trackers.
-        Must match the subscription pattern from _subscribe_warnings().
-        """
-        # Connection warnings (all SDK versions)
-        self.eyetracker.unsubscribe_from(tr.EYETRACKER_NOTIFICATION_CONNECTION_LOST)
-        self.eyetracker.unsubscribe_from(tr.EYETRACKER_NOTIFICATION_CONNECTION_RESTORED)
-        
-        # Stream buffer warnings (version dependent)
-        if self.sdk_major >= 2:
-            self.eyetracker.unsubscribe_from(tr.EYETRACKER_NOTIFICATION_STREAM_BUFFER_OVERFLOW)
-        else:
-            self.eyetracker.unsubscribe_from(tr.EYETRACKER_STREAM_ERRORS)
+        """Unsubscribe from warning notifications."""
+        if hasattr(self, '_cb_conn_lost'):
+            self.eyetracker.unsubscribe_from(
+                tr.EYETRACKER_NOTIFICATION_CONNECTION_LOST,
+                self._cb_conn_lost
+            )
+
+        if hasattr(self, '_cb_conn_rest'):
+            self.eyetracker.unsubscribe_from(
+                tr.EYETRACKER_NOTIFICATION_CONNECTION_RESTORED,
+                self._cb_conn_rest
+            )
+
+        if hasattr(self, '_cb_stream_err'):
+            if self.sdk_major >= 2:
+                self.eyetracker.unsubscribe_from(
+                    tr.EYETRACKER_NOTIFICATION_STREAM_BUFFER_OVERFLOW,
+                    self._cb_stream_err
+                )
+            else:
+                self.eyetracker.unsubscribe_from(
+                    tr.EYETRACKER_STREAM_ERRORS,
+                    self._cb_stream_err
+                )
     
     
     def _on_warning(self, notification_type, data):
