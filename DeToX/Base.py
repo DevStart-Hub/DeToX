@@ -1837,10 +1837,11 @@ class ETracker:
             if len(idx) != len(np.unique(idx)):
                 # Duplicates detected - use pandas groupby for vectorized aggregation
                 events_df['_target_idx'] = idx
-                grouped = events_df.groupby('_target_idx')['Events'].agg(lambda x: '; '.join(x))
+                grouped = events_df.groupby('_target_idx')['Events'].agg(lambda x: ' | '.join(x))
                 
                 # Vectorized assignment to gaze_df
                 gaze_df.loc[grouped.index, 'Events'] = grouped.values
+                events_df.drop(columns='_target_idx', inplace=True)
             else:
                 # No duplicates - fast vectorized assignment
                 gaze_df.iloc[idx, gaze_df.columns.get_loc('Events')] = events_df['Events'].values
