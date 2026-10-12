@@ -1207,13 +1207,14 @@ class ETracker:
         
     # --- Recording Methods ---
 
-    def start_recording(self, filename=None, raw_format=False, coordinate_units='default', relative_timestamps='default'):
+    def start_recording(self, filename=None, raw_format=False, coordinate_units='default'):
         """
         Begin gaze data recording session.
         
-        Initializes file structure, clears any existing buffers, and starts
-        data collection from either the eye tracker or simulation mode.
-        Creates HDF5 or CSV files based on filename extension.
+        Clears pending gaze samples, resets the timestamp origin, prepares the
+        output file, and starts tracker or simulation data collection. HDF5 files
+        begin with metadata and empty typed gaze/events tables; CSV files begin
+        with a header row. Data rows are written by save_data(), not continuously.
         
         Parameters
         ----------
@@ -1222,8 +1223,8 @@ class ETracker:
             name. File extension determines format (.h5/.hdf5 for HDF5,
             .csv for CSV, defaults to .h5).
         raw_format : bool, optional
-            If True, preserves all original Tobii SDK column names and data
-            (including 3D eye positions, gaze origins, etc.).
+            If True, uses the configured raw SDK fields, splitting coordinate
+            tuples into x/y/z columns and preserving SDK microsecond timestamps.
             If False (default), uses simplified column names and subset of columns
             (gaze positions, pupil diameters, validity flags only).
             See [Data Format Options](#data-format-options) for more information.
@@ -1237,16 +1238,18 @@ class ETracker:
             Converts to PsychoPy coordinate systems where (0,0) is at screen center.
             Other options: 'tobii', 'height', 'norm', 'cm', 'deg'.
             See [Coordinate System Conversion](#coordinate-system-conversion) for more information.
-        relative_timestamps : str or bool, optional
-            Controls timestamp format. Default is 'default':
-            
-            - **'default'**: Smart defaults based on format
-              - raw_format=True → False (absolute microseconds)
-              - raw_format=False → True (relative milliseconds from 0)
-            
-            Other options: True (always relative), False (always absolute).
-            See [Timestamp Format](#timestamp-format) for more information.
         
+        Raises
+        ------
+        ValueError
+            If coordinate_units or the filename extension is unsupported.
+
+        Warns
+        -----
+        UserWarning
+            If recording is already active (the call is ignored), or the
+            requested output filename exists (a datetime suffix is appended).
+
         Details
         -------
         ### Data Format Options
@@ -1278,25 +1281,19 @@ class ETracker:
         comparisons. When converting to other PsychoPy units like 'height' or 'norm',
         the coordinates will match your PsychoPy window's unit system. Note that in
         raw format, only the 2D display coordinates are converted; the 3D spatial
-        coordinates (eye positions and gaze origins) always remain in meters as
-        provided by the Tobii SDK.
+        coordinates (eye positions and gaze origins) retain their SDK user
+        coordinate units without conversion.
         
         ### Timestamp Format
         
-        The `relative_timestamps` parameter controls how time is represented in your
-        data. Absolute timestamps preserve the exact microsecond values from the Tobii
-        system clock, which are useful when you need to synchronize eye tracking data
-        with other recording systems or when collecting multiple data files that need
-        to be aligned temporally. Relative timestamps convert the first sample to time
-        zero and express all subsequent times in milliseconds relative to that starting
-        point, making it much easier to analyze individual trials or sessions. For
-        example, with relative timestamps you can immediately see that an event occurred
-        at 1500ms into your recording, whereas with absolute timestamps you would need
-        to subtract the session start time first. The default behavior chooses relative
-        timestamps for simplified format (since most analyses focus on within-session
-        timing) and absolute timestamps for raw format (to preserve the complete
-        temporal information). Both gaze samples and event markers use the same
-        timestamp format to ensure proper synchronization when analyzing your data.
+        Raw format preserves the SDK's system and device timestamps in microseconds,
+        without resetting them to zero. Raw events also retain system microseconds.
+        Simplified format stores gaze and event timestamps in milliseconds relative
+        to the first gaze sample. This origin is shared across saves and reset for
+        each recording. Timestamp behavior is determined by raw_format.
+
+        Raw output does not subtract a timestamp origin. Simulation generates
+        timestamps from the experiment clock, which is reset at recording start.
         
         Examples
         --------
@@ -1325,20 +1322,6 @@ class ETracker:
         ```python
         ET_controller.start_recording('data.h5', raw_format=True, coordinate_units='pix')
         # All Tobii columns, display coords in PsychoPy pixels
-        ```
-        
-        ### Timestamp Control
-        
-        #### Raw format with relative timestamps
-        ```python
-        ET_controller.start_recording('data.h5', raw_format=True, relative_timestamps=True)
-        # Raw format but timestamps start at 0ms
-        ```
-        
-        #### Simplified format with absolute timestamps
-        ```python
-        ET_controller.start_recording('data.h5', relative_timestamps=False)
-        # Simplified format but keeps absolute microsecond timestamps
         ```
         
         ### Coordinate Units
@@ -1378,24 +1361,23 @@ class ETracker:
         #### Multi-file synchronization with absolute timestamps
         ```python
         # Recording multiple synchronized files
-        ET_controller.start_recording('session1_gaze.h5', relative_timestamps=False)
+        ET_controller.start_recording('session1_gaze.h5', raw_format=True)
         # ... run session 1 ...
         ET_controller.stop_recording()
         
         # Session 2 can be synchronized using absolute timestamps
-        ET_controller.start_recording('session2_gaze.h5', relative_timestamps=False)
+        ET_controller.start_recording('session2_gaze.h5', raw_format=True)
         # ... run session 2 ...
         ET_controller.stop_recording()
         ```
         
         #### Advanced raw data collection
         ```python
-        # Collect all data with pixel coords and relative time
+        # Collect all data with pixel coords and unchanged SDK timestamps
         ET_controller.start_recording(
             'advanced_analysis.h5',
             raw_format=True,
-            coordinate_units='pix',
-            relative_timestamps=True
+            coordinate_units='pix'
         )
         ```
         """
@@ -1423,22 +1405,12 @@ class ETracker:
                 )
             self.coordinate_units = coordinate_units
         
-        # --- Smart timestamp format defaults ---
-        if relative_timestamps == 'default':
-            self.relative_timestamps = False if raw_format else True
-        else:
-            if not isinstance(relative_timestamps, bool):
-                raise TypeError(
-                    f"relative_timestamps must be 'default', True, or False. "
-                    f"Got: {type(relative_timestamps).__name__}"
-                )
-            self.relative_timestamps = relative_timestamps
-
         # --- Buffer initialization ---
         if self.gaze_data and not self.recording:
             self.gaze_data.clear()
         
         # --- Timing setup ---
+        self.first_timestamp = None
         self.experiment_clock.reset()
         
         # --- File preparation ---
@@ -1480,9 +1452,8 @@ class ETracker:
         """
         Stop gaze data recording and finalize session.
         
-        Performs complete shutdown: stops data collection, cleans up resources,
-        saves all buffered data, and optionally performs a comprehensive data
-        quality check. Handles both simulation and real eye tracker modes appropriately.
+        Stops data collection, attempts to save the remaining buffers, and
+        optionally estimates dropped samples from saved timestamp gaps.
         
         Parameters
         ----------
@@ -1491,19 +1462,19 @@ class ETracker:
             and analyzing timestamp gaps to detect dropped samples. If False, skips
             the quality check and completes faster. Default True.
         
-        Raises
-        ------
+        Warns
+        -----
         UserWarning
-            If recording is not currently active.
+            If recording is not currently active; the method then returns.
             
         Details
         -------
-        - All pending data in buffers is automatically saved before completion
+        - Calls save_data() after stopping data collection; its limitations apply
         - Recording duration is measured from start_recording() call
-        - Quality check reads the complete saved file to analyze gaps between ALL samples,
+        - Quality check reads all saved timestamps to analyze gaps between samples,
         including potential gaps between save_data() calls
-        - At 120Hz, each sample should be ~8333µs apart; gaps significantly larger
-        indicate dropped samples
+        - At 120Hz, samples should be about 8333µs apart in raw format or 8.33ms
+        in simplified format; larger gaps are used to estimate dropped samples
         
         Examples
         --------
@@ -1627,8 +1598,9 @@ class ETracker:
         called. Each event is aligned to the next closest gaze sample (at or after the
         event timestamp) using binary search. When multiple events occur within the same
         sampling interval, they are concatenated with semicolon delimiters in the Events
-        column (e.g., 'fixation_offset; stimulus_onset'). This ensures no event data is
-        lost even when events occur in rapid succession.
+        column (e.g., 'fixation_offset; stimulus_onset'). HDF5 also stores each
+        marker separately in the events table. The fixed-width text limit still
+        applies to both individual and combined labels when writing HDF5.
             
         Examples
         --------
@@ -1714,18 +1686,25 @@ class ETracker:
         This method is typically called automatically by `stop_recording()`, but
         can be called manually during recording to periodically save data and
         clear buffers. This is useful for long experiments to avoid memory buildup
-        and ensure data is saved even if the program crashes.
+        and reduce the amount of data still in memory if the program crashes.
         
         Details
         -------
         - Automatically called by `stop_recording()`
-        - Safe to call during active recording
-        - Clears buffers after saving
-        - Events are matched to nearest gaze sample by timestamp
+        - Can be called during active recording; simultaneous saves are not serialized
+        - Detaches buffers before processing; new gaze callbacks use fresh buffers
+        - Events are attached to the first gaze sample at or after their timestamp
         - In HDF5 format, events are saved in two places:
           1. Merged into the main gaze table's 'Events' column
           2. As a separate 'events' table for independent event analysis
         - In CSV format, events only appear in the 'Events' column
+
+        Notes
+        -----
+        If the detached gaze buffer is empty, the method returns without writing
+        its events. A processing or write failure does not restore the detached
+        buffers. HDF5 table appends are not transactional. Long merged labels
+        remain subject to the fixed-width event-text limit.
         
         Examples
         --------
@@ -2243,17 +2222,18 @@ class ETracker:
         including potential gaps between save_data() calls that wouldn't be
         detected by incremental checking.
         
-        Automatically adapts to data format (raw vs simplified) and timestamp
-        format (relative vs absolute) based on recording settings.
+        Uses system_time_stamp in SDK microseconds for raw format and TimeStamp
+        in relative milliseconds for simplified format.
         
         Returns
         -------
         dict or None
             Dictionary containing quality metrics:
-            - 'total_samples' (int): Number of samples successfully collected
+            - 'total_samples' (int): Number of saved gaze rows
             - 'dropped_samples' (int): Estimated number of dropped samples based
             on timestamp gaps
-            Returns None if file has fewer than 2 samples or cannot be read.
+            Returns None if the file has fewer than two samples. File-reading
+            errors propagate to the caller.
         
         Details
         -------
@@ -2284,8 +2264,8 @@ class ETracker:
         if len(timestamps) < 2:
             return None
         
-        # --- Calculate expected interval (ALWAYS in milliseconds) ---
-        expected_interval = 1000.0 / self.fps  # ms per sample
+        # --- Calculate expected interval in the stored timestamp units ---
+        expected_interval = (1_000_000.0 if self.raw_format else 1000.0) / self.fps
         
         # --- Calculate intervals between consecutive samples ---
         intervals = np.diff(timestamps)
@@ -2318,6 +2298,11 @@ class ETracker:
         - Returns immediately if no events are buffered
         - Each wait releases GIL, allowing callback thread to run
         - Typically completes in 1-2 sample intervals
+
+        Notes
+        -----
+        Also returns if no gaze samples are buffered. There is no timeout: if
+        gaze collection stops before catching up to an event, the wait can persist.
         """
         if len(self.event_data) == 0:
             return  # No events to sync
@@ -2500,13 +2485,13 @@ class ETracker:
         """
         Initialize file structure with metadata and validate recording setup.
         
-        Creates output file immediately with comprehensive metadata for HDF5 format
-        or column headers for CSV format. This ensures metadata is preserved even
-        if the program crashes before the first data save.
+        Creates the output file immediately with metadata and empty typed tables
+        for HDF5, or column headers for CSV. No dummy samples are inserted.
         
         For HDF5, creates file with root-level metadata including session info,
         hardware configuration, recording settings, and display configuration.
-        Data tables (gaze, events) are created later on first save_data() call.
+        Empty gaze and events tables are created immediately with explicit types.
+        Subsequent save_data() calls append rows to these tables.
         
         For CSV, writes header row with column names based on raw_format setting.
         Data is appended in subsequent save_data() calls.
@@ -2525,12 +2510,16 @@ class ETracker:
             
         Notes
         -----
-        If specified filename already exists, a datetime suffix is automatically
-        appended to prevent overwriting existing data.
+        If the requested filename exists, a datetime suffix is appended. The
+        resulting suffixed path is not checked again for a collision.
         
         HDF5 metadata is stored at root level (_v_attrs) and persists even if
         no gaze data is collected. This enables post-hoc quality assessment and
         troubleshooting of failed recording sessions.
+
+        Raw events contain system_time_stamp and Events. Simplified events contain
+        TimeStamp and Events. timestamp_units records 'us' or 'ms'; the derived
+        relative_timestamps metadata is not a configurable recording argument.
         """
         # --- Filename and format determination ---
         if filename is None:
@@ -2591,7 +2580,18 @@ class ETracker:
                 # === DATA FORMAT SETTINGS ===
                 f.root._v_attrs.raw_format = str(self.raw_format)                         # Full vs simplified columns
                 f.root._v_attrs.coordinate_units = str(self.coordinate_units)             # Coordinate system used
-                f.root._v_attrs.relative_timestamps = str(self.relative_timestamps)       # Timestamp format
+                f.root._v_attrs.relative_timestamps = str(not self.raw_format)            # Timestamp format
+                f.root._v_attrs.timestamp_units = 'us' if self.raw_format else 'ms'
+
+                # Create typed tables without inserting dummy samples.
+                if self.raw_format:
+                    gaze_dtype = cfg.RawDataColumns.get_hdf5_dtype()
+                else:
+                    gaze_dtype = cfg.SimplifiedDataColumns.get_hdf5_dtype()
+
+                events_dtype = cfg.EventDataColumns.get_hdf5_dtype(self.raw_format)
+                f.create_table('/', 'gaze', description=gaze_dtype, title='Gaze data samples')
+                f.create_table('/', 'events', description=events_dtype, title='Event markers')
         
         elif self.file_format == 'csv':
             # --- CSV: Write column headers ---
@@ -2615,11 +2615,11 @@ class ETracker:
         Handles three main transformations:
         1. Format conversion (raw vs simplified columns)
         2. Coordinate conversion (Tobii ADCS to target units)
-        3. Timestamp conversion (always to milliseconds, relative or absolute)
+        3. Preserve raw SDK microseconds or produce simplified relative milliseconds
         
         In raw format, expands tuple columns into separate x, y, z components
-        for HDF5 compatibility while optionally converting display coordinates
-        and timestamps.
+        for tabular storage while optionally converting display coordinates.
+        Raw system, device, and event timestamps are left unchanged.
         
         In simplified format, extracts essential columns and converts coordinates
         and timestamps to specified formats.
@@ -2633,52 +2633,37 @@ class ETracker:
             
         Returns
         -------
-        tuple of pandas.DataFrame
+        tuple
             (adapted_gaze_df, adapted_events_df)
             
             Raw format returns all Tobii columns with tuples expanded to x, y, z
             components, display coordinates converted based on coordinate_units,
-            3D spatial coordinates preserved in meters, and timestamps converted
-            to milliseconds.
+            3D spatial coordinates preserved in SDK units, and timestamps preserved
+            unchanged from the SDK in microseconds.
             
             Simplified format returns essential columns (TimeStamp, Left_X, Left_Y,
             Right_X, Right_Y, pupil diameters, validity flags, Events) with
             coordinates converted based on coordinate_units and timestamps converted
-            to milliseconds.
+            to integer relative milliseconds, discarding sub-millisecond precision.
+
+            The event DataFrame is None if no events were supplied. In simplified
+            mode it retains system_time_stamp internally and gains TimeStamp;
+            the HDF5 writer stores only TimeStamp and Events.
             
         Details
         -------
-        Timestamp conversion transforms Tobii system timestamps (microseconds) into
-        milliseconds for consistency and readability. Relative mode starts from zero
-        (first sample becomes time 0), while absolute mode preserves original timing
-        in milliseconds. This conversion is applied consistently to both gaze samples
-        and event markers to maintain temporal synchronization.
+        Raw format preserves system and device timestamps in SDK microseconds,
+        without subtracting a recording origin. Simplified gaze and event timestamps
+        use milliseconds relative to the first gaze sample, across all saved batches.
         
         Coordinate conversion in raw format affects only the 2D display coordinates
         (left_gaze_point_on_display_area and right_gaze_point_on_display_area), while
         3D spatial coordinates (left/right_gaze_point_in_user_coordinate_system and
-        left/right_gaze_origin_in_user_coordinate_system) always remain in meters as
-        provided by the Tobii SDK. These spatial coordinates represent the 3D position
+        left/right_gaze_origin_in_user_coordinate_system) retain their SDK units.
+        These spatial coordinates represent the 3D position
         of the eyes and gaze vectors in the user coordinate system and are not
         meaningful to convert to screen-based units.
         """
-
-        # --- Timestamp conversion to milliseconds (ALWAYS) ---
-        if self.relative_timestamps:
-            # Relative: Convert to ms starting from 0
-            if self.first_timestamp is None:
-                self.first_timestamp = df.iloc[0]['system_time_stamp']
-            
-            df['system_time_stamp'] = ((df['system_time_stamp'] - self.first_timestamp) / 1000.0).astype(int)
-            
-            if df_ev is not None:
-                df_ev['system_time_stamp'] = ((df_ev['system_time_stamp'] - self.first_timestamp) / 1000.0).astype(int)
-        else:
-            # Absolute: Convert to ms but keep original timing
-            df['system_time_stamp'] = (df['system_time_stamp'] / 1000.0).astype(int)
-            
-            if df_ev is not None:
-                df_ev['system_time_stamp'] = (df_ev['system_time_stamp'] / 1000.0).astype(int)
 
         if self.raw_format:
             # =====================================================================
@@ -2716,7 +2701,7 @@ class ETracker:
                 df[f'{col}_x'] = coords[:, 0]
                 df[f'{col}_y'] = coords[:, 1]
 
-            # Process 3D spatial coordinates (always in meters, never converted)
+            # Preserve SDK units for 3D spatial coordinates.
             for col in spatial_columns:
                 coords_3d = np.array(df[col].tolist())
                 df[f'{col}_x'] = coords_3d[:, 0]
@@ -2734,10 +2719,13 @@ class ETracker:
             # SIMPLIFIED FORMAT: Extract, convert, rename for ease of use
             # =====================================================================
 
-            # Create TimeStamp column (always in milliseconds)
-            df['TimeStamp'] = df['system_time_stamp']
+            # Simplified timestamps share one origin across all saved batches.
+            if self.first_timestamp is None:
+                self.first_timestamp = df.iloc[0]['system_time_stamp']
+
+            df['TimeStamp'] = ((df['system_time_stamp'] - self.first_timestamp) / 1000.0).astype(int)
             if df_ev is not None:
-                df_ev['TimeStamp'] = df_ev['system_time_stamp']
+                df_ev['TimeStamp'] = ((df_ev['system_time_stamp'] - self.first_timestamp) / 1000.0).astype(int)
             
             # Process gaze coordinates with optional conversion
             if self.coordinate_units == 'tobii':
@@ -2781,7 +2769,7 @@ class ETracker:
         Save data in CSV format with append mode.
         
         Appends data to existing file. Header was already written in
-        _create_csv_header().
+        _prepare_recording().
         
         Parameters
         ----------
@@ -2794,38 +2782,46 @@ class ETracker:
 
     def _save_hdf5_data(self, gaze_df, events_df):
         """
-        Save gaze and event data to HDF5 using PyTables.
-        
-        Creates tables on first call if they don't exist. Metadata is already
-        present in the file from _create_hdf5_structure().
+        Append gaze and event rows to the existing typed HDF5 tables.
+
+        Parameters
+        ----------
+        gaze_df : pandas.DataFrame
+            Adapted gaze samples, including the merged Events column.
+        events_df : pandas.DataFrame or None
+            Adapted event markers. None skips the event-table append.
+
+        Notes
+        -----
+        Tables must have been created by _prepare_recording(). Column selection
+        excludes temporary fields and orders each batch to match the stored schema.
+        Raw events store system_time_stamp and Events; simplified events store
+        TimeStamp and Events. Input DataFrames are not modified.
+
+        Both batches are converted before either is appended, but the two appends
+        are not transactional. Event labels use fixed-width bytes with capacity
+        HDF5_EVENT_BYTES at table creation (currently 50); longer labels can be
+        truncated and text conversion can fail for unsupported characters.
+        pandas.read_hdf() reads these tables as DataFrames and decodes their text.
         """
-        
-        # Convert string columns to fixed-width bytes
-        gaze_df['Events'] = gaze_df['Events'].astype('S50')
-        gaze_array = gaze_df.to_records(index=False)
-        
-        if events_df is not None:
-            events_df['Events'] = events_df['Events'].astype('S50')
-            events_array = events_df.to_records(index=False)
-        
-        with tables.open_file(self.filename, mode='a') as f:
-            # --- Gaze table ---
-            if hasattr(f.root, 'gaze'):
-                # Table exists - just append data
-                f.root.gaze.append(gaze_array)
-            else:
-                # First save - create table
-                # Note: Metadata already exists at root level from _create_hdf5_structure()
-                f.create_table(f.root, 'gaze', obj=gaze_array, title='Gaze data samples')
-            
-            # --- Events table ---
-            if events_df is not None:
-                if hasattr(f.root, 'events'):
-                    # Table exists - just append data
-                    f.root.events.append(events_array)
-                else:
-                    # First save - create table
-                    f.create_table(f.root, 'events', obj=events_array, title='Event markers')
+        with tables.open_file(self.filename, mode='r+') as f:
+            batches = [(f.root.gaze, gaze_df), (f.root.events, events_df)]
+            prepared_batches = []
+
+            # Prepare both batches before writing either; this is not transactional.
+            for table, df in batches:
+                if df is None:
+                    continue
+
+                # Exclude temporary columns and use the table's column order.
+                df = df.loc[:, table.colnames].copy()
+                df['Events'] = df['Events'].astype(table.dtype['Events'])
+                column_types = {name: table.dtype[name] for name in table.colnames}
+                records = df.to_records(index=False, column_dtypes=column_types)
+                prepared_batches.append((table, records))
+
+            for table, records in prepared_batches:
+                table.append(records)
 
 
     def _on_gaze_data(self, gaze_data):

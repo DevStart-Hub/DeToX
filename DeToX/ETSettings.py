@@ -32,6 +32,8 @@ backward-compatible module-level dictionaries for existing code.
 from dataclasses import dataclass, field
 from typing import Tuple
 
+import numpy as np
+
 
 @dataclass
 class AnimationSettings:
@@ -295,17 +297,21 @@ class UIElementSizes:
     legend_text_offset = 0.025 
 
 
+# Fixed-width event text capacity in HDF5 storage, in bytes.
+HDF5_EVENT_BYTES = 50
+
+
 class RawDataColumns:
     """
     Column specifications for raw Tobii SDK data format.
     
     This class defines the complete structure for raw format data including:
-    - Column order (matching pandas' dtype grouping for HDF5 compatibility)
+    - Output column order
     - Data types for each column
-    - Default values for dummy data creation
+    - HDF5 storage schema
     
-    The order is optimized for HDF5 storage where related measurements
-    (coordinates + validity) are grouped together for easier analysis.
+    The column order groups related measurements
+    (coordinates + validity) together for easier analysis.
     """
     
     # Column order (list)
@@ -393,68 +399,28 @@ class RawDataColumns:
         'Events': 'string'
     }
     
-    # Default values for dummy data creation (dict)
-    DEFAULTS = {
-        # Timestamps
-        'device_time_stamp': -999999,
-        'system_time_stamp': -999999,
-        
-        # Validity flags
-        'left_gaze_point_validity': 0,
-        'right_gaze_point_validity': 0,
-        'left_pupil_validity': 0,
-        'right_pupil_validity': 0,
-        'left_gaze_origin_validity': 0,
-        'right_gaze_origin_validity': 0,
-        
-        # All float columns default to NaN
-        'left_gaze_point_on_display_area_x': float('nan'),
-        'left_gaze_point_on_display_area_y': float('nan'),
-        'right_gaze_point_on_display_area_x': float('nan'),
-        'right_gaze_point_on_display_area_y': float('nan'),
-        'left_gaze_point_in_user_coordinate_system_x': float('nan'),
-        'left_gaze_point_in_user_coordinate_system_y': float('nan'),
-        'left_gaze_point_in_user_coordinate_system_z': float('nan'),
-        'right_gaze_point_in_user_coordinate_system_x': float('nan'),
-        'right_gaze_point_in_user_coordinate_system_y': float('nan'),
-        'right_gaze_point_in_user_coordinate_system_z': float('nan'),
-        'left_pupil_diameter': float('nan'),
-        'right_pupil_diameter': float('nan'),
-        'left_gaze_origin_in_user_coordinate_system_x': float('nan'),
-        'left_gaze_origin_in_user_coordinate_system_y': float('nan'),
-        'left_gaze_origin_in_user_coordinate_system_z': float('nan'),
-        'right_gaze_origin_in_user_coordinate_system_x': float('nan'),
-        'right_gaze_origin_in_user_coordinate_system_y': float('nan'),
-        'right_gaze_origin_in_user_coordinate_system_z': float('nan'),
-        
-        # Events
-        'Events': '__DUMMY__'
-    }
-    
     @classmethod
-    def get_dummy_dict(cls):
+    def get_hdf5_dtype(cls):
         """
-        Get dictionary for creating dummy DataFrame with proper structure.
-        
+        Build the HDF5 storage schema from the current column definitions.
+
         Returns
         -------
-        dict
-            Dictionary with column names as keys and lists containing default
-            values as values, ready for pd.DataFrame() constructor.
+        numpy.dtype
+            Structured dtype in ORDER, using DTYPES for numeric fields and
+            HDF5_EVENT_BYTES fixed-width bytes for text. No data rows are created.
         """
-        return {col: [cls.DEFAULTS[col]] for col in cls.ORDER}
-    
-    @classmethod
-    def get_validity_dtypes(cls):
-        """
-        Get dictionary of validity column dtypes for optimization.
-        
-        Returns
-        -------
-        dict
-            Dictionary mapping validity column names to 'int8' dtype.
-        """
-        return {col: dtype for col, dtype in cls.DTYPES.items() if 'validity' in col}
+        fields = []
+
+        for name in cls.ORDER:
+            field_type = cls.DTYPES[name]
+
+            if field_type == 'string':
+                field_type = f'S{HDF5_EVENT_BYTES}'
+
+            fields.append((name, field_type))
+
+        return np.dtype(fields)
 
 
 class SimplifiedDataColumns:
@@ -464,7 +430,8 @@ class SimplifiedDataColumns:
     This class defines the structure for simplified format data that:
     - Uses short, intuitive column names
     - Contains only essential gaze tracking data
-    - Has coordinates already converted to PsychoPy units
+    - Uses the chosen coordinate units (PsychoPy pixels by default)
+    - Uses integer milliseconds relative to the first gaze sample
     - Is optimized for quick analysis and visualization
     """
     
@@ -503,47 +470,68 @@ class SimplifiedDataColumns:
         'Events': 'string'
     }
     
-    # Default values for dummy data creation (dict)
-    DEFAULTS = {
-        'TimeStamp': -999999,
-        'Left_X': float('nan'),
-        'Left_Y': float('nan'),
-        'Left_Validity': 0,
-        'Left_Pupil': float('nan'),
-        'Left_Pupil_Validity': 0,
-        'Right_X': float('nan'),
-        'Right_Y': float('nan'),
-        'Right_Validity': 0,
-        'Right_Pupil': float('nan'),
-        'Right_Pupil_Validity': 0,
-        'Events': '__DUMMY__'
-    }
-    
     @classmethod
-    def get_dummy_dict(cls):
+    def get_hdf5_dtype(cls):
         """
-        Get dictionary for creating dummy DataFrame with proper structure.
-        
+        Build the HDF5 storage schema from the current column definitions.
+
         Returns
         -------
-        dict
-            Dictionary with column names as keys and lists containing default
-            values as values, ready for pd.DataFrame() constructor.
+        numpy.dtype
+            Structured dtype in ORDER, using DTYPES for numeric fields and
+            HDF5_EVENT_BYTES fixed-width bytes for text. No data rows are created.
         """
-        return {col: [cls.DEFAULTS[col]] for col in cls.ORDER}
-    
+        fields = []
+
+        for name in cls.ORDER:
+            field_type = cls.DTYPES[name]
+
+            if field_type == 'string':
+                field_type = f'S{HDF5_EVENT_BYTES}'
+
+            fields.append((name, field_type))
+
+        return np.dtype(fields)
+
     @classmethod
     def get_validity_dtypes(cls):
         """
-        Get dictionary of validity column dtypes for optimization.
+        Get the declared types for validity columns.
         
         Returns
         -------
         dict
-            Dictionary mapping validity column names to 'int8' dtype.
+            Dictionary mapping validity column names to 'int64' dtype.
         """
         return {col: dtype for col, dtype in cls.DTYPES.items() if 'Validity' in col}
 
+
+
+class EventDataColumns:
+    """Two-column event schemas with timestamps matching the gaze format."""
+
+    @staticmethod
+    def get_hdf5_dtype(raw_format):
+        """
+        Build the event-table schema for the selected recording format.
+
+        Parameters
+        ----------
+        raw_format : bool
+            True selects system_time_stamp in SDK microseconds. False selects
+            TimeStamp in milliseconds relative to the first gaze sample.
+
+        Returns
+        -------
+        numpy.dtype
+            An int64 timestamp field followed by Events as fixed-width bytes
+            with capacity HDF5_EVENT_BYTES. No duplicate timestamp field is stored.
+        """
+        timestamp = 'system_time_stamp' if raw_format else 'TimeStamp'
+        return np.dtype([
+            (timestamp, 'int64'),
+            ('Events', f'S{HDF5_EVENT_BYTES}'),
+        ])
 
 
 # =============================================================================
@@ -638,6 +626,8 @@ __all__ = [
     'calibration',
     'numkey_dict',
     'simulation_framerate',
+    'HDF5_EVENT_BYTES',
     'RawDataColumns',
     'SimplifiedDataColumns',
+    'EventDataColumns',
 ]
