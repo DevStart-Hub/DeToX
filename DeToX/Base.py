@@ -1562,8 +1562,10 @@ class ETracker:
             )
             return
         
+        # Wait while acquisition can still deliver samples.
+        self._check_gaze_samples()
+
         # --- Stop data collection ---
-        # Set flag to halt data collection immediately
         self.recording = False
         
         # --- Mode-specific cleanup ---
@@ -1797,7 +1799,8 @@ class ETracker:
         start_saving = core.getTime()
         
         # --- Ensure event-gaze synchronization ---
-        self._check_gaze_samples()
+        if self.recording:
+            self._check_gaze_samples()
         
         # --- Thread-safe buffer swap (O(1) operation) ---
         # Swap buffers under lock to minimize thread blocking time
@@ -2332,25 +2335,32 @@ class ETracker:
         - Each wait releases GIL, allowing callback thread to run
         - Typically completes in 1-2 sample intervals
         """
-        if len(self.event_data) == 0:
-            return  # No events to sync
+        deadline = time.monotonic() + 0.100
 
         while True:
-
-            # Thread-safe peek at last timestamps
             with self._buf_lock:
-                if len(self.gaze_data) == 0:
-                    break  # No gaze data yet, can't sync
-                
-                last_event_time = self.event_data[-1]['system_time_stamp']
-                last_gaze_time = self.gaze_data[-1]['system_time_stamp']
-            
-            # If gaze has caught up to events, we're done
-            if last_gaze_time >= last_event_time:
-                break
-            
-            # Wait for one sample interval (releases GIL)
-            core.wait(1 / self.fps)
+                if not self.event_data:
+                    return True
+
+                if self.gaze_data:
+                    last_event_time = self.event_data[-1]['system_time_stamp']
+                    last_gaze_time = self.gaze_data[-1]['system_time_stamp']
+
+                    if last_gaze_time >= last_event_time:
+                        return True
+
+            remaining = deadline - time.monotonic()
+            if remaining <= 0:
+                warnings.warn(
+                    "Gaze did not catch up with the last event within 100 ms. "
+                    "Continuing shutdown/save; some events may have no "
+                    "following gaze sample.",
+                    UserWarning,
+                )
+                return False
+
+            # Allow acquisition callbacks to run between checks.
+            core.wait(min(0.001, remaining))
 
 
     def _get_info(self, moment='connection'):
