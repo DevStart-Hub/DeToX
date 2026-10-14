@@ -86,6 +86,7 @@ class ETracker:
         # Use deques for efficient appending and popping from both ends.
         self._buf_lock = threading.Lock()  # Lock for thread-safe access to buffers.
         self.gaze_data = deque()        # Main buffer for incoming gaze data.
+        self._position_data = deque(maxlen=1)  # Latest positioning sample only.
         self.event_data = deque()       # Buffer for timestamped experimental events.
         self.gaze_contingent_buffer = None # Buffer for real-time gaze-contingent logic.
 
@@ -343,94 +344,91 @@ class ETracker:
 
     # --- Calibration Methods ---
 
-    def show_status(self, decision_key="space", video_help=True):
+    def show_status(self, decision_key="space", video_help=True, overlay=False, scale=1.0, offset_y=30):
         """
-        Real-time visualization of participant's eye position in track box.
-        
-        Creates interactive display showing left/right eye positions and distance
-        from screen. Useful for positioning participants before data collection.
-        Updates continuously until exit key is pressed.
-        
-        Optionally displays an instructional video in the background to help guide
-        participant positioning. You can use the built-in video, disable the video,
-        or provide your own custom MovieStim object.
-        
+        Real-time visualization of participant eye position in the track box.
+
+        Creates an interactive positioning display showing left/right eye
+        positions and distance from the screen. Updates continuously until the
+        decision key is pressed.
+
         Parameters
         ----------
         decision_key : str, optional
-            Key to press to exit visualization. Default 'space'.
+            Key to press to exit visualization. Default is 'space'.
         video_help : bool or visual.MovieStim, optional
-            Controls background video display:
-            - True: Uses built-in instructional video (default)
-            - False: No video displayed
-            - visual.MovieStim: Uses your pre-loaded custom video. You are
-            responsible for scaling (size) and positioning (pos) the MovieStim
-            to fit your desired layout.
-            Default True.
-            
-        Details
-        -------
-        In simulation mode, use scroll wheel to adjust simulated distance.
-        Eye positions shown as green (left) and red (right) circles.
-        
-        The built-in video (when video_help=True) is sized at (1.06, 0.6) in 
-        height units and positioned at (0, -0.08) to avoid covering the track box.
-        
+            Controls background video display. True uses the built-in
+            instructional video, False disables it, and a MovieStim object uses
+            that pre-loaded custom video.
+        overlay : bool, optional
+            Experimental: if True, use a separate Tkinter overlay with Tobii eye-camera images
+            on real hardware. In simulation mode this falls back to the
+            integrated PsychoPy-shapes display. Default is False.
+        scale : float, optional
+            Scale factor for the overlay GUI. Used only when overlay=True with a
+            real eye tracker. Default is 1.0.
+        offset_y : int, optional
+            Vertical pixel offset for the overlay GUI relative to the PsychoPy
+            window. Default is 30.
+
+        Raises
+        ------
+        RuntimeError
+            If positioning is requested during an active recording. Use the
+            detached live monitor for eye-position feedback while recording.
+
+        Notes
+        -----
+        The optional overlay is experimental: its API and platform behavior may
+        change. Validate it on the intended tracker/display setup before use.
+        The default integrated positioning display is not an experimental API.
+
+        The default mode draws the track-box visualization directly into the
+        PsychoPy window. The overlay mode draws eye-position feedback and eye
+        images in a small Tkinter window while PsychoPy continues to show the
+        optional help video.
+
+        In simulation mode, the scroll wheel adjusts simulated distance. The
+        simulation path uses a background data thread to populate user-position
+        samples for the PsychoPy display.
+
+        Positioning keeps only the latest user-position sample in a separate
+        buffer; it does not update recorded gaze, gaze-contingent history, or
+        the detached live monitor. Run positioning before recording; use
+        `enable_live_monitor()` for eye-position feedback during recording.
+
+        This method owns the PsychoPy flip loop until `decision_key` is pressed.
+        Custom PsychoPy stimuli that should appear during positioning must be
+        drawn inside this method rather than by the caller while it is running.
+
         Examples
         --------
-        ### Basic Usage
-        
-        #### Default with built-in video
+        ### Integrated positioning display
         ```python
-            ET_controller.show_status()
+        ET_controller.show_status()
         ```
-        
-        #### Without background video
+
+        ### Overlay display with eye-camera images
         ```python
-            ET_controller.show_status(video_help=False)
-        ```
-        
-        ### Customization Options
-        
-        #### Custom exit key
-        ```python
-            ET_controller.show_status(decision_key='return')
-        ```
-        
-        #### Custom video with specific size and position
-        ```python
-            from psychopy import visual
-            my_video = visual.MovieStim(
-                win, 
-                'instructions.mp4', 
-                size=(0.8, 0.6), 
-                pos=(0, -0.1)
-            )
-            ET_controller.show_status(video_help=my_video)
-        ```
-        
-        ### Complete Workflows
-        
-        #### Position participant before calibration
-        ```python
-            # Position participant
-            ET_controller.show_status()
-            
-            # Run calibration
-            success = ET_controller.calibrate(5)
-            
-            # Start recording if calibration successful
-            if success:
-                ET_controller.start_recording('data.h5')
+        ET_controller.show_status(overlay=True)
         ```
         """
-        # --- 1. Instruction Display ---
+        if self.recording:
+            raise RuntimeError(
+                "Cannot show positioning during an active recording. "
+                "Use enable_live_monitor() instead."
+            )
+
+        # Do not display a stale position from a previous positioning session.
+        with self._buf_lock:
+            self._position_data.clear()
+
         instructions_text = f"""Showing participant position:
 
     - The track box is shown as a white rectangle.
     - Both eyes are shown as colored circles.
         (try to center them within the box)
-    - The green bar  on the bottom indicates distance from screen. 
+    - The green bar on the bottom indicates distance from screen.
         (try to have the black marker in the center of
         the green bar, around 60 cm from the screen)
 
@@ -439,145 +437,203 @@ class ETracker:
 
         NicePrint(instructions_text, title="Participant Positioning", verbose=self.verbose)
 
-        # --- Video setup (if enabled) ---
-        status_movie = None
+        if not self.simulate and self.eyetracker is None:
+            raise ValueError("Eye tracker not found and not in simulation mode")
 
+        status_movie = None
         if isinstance(video_help, visual.MovieStim):
-            # video_help is already a loaded MovieStim, just use it
             status_movie = video_help
-            status_movie.play()  # Start playing
-            
+            status_movie.play()
         elif video_help:
-            # video_help is True, create new MovieStim from file
             video_path = os.path.join(os.path.dirname(__file__), 'stimuli', 'ShowStatus.mp4')
             status_movie = visual.MovieStim(
-                self.win, 
+                self.win,
                 video_path,
-                size=(1.06, 0.6),  # Width x Height maintaining 16:9 ratio
-                pos=(0, -0.08),  # Offset down so it doesn't cover track box
+                size=(1.06, 0.6),
+                pos=(0, -0.08),
                 loop=True,
                 units='height'
             )
-            status_movie.play()  # Start playing
+            status_movie.play()
 
+        eye_gui = None
+        use_overlay = overlay and not self.simulate
+        subscribed_position = False
+        sim_started = False
 
-        # --- Visual element creation ---
-        # Create display components for track box visualization
-        bgrect = visual.Rect(self.win, pos=(0, 0.4), width=0.25, height=0.2,
-                            lineColor="white", fillColor="black", units="height")
-        
-        leye = visual.Circle(self.win, size=0.02, units="height",
-                            lineColor=None, fillColor=cfg.colors.left_eye, colorSpace='rgb255')  # Left eye indicator
-        
-        reye = visual.Circle(self.win, size=0.02, units="height", 
-                            lineColor=None, fillColor=cfg.colors.right_eye, colorSpace='rgb255')    # Right eye indicator
-        
-        # Z-position visualization elements
-        zbar = visual.Rect(self.win, pos=(0, 0.28), width=0.25, height=0.03,
-                          lineColor="green", fillColor="green", units="height")
-        zc = visual.Rect(self.win, pos=(0, 0.28), width=0.01, height=0.03,
-                        lineColor="white", fillColor="white", units="height")
-        zpos = visual.Rect(self.win, pos=(0, 0.28), width=0.005, height=0.03,
-                          lineColor="black", fillColor="black", units="height")
-        
-        # --- Hardware validation ---
-        if not self.simulate and self.eyetracker is None:
-            raise ValueError("Eye tracker not found and not in simulation mode")
-        
-        # --- Mode-specific setup ---
-        if self.simulate:
-            # --- Simulation initialization ---
-            self.sim_z_position = 0.6  # Start at optimal distance
-            print("Simulation mode: Use scroll wheel to adjust Z-position (distance from screen)")
-            
-            # Start position data simulation thread
-            self._stop_simulation = threading.Event()
-            self._simulation_thread = threading.Thread(
-                target=self._simulate_data_loop, 
-                args=('user_position',),
-                daemon=True
-            )
-            self.recording = True  # Required for simulation loop
-            self._simulation_thread.start()
-            
-        else:
-            # --- Real eye tracker setup ---
-            # Subscribe to user position guide data stream
-            self.eyetracker.subscribe_to(tr.EYETRACKER_USER_POSITION_GUIDE,
-                                        self._on_gaze_data,
-                                        as_dictionary=True)
-        
-        # --- System stabilization ---
-        core.wait(1)  # Allow data stream to stabilize
-        
-        # --- Main visualization loop ---
-        b_show_status = True
-        while b_show_status:
+        bgrect = leye = reye = zbar = zc = zpos = None
 
-            # --- Draw video first ---
+        try:
+            if use_overlay:
+                from .gui.PositioningOverlay import PositioningOverlay
+
+                eye_gui = PositioningOverlay(
+                    self.eyetracker,
+                    win=self.win,
+                    scale=scale,
+                    position='top-center',
+                    offset_y=offset_y,
+                    left_eye_color=cfg.colors.left_eye,
+                    right_eye_color=cfg.colors.right_eye
+                )
+            else:
+                if overlay and self.simulate:
+                    print("Simulation mode: eye images are unavailable; using integrated positioning display")
+
+                bgrect = visual.Rect(
+                    self.win,
+                    pos=(0, 0.4),
+                    width=0.25,
+                    height=0.2,
+                    lineColor="white",
+                    fillColor="black",
+                    units="height"
+                )
+                leye = visual.Circle(
+                    self.win,
+                    size=0.02,
+                    units="height",
+                    lineColor=None,
+                    fillColor=cfg.colors.left_eye,
+                    colorSpace='rgb255'
+                )
+                reye = visual.Circle(
+                    self.win,
+                    size=0.02,
+                    units="height",
+                    lineColor=None,
+                    fillColor=cfg.colors.right_eye,
+                    colorSpace='rgb255'
+                )
+                zbar = visual.Rect(
+                    self.win,
+                    pos=(0, 0.28),
+                    width=0.25,
+                    height=0.03,
+                    lineColor="green",
+                    fillColor="green",
+                    units="height"
+                )
+                zc = visual.Rect(
+                    self.win,
+                    pos=(0, 0.28),
+                    width=0.01,
+                    height=0.03,
+                    lineColor="white",
+                    fillColor="white",
+                    units="height"
+                )
+                zpos = visual.Rect(
+                    self.win,
+                    pos=(0, 0.28),
+                    width=0.005,
+                    height=0.03,
+                    lineColor="black",
+                    fillColor="black",
+                    units="height"
+                )
+
+                if self.simulate:
+                    self.sim_z_position = 0.6
+                    print("Simulation mode: Use scroll wheel to adjust Z-position (distance from screen)")
+                    self._stop_simulation = threading.Event()
+                    self._simulation_thread = threading.Thread(
+                        target=self._simulate_data_loop,
+                        args=('user_position',),
+                        daemon=True
+                    )
+                    self.recording = True
+                    self._simulation_thread.start()
+                    sim_started = True
+                else:
+                    self.eyetracker.subscribe_to(
+                        tr.EYETRACKER_USER_POSITION_GUIDE,
+                        self._on_user_position,
+                        as_dictionary=True
+                    )
+                    subscribed_position = True
+
+            core.wait(1)
+
+            b_show_status = True
+            while b_show_status:
+                if eye_gui:
+                    eye_gui.update()
+                    if not eye_gui.is_running():
+                        break
+
+                if status_movie:
+                    status_movie.draw()
+
+                if not eye_gui:
+                    bgrect.draw()
+                    zbar.draw()
+                    zc.draw()
+
+                    with self._buf_lock:
+                        gaze_data = self._position_data[-1] if self._position_data else None
+                    if gaze_data:
+                        lv = gaze_data.get("left_user_position_validity", 0)
+                        rv = gaze_data.get("right_user_position_validity", 0)
+                        lx, ly, lz = gaze_data.get("left_user_position", (None, None, None))
+                        rx, ry, rz = gaze_data.get("right_user_position", (None, None, None))
+
+                        if lv:
+                            lx_conv, ly_conv = Coords.get_psychopy_pos_from_user_position(
+                                self.win,
+                                [lx, ly],
+                                "height"
+                            )
+                            leye.setPos((round(lx_conv * 0.25, 4), round(ly_conv * 0.2 + 0.4, 4)))
+                            leye.draw()
+
+                        if rv:
+                            rx_conv, ry_conv = Coords.get_psychopy_pos_from_user_position(
+                                self.win,
+                                [rx, ry],
+                                "height"
+                            )
+                            reye.setPos((round(rx_conv * 0.25, 4), round(ry_conv * 0.2 + 0.4, 4)))
+                            reye.draw()
+
+                        if lv or rv:
+                            avg_z = (lz * int(lv) + rz * int(rv)) / (int(lv) + int(rv))
+                            zpos.setPos((round((avg_z - 0.5) * 0.125, 4), 0.28))
+                            zpos.draw()
+
+                keys = event.getKeys()
+                if eye_gui:
+                    keys.extend(eye_gui.get_keys())
+
+                for key in keys:
+                    if key == decision_key or str(key).lower() == str(decision_key).lower():
+                        b_show_status = False
+                        break
+
+                self.win.flip()
+
+        finally:
             if status_movie:
-                status_movie.draw()
+                status_movie.stop()
 
-            # --- Draw static elements ---
-            bgrect.draw()
-            zbar.draw()
-            zc.draw()
-            
-            # --- Get latest position data ---
-            gaze_data = self.gaze_data[-1] if self.gaze_data else None
-            
-            if gaze_data:
-                # --- Extract eye position data ---
-                lv = gaze_data["left_user_position_validity"]
-                rv = gaze_data["right_user_position_validity"]
-                lx, ly, lz = gaze_data["left_user_position"]
-                rx, ry, rz = gaze_data["right_user_position"]
-                
-                # --- Draw left eye position ---
-                if lv:
-                    lx_conv, ly_conv = Coords.get_psychopy_pos_from_user_position(self.win, [lx, ly], "height")
-                    leye.setPos((round(lx_conv * 0.25, 4), round(ly_conv * 0.2 + 0.4, 4)))
-                    leye.draw()
-                
-                # --- Draw right eye position ---
-                if rv:
-                    rx_conv, ry_conv = Coords.get_psychopy_pos_from_user_position(self.win, [rx, ry], "height")
-                    reye.setPos((round(rx_conv * 0.25, 4), round(ry_conv * 0.2 + 0.4, 4)))
-                    reye.draw()
-                
-                # --- Draw distance indicator ---
-                if lv or rv:
-                    # Calculate weighted average z-position
-                    avg_z = (lz * int(lv) + rz * int(rv)) / (int(lv) + int(rv))
-                    zpos.setPos((round((avg_z - 0.5) * 0.125, 4), 0.28))
-                    zpos.draw()
-            
-            # --- Check for exit input ---
-            for key in event.getKeys():
-                if key == decision_key:
-                    b_show_status = False
-                    break
-            
+            if eye_gui:
+                eye_gui.close()
+
             self.win.flip()
-        
-        # --- Cleanup ---
-        if status_movie:
-            status_movie.stop()  # Stop video playback
 
-        self.win.flip()  # Clear display
-        
-        if self.simulate:
-            # --- Simulation cleanup ---
-            self.recording = False
-            self._stop_simulation.set()
-            if self._simulation_thread.is_alive():
-                self._simulation_thread.join(timeout=1.0)
-        else:
-            # --- Real eye tracker cleanup ---
-            self.eyetracker.unsubscribe_from(tr.EYETRACKER_USER_POSITION_GUIDE,
-                                            self._on_gaze_data)
-        
-        core.wait(0.5)  # Brief pause before return
+            if sim_started:
+                self.recording = False
+                self._stop_simulation.set()
+                if self._simulation_thread is not None and self._simulation_thread.is_alive():
+                    self._simulation_thread.join(timeout=1.0)
+
+            if subscribed_position:
+                self.eyetracker.unsubscribe_from(
+                    tr.EYETRACKER_USER_POSITION_GUIDE,
+                    self._on_user_position
+                )
+
+            core.wait(0.5)
 
 
     def calibrate(self,
@@ -2859,6 +2915,34 @@ class ETracker:
                 ])
 
 
+    def _on_user_position(self, position_data):
+        """
+        Store the latest user-position guide sample for participant positioning.
+
+        Parameters
+        ----------
+        position_data : dict
+            Tobii user-position guide sample, received with
+            ``as_dictionary=True``, or its simulated equivalent. Contains
+            ``left_user_position`` and ``right_user_position`` as (x, y, z)
+            tuples, plus their corresponding ``*_validity`` flags.
+
+        Notes
+        -----
+        Called on the Tobii SDK callback thread for real hardware or the
+        background positioning thread in simulation. The shared buffer lock
+        protects writes and the positioning display's reads.
+
+        The dedicated buffer has ``maxlen=1`` because the display needs only
+        the most recent position, not an accumulating sample history.
+        Positioning packets must not enter recording, gaze-contingent, or
+        live-monitor processing, which expects gaze samples.
+        """
+        with self._buf_lock:
+            self._position_data.append(position_data)
+
+
+
     # --- Simulation Methods ---
 
 
@@ -2955,6 +3039,12 @@ class ETracker:
             Creates position data mimicking Tobii's user position guide,
             with realistic eye separation and interactive Z-position control
             via scroll wheel. Used specifically for show_status() display.
+
+            Notes
+            -----
+            Routes samples through ``_on_user_position()`` so simulation uses
+            the same isolated, latest-sample buffer as real positioning data.
+            Does not append positioning samples to the gaze recording buffer.
             """
             try:
                 # --- Interactive Z-position control ---
@@ -2996,8 +3086,8 @@ class ETracker:
                     'right_user_position_validity': 1
                 }
                 
-                # --- Data storage ---
-                self.gaze_data.append(gaze_data)
+                # --- Position-only storage (same callback as real hardware) ---
+                self._on_user_position(gaze_data)
                 
             except Exception as e:
                 print(f"Simulated user position error: {e}")
