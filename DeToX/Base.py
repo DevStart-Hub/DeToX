@@ -338,7 +338,7 @@ class ETracker:
         
         # --- Print summary ---
         summary = "\n".join(changes)
-        NicePrint(summary, title="Applied Changes")
+        NicePrint(summary, title="Applied Changes", verbose=self.verbose)
 
 
     # --- Calibration Methods ---
@@ -1207,7 +1207,7 @@ class ETracker:
         
     # --- Recording Methods ---
 
-    def start_recording(self, filename=None, raw_format=False, coordinate_units='default', relative_timestamps='default'):
+    def start_recording(self, filename=None, raw_format=False, coordinate_units='default'):
         """
         Begin gaze data recording session.
         
@@ -1228,75 +1228,74 @@ class ETracker:
             (gaze positions, pupil diameters, validity flags only).
             See [Data Format Options](#data-format-options) for more information.
         coordinate_units : str, optional
-            Target coordinate system for 2D screen positions. Default is 'default':
-            
-            - **'default'**: Smart defaults based on format
-              - raw_format=True → 'tobii' (keeps 0-1 range)
-              - raw_format=False → 'pix' (PsychoPy pixels, center origin)
-            
-            Converts to PsychoPy coordinate systems where (0,0) is at screen center.
-            Other options: 'tobii', 'height', 'norm', 'cm', 'deg'.
-            See [Coordinate System Conversion](#coordinate-system-conversion) for more information.
-        relative_timestamps : str or bool, optional
-            Controls timestamp format. Default is 'default':
-            
-            - **'default'**: Smart defaults based on format
-              - raw_format=True → False (absolute microseconds)
-              - raw_format=False → True (relative milliseconds from 0)
-            
-            Other options: True (always relative), False (always absolute).
-            See [Timestamp Format](#timestamp-format) for more information.
+            Unit for the 2D screen coordinates in the **simplified** format only
+            (ignored—and warned—under raw format, which always keeps the Tobii
+            ADCS 0-1 coordinates untouched). Default is 'default' (= 'pix').
+
+            Simplified 2D coordinates are always written in the PsychoPy
+            convention: origin at screen center, y-axis pointing up. This
+            parameter only selects the *unit/scale*, never the origin:
+
+            - **'default'** → 'pix' (PsychoPy pixels)
+            - **'pix'**, **'height'**, **'norm'**, **'cm'**, **'deg'**
+
+            See [Coordinate System](#coordinate-system) for more information.
         
-        Details
-        -------
-        ### Data Format Options
+        Warns
+        -----
+        UserWarning
+            - If a recording is already running, the call is ignored.
+            - If the output file already exists, a timestamp is added to the
+              filename so the old file is not overwritten.
+            - If ``raw_format=True`` and ``coordinate_units`` is not 'default',
+              ``coordinate_units`` is ignored.
         
-        The `raw_format` parameter controls which columns are included in the saved
-        data file. Raw format preserves the complete data structure from the Tobii
-        Pro SDK, which includes both 2D screen coordinates and 3D spatial information
-        about eye position and gaze origin in the user coordinate system. This format
-        is useful for advanced analyses that require the full geometric relationship
-        between the eyes and the screen, or when you need to preserve all metadata
-        provided by the eye tracker. The simplified format extracts only the essential
-        data needed for most eye tracking analyses: gaze positions on screen, pupil
-        diameters, and validity flags. This results in smaller files and easier data
-        analysis for typical gaze visualization and AOI (Area of Interest) tasks.
-        
-        ### Coordinate System Conversion
-        
-        The `coordinate_units` parameter determines how 2D screen coordinates are
-        represented in the output file. By default, raw format keeps coordinates in
-        Tobii's Active Display Coordinate System (ADCS) where values range from 0 to 1
-        with the origin at the top-left corner. This normalized system is
-        screen-independent and useful for comparing data across different display
-        setups. The simplified format defaults to PsychoPy pixel coordinates, which
-        place the origin at the screen center with the y-axis pointing upward. This
-        matches PsychoPy's coordinate system and makes it seamless to overlay gaze
-        data on your experimental stimuli. You can override these defaults for either
-        format. For example, you might want pixel coordinates in raw format for easier
-        visualization, or keep Tobii coordinates in simplified format for cross-screen
-        comparisons. When converting to other PsychoPy units like 'height' or 'norm',
-        the coordinates will match your PsychoPy window's unit system. Note that in
-        raw format, only the 2D display coordinates are converted; the 3D spatial
-        coordinates (eye positions and gaze origins) always remain in meters as
-        provided by the Tobii SDK.
-        
-        ### Timestamp Format
-        
-        The `relative_timestamps` parameter controls how time is represented in your
-        data. Absolute timestamps preserve the exact microsecond values from the Tobii
-        system clock, which are useful when you need to synchronize eye tracking data
-        with other recording systems or when collecting multiple data files that need
-        to be aligned temporally. Relative timestamps convert the first sample to time
-        zero and express all subsequent times in milliseconds relative to that starting
-        point, making it much easier to analyze individual trials or sessions. For
-        example, with relative timestamps you can immediately see that an event occurred
-        at 1500ms into your recording, whereas with absolute timestamps you would need
-        to subtract the session start time first. The default behavior chooses relative
-        timestamps for simplified format (since most analyses focus on within-session
-        timing) and absolute timestamps for raw format (to preserve the complete
-        temporal information). Both gaze samples and event markers use the same
-        timestamp format to ensure proper synchronization when analyzing your data.
+        Notes
+        -----
+        ### Data Format: fidelity vs convenience
+
+        `raw_format` is a *fidelity* switch. It fixes the coordinate system *and*
+        the time representation, so the two formats never silently disagree:
+
+        - **Simplified** (`raw_format=False`): the analysis-ready, PsychoPy-native
+          view. 2D gaze is written in PsychoPy coordinates (origin at the screen
+          center, y up) in the unit chosen with `coordinate_units`; time is
+          standardised to milliseconds measured from the first sample.
+        - **Raw** (`raw_format=True`): the data exactly as the Tobii Pro SDK
+          delivered it. 2D gaze stays in Tobii ADCS (0-1, origin top-left, y down);
+          3D eye data stays in meters in the User Coordinate System; time stays in
+          the SDK's original units (microseconds). No conversion is applied, and
+          `coordinate_units` is ignored.
+
+        This keeps the full geometric and temporal information available in raw
+        files without any loss, while simplified files drop straight onto your
+        PsychoPy stimuli for typical AOI / scanpath / pupil analyses.
+
+        ### Coordinate System
+
+        The origin of the 2D gaze coordinates is fixed by the format:
+
+        - **Simplified**: always PsychoPy-convention (origin at screen center,
+          y up). `coordinate_units` selects only the unit/scale (`'pix'` by
+          default; also `'height'`, `'norm'`, `'cm'`, `'deg'`). Because the file
+          stores `screen_size` and `window_units` as metadata, any other
+          coordinate system can be re-derived at read time.
+        - **Raw**: always Tobii ADCS (0-1, top-left origin, y down), untouched.
+
+        The 3D spatial columns present only in raw format (`*_in_user_coordinate_system_*`
+        for gaze points and gaze origins) always remain in meters in the Tobii User
+        Coordinate System and are never converted under any setting.
+
+        ### Timestamps
+
+        Time representation is also fixed by the format:
+
+        - **Simplified**: standardised — milliseconds, measured from 0 at the
+          first gaze sample. The same convention is applied to both gaze samples
+          and event markers so they stay aligned.
+        - **Raw**: original — both `system_time_stamp` and `device_time_stamp`
+          are kept in the SDK's native microseconds, untouched, for
+          synchronisation with other recording systems.
         
         Examples
         --------
@@ -1314,89 +1313,57 @@ class ETracker:
         ```
         
         ### Format Options
-        
-        #### Raw format with defaults (Tobii coords, absolute timestamps)
+
+        #### Simplified format with defaults (PsychoPy pixels, relative ms)
         ```python
-        ET_controller.start_recording('data.h5', raw_format=True)
-        # All Tobii columns, coords in 0-1 range, timestamps in microseconds
+        ET_controller.start_recording('data.h5')
+        # Simplified columns, 2D coords in pixels (center origin), TimeStamp from 0ms
         ```
-        
-        #### Raw format with pixel coordinates
-        ```python
-        ET_controller.start_recording('data.h5', raw_format=True, coordinate_units='pix')
-        # All Tobii columns, display coords in PsychoPy pixels
-        ```
-        
-        ### Timestamp Control
-        
-        #### Raw format with relative timestamps
-        ```python
-        ET_controller.start_recording('data.h5', raw_format=True, relative_timestamps=True)
-        # Raw format but timestamps start at 0ms
-        ```
-        
-        #### Simplified format with absolute timestamps
-        ```python
-        ET_controller.start_recording('data.h5', relative_timestamps=False)
-        # Simplified format but keeps absolute microsecond timestamps
-        ```
-        
-        ### Coordinate Units
-        
-        #### Simplified format with Tobii coordinates
-        ```python
-        ET_controller.start_recording('data.h5', coordinate_units='tobii')
-        # Simplified columns, coordinates in 0-1 range
-        ```
-        
+
         #### Simplified format with height units
         ```python
         ET_controller.start_recording('data.h5', coordinate_units='height')
-        # Simplified columns, coordinates in height units matching window
+        # Simplified columns, 2D coords in height units (still center origin)
         ```
-        
+
+        #### Raw format (full Tobii SDK, untouched)
+        ```python
+        ET_controller.start_recording('data.h5', raw_format=True)
+        # All Tobii columns, 2D coords in ADCS (0-1, top-left), timestamps in microseconds
+        # Note: coordinate_units is ignored (and warned) under raw_format=True
+        ```
+
         ### Complete Workflows
-        
+
         #### Standard experiment workflow
         ```python
         # Setup and calibration
         ET_controller.show_status()
         ET_controller.calibrate(5)
-        
+
         # Start recording with defaults
         ET_controller.start_recording('participant_01.h5')
-        
+
         # Run experiment with event markers
         ET_controller.record_event('trial_1_start')
         # ... present stimuli ...
         ET_controller.record_event('trial_1_end')
-        
+
         # Stop recording
         ET_controller.stop_recording()
         ```
-        
-        #### Multi-file synchronization with absolute timestamps
+
+        #### Multi-file raw collection (synchronisation across sessions)
         ```python
-        # Recording multiple synchronized files
-        ET_controller.start_recording('session1_gaze.h5', relative_timestamps=False)
+        # Raw files keep the SDK's original microsecond timestamps, so multiple
+        # files can be aligned temporally after the fact.
+        ET_controller.start_recording('session1_gaze.h5', raw_format=True)
         # ... run session 1 ...
         ET_controller.stop_recording()
-        
-        # Session 2 can be synchronized using absolute timestamps
-        ET_controller.start_recording('session2_gaze.h5', relative_timestamps=False)
+
+        ET_controller.start_recording('session2_gaze.h5', raw_format=True)
         # ... run session 2 ...
         ET_controller.stop_recording()
-        ```
-        
-        #### Advanced raw data collection
-        ```python
-        # Collect all data with pixel coords and relative time
-        ET_controller.start_recording(
-            'advanced_analysis.h5',
-            raw_format=True,
-            coordinate_units='pix',
-            relative_timestamps=True
-        )
         ```
         """
         # --- State validation ---
@@ -1409,30 +1376,31 @@ class ETracker:
         
         # --- Format flag ---
         self.raw_format = raw_format
-        
-        # --- Smart coordinate unit defaults ---
-        if coordinate_units == 'default':
-            self.coordinate_units = 'tobii' if raw_format else 'pix'
-        else:
-            # Validate coordinate_units
-            valid_units = ['tobii', 'pix', 'height', 'norm', 'cm', 'deg', 'degFlat', 'degFlatPos']
-            if coordinate_units not in valid_units:
-                raise ValueError(
-                    f"Invalid coordinate_units: '{coordinate_units}'. "
-                    f"Must be one of {valid_units}"
+
+        # --- Coordinate units ---
+        # Raw format always keeps Tobii ADCS coordinates untouched: coordinate_units
+        # is ignored (and warned) under raw_format=True. Simplified format always
+        # uses the PsychoPy convention (center origin, y up) in the chosen unit.
+        valid_units = ['pix', 'height', 'norm', 'cm', 'deg']
+        if raw_format:
+            self.coordinate_units = 'tobii'
+            if coordinate_units != 'default':
+                warnings.warn(
+                    "coordinate_units is ignored under raw_format=True: raw files "
+                    "always keep the original Tobii ADCS 0-1 coordinates.",
+                    UserWarning,
+                    stacklevel=2
                 )
-            self.coordinate_units = coordinate_units
-        
-        # --- Smart timestamp format defaults ---
-        if relative_timestamps == 'default':
-            self.relative_timestamps = False if raw_format else True
         else:
-            if not isinstance(relative_timestamps, bool):
-                raise TypeError(
-                    f"relative_timestamps must be 'default', True, or False. "
-                    f"Got: {type(relative_timestamps).__name__}"
-                )
-            self.relative_timestamps = relative_timestamps
+            if coordinate_units == 'default':
+                self.coordinate_units = 'pix'
+            else:
+                if coordinate_units not in valid_units:
+                    raise ValueError(
+                        f"Invalid coordinate_units: '{coordinate_units}'. "
+                        f"Must be one of {valid_units} (simplified format only)."
+                    )
+                self.coordinate_units = coordinate_units
 
         # --- Buffer initialization ---
         if self.gaze_data and not self.recording:
@@ -1598,7 +1566,7 @@ class ETracker:
                 f'  - Dropped samples: {quality["dropped_samples"]}\n'
             )
         
-        NicePrint(summary, title="Recording Complete")
+        NicePrint(summary, title="Recording Complete", verbose=self.verbose)
 
 
     def record_event(self, label):
@@ -2284,8 +2252,12 @@ class ETracker:
         if len(timestamps) < 2:
             return None
         
-        # --- Calculate expected interval (ALWAYS in milliseconds) ---
-        expected_interval = 1000.0 / self.fps  # ms per sample
+        # --- Calculate expected interval in the timestamp unit of this format ---
+        # Raw keeps the SDK's native microseconds; simplified stores relative ms.
+        if self.raw_format:
+            expected_interval = 1_000_000.0 / self.fps  # microseconds per sample
+        else:
+            expected_interval = 1000.0 / self.fps       # milliseconds per sample
         
         # --- Calculate intervals between consecutive samples ---
         intervals = np.diff(timestamps)
@@ -2591,8 +2563,7 @@ class ETracker:
                 
                 # === DATA FORMAT SETTINGS ===
                 f.root._v_attrs.raw_format = str(self.raw_format)                         # Full vs simplified columns
-                f.root._v_attrs.coordinate_units = str(self.coordinate_units)             # Coordinate system used
-                f.root._v_attrs.relative_timestamps = str(self.relative_timestamps)       # Timestamp format
+                f.root._v_attrs.coordinate_units = str(self.coordinate_units)             # Coordinate unit (simplified only; raw always ADCS)
         
         elif self.file_format == 'csv':
             # --- CSV: Write column headers ---
@@ -2638,60 +2609,43 @@ class ETracker:
             (adapted_gaze_df, adapted_events_df)
             
             Raw format returns all Tobii columns with tuples expanded to x, y, z
-            components, display coordinates converted based on coordinate_units,
-            3D spatial coordinates preserved in meters, and timestamps converted
-            to milliseconds.
-            
-            Simplified format returns essential columns (TimeStamp, Left_X, Left_Y,
-            Right_X, Right_Y, pupil diameters, validity flags, Events) with
-            coordinates converted based on coordinate_units and timestamps converted
-            to milliseconds.
-            
-        Details
-        -------
-        Timestamp conversion transforms Tobii system timestamps (microseconds) into
-        milliseconds for consistency and readability. Relative mode starts from zero
-        (first sample becomes time 0), while absolute mode preserves original timing
-        in milliseconds. This conversion is applied consistently to both gaze samples
-        and event markers to maintain temporal synchronization.
-        
-        Coordinate conversion in raw format affects only the 2D display coordinates
-        (left_gaze_point_on_display_area and right_gaze_point_on_display_area), while
-        3D spatial coordinates (left/right_gaze_point_in_user_coordinate_system and
-        left/right_gaze_origin_in_user_coordinate_system) always remain in meters as
-        provided by the Tobii SDK. These spatial coordinates represent the 3D position
-        of the eyes and gaze vectors in the user coordinate system and are not
-        meaningful to convert to screen-based units.
-        """
+            components. Nothing is converted: 2D coordinates stay in Tobii ADCS
+            (0-1), 3D spatial coordinates stay in meters in the User Coordinate
+            System, and timestamps stay in the SDK's original microseconds.
 
-        # --- Timestamp conversion to milliseconds (ALWAYS) ---
-        if self.relative_timestamps:
-            # Relative: Convert to ms starting from 0
-            if self.first_timestamp is None:
-                self.first_timestamp = df.iloc[0]['system_time_stamp']
+            Simplified format returns essential columns (TimeStamp, Left_X, Left_Y,
+            Right_X, Right_Y, pupil diameters, validity flags, Events) with 2D
+            coordinates converted to the PsychoPy convention (center origin, y up)
+            in the unit chosen with coordinate_units, and timestamps standardised
+            to relative milliseconds measured from the first sample.
             
-            df['system_time_stamp'] = ((df['system_time_stamp'] - self.first_timestamp) / 1000.0).astype(int)
-            
-            if df_ev is not None:
-                df_ev['system_time_stamp'] = ((df_ev['system_time_stamp'] - self.first_timestamp) / 1000.0).astype(int)
-        else:
-            # Absolute: Convert to ms but keep original timing
-            df['system_time_stamp'] = (df['system_time_stamp'] / 1000.0).astype(int)
-            
-            if df_ev is not None:
-                df_ev['system_time_stamp'] = (df_ev['system_time_stamp'] / 1000.0).astype(int)
+        Notes
+        -----
+        Raw format performs no conversion at all: it only splits Tobii tuple columns
+        into x, y, z components for tabular storage. 2D coordinates stay in Tobii
+        ADCS (0-1), 3D spatial coordinates stay in meters in the User Coordinate
+        System, and timestamps stay in the SDK's native microseconds. `coordinate_units`
+        is ignored (and warned) under raw format.
+
+        Simplified format standardises everything for analysis: 2D coordinates are
+        converted to the PsychoPy convention (origin at screen center, y up) in the
+        unit selected by coordinate_units, and both gaze and event timestamps are
+        rewritten as relative milliseconds measured from the first gaze sample.
+        """
 
         if self.raw_format:
             # =====================================================================
-            # RAW FORMAT: Expand tuples into x, y, z columns
+            # RAW FORMAT: keep the data exactly as the Tobii SDK delivered it.
+            # No timestamp conversion (stays in microseconds); no coordinate
+            # conversion (2D stays in Tobii ADCS 0-1; 3D stays in UCS meters).
+            # Only tuple columns are split into x, y, z for tabular storage.
             # =====================================================================
-            
-            # Define column categories for processing
+
             display_columns = [
                 'left_gaze_point_on_display_area',
                 'right_gaze_point_on_display_area'
             ]
-            
+
             spatial_columns = [
                 'left_gaze_point_in_user_coordinate_system',
                 'left_gaze_origin_in_user_coordinate_system',
@@ -2699,25 +2653,13 @@ class ETracker:
                 'right_gaze_origin_in_user_coordinate_system',
             ]
 
-            # Process 2D display coordinates with optional conversion
+            # 2D display coordinates: keep original Tobii ADCS (0-1) untouched
             for col in display_columns:
-                if self.coordinate_units == 'tobii':
-                    # Keep original Tobii ADCS coordinates (0-1 range)
-                    coords = np.array(df[col].tolist())
-                else:
-                    # Extract and convert to target coordinate system
-                    coords_tobii = np.array(df[col].tolist())
-                    coords = Coords.get_psychopy_pos(
-                        self.win, 
-                        coords_tobii, 
-                        units=self.coordinate_units
-                    )
-                
-                # Split into separate x and y columns
+                coords = np.array(df[col].tolist())
                 df[f'{col}_x'] = coords[:, 0]
                 df[f'{col}_y'] = coords[:, 1]
 
-            # Process 3D spatial coordinates (always in meters, never converted)
+            # 3D spatial coordinates: always meters, never converted
             for col in spatial_columns:
                 coords_3d = np.array(df[col].tolist())
                 df[f'{col}_x'] = coords_3d[:, 0]
@@ -2726,39 +2668,37 @@ class ETracker:
 
             # Remove original tuple columns
             df = df.drop(columns=display_columns + spatial_columns)
-            
+
             # Return with enforced column order
             return (df[cfg.RawDataColumns.ORDER], df_ev)
-            
+
         else:
             # =====================================================================
-            # SIMPLIFIED FORMAT: Extract, convert, rename for ease of use
+            # SIMPLIFIED FORMAT: standardise to the PsychoPy-native, analysis-ready
+            # view. 2D coordinates are centered (origin at screen center, y up) in
+            # the chosen unit; timestamps become relative milliseconds from 0.
             # =====================================================================
 
-            # Create TimeStamp column (always in milliseconds)
-            df['TimeStamp'] = df['system_time_stamp']
-            if df_ev is not None:
-                df_ev['TimeStamp'] = df_ev['system_time_stamp']
-            
-            # Process gaze coordinates with optional conversion
-            if self.coordinate_units == 'tobii':
-                # Keep original Tobii ADCS coordinates (0-1 range)
-                left_coords = np.array(df['left_gaze_point_on_display_area'].tolist())
-                right_coords = np.array(df['right_gaze_point_on_display_area'].tolist())
-            else:
-                # Extract and convert to target coordinate system
-                left_tobii = np.array(df['left_gaze_point_on_display_area'].tolist())
-                right_tobii = np.array(df['right_gaze_point_on_display_area'].tolist())
-                
-                left_coords = Coords.get_psychopy_pos(self.win, left_tobii, units=self.coordinate_units)
-                right_coords = Coords.get_psychopy_pos(self.win, right_tobii, units=self.coordinate_units)
+            # --- Timestamp standardisation: relative milliseconds from 0 ---
+            if self.first_timestamp is None:
+                self.first_timestamp = df.iloc[0]['system_time_stamp']
 
-            # Add converted coordinates to dataframe
+            df['TimeStamp'] = ((df['system_time_stamp'] - self.first_timestamp) / 1000.0).astype(int)
+            if df_ev is not None:
+                df_ev['TimeStamp'] = ((df_ev['system_time_stamp'] - self.first_timestamp) / 1000.0).astype(int)
+
+            # --- Gaze coordinates: always PsychoPy convention (center, y up) ---
+            left_tobii = np.array(df['left_gaze_point_on_display_area'].tolist())
+            right_tobii = np.array(df['right_gaze_point_on_display_area'].tolist())
+
+            left_coords = Coords.get_psychopy_pos(self.win, left_tobii, units=self.coordinate_units)
+            right_coords = Coords.get_psychopy_pos(self.win, right_tobii, units=self.coordinate_units)
+
             df['Left_X'] = left_coords[:, 0]
             df['Left_Y'] = left_coords[:, 1]
             df['Right_X'] = right_coords[:, 0]
             df['Right_Y'] = right_coords[:, 1]
-            
+
             # Rename remaining columns to simplified format
             df = df.rename(columns={
                 'left_gaze_point_validity': 'Left_Validity',
@@ -2768,11 +2708,11 @@ class ETracker:
                 'right_pupil_diameter': 'Right_Pupil',
                 'right_pupil_validity': 'Right_Pupil_Validity'
             })
-            
+
             # --- Data type optimization ---
             validity_dtypes = cfg.SimplifiedDataColumns.get_validity_dtypes()
             df = df.astype(validity_dtypes)
-            
+
             # Return with enforced column order
             return (df[cfg.SimplifiedDataColumns.ORDER], df_ev)
 
