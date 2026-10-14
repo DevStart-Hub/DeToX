@@ -103,6 +103,7 @@ class ETracker:
         self.illum_mode = None          # Illumination mode of the tracker.
         self._stop_simulation = None    # Threading event to stop simulation loops.
         self._simulation_thread = None  # Thread object for running simulations.
+        self.live_monitor = None        # Live eye position monitor window.
 
         # --- Setup based on Mode (Real vs. Simulation) ---
         # Configure the controller for either a real eyetracker or simulation.
@@ -1629,6 +1630,9 @@ class ETracker:
 
             # Unsubscribe from Tobii SDK data stream
             self.eyetracker.unsubscribe_from(tr.EYETRACKER_GAZE_DATA, self._on_gaze_data)
+
+        # --- Live monitor cleanup ---
+        self.stop_live_monitor()
         
         # --- Save final batch ---
         self.save_data()
@@ -2268,8 +2272,100 @@ class ETracker:
             # Convert to specified coordinate system
             return Coords.get_psychopy_pos(self.win, mean_tobii, units=coordinate_units)
 
-            
-    # --- Interanl fucntions ---
+
+    def stop_live_monitor(self):
+        """
+        Stop the experimental live eye-position monitor if it is running.
+
+        Safe to call when no monitor is active. This method is called
+        automatically by stop_recording() and during ETracker shutdown.
+        """
+        if self.live_monitor is not None:
+            self.live_monitor.stop()
+            self.live_monitor = None
+
+
+    def enable_live_monitor(self, scale=1.0, screen=None, update_rate=20):
+        """
+        Enable an experimental detached real-time eye-position monitor window.
+
+        This feature is experimental: its API and platform behavior may change.
+        Validate it on the intended tracker/display setup before use.
+
+        Parameters
+        ----------
+        scale : float, optional
+            Scale factor for the monitor window. Default is 1.0.
+        screen : int, optional
+            Zero-based monitor index where the monitor should appear. It uses
+            the same numbering as PsychoPy's ``Window(screen=...)``. If None,
+            the monitor is placed on the other screen when possible. Default
+            is None.
+        update_rate : int or float, optional
+            Maximum monitor update rate in Hz. Default is 20.
+
+        Warns
+        -----
+        UserWarning
+            If the screen geometry cannot be found, the monitor window may open
+            on the default screen.
+
+        Notes
+        -----
+        The monitor receives data only while gaze samples are being generated,
+        usually after start_recording() is called. It is automatically stopped by
+        stop_recording().
+
+        The monitor is a Tkinter window, which has no concept of monitor indices,
+        so the requested ``screen`` is resolved to pixel coordinates via pyglet
+        (already a PsychoPy dependency) before the window is placed. This keeps
+        screen numbering consistent with the PsychoPy window.
+
+        Examples
+        --------
+        ### Default monitor
+        ```python
+        ET_controller.enable_live_monitor()
+        ET_controller.start_recording('data.h5')
+        ```
+
+        ### Custom monitor screen and refresh rate
+        ```python
+        ET_controller.enable_live_monitor(screen=1, update_rate=10)
+        ```
+        """
+        if self.live_monitor is None:
+            from .gui.LiveMonitor import LiveMonitor
+            from .gui.TrackBox import get_screen_rect
+
+            if screen is None:
+                psychopy_screen = getattr(self.win, 'screen', 0) or 0
+                screen = 1 if psychopy_screen == 0 else 0
+
+            screen_rect = get_screen_rect(screen)
+            if screen_rect is None:
+                warnings.warn(
+                    f"Could not determine geometry for screen {screen}; "
+                    f"the live monitor may open on the default screen.",
+                    UserWarning
+                )
+
+            self.live_monitor = LiveMonitor(
+                scale=scale,
+                screen=screen,
+                screen_rect=screen_rect,
+                update_rate=update_rate,
+                left_eye_color=cfg.colors.left_eye,
+                right_eye_color=cfg.colors.right_eye
+            )
+
+            NicePrint(
+                "Live monitor enabled - gaze will appear once recording starts.",
+                title="Live Monitor",
+                verbose=self.verbose
+            )
+
+    # --- Internal functions ---
 
 
     def _close(self):
@@ -2283,6 +2379,8 @@ class ETracker:
         # Stop recording if active (includes data saving and cleanup)
         if self.recording:
             self.stop_recording()
+
+        self.stop_live_monitor()
 
 
     def _check_continuity(self):
@@ -2898,6 +2996,9 @@ class ETracker:
             Gaze sample from Tobii SDK containing timestamps, coordinates,
             validity flags, and pupil data.
         """
+        live_monitor = None
+        live_monitor_payload = None
+
         # --- Thread-safe data storage ---
         # Use lock since this is called from Tobii SDK thread
         with self._buf_lock:
@@ -2913,6 +3014,20 @@ class ETracker:
                     gaze_data.get('left_gaze_point_on_display_area'),
                     gaze_data.get('right_gaze_point_on_display_area')
                 ])
+
+            if self.live_monitor is not None:
+                live_monitor = self.live_monitor
+                left = gaze_data.get('left_gaze_origin_in_trackbox_coordinate_system')
+                right = gaze_data.get('right_gaze_origin_in_trackbox_coordinate_system')
+                left_valid = gaze_data.get('left_gaze_origin_validity', 0)
+                right_valid = gaze_data.get('right_gaze_origin_validity', 0)
+                live_monitor_payload = (
+                    left if left_valid else None,
+                    right if right_valid else None
+                )
+
+        if live_monitor_payload is not None:
+            live_monitor.push(*live_monitor_payload)
 
 
     def _on_user_position(self, position_data):
@@ -2940,7 +3055,6 @@ class ETracker:
         """
         with self._buf_lock:
             self._position_data.append(position_data)
-
 
 
     # --- Simulation Methods ---
@@ -2986,22 +3100,34 @@ class ETracker:
     def _simulate_gaze_data(self):
         """Generate single gaze sample from current mouse position."""
         try:
+            scroll = self.mouse.getWheelRel()
+            if scroll[1] != 0:
+                current_z = getattr(self, 'sim_z_position', 0.6)
+                self.sim_z_position = current_z + scroll[1] * 0.05
+                self.sim_z_position = max(0.2, min(1.0, self.sim_z_position))
+
             pos = self.mouse.getPos()
             tobii_pos = Coords.get_tobii_pos(self.win, pos)
             tbcs_z = getattr(self, 'sim_z_position', 0.6)
+            trackbox_x = 1.0 - tobii_pos[0]
+            trackbox_y = tobii_pos[1]
+            eye_offset = 0.035
+            left_trackbox = (trackbox_x + eye_offset, trackbox_y, tbcs_z)
+            right_trackbox = (trackbox_x - eye_offset, trackbox_y, tbcs_z)
             
             timestamp = int(self.experiment_clock.getTime() * 1_000_000) 
             
             # Create full Tobii-compatible structure
             gaze_data = {
-                'device_time_stamp': timestamp,      # ← DEVICE FIRST
-                'system_time_stamp': timestamp,      # ← SYSTEM SECOND
+                'device_time_stamp': timestamp,
+                'system_time_stamp': timestamp,
                 'left_gaze_point_on_display_area': tobii_pos,
                 'left_gaze_point_in_user_coordinate_system': (tobii_pos[0], tobii_pos[1], tbcs_z),
                 'left_gaze_point_validity': 1,
                 'left_pupil_diameter': 3.0,
                 'left_pupil_validity': 1,
                 'left_gaze_origin_in_user_coordinate_system': (tobii_pos[0], tobii_pos[1], tbcs_z),
+                'left_gaze_origin_in_trackbox_coordinate_system': left_trackbox,
                 'left_gaze_origin_validity': 1,
                 'right_gaze_point_on_display_area': tobii_pos,
                 'right_gaze_point_in_user_coordinate_system': (tobii_pos[0], tobii_pos[1], tbcs_z),
@@ -3009,10 +3135,11 @@ class ETracker:
                 'right_pupil_diameter': 3.0,
                 'right_pupil_validity': 1,
                 'right_gaze_origin_in_user_coordinate_system': (tobii_pos[0], tobii_pos[1], tbcs_z),
+                'right_gaze_origin_in_trackbox_coordinate_system': right_trackbox,
                 'right_gaze_origin_validity': 1,
                 # These aren't needed for raw format but keep for show_status compatibility:
-                'left_user_position': (tobii_pos[0], tobii_pos[1], tbcs_z),
-                'right_user_position': (tobii_pos[0], tobii_pos[1], tbcs_z),
+                'left_user_position': left_trackbox,
+                'right_user_position': right_trackbox,
                 'left_user_position_validity': 1,
                 'right_user_position_validity': 1,
             }
@@ -3027,7 +3154,9 @@ class ETracker:
                     gaze_data.get('right_gaze_point_on_display_area')
                 ])
 
-            
+            if self.live_monitor is not None:
+                self.live_monitor.push(left_trackbox, right_trackbox)
+
         except Exception as e:
             print(f"Simulated gaze error: {e}")
 
