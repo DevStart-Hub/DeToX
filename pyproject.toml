@@ -21,8 +21,12 @@ authors = [
 ]
 
 [tool.setuptools]
-# This tells setuptools to package your folder named "DeToX"
-packages = ["DeToX"]
+
+# Automatically discover the DeToX package and its subpackages
+# (e.g. DeToX.gui) so new subpackages ship without extra edits.
+[tool.setuptools.packages.find]
+where = ["."]
+include = ["DeToX*"]
 
 [tool.setuptools.package-data]
 DeToX = ["stimuli/*.png", "stimuli/*.mp4", "stimuli/*.wav"]
