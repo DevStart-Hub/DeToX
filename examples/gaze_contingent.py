@@ -1,3 +1,5 @@
+"""Manual gaze-contingent mouse demo; press Escape to finish."""
+
 #%% Imports
 from psychopy import visual, core, event
 from DeToX import ETracker

@@ -1,10 +1,7 @@
-import os
+"""Manual mouse-simulation recording example; requires a PsychoPy window."""
+
 from psychopy import visual, core
 from DeToX import ETracker
-
-# Delete 'TEST3.h5' if exists
-if os.path.exists('TEST3.h5'):
-    os.remove('TEST3.h5')
 
 # Create window - adjust size based on your monitor
 win = visual.Window(
@@ -18,31 +15,20 @@ win = visual.Window(
 win.setMouseVisible(True)  # Set to False for real experiments
 
 # # Create controller in simulation mode
-controller = ETracker(win, simulate=False)
+controller = ETracker(win, simulate=True)
 
 ## Start recording
-controller.start_recording('TEST4.h5',  raw_format=True) # save to hdf5 ( set to csv for easier debug)
+controller.start_recording('TEST.h5', raw_format=True) # save to hdf5 ( set to csv for easier debug)
 
+print("Recording started. Simulated data will be generated.")
 win.flip()
 core.wait(4)
 
 controller.record_event('Event1')
 controller.save_data() # Right after the event to test the saving function
 
-core.wait(60)
-
-controller.record_event('Event2')
-controller.save_data() # Right after the event to test the saving function
-
-core.wait(1)
-
-controller.record_event('Event3')
-controller.save_data() # Right after the event to test the saving function
-
-core.wait(1)
+core.wait(2)
 
 # Clean up
 controller.stop_recording() # this closes and saves 
 win.close()
-
-
