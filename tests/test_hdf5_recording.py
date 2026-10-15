@@ -45,7 +45,7 @@ tracker = next(node for node in tree.body if isinstance(node, ast.ClassDef) and 
 names = {'start_recording', '_adapt_gaze_data', '_check_continuity',
          '_prepare_recording', '_save_hdf5_data', '_save_csv_data',
          '_on_gaze_data', 'record_event', '_check_gaze_samples',
-         'save_data', 'stop_recording'}
+         'save_data', 'stop_recording', 'stop_live_monitor'}
 methods = [node for node in tracker.body if isinstance(node, ast.FunctionDef) and node.name in names]
 namespace = dict(globals())
 exec(compile(ast.Module(body=methods, type_ignores=[]), str(source), 'exec'), namespace)
@@ -60,6 +60,7 @@ def controller(raw):
     instance.win = SimpleNamespace(size=[1920, 1080], units='pix')
     instance.coordinate_units = 'tobii' if raw else 'pix'
     instance.first_timestamp = None
+    instance.live_monitor = None
     instance.verbose = False
     return instance
 
