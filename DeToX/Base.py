@@ -54,7 +54,9 @@ class ETracker:
         ----------
         win : psychopy.visual.Window
             The PsychoPy window object where stimuli will be displayed. This is
-            required for coordinate conversions.
+            required for coordinate conversions. Real tracking requires fullscreen
+            on the display configured for the tracker; keep it fullscreen for the
+            lifetime of this controller. Simulation also supports windowed mode.
         id : int, optional
             The index of the Tobii eye tracker to use if multiple are found.
             Default is 0. Ignored if `simulate` is True.
@@ -67,6 +69,8 @@ class ETracker:
 
         Raises
         ------
+        ValueError
+            If real tracking is requested with a non-fullscreen window.
         RuntimeError
             If `simulate` is False and no Tobii eye trackers can be found.
         """
@@ -74,6 +78,14 @@ class ETracker:
         # Store essential configuration parameters provided at initialization.
         self.win = win
         self.simulate = simulate
+
+        if not self.simulate and not self.win.fullscr:
+            raise ValueError(
+                "Real eye tracking currently requires a fullscreen window "
+                "on the display configured for the tracker. "
+                "Windowed mode is supported for simulation only."
+            )
+
         self.eyetracker_id = etracker_id
         self.verbose = verbose
 
@@ -338,7 +350,7 @@ class ETracker:
         
         # --- Print summary ---
         summary = "\n".join(changes)
-        NicePrint(summary, title="Applied Changes")
+        NicePrint(summary, title="Applied Changes", verbose=self.verbose)
 
 
     # --- Calibration Methods ---
@@ -1229,71 +1241,82 @@ class ETracker:
             (gaze positions, pupil diameters, validity flags only).
             See [Data Format Options](#data-format-options) for more information.
         coordinate_units : str, optional
-            Target coordinate system for 2D screen positions. Default is 'default':
-            
-            - **'default'**: Smart defaults based on format
-              - raw_format=True → 'tobii' (keeps 0-1 range)
-              - raw_format=False → 'pix' (PsychoPy pixels, center origin)
-            
-            Converts to PsychoPy coordinate systems where (0,0) is at screen center.
-            Other options: 'tobii', 'height', 'norm', 'cm', 'deg'.
-            See [Coordinate System Conversion](#coordinate-system-conversion) for more information.
-        
+            Unit for the 2D screen coordinates in the **simplified** format only
+            (ignored—and warned—under raw format, which always keeps the Tobii
+            ADCS 0-1 coordinates untouched). Default is 'default' (= 'pix').
+
+            Simplified 2D coordinates are always written in the PsychoPy
+            convention: origin at screen center, y-axis pointing up. This
+            parameter only selects the *unit/scale*, never the origin:
+
+            - **'default'** → 'pix' (PsychoPy pixels)
+            - **'pix'**, **'height'**, **'norm'**, **'cm'**, **'deg'**
+
+            See [Coordinate System](#coordinate-system) for more information.
+
         Raises
         ------
         ValueError
-            If coordinate_units or the filename extension is unsupported.
+            If simplified coordinate_units or the filename extension is unsupported.
 
         Warns
         -----
         UserWarning
-            If recording is already active (the call is ignored), or the
-            requested output filename exists (a datetime suffix is appended).
+            - If a recording is already running, the call is ignored.
+            - If the output file already exists, a timestamp is added to the
+              filename so the old file is not overwritten.
+            - If ``raw_format=True`` and ``coordinate_units`` is not 'default',
+              ``coordinate_units`` is ignored.
+        
+        Notes
+        -----
+        ### Data Format: fidelity vs convenience
 
-        Details
-        -------
-        ### Data Format Options
-        
-        The `raw_format` parameter controls which columns are included in the saved
-        data file. Raw format preserves the complete data structure from the Tobii
-        Pro SDK, which includes both 2D screen coordinates and 3D spatial information
-        about eye position and gaze origin in the user coordinate system. This format
-        is useful for advanced analyses that require the full geometric relationship
-        between the eyes and the screen, or when you need to preserve all metadata
-        provided by the eye tracker. The simplified format extracts only the essential
-        data needed for most eye tracking analyses: gaze positions on screen, pupil
-        diameters, and validity flags. This results in smaller files and easier data
-        analysis for typical gaze visualization and AOI (Area of Interest) tasks.
-        
-        ### Coordinate System Conversion
-        
-        The `coordinate_units` parameter determines how 2D screen coordinates are
-        represented in the output file. By default, raw format keeps coordinates in
-        Tobii's Active Display Coordinate System (ADCS) where values range from 0 to 1
-        with the origin at the top-left corner. This normalized system is
-        screen-independent and useful for comparing data across different display
-        setups. The simplified format defaults to PsychoPy pixel coordinates, which
-        place the origin at the screen center with the y-axis pointing upward. This
-        matches PsychoPy's coordinate system and makes it seamless to overlay gaze
-        data on your experimental stimuli. You can override these defaults for either
-        format. For example, you might want pixel coordinates in raw format for easier
-        visualization, or keep Tobii coordinates in simplified format for cross-screen
-        comparisons. When converting to other PsychoPy units like 'height' or 'norm',
-        the coordinates will match your PsychoPy window's unit system. Note that in
-        raw format, only the 2D display coordinates are converted; the 3D spatial
-        coordinates (eye positions and gaze origins) retain their SDK user
-        coordinate units without conversion.
-        
-        ### Timestamp Format
-        
-        Raw format preserves the SDK's system and device timestamps in microseconds,
-        without resetting them to zero. Raw events also retain system microseconds.
-        Simplified format stores gaze and event timestamps in milliseconds relative
-        to the first gaze sample. This origin is shared across saves and reset for
-        each recording. Timestamp behavior is determined by raw_format.
+        `raw_format` is a *fidelity* switch. It fixes the coordinate system *and*
+        the time representation, so the two formats never silently disagree:
 
-        Raw output does not subtract a timestamp origin. Simulation generates
-        timestamps from the experiment clock, which is reset at recording start.
+        - **Simplified** (`raw_format=False`): the analysis-ready, PsychoPy-native
+          view. 2D gaze is written in PsychoPy coordinates (origin at the screen
+          center, y up) in the unit chosen with `coordinate_units`; time is
+          standardised to milliseconds measured from the first sample.
+        - **Raw** (`raw_format=True`): the data exactly as the Tobii Pro SDK
+          delivered it. 2D gaze stays in Tobii ADCS (0-1, origin top-left, y down);
+          3D eye data retains its SDK User Coordinate System units; time stays in
+          the SDK's original units (microseconds). No conversion is applied, and
+          `coordinate_units` is ignored.
+
+        This keeps the full geometric and temporal information available in raw
+        files without any loss, while simplified files drop straight onto your
+        PsychoPy stimuli for typical AOI / scanpath / pupil analyses.
+
+        ### Coordinate System
+
+        The origin of the 2D gaze coordinates is fixed by the format:
+
+        - **Simplified**: always PsychoPy-convention (origin at screen center,
+          y up). `coordinate_units` selects only the unit/scale (`'pix'` by
+          default; also `'height'`, `'norm'`, `'cm'`, `'deg'`). Because the file
+          stores `screen_size` and `window_units` as metadata, any other
+          coordinate system can be re-derived at read time.
+        - **Raw**: always Tobii ADCS (0-1, top-left origin, y down), untouched.
+
+        The 3D spatial columns present only in raw format (`*_in_user_coordinate_system_*`
+        for gaze points and gaze origins) retain their SDK User Coordinate System
+        units and are never converted under any setting.
+
+        ### Timestamps
+
+        Time representation is also fixed by the format:
+
+        - **Simplified**: standardised — milliseconds, measured from 0 at the
+          first gaze sample. The same convention is applied to both gaze samples
+          and event markers so they stay aligned.
+        - **Raw**: original — both `system_time_stamp` and `device_time_stamp`
+          are kept in the SDK's native microseconds, untouched, for
+          synchronisation with other recording systems.
+
+        Simulation generates timestamps from the experiment clock, which resets
+        at recording start; raw output does not subtract another timestamp origin.
         
         Examples
         --------
@@ -1311,74 +1334,57 @@ class ETracker:
         ```
         
         ### Format Options
-        
-        #### Raw format with defaults (Tobii coords, absolute timestamps)
+
+        #### Simplified format with defaults (PsychoPy pixels, relative ms)
         ```python
-        ET_controller.start_recording('data.h5', raw_format=True)
-        # All Tobii columns, coords in 0-1 range, timestamps in microseconds
+        ET_controller.start_recording('data.h5')
+        # Simplified columns, 2D coords in pixels (center origin), TimeStamp from 0ms
         ```
-        
-        #### Raw format with pixel coordinates
-        ```python
-        ET_controller.start_recording('data.h5', raw_format=True, coordinate_units='pix')
-        # All Tobii columns, display coords in PsychoPy pixels
-        ```
-        
-        ### Coordinate Units
-        
-        #### Simplified format with Tobii coordinates
-        ```python
-        ET_controller.start_recording('data.h5', coordinate_units='tobii')
-        # Simplified columns, coordinates in 0-1 range
-        ```
-        
+
         #### Simplified format with height units
         ```python
         ET_controller.start_recording('data.h5', coordinate_units='height')
-        # Simplified columns, coordinates in height units matching window
+        # Simplified columns, 2D coords in height units (still center origin)
         ```
-        
+
+        #### Raw format (full Tobii SDK, untouched)
+        ```python
+        ET_controller.start_recording('data.h5', raw_format=True)
+        # All Tobii columns, 2D coords in ADCS (0-1, top-left), timestamps in microseconds
+        # Note: coordinate_units is ignored (and warned) under raw_format=True
+        ```
+
         ### Complete Workflows
-        
+
         #### Standard experiment workflow
         ```python
         # Setup and calibration
         ET_controller.show_status()
         ET_controller.calibrate(5)
-        
+
         # Start recording with defaults
         ET_controller.start_recording('participant_01.h5')
-        
+
         # Run experiment with event markers
         ET_controller.record_event('trial_1_start')
         # ... present stimuli ...
         ET_controller.record_event('trial_1_end')
-        
+
         # Stop recording
         ET_controller.stop_recording()
         ```
-        
-        #### Multi-file synchronization with absolute timestamps
+
+        #### Multi-file raw collection (synchronisation across sessions)
         ```python
-        # Recording multiple synchronized files
+        # Raw files keep the SDK's original microsecond timestamps, so multiple
+        # files can be aligned temporally after the fact.
         ET_controller.start_recording('session1_gaze.h5', raw_format=True)
         # ... run session 1 ...
         ET_controller.stop_recording()
-        
-        # Session 2 can be synchronized using absolute timestamps
+
         ET_controller.start_recording('session2_gaze.h5', raw_format=True)
         # ... run session 2 ...
         ET_controller.stop_recording()
-        ```
-        
-        #### Advanced raw data collection
-        ```python
-        # Collect all data with pixel coords and unchanged SDK timestamps
-        ET_controller.start_recording(
-            'advanced_analysis.h5',
-            raw_format=True,
-            coordinate_units='pix'
-        )
         ```
         """
         # --- State validation ---
@@ -1391,26 +1397,38 @@ class ETracker:
         
         # --- Format flag ---
         self.raw_format = raw_format
-        
-        # --- Smart coordinate unit defaults ---
-        if coordinate_units == 'default':
-            self.coordinate_units = 'tobii' if raw_format else 'pix'
-        else:
-            # Validate coordinate_units
-            valid_units = ['tobii', 'pix', 'height', 'norm', 'cm', 'deg', 'degFlat', 'degFlatPos']
-            if coordinate_units not in valid_units:
-                raise ValueError(
-                    f"Invalid coordinate_units: '{coordinate_units}'. "
-                    f"Must be one of {valid_units}"
+
+        # --- Coordinate units ---
+        # Raw format always keeps Tobii ADCS coordinates untouched: coordinate_units
+        # is ignored (and warned) under raw_format=True. Simplified format always
+        # uses the PsychoPy convention (center origin, y up) in the chosen unit.
+        valid_units = ['pix', 'height', 'norm', 'cm', 'deg']
+        if raw_format:
+            self.coordinate_units = 'tobii'
+            if coordinate_units != 'default':
+                warnings.warn(
+                    "coordinate_units is ignored under raw_format=True: raw files "
+                    "always keep the original Tobii ADCS 0-1 coordinates.",
+                    UserWarning,
+                    stacklevel=2
                 )
-            self.coordinate_units = coordinate_units
-        
+        else:
+            if coordinate_units == 'default':
+                self.coordinate_units = 'pix'
+            else:
+                if coordinate_units not in valid_units:
+                    raise ValueError(
+                        f"Invalid coordinate_units: '{coordinate_units}'. "
+                        f"Must be one of {valid_units} (simplified format only)."
+                    )
+                self.coordinate_units = coordinate_units
+
         # --- Buffer initialization ---
         if self.gaze_data and not self.recording:
             self.gaze_data.clear()
         
         # --- Timing setup ---
-        self.first_timestamp = None
+        self.first_timestamp = None  # Each recording gets its own time origin.
         self.experiment_clock.reset()
         
         # --- File preparation ---
@@ -1520,8 +1538,10 @@ class ETracker:
             )
             return
         
+        # Wait while acquisition can still deliver samples.
+        self._check_gaze_samples()
+
         # --- Stop data collection ---
-        # Set flag to halt data collection immediately
         self.recording = False
         
         # --- Mode-specific cleanup ---
@@ -1569,7 +1589,7 @@ class ETracker:
                 f'  - Dropped samples: {quality["dropped_samples"]}\n'
             )
         
-        NicePrint(summary, title="Recording Complete")
+        NicePrint(summary, title="Recording Complete", verbose=self.verbose)
 
 
     def record_event(self, label):
@@ -1597,8 +1617,8 @@ class ETracker:
         Events are stored separately and merged with gaze data when `save_data()` is
         called. Each event is aligned to the next closest gaze sample (at or after the
         event timestamp) using binary search. When multiple events occur within the same
-        sampling interval, they are concatenated with semicolon delimiters in the Events
-        column (e.g., 'fixation_offset; stimulus_onset'). HDF5 also stores each
+        sampling interval, they are concatenated with pipe delimiters in the Events
+        column (e.g., 'fixation_offset | stimulus_onset'). HDF5 also stores each
         marker separately in the events table. The fixed-width text limit still
         applies to both individual and combined labels when writing HDF5.
             
@@ -1763,7 +1783,8 @@ class ETracker:
         start_saving = core.getTime()
         
         # --- Ensure event-gaze synchronization ---
-        self._check_gaze_samples()
+        if self.recording:
+            self._check_gaze_samples()
         
         # --- Thread-safe buffer swap (O(1) operation) ---
         # Swap buffers under lock to minimize thread blocking time
@@ -1800,10 +1821,11 @@ class ETracker:
             if len(idx) != len(np.unique(idx)):
                 # Duplicates detected - use pandas groupby for vectorized aggregation
                 events_df['_target_idx'] = idx
-                grouped = events_df.groupby('_target_idx')['Events'].agg(lambda x: '; '.join(x))
+                grouped = events_df.groupby('_target_idx')['Events'].agg(lambda x: ' | '.join(x))
                 
                 # Vectorized assignment to gaze_df
                 gaze_df.loc[grouped.index, 'Events'] = grouped.values
+                events_df.drop(columns='_target_idx', inplace=True)
             else:
                 # No duplicates - fast vectorized assignment
                 gaze_df.iloc[idx, gaze_df.columns.get_loc('Events')] = events_df['Events'].values
@@ -2264,8 +2286,12 @@ class ETracker:
         if len(timestamps) < 2:
             return None
         
-        # --- Calculate expected interval in the stored timestamp units ---
-        expected_interval = (1_000_000.0 if self.raw_format else 1000.0) / self.fps
+        # --- Calculate expected interval in the timestamp unit of this format ---
+        # Raw keeps the SDK's native microseconds; simplified stores relative ms.
+        if self.raw_format:
+            expected_interval = 1_000_000.0 / self.fps  # microseconds per sample
+        else:
+            expected_interval = 1000.0 / self.fps       # milliseconds per sample
         
         # --- Calculate intervals between consecutive samples ---
         intervals = np.diff(timestamps)
@@ -2301,28 +2327,36 @@ class ETracker:
 
         Notes
         -----
-        Also returns if no gaze samples are buffered. There is no timeout: if
-        gaze collection stops before catching up to an event, the wait can persist.
+        Waits at most 100 ms, including when no gaze samples are buffered.
+        Returns True when there are no pending events or gaze has caught up;
+        otherwise warns and returns False when the deadline expires.
         """
-        if len(self.event_data) == 0:
-            return  # No events to sync
+        deadline = time.monotonic() + 0.100
 
         while True:
-
-            # Thread-safe peek at last timestamps
             with self._buf_lock:
-                if len(self.gaze_data) == 0:
-                    break  # No gaze data yet, can't sync
-                
-                last_event_time = self.event_data[-1]['system_time_stamp']
-                last_gaze_time = self.gaze_data[-1]['system_time_stamp']
-            
-            # If gaze has caught up to events, we're done
-            if last_gaze_time >= last_event_time:
-                break
-            
-            # Wait for one sample interval (releases GIL)
-            core.wait(1 / self.fps)
+                if not self.event_data:
+                    return True
+
+                if self.gaze_data:
+                    last_event_time = self.event_data[-1]['system_time_stamp']
+                    last_gaze_time = self.gaze_data[-1]['system_time_stamp']
+
+                    if last_gaze_time >= last_event_time:
+                        return True
+
+            remaining = deadline - time.monotonic()
+            if remaining <= 0:
+                warnings.warn(
+                    "Gaze did not catch up with the last event within 100 ms. "
+                    "Continuing shutdown/save; some events may have no "
+                    "following gaze sample.",
+                    UserWarning,
+                )
+                return False
+
+            # Allow acquisition callbacks to run between checks.
+            core.wait(min(0.001, remaining))
 
 
     def _get_info(self, moment='connection'):
@@ -2405,58 +2439,59 @@ class ETracker:
 
 
     def _subscribe_warnings(self):
-        """
-        Subscribe to critical warnings during recording.
-        
-        Monitors three types of warnings:
-          - Connection lost/restored (hardware disconnection)
-          - Stream buffer overflow (data loss from processing bottleneck)
-        
-        Automatically called by start_recording() for real eye trackers.
-        Uses SDK version detection to handle API changes between versions 1.x and 2.x.
-        """
-        # Connection warnings (all SDK versions)
+        """Subscribe to critical warnings during recording."""
+        self._cb_conn_lost = lambda x: self._on_warning('CONNECTION_LOST', x)
+        self._cb_conn_rest = lambda x: self._on_warning('CONNECTION_RESTORED', x)
+        self._cb_stream_err = lambda x: self._on_warning(
+            'STREAM_BUFFER_OVERFLOW' if self.sdk_major >= 2 else 'STREAM_ERRORS', x
+        )
+
         self.eyetracker.subscribe_to(
             tr.EYETRACKER_NOTIFICATION_CONNECTION_LOST,
-            lambda x: self._on_warning('CONNECTION_LOST', x)
+            self._cb_conn_lost
         )
         self.eyetracker.subscribe_to(
             tr.EYETRACKER_NOTIFICATION_CONNECTION_RESTORED,
-            lambda x: self._on_warning('CONNECTION_RESTORED', x)
+            self._cb_conn_rest
         )
         
-        # Stream buffer warnings (version dependent)
         if self.sdk_major >= 2:
-            # SDK 2.0+: use new name
             self.eyetracker.subscribe_to(
                 tr.EYETRACKER_NOTIFICATION_STREAM_BUFFER_OVERFLOW,
-                lambda x: self._on_warning('STREAM_BUFFER_OVERFLOW', x)
+                self._cb_stream_err
             )
         else:
-            # SDK 1.x: use old name
             self.eyetracker.subscribe_to(
                 tr.EYETRACKER_STREAM_ERRORS,
-                lambda x: self._on_warning('STREAM_ERRORS', x)
+                self._cb_stream_err
             )
     
     
     def _unsubscribe_warnings(self):
-        """
-        Unsubscribe from warning notifications.
-        
-        Cleans up warning subscriptions after recording completes.
-        Automatically called by stop_recording() for real eye trackers.
-        Must match the subscription pattern from _subscribe_warnings().
-        """
-        # Connection warnings (all SDK versions)
-        self.eyetracker.unsubscribe_from(tr.EYETRACKER_NOTIFICATION_CONNECTION_LOST)
-        self.eyetracker.unsubscribe_from(tr.EYETRACKER_NOTIFICATION_CONNECTION_RESTORED)
-        
-        # Stream buffer warnings (version dependent)
-        if self.sdk_major >= 2:
-            self.eyetracker.unsubscribe_from(tr.EYETRACKER_NOTIFICATION_STREAM_BUFFER_OVERFLOW)
-        else:
-            self.eyetracker.unsubscribe_from(tr.EYETRACKER_STREAM_ERRORS)
+        """Unsubscribe from warning notifications."""
+        if hasattr(self, '_cb_conn_lost'):
+            self.eyetracker.unsubscribe_from(
+                tr.EYETRACKER_NOTIFICATION_CONNECTION_LOST,
+                self._cb_conn_lost
+            )
+
+        if hasattr(self, '_cb_conn_rest'):
+            self.eyetracker.unsubscribe_from(
+                tr.EYETRACKER_NOTIFICATION_CONNECTION_RESTORED,
+                self._cb_conn_rest
+            )
+
+        if hasattr(self, '_cb_stream_err'):
+            if self.sdk_major >= 2:
+                self.eyetracker.unsubscribe_from(
+                    tr.EYETRACKER_NOTIFICATION_STREAM_BUFFER_OVERFLOW,
+                    self._cb_stream_err
+                )
+            else:
+                self.eyetracker.unsubscribe_from(
+                    tr.EYETRACKER_STREAM_ERRORS,
+                    self._cb_stream_err
+                )
     
     
     def _on_warning(self, notification_type, data):
@@ -2579,7 +2614,7 @@ class ETracker:
                 
                 # === DATA FORMAT SETTINGS ===
                 f.root._v_attrs.raw_format = str(self.raw_format)                         # Full vs simplified columns
-                f.root._v_attrs.coordinate_units = str(self.coordinate_units)             # Coordinate system used
+                f.root._v_attrs.coordinate_units = str(self.coordinate_units)             # Coordinate unit (simplified only; raw always ADCS)
                 f.root._v_attrs.relative_timestamps = str(not self.raw_format)            # Timestamp format
                 f.root._v_attrs.timestamp_units = 'us' if self.raw_format else 'ms'
 
@@ -2618,7 +2653,7 @@ class ETracker:
         3. Preserve raw SDK microseconds or produce simplified relative milliseconds
         
         In raw format, expands tuple columns into separate x, y, z components
-        for tabular storage while optionally converting display coordinates.
+        for tabular storage without converting display coordinates.
         Raw system, device, and event timestamps are left unchanged.
         
         In simplified format, extracts essential columns and converts coordinates
@@ -2637,45 +2672,48 @@ class ETracker:
             (adapted_gaze_df, adapted_events_df)
             
             Raw format returns all Tobii columns with tuples expanded to x, y, z
-            components, display coordinates converted based on coordinate_units,
-            3D spatial coordinates preserved in SDK units, and timestamps preserved
-            unchanged from the SDK in microseconds.
-            
+            components. Nothing is converted: 2D coordinates stay in Tobii ADCS
+            (0-1), 3D spatial coordinates retain their SDK User Coordinate
+            System units, and timestamps stay in the SDK's original microseconds.
+
             Simplified format returns essential columns (TimeStamp, Left_X, Left_Y,
-            Right_X, Right_Y, pupil diameters, validity flags, Events) with
-            coordinates converted based on coordinate_units and timestamps converted
-            to integer relative milliseconds, discarding sub-millisecond precision.
+            Right_X, Right_Y, pupil diameters, validity flags, Events) with 2D
+            coordinates converted to the PsychoPy convention (center origin, y up)
+            in the unit chosen with coordinate_units, and timestamps standardised
+            to relative milliseconds measured from the first sample.
 
             The event DataFrame is None if no events were supplied. In simplified
             mode it retains system_time_stamp internally and gains TimeStamp;
             the HDF5 writer stores only TimeStamp and Events.
             
-        Details
-        -------
-        Raw format preserves system and device timestamps in SDK microseconds,
-        without subtracting a recording origin. Simplified gaze and event timestamps
-        use milliseconds relative to the first gaze sample, across all saved batches.
-        
-        Coordinate conversion in raw format affects only the 2D display coordinates
-        (left_gaze_point_on_display_area and right_gaze_point_on_display_area), while
-        3D spatial coordinates (left/right_gaze_point_in_user_coordinate_system and
-        left/right_gaze_origin_in_user_coordinate_system) retain their SDK units.
-        These spatial coordinates represent the 3D position
-        of the eyes and gaze vectors in the user coordinate system and are not
-        meaningful to convert to screen-based units.
+        Notes
+        -----
+        Raw format performs no conversion at all: it only splits Tobii tuple columns
+        into x, y, z components for tabular storage. 2D coordinates stay in Tobii
+        ADCS (0-1), 3D spatial coordinates retain their SDK User Coordinate
+        System units, and timestamps stay in the SDK's native microseconds. `coordinate_units`
+        is ignored (and warned) under raw format.
+
+        Simplified format standardises everything for analysis: 2D coordinates are
+        converted to the PsychoPy convention (origin at screen center, y up) in the
+        unit selected by coordinate_units, and both gaze and event timestamps are
+        rewritten as integer relative milliseconds measured from the first gaze
+        sample across all saves, discarding sub-millisecond precision.
         """
 
         if self.raw_format:
             # =====================================================================
-            # RAW FORMAT: Expand tuples into x, y, z columns
+            # RAW FORMAT: keep the data exactly as the Tobii SDK delivered it.
+            # No timestamp conversion (stays in microseconds); no coordinate
+            # conversion (2D stays in Tobii ADCS 0-1; 3D retains SDK UCS units).
+            # Only tuple columns are split into x, y, z for tabular storage.
             # =====================================================================
-            
-            # Define column categories for processing
+
             display_columns = [
                 'left_gaze_point_on_display_area',
                 'right_gaze_point_on_display_area'
             ]
-            
+
             spatial_columns = [
                 'left_gaze_point_in_user_coordinate_system',
                 'left_gaze_origin_in_user_coordinate_system',
@@ -2683,21 +2721,9 @@ class ETracker:
                 'right_gaze_origin_in_user_coordinate_system',
             ]
 
-            # Process 2D display coordinates with optional conversion
+            # 2D display coordinates: keep original Tobii ADCS (0-1) untouched
             for col in display_columns:
-                if self.coordinate_units == 'tobii':
-                    # Keep original Tobii ADCS coordinates (0-1 range)
-                    coords = np.array(df[col].tolist())
-                else:
-                    # Extract and convert to target coordinate system
-                    coords_tobii = np.array(df[col].tolist())
-                    coords = Coords.get_psychopy_pos(
-                        self.win, 
-                        coords_tobii, 
-                        units=self.coordinate_units
-                    )
-                
-                # Split into separate x and y columns
+                coords = np.array(df[col].tolist())
                 df[f'{col}_x'] = coords[:, 0]
                 df[f'{col}_y'] = coords[:, 1]
 
@@ -2710,42 +2736,37 @@ class ETracker:
 
             # Remove original tuple columns
             df = df.drop(columns=display_columns + spatial_columns)
-            
+
             # Return with enforced column order
             return (df[cfg.RawDataColumns.ORDER], df_ev)
-            
+
         else:
             # =====================================================================
-            # SIMPLIFIED FORMAT: Extract, convert, rename for ease of use
+            # SIMPLIFIED FORMAT: standardise to the PsychoPy-native, analysis-ready
+            # view. 2D coordinates are centered (origin at screen center, y up) in
+            # the chosen unit; timestamps become relative milliseconds from 0.
             # =====================================================================
 
-            # Simplified timestamps share one origin across all saved batches.
+            # --- Timestamp standardisation: relative milliseconds from 0 ---
             if self.first_timestamp is None:
                 self.first_timestamp = df.iloc[0]['system_time_stamp']
 
             df['TimeStamp'] = ((df['system_time_stamp'] - self.first_timestamp) / 1000.0).astype(int)
             if df_ev is not None:
                 df_ev['TimeStamp'] = ((df_ev['system_time_stamp'] - self.first_timestamp) / 1000.0).astype(int)
-            
-            # Process gaze coordinates with optional conversion
-            if self.coordinate_units == 'tobii':
-                # Keep original Tobii ADCS coordinates (0-1 range)
-                left_coords = np.array(df['left_gaze_point_on_display_area'].tolist())
-                right_coords = np.array(df['right_gaze_point_on_display_area'].tolist())
-            else:
-                # Extract and convert to target coordinate system
-                left_tobii = np.array(df['left_gaze_point_on_display_area'].tolist())
-                right_tobii = np.array(df['right_gaze_point_on_display_area'].tolist())
-                
-                left_coords = Coords.get_psychopy_pos(self.win, left_tobii, units=self.coordinate_units)
-                right_coords = Coords.get_psychopy_pos(self.win, right_tobii, units=self.coordinate_units)
 
-            # Add converted coordinates to dataframe
+            # --- Gaze coordinates: always PsychoPy convention (center, y up) ---
+            left_tobii = np.array(df['left_gaze_point_on_display_area'].tolist())
+            right_tobii = np.array(df['right_gaze_point_on_display_area'].tolist())
+
+            left_coords = Coords.get_psychopy_pos(self.win, left_tobii, units=self.coordinate_units)
+            right_coords = Coords.get_psychopy_pos(self.win, right_tobii, units=self.coordinate_units)
+
             df['Left_X'] = left_coords[:, 0]
             df['Left_Y'] = left_coords[:, 1]
             df['Right_X'] = right_coords[:, 0]
             df['Right_Y'] = right_coords[:, 1]
-            
+
             # Rename remaining columns to simplified format
             df = df.rename(columns={
                 'left_gaze_point_validity': 'Left_Validity',
@@ -2755,11 +2776,11 @@ class ETracker:
                 'right_pupil_diameter': 'Right_Pupil',
                 'right_pupil_validity': 'Right_Pupil_Validity'
             })
-            
+
             # --- Data type optimization ---
             validity_dtypes = cfg.SimplifiedDataColumns.get_validity_dtypes()
             df = df.astype(validity_dtypes)
-            
+
             # Return with enforced column order
             return (df[cfg.SimplifiedDataColumns.ORDER], df_ev)
 

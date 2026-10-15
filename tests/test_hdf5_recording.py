@@ -12,6 +12,7 @@ from pathlib import Path
 import runpy
 import tempfile
 import threading
+import time
 from collections import deque
 from types import SimpleNamespace
 import unittest
@@ -27,6 +28,15 @@ from hdf5_fixtures import fake_batch
 
 ROOT = Path(__file__).resolve().parents[1]
 cfg = SimpleNamespace(**runpy.run_path(str(ROOT / 'DeToX' / 'ETSettings.py')))
+
+# Compile the real coordinate converter too; pixel conversion needs only NumPy.
+coords_source = ROOT / 'DeToX' / 'Coords.py'
+coords_tree = ast.parse(coords_source.read_text(encoding='utf-8'))
+converter = next(node for node in coords_tree.body
+                 if isinstance(node, ast.FunctionDef) and node.name == 'get_psychopy_pos')
+coords_namespace = {'np': np}
+exec(compile(ast.Module(body=[converter], type_ignores=[]), str(coords_source), 'exec'), coords_namespace)
+Coords = SimpleNamespace(get_psychopy_pos=coords_namespace['get_psychopy_pos'])
 
 # Compile the selected production functions unchanged, not copies of their logic.
 source = ROOT / 'DeToX' / 'Base.py'
@@ -48,8 +58,9 @@ def controller(raw):
     instance.simulate = True
     instance.fps = 120
     instance.win = SimpleNamespace(size=[1920, 1080], units='pix')
-    instance.coordinate_units = 'tobii'
+    instance.coordinate_units = 'tobii' if raw else 'pix'
     instance.first_timestamp = None
+    instance.verbose = False
     return instance
 
 
@@ -82,6 +93,9 @@ class RecordingStorageTests(unittest.TestCase):
                     self.assertEqual(file.root.gaze.dtype, columns.get_hdf5_dtype())
                     self.assertEqual(file.root.events.dtype, cfg.EventDataColumns.get_hdf5_dtype(raw))
                     self.assertEqual(file.root._v_attrs.eyetracker_model, 'Simulation')
+                    self.assertEqual(file.root._v_attrs.relative_timestamps, str(not raw))
+                    self.assertEqual(file.root._v_attrs.timestamp_units, 'us' if raw else 'ms')
+                    self.assertEqual(file.root._v_attrs.coordinate_units, 'tobii' if raw else 'pix')
                 self.assertTrue(pd.read_hdf(instance.filename, key='gaze').empty)
                 self.assertTrue(pd.read_hdf(instance.filename, key='events').empty)
 
@@ -165,9 +179,12 @@ class RecordingStorageTests(unittest.TestCase):
                     self.assertEqual(gaze['device_time_stamp'].tolist(), [1_234_567, 1_244_567, 1_254_567])
                     self.assertEqual(events['system_time_stamp'].tolist(), [origin + 7, origin + 20_007])
                     self.assertIsNone(instance.first_timestamp)
+                    self.assertEqual(gaze['left_gaze_point_on_display_area_x'].tolist(), [0.25] * 3)
                 else:
                     self.assertEqual(gaze['TimeStamp'].tolist(), [0, 10, 20])
                     self.assertEqual(events['TimeStamp'].tolist(), [0, 20])
+                    self.assertEqual(gaze['Left_X'].tolist(), [-480.0] * 3)
+                    self.assertEqual(gaze['Left_Y'].tolist(), [0.0] * 3)
                 self.assertEqual(instance._check_continuity()['dropped_samples'], 0)
 
     def test_start_resets_origin_and_enforces_format_policy(self):
@@ -180,10 +197,18 @@ class RecordingStorageTests(unittest.TestCase):
                 instance.experiment_clock = SimpleNamespace(reset=lambda: None)
                 instance._get_info = lambda moment: None
                 instance._simulate_data_loop = lambda data_type: None
-                instance.start_recording(
-                    str(Path(self.temp.name) / f'start-{raw}.h5'),
-                    raw_format=raw, coordinate_units='tobii',
-                )
+                if raw:
+                    with self.assertWarnsRegex(UserWarning, 'coordinate_units is ignored'):
+                        instance.start_recording(
+                            str(Path(self.temp.name) / f'start-{raw}.h5'),
+                            raw_format=True, coordinate_units='pix',
+                        )
+                    self.assertEqual(instance.coordinate_units, 'tobii')
+                else:
+                    instance.start_recording(
+                        str(Path(self.temp.name) / f'start-{raw}.h5'),
+                    )
+                    self.assertEqual(instance.coordinate_units, 'pix')
                 instance._simulation_thread.join()
                 self.assertIsNone(instance.first_timestamp)
                 with tables.open_file(instance.filename, 'r') as file:
@@ -193,6 +218,36 @@ class RecordingStorageTests(unittest.TestCase):
     def test_removed_timestamp_option_is_not_accepted(self):
         with self.assertRaisesRegex(TypeError, 'relative_timestamps'):
             controller(False).start_recording(relative_timestamps=True)
+
+    def test_simplified_format_rejects_tobii_units(self):
+        instance = controller(False)
+        instance.recording = False
+        with self.assertRaisesRegex(ValueError, 'simplified format only'):
+            instance.start_recording(coordinate_units='tobii')
+
+    def test_gaze_synchronization_is_bounded(self):
+        instance = controller(False)
+        instance._buf_lock = threading.Lock()
+        instance.gaze_data = deque()
+        instance.event_data = deque()
+        clock = SimpleNamespace(now=0.0)
+
+        def wait(seconds):
+            clock.now += seconds
+
+        with patch.dict(namespace, {
+            'time': SimpleNamespace(monotonic=lambda: clock.now),
+            'core': SimpleNamespace(wait=wait),
+        }):
+            self.assertTrue(instance._check_gaze_samples())
+            instance.event_data.append({'system_time_stamp': 100})
+            with self.assertWarnsRegex(UserWarning, '100 ms'):
+                self.assertFalse(instance._check_gaze_samples())
+            self.assertAlmostEqual(clock.now, 0.100)
+
+            instance.gaze_data.append({'system_time_stamp': 100})
+            self.assertTrue(instance._check_gaze_samples())
+            self.assertAlmostEqual(clock.now, 0.100)
 
     def test_full_buffer_save_and_stop_workflow(self):
         origin = 9_876_543_210_123
@@ -224,7 +279,7 @@ class RecordingStorageTests(unittest.TestCase):
                 with patch.dict(namespace, {'core': core, 'tr': sdk, 'NicePrint': lambda *args, **kwargs: None}):
                     instance.start_recording(
                         str(Path(self.temp.name) / f'workflow-{raw}.h5'),
-                        raw_format=raw, coordinate_units='tobii',
+                        raw_format=raw,
                     )
                     instance._simulation_thread.join()
                     # Feed the actual callback/event methods with fake SDK input.
@@ -259,9 +314,9 @@ class RecordingStorageTests(unittest.TestCase):
                 gaze = pd.read_hdf(instance.filename, key='gaze')
                 events = pd.read_hdf(instance.filename, key='events')
                 timestamp = 'system_time_stamp' if raw else 'TimeStamp'
-                self.assertEqual(gaze['Events'].tolist(), ['', 'start; stim', '', '', 'mid', '', 'end'])
+                self.assertEqual(gaze['Events'].tolist(), ['', 'start | stim', '', '', 'mid', '', 'end'])
                 x_column = 'left_gaze_point_on_display_area_x' if raw else 'Left_X'
-                self.assertEqual(gaze[x_column].tolist(), [0.25] * 7)
+                self.assertEqual(gaze[x_column].tolist(), [0.25 if raw else -480.0] * 7)
                 self.assertEqual(events['Events'].tolist(), ['start', 'stim', 'mid', 'end'])
                 self.assertEqual(list(events.columns), [timestamp, 'Events'])
                 expected_gaze = [origin + i * 10_000 for i in range(7)] if raw else list(range(0, 70, 10))
