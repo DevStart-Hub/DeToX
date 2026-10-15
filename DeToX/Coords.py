@@ -28,6 +28,46 @@ Typical usage:
 import numpy as np
 from psychopy.tools.monitorunittools import cm2pix, deg2pix, pix2cm, pix2deg
 
+def get_content_scale(win):
+    """
+    Return the display scale factor of a window (1.0 on ordinary screens).
+    
+    High-density screens such as mac Retina have more screen-buffer pixels
+    than the window size PsychoPy reports (for example 2x), so pixel
+    coordinates drawn by hand must be scaled to match the buffer.
+    
+    Parameters
+    ----------
+    win : psychopy.visual.Window
+        The PsychoPy window to inspect.
+    
+    Returns
+    -------
+    float
+        Scale factor of the display, or 1.0 if it cannot be found.
+    """
+    # --- Look for a scale getter on the window and on its backend handle ---
+    handle = getattr(win, 'winHandle', None)
+    for obj in (win, handle):
+        if obj is None:
+            continue
+        for name in ('getContentScaleFactor', 'get_content_scale'):
+            getter = getattr(obj, name, None)
+            if callable(getter):
+                try:
+                    scale = getter()
+                except Exception:
+                    continue
+                
+                # pyglet returns (x, y); other backends return one value.
+                if isinstance(scale, (tuple, list)):
+                    scale = scale[0]
+                if scale and scale > 0:
+                    return float(scale)
+    
+    return 1.0
+
+
 def convert_height_to_units(win, height_value, target_units=None):
     """
     Convert a size from height units to the specified units.
@@ -181,7 +221,7 @@ def get_psychopy_pos(win, p, units=None):
 
 # Coords.py
 
-def psychopy_to_pixels(win, pos, source_units=None):
+def psychopy_to_pixels(win, pos, source_units=None, scale=None):
     """
     Convert PsychoPy coordinates to pixel coordinates for image drawing.
     
@@ -197,6 +237,10 @@ def psychopy_to_pixels(win, pos, source_units=None):
     source_units : str, optional
         Units of the input coordinates. If None, uses window's default units.
         Supported: 'norm', 'height', 'pix', 'cm', 'deg', 'degFlat', 'degFlatPos'.
+    scale : float, optional
+        Multiplier for the returned pixels. If None, uses the window's content
+        scale factor, so Retina/high-DPI screens map to the screen buffer.
+        Default is None.
     
     Returns
     -------
@@ -252,9 +296,13 @@ def psychopy_to_pixels(win, pos, source_units=None):
         x_pix = x + win.size[0] / 2
         y_pix = -y + win.size[1] / 2
     
+    # --- Scale to screen-buffer pixels (needed on Retina/high-DPI screens) ---
+    if scale is None:
+        scale = get_content_scale(win)
+    
     # Round to integers for pixel alignment
-    x_pix = np.round(x_pix).astype(int)
-    y_pix = np.round(y_pix).astype(int)
+    x_pix = np.round(x_pix * scale).astype(int)
+    y_pix = np.round(y_pix * scale).astype(int)
     
     # Return in original format
     if is_single:

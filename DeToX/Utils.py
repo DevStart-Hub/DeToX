@@ -1,10 +1,15 @@
-# Third party imports
-import numpy as np
-from psychopy import visual
+import textwrap
 
 
 
-def NicePrint(body: str, title: str = "", verbose=True) -> str:
+def NicePrint(
+    body: str,
+    title: str = "",
+    verbose: bool = True,
+    *,
+    max_width: int | None = None,
+    ascii_only: bool = False,
+) -> str:
     """
     Print a message in a box with an optional title AND return the formatted text.
     
@@ -29,6 +34,15 @@ def NicePrint(body: str, title: str = "", verbose=True) -> str:
         will be solid. Default empty string.
     verbose : bool, optional
         If True, the formatted box will be printed to the console. Default is True.
+    max_width : int or None, optional
+        Maximum total box width, including borders and padding. Long body lines
+        are wrapped, preserving explicit line breaks and leading indentation.
+        None (default) disables wrapping. Widths count characters, not Unicode
+        display cells. Must be at least 6 and large enough for the title and
+        indentation; otherwise ValueError is raised. Titles are never truncated.
+    ascii_only : bool, optional
+        Use +, -, and | instead of Unicode borders. Default is False. This only
+        changes borders, not Unicode characters in the body or title.
         
     Returns
     -------
@@ -37,56 +51,59 @@ def NicePrint(body: str, title: str = "", verbose=True) -> str:
         use with PsychoPy TextStim objects. Includes all box-drawing characters
         and proper spacing.
     """
-    # --- Text Processing ---
-    # Split the body string into individual lines for formatting
-    lines = body.splitlines() or [""]
-    
-    # --- Width Calculation ---
-    # Calculate the maximum width needed for content
-    content_w = max(map(len, lines))
-    
-    # --- Panel Sizing ---
-    # Calculate the panel width to accommodate both content and title
+    lines = body.expandtabs(4).splitlines() or [""]
+    title = " ".join(title.expandtabs(4).splitlines()).strip()
     title_space = f" {title} " if title else ""
-    panel_w = max(content_w, len(title_space)) + 2
-    
-    # --- Box Character Definition ---
-    # Unicode characters for the corners and sides of the box
-    # These create smooth, connected borders in terminals that support Unicode
-    tl, tr, bl, br, h, v = "┌", "┐", "└", "┘", "─", "│"
-    
-    # --- Top Border Construction ---
-    # Construct the top border of the box with optional centered title
+
+    if max_width is not None:
+        if isinstance(max_width, bool) or not isinstance(max_width, int):
+            raise TypeError("max_width must be an integer or None")
+        if max_width < 6:
+            raise ValueError("max_width must be at least 6")
+        if title_space and len(title_space) + 4 > max_width:
+            raise ValueError("max_width is too small for the title")
+
+        content_width = max_width - 4
+        wrapped_lines = []
+        for line in lines:
+            if len(line) <= content_width:
+                wrapped_lines.append(line)
+                continue
+            if not line.strip():
+                wrapped_lines.append("")
+                continue
+            indent = line[:len(line) - len(line.lstrip(" "))]
+            if len(indent) >= content_width:
+                raise ValueError("max_width is too small for the body indentation")
+            wrapped_lines.extend(textwrap.wrap(
+                line,
+                width=content_width,
+                subsequent_indent=indent,
+                replace_whitespace=False,
+                break_on_hyphens=False,
+            ))
+        lines = wrapped_lines
+
+    panel_w = max(max(map(len, lines)), len(title_space)) + 2
+    tl, tr, bl, br, h, v = (
+        ("+", "+", "+", "+", "-", "|") if ascii_only
+        else ("┌", "┐", "└", "┘", "─", "│")
+    )
+
     if title:
-        # Calculate the left and right margins for centering the title
         left = (panel_w - len(title_space)) // 2
         right = panel_w - len(title_space) - left
-        # Construct the top border with embedded title
         top = f"{tl}{h * left}{title_space}{h * right}{tr}"
     else:
-        # Construct solid top border without title
         top = f"{tl}{h * panel_w}{tr}"
-    
-    # --- Content Line Formatting ---
-    # Create the middle lines with content, padding each line to panel width
+
     middle_lines = [
-        f"{v}{line}{' ' * (panel_w - len(line))}{v}"
+        f"{v} {line.ljust(panel_w - 2)} {v}"
         for line in lines
     ]
-    
-    # --- Bottom Border Construction ---
-    # Create the bottom border
     bottom = f"{bl}{h * panel_w}{br}"
-    
-    # --- Final Assembly ---
-    # Combine all parts into the complete formatted text
     formatted_text = "\n".join([top] + middle_lines + [bottom])
-    
-    # --- Console Output ---
-    # Print to console for immediate feedback
+
     if verbose:
         print(formatted_text)
-    
-    # --- Return Formatted Text ---
-    # Return the formatted text for use in PsychoPy visual stimuli
     return formatted_text

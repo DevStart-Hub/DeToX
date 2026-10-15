@@ -3,3 +3,4 @@
 .RData
 .Ruserdata
 *.egg-info/
+__pycache__/

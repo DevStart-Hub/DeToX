@@ -12,7 +12,7 @@ from psychopy import core, event, visual
 # Local imports
 from . import ETSettings as cfg
 from .Utils import NicePrint
-from .Coords import get_tobii_pos, psychopy_to_pixels, convert_height_to_units, get_psychopy_pos, norm_to_window_units
+from .Coords import get_tobii_pos, psychopy_to_pixels, convert_height_to_units, get_psychopy_pos, norm_to_window_units, get_content_scale
 
 
 class BaseCalibrationSession:
@@ -646,14 +646,18 @@ class BaseCalibrationSession:
             that have valid data in sample_data.
             """
             # --- Image Canvas Creation ---
-            img = Image.new("RGBA", tuple(self.win.size))
+            # The screen buffer can be larger than the window size (Retina),
+            # so the image and every pixel size are scaled to match it.
+            scale = get_content_scale(self.win)
+            canvas_size = (int(self.win.size[0] * scale), int(self.win.size[1] * scale))
+            img = Image.new("RGBA", canvas_size)
             img_draw = ImageDraw.Draw(img)
             
             # --- Configuration ---
-            # Convert sizes to pixels
-            line_width_pixels = cfg.ui_sizes.plot_line * self.win.size[1]
-            target_circle_radius_pixels = cfg.ui_sizes.target_circle * self.win.size[1]
-            target_circle_width_pixels = cfg.ui_sizes.target_circle_width * self.win.size[1]
+            # Convert sizes to screen-buffer pixels
+            line_width_pixels = cfg.ui_sizes.plot_line * self.win.size[1] * scale
+            target_circle_radius_pixels = cfg.ui_sizes.target_circle * self.win.size[1] * scale
+            target_circle_width_pixels = cfg.ui_sizes.target_circle_width * self.win.size[1] * scale
             
             # --- STEP 1: Draw Samples (Style-Dependent) ---
             
@@ -683,7 +687,7 @@ class BaseCalibrationSession:
         
             ## CIRCLES STYLE: Draw filled circles at sample positions
             elif self.visualization_style == 'circles':
-                sample_marker_radius = cfg.ui_sizes.sample_marker * self.win.size[1]
+                sample_marker_radius = cfg.ui_sizes.sample_marker * self.win.size[1] * scale
                 for point_idx, samples in sample_data.items():
                     for sample_pix, fill_color in samples:
                         img_draw.ellipse(
@@ -710,7 +714,12 @@ class BaseCalibrationSession:
                     width=max(1, int(target_circle_width_pixels))
                 )
 
-            return visual.SimpleImageStim(self.win, img, autoLog=False)
+            # ImageStim draws the image as a texture over the whole window, which
+            # keeps it aligned with the screen buffer; SimpleImageStim does not.
+            return visual.ImageStim(
+                self.win, image=img, size=tuple(self.win.size),
+                units='pix', interpolate=True, autoLog=False
+            )
 
 
 class TobiiCalibrationSession(BaseCalibrationSession):

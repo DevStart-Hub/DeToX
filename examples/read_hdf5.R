@@ -1,3 +1,4 @@
+# Manual HDF5-reading example; set the input path to your recording file.
 library(hdf5r)
 
 # Read the file
