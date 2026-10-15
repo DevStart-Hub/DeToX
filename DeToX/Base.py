@@ -54,7 +54,9 @@ class ETracker:
         ----------
         win : psychopy.visual.Window
             The PsychoPy window object where stimuli will be displayed. This is
-            required for coordinate conversions.
+            required for coordinate conversions. Real tracking requires fullscreen
+            on the display configured for the tracker; keep it fullscreen for the
+            lifetime of this controller. Simulation also supports windowed mode.
         id : int, optional
             The index of the Tobii eye tracker to use if multiple are found.
             Default is 0. Ignored if `simulate` is True.
@@ -67,6 +69,8 @@ class ETracker:
 
         Raises
         ------
+        ValueError
+            If real tracking is requested with a non-fullscreen window.
         RuntimeError
             If `simulate` is False and no Tobii eye trackers can be found.
         """
@@ -74,6 +78,14 @@ class ETracker:
         # Store essential configuration parameters provided at initialization.
         self.win = win
         self.simulate = simulate
+
+        if not self.simulate and not self.win.fullscr:
+            raise ValueError(
+                "Real eye tracking currently requires a fullscreen window "
+                "on the display configured for the tracker. "
+                "Windowed mode is supported for simulation only."
+            )
+
         self.eyetracker_id = etracker_id
         self.verbose = verbose
 
@@ -1407,6 +1419,7 @@ class ETracker:
             self.gaze_data.clear()
         
         # --- Timing setup ---
+        self.first_timestamp = None  # Each recording gets its own time origin.
         self.experiment_clock.reset()
         
         # --- File preparation ---
@@ -1517,8 +1530,10 @@ class ETracker:
             )
             return
         
+        # Wait while acquisition can still deliver samples.
+        self._check_gaze_samples()
+
         # --- Stop data collection ---
-        # Set flag to halt data collection immediately
         self.recording = False
         
         # --- Mode-specific cleanup ---
@@ -1752,7 +1767,8 @@ class ETracker:
         start_saving = core.getTime()
         
         # --- Ensure event-gaze synchronization ---
-        self._check_gaze_samples()
+        if self.recording:
+            self._check_gaze_samples()
         
         # --- Thread-safe buffer swap (O(1) operation) ---
         # Swap buffers under lock to minimize thread blocking time
@@ -1789,10 +1805,11 @@ class ETracker:
             if len(idx) != len(np.unique(idx)):
                 # Duplicates detected - use pandas groupby for vectorized aggregation
                 events_df['_target_idx'] = idx
-                grouped = events_df.groupby('_target_idx')['Events'].agg(lambda x: '; '.join(x))
+                grouped = events_df.groupby('_target_idx')['Events'].agg(lambda x: ' | '.join(x))
                 
                 # Vectorized assignment to gaze_df
                 gaze_df.loc[grouped.index, 'Events'] = grouped.values
+                events_df.drop(columns='_target_idx', inplace=True)
             else:
                 # No duplicates - fast vectorized assignment
                 gaze_df.iloc[idx, gaze_df.columns.get_loc('Events')] = events_df['Events'].values
@@ -2291,25 +2308,32 @@ class ETracker:
         - Each wait releases GIL, allowing callback thread to run
         - Typically completes in 1-2 sample intervals
         """
-        if len(self.event_data) == 0:
-            return  # No events to sync
+        deadline = time.monotonic() + 0.100
 
         while True:
-
-            # Thread-safe peek at last timestamps
             with self._buf_lock:
-                if len(self.gaze_data) == 0:
-                    break  # No gaze data yet, can't sync
-                
-                last_event_time = self.event_data[-1]['system_time_stamp']
-                last_gaze_time = self.gaze_data[-1]['system_time_stamp']
-            
-            # If gaze has caught up to events, we're done
-            if last_gaze_time >= last_event_time:
-                break
-            
-            # Wait for one sample interval (releases GIL)
-            core.wait(1 / self.fps)
+                if not self.event_data:
+                    return True
+
+                if self.gaze_data:
+                    last_event_time = self.event_data[-1]['system_time_stamp']
+                    last_gaze_time = self.gaze_data[-1]['system_time_stamp']
+
+                    if last_gaze_time >= last_event_time:
+                        return True
+
+            remaining = deadline - time.monotonic()
+            if remaining <= 0:
+                warnings.warn(
+                    "Gaze did not catch up with the last event within 100 ms. "
+                    "Continuing shutdown/save; some events may have no "
+                    "following gaze sample.",
+                    UserWarning,
+                )
+                return False
+
+            # Allow acquisition callbacks to run between checks.
+            core.wait(min(0.001, remaining))
 
 
     def _get_info(self, moment='connection'):
