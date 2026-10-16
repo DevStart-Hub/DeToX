@@ -831,7 +831,15 @@ class TobiiCalibrationSession(BaseCalibrationSession):
 
         # --- 1. Calibration Mode Activation ---
         self.calibration.enter_calibration_mode()
-        
+
+        try:
+            return self._run_calibration_session(calibration_points)
+        finally:
+            # Always leave calibration mode, even if a step above raised.
+            self.calibration.leave_calibration_mode()
+
+    def _run_calibration_session(self, calibration_points):
+        """Run the calibration steps while calibration mode is active."""
         # --- 2. Instruction Display ---
         instructions_text = f"""Tobii Eye Tracker Calibration Setup:
 
@@ -859,7 +867,6 @@ class TobiiCalibrationSession(BaseCalibrationSession):
             success = self._collection_phase(self.calibration_points)
             
             if not success:
-                self.calibration.leave_calibration_mode()
                 return False
 
             # --- 5b. Calibration Computation ---
@@ -882,13 +889,8 @@ class TobiiCalibrationSession(BaseCalibrationSession):
                 self.remaining_points = retries.copy()
                 self._discard_phase(self.calibration_points, retries)
 
-        # --- 6. Calibration Mode Deactivation ---
-        self.calibration.leave_calibration_mode()
-
-        # --- 7. Final Success Check ---
-        success = (self.calibration_result.status == tr.CALIBRATION_STATUS_SUCCESS)
-
-        return success
+        # --- 6. Final Success Check ---
+        return (self.calibration_result.status == tr.CALIBRATION_STATUS_SUCCESS)
 
 
     def _collect_data_at_point(self, target_pos, point_idx, **kwargs):
