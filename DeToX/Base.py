@@ -3161,7 +3161,6 @@ class ETracker:
                 'left_pupil_diameter': 3.0,
                 'left_pupil_validity': 1,
                 'left_gaze_origin_in_user_coordinate_system': (tobii_pos[0], tobii_pos[1], tbcs_z),
-                'left_gaze_origin_in_trackbox_coordinate_system': left_trackbox,
                 'left_gaze_origin_validity': 1,
                 'right_gaze_point_on_display_area': tobii_pos,
                 'right_gaze_point_in_user_coordinate_system': (tobii_pos[0], tobii_pos[1], tbcs_z),
@@ -3169,13 +3168,7 @@ class ETracker:
                 'right_pupil_diameter': 3.0,
                 'right_pupil_validity': 1,
                 'right_gaze_origin_in_user_coordinate_system': (tobii_pos[0], tobii_pos[1], tbcs_z),
-                'right_gaze_origin_in_trackbox_coordinate_system': right_trackbox,
                 'right_gaze_origin_validity': 1,
-                # These aren't needed for raw format but keep for show_status compatibility:
-                'left_user_position': left_trackbox,
-                'right_user_position': right_trackbox,
-                'left_user_position_validity': 1,
-                'right_user_position_validity': 1,
             }
             
             self.gaze_data.append(gaze_data)
