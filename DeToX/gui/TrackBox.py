@@ -190,6 +190,15 @@ class TrackBoxView:
         )
         self.status_label.pack(pady=(int(3 * self.scale), 0))
 
+        if self.config.get('approximate', False):
+            tk.Label(
+                center_frame,
+                text="approx. position",
+                fg="#666666",
+                bg='#1a1a1a',
+                font=font_small
+            ).pack(pady=(int(2 * self.scale), 0))
+
         if self.show_images:
             right_frame = tk.Frame(main_frame, bg='#1a1a1a')
             right_frame.pack(side=tk.LEFT, padx=int(8 * self.scale))
@@ -231,9 +240,9 @@ class TrackBoxView:
             if 0.3 <= avg_z <= 0.7:
                 self.status_label.config(text="Good", fg="#00ff00")
             elif avg_z < 0.3:
-                self.status_label.config(text="Too Close", fg="#ffaa00")
+                self.status_label.config(text="Close", fg="#ffaa00")
             else:
-                self.status_label.config(text="Too Far", fg="#ffaa00")
+                self.status_label.config(text="Far", fg="#ffaa00")
         else:
             self.status_label.config(text="No Eyes", fg="#ff4444")
 

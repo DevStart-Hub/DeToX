@@ -2318,8 +2318,10 @@ class ETracker:
 
         Notes
         -----
-        The monitor receives data only while gaze samples are being generated,
-        usually after start_recording() is called. It is automatically stopped by
+        The monitor is driven by the gaze stream's eye origins, so it updates
+        while gaze samples arrive (usually during a recording). Those origins are
+        in millimetres and the monitor maps them onto its normalized view
+        approximately, which it labels. It is automatically stopped by
         stop_recording().
 
         The monitor is a Tkinter window, which has no concept of monitor indices,
@@ -2356,17 +2358,26 @@ class ETracker:
                     UserWarning
                 )
 
+            # Eye origins arrive in millimetres; give the monitor the display
+            # size it needs to map them onto its normalized view.
+            display_size_mm = (555.0, 312.0)
+            if not self.simulate:
+                area = self.eyetracker.get_display_area()
+                display_size_mm = (area.width, area.height)
+
             self.live_monitor = LiveMonitor(
                 scale=scale,
                 screen=screen,
                 screen_rect=screen_rect,
                 update_rate=update_rate,
                 left_eye_color=cfg.colors.left_eye,
-                right_eye_color=cfg.colors.right_eye
+                right_eye_color=cfg.colors.right_eye,
+                display_size_mm=display_size_mm,
+                approximate=not self.simulate
             )
 
             NicePrint(
-                "Live monitor enabled - gaze will appear once recording starts.",
+                "Live monitor enabled - eye positions appear as the tracker sees them.",
                 title="Live Monitor",
                 verbose=self.verbose
             )
@@ -3032,17 +3043,13 @@ class ETracker:
             Gaze sample from Tobii SDK containing timestamps, coordinates,
             validity flags, and pupil data.
         """
-        live_monitor = None
-        live_monitor_payload = None
-
         # --- Thread-safe data storage ---
         # Use lock since this is called from Tobii SDK thread
         with self._buf_lock:
-            
             # --- Main recording buffer ---
             # Store complete sample for later processing and file saving
             self.gaze_data.append(gaze_data)
-            
+
             # --- Real-time gaze-contingent buffer ---
             # Update rolling buffer for immediate gaze-contingent applications
             if self.gaze_contingent_buffer is not None:
@@ -3051,19 +3058,10 @@ class ETracker:
                     gaze_data.get('right_gaze_point_on_display_area')
                 ])
 
+            # --- Detached live monitor ---
+            # Fed from the gaze origins; the monitor maps mm to its own view.
             if self.live_monitor is not None:
-                live_monitor = self.live_monitor
-                left = gaze_data.get('left_gaze_origin_in_trackbox_coordinate_system')
-                right = gaze_data.get('right_gaze_origin_in_trackbox_coordinate_system')
-                left_valid = gaze_data.get('left_gaze_origin_validity', 0)
-                right_valid = gaze_data.get('right_gaze_origin_validity', 0)
-                live_monitor_payload = (
-                    left if left_valid else None,
-                    right if right_valid else None
-                )
-
-        if live_monitor_payload is not None:
-            live_monitor.push(*live_monitor_payload)
+                self.live_monitor.push_origin(gaze_data)
 
 
     def _on_user_position(self, position_data):

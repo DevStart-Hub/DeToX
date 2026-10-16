@@ -32,14 +32,16 @@ class LiveMonitor:
     """
 
     def __init__(self, scale=1.0, screen=0, screen_rect=None, update_rate=20,
-                 left_eye_color=None, right_eye_color=None):
+                 left_eye_color=None, right_eye_color=None,
+                 display_size_mm=(555.0, 312.0), approximate=False):
         config = {
             'scale': scale,
             'screen': screen,
             'screen_rect': list(screen_rect) if screen_rect else None,
             'status_text': 'Gaze appears when recording starts',
             'left_eye_color': list(left_eye_color or (0, 212, 255)),
-            'right_eye_color': list(right_eye_color or (255, 110, 199))
+            'right_eye_color': list(right_eye_color or (255, 110, 199)),
+            'approximate': approximate
         }
 
         monitor_script = os.path.join(
@@ -58,6 +60,37 @@ class LiveMonitor:
         self._alive = True
         self._update_interval = 1.0 / update_rate if update_rate > 0 else 0
         self._last_update_time = 0
+        self._display_size_mm = display_size_mm
+
+    def push_origin(self, gaze_data):
+        """
+        Send one gaze sample's eye origins to the monitor.
+
+        Origins are in the user coordinate system (millimetres). They are mapped
+        onto the monitor's normalized 0-1 view: x and y use the display size, and
+        z uses the tracker's 50-80 cm operating range. This mapping is approximate
+        because the SDK exposes no track-box coordinate system.
+
+        Parameters
+        ----------
+        gaze_data : dict
+            Tobii gaze sample (``as_dictionary=True``) with the per-eye
+            ``*_gaze_origin_in_user_coordinate_system`` and validity fields.
+        """
+        width_mm, height_mm = self._display_size_mm
+
+        def normalized(origin, valid):
+            if not valid or origin is None:
+                return None
+            x, y, z = origin
+            return (0.5 - x / width_mm, 0.5 - y / height_mm, (z - 500.0) / 300.0)
+
+        self.push(
+            normalized(gaze_data.get('left_gaze_origin_in_user_coordinate_system'),
+                       gaze_data.get('left_gaze_origin_validity', 0)),
+            normalized(gaze_data.get('right_gaze_origin_in_user_coordinate_system'),
+                       gaze_data.get('right_gaze_origin_validity', 0)),
+        )
 
     def push(self, left_eye, right_eye):
         """
@@ -66,7 +99,7 @@ class LiveMonitor:
         Parameters
         ----------
         left_eye, right_eye : tuple or None
-            Track-box coordinates as (x, y, z). None marks an invalid eye.
+            Normalized (0-1) coordinates as (x, y, z). None marks an invalid eye.
 
         Notes
         -----
