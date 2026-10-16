@@ -538,33 +538,6 @@ def get_psychopy_pos_from_user_position(win, p, units=None):
     The X-axis is reversed compared to ADCS because User Position coordinates
     use the tracker's perspective, not the user's.
     
-    Examples
-    --------
-    ```python
-    from DeToX import Coords
-    import tobii_research as tr
-    
-    # Subscribe to User Position Guide
-    def position_callback(data):
-        if data['left_eye']['validity']:
-            x, y, z = data['left_eye']['user_position']
-            
-            # Convert to PsychoPy for visualization
-            pos = Coords.get_psychopy_pos_from_user_position(win, [x, y], 'height')
-            
-            # Display eye position indicator
-            eye_circle.pos = pos
-            eye_circle.draw()
-    
-    eyetracker.subscribe_to(tr.EYETRACKER_USER_POSITION_GUIDE, 
-                           position_callback, 
-                           as_dictionary=True)
-    
-    # Manual conversion example
-    user_pos = (0.5, 0.6)  # Centered horizontally, slightly below center
-    screen_pos = Coords.get_psychopy_pos_from_user_position(win, user_pos)
-    # Returns position for drawing positioning feedback
-    ```
     """
     if units is None:
         units = win.units
