@@ -2522,11 +2522,11 @@ class ETracker:
         """
         Displays information about the connected eye tracker or simulation settings.
 
-        This method prints a formatted summary of the hardware or simulation
-        configuration. It can be called at different moments (e.g., at connection
-        or before recording) to show relevant information. The information is
-        retrieved from the eye tracker or simulation settings and cached on the
-        first call to avoid repeated hardware queries.
+        This method caches the hardware or simulation configuration and, when
+        verbose, prints a formatted summary. It can be called at different moments
+        (e.g., at connection or before recording). The configuration is always
+        retrieved and cached on the first call to avoid repeated hardware queries;
+        verbose only controls the printing.
 
         Parameters
         ----------
@@ -2539,62 +2539,64 @@ class ETracker:
                 for the current recording session.
             Default is 'connection'.
         """
-        if self.verbose:
-            # --- Handle Simulation Mode ---
-            if self.simulate:
-                # Set the simulated frames per second (fps) if not already set.
-                if self.fps is None:
-                    self.fps = cfg.simulation_framerate
+        # --- Cache tracker state (independent of verbosity) ---
+        # Quiet mode must still know fps/illumination for recording and settings.
+        if self.simulate:
+            if self.fps is None:
+                self.fps = cfg.simulation_framerate
+        else:
+            if self.fps is None:
+                self.fps = self.eyetracker.get_gaze_output_frequency()
+                self.freqs = self.eyetracker.get_all_gaze_output_frequencies()
 
-                # Display information specific to the simulation context.
-                if moment == 'connection':
-                    text = (
-                        "Simulating eyetracker:\n"
-                        f" - Simulated frequency: {self.fps} Hz"
-                    )
-                    title = "Simulated Eyetracker Info"
-                else:  # Assumes 'recording' context
-                    text = (
-                        "Recording mouse position:\n"
-                        f" - frequency: {self.fps} Hz"
-                    )
-                    title = "Recording Info"
+            if self.illum_mode is None:
+                self.illum_mode = self.eyetracker.get_eye_tracking_mode()
+                self.illum_modes = self.eyetracker.get_all_eye_tracking_modes()
 
-            # --- Handle Real Eyetracker Mode ---
-            else:
-                # On the first call, query the eyetracker for its properties and cache them.
-                # This avoids redundant SDK calls on subsequent `get_info` invocations.
-                if self.fps is None:
-                    self.fps = self.eyetracker.get_gaze_output_frequency()
-                    self.freqs = self.eyetracker.get_all_gaze_output_frequencies()
+        if not self.verbose:
+            return
 
-                if self.illum_mode is None:
-                    self.illum_mode = self.eyetracker.get_eye_tracking_mode()
-                    self.illum_modes = self.eyetracker.get_all_eye_tracking_modes()
+        # --- Handle Simulation Mode ---
+        if self.simulate:
+            # Display information specific to the simulation context.
+            if moment == 'connection':
+                text = (
+                    "Simulating eyetracker:\n"
+                    f" - Simulated frequency: {self.fps} Hz"
+                )
+                title = "Simulated Eyetracker Info"
+            else:  # Assumes 'recording' context
+                text = (
+                    "Recording mouse position:\n"
+                    f" - frequency: {self.fps} Hz"
+                )
+                title = "Recording Info"
 
-                # Display detailed information upon initial connection.
-                if moment == 'connection':
-                    text = (
-                        "Connected to the eyetracker:\n"
-                        f"    - Model: {self.eyetracker.model}\n"
-                        f"    - Current frequency: {self.fps} Hz\n"
-                        f"    - Current illumination mode: {self.illum_mode}"
-                        "\nOther options:\n"
-                        f"    - Possible frequencies: {self.freqs}\n"
-                        f"    - Possible illumination modes: {self.illum_modes}"
-                    )
-                    title = "Eyetracker Info"
-                else:  # Assumes 'recording' context, shows a concise summary.
-                    text = (
-                        "Starting recording with:\n"
-                        f"    - Model: {self.eyetracker.model}\n"
-                        f"    - With frequency: {self.fps} Hz\n"
-                        f"    - With illumination mode: {self.illum_mode}"
-                    )
-                    title = "Recording Info"
+        # --- Handle Real Eyetracker Mode ---
+        else:
+            # Display detailed information upon initial connection.
+            if moment == 'connection':
+                text = (
+                    "Connected to the eyetracker:\n"
+                    f"    - Model: {self.eyetracker.model}\n"
+                    f"    - Current frequency: {self.fps} Hz\n"
+                    f"    - Current illumination mode: {self.illum_mode}"
+                    "\nOther options:\n"
+                    f"    - Possible frequencies: {self.freqs}\n"
+                    f"    - Possible illumination modes: {self.illum_modes}"
+                )
+                title = "Eyetracker Info"
+            else:  # Assumes 'recording' context, shows a concise summary.
+                text = (
+                    "Starting recording with:\n"
+                    f"    - Model: {self.eyetracker.model}\n"
+                    f"    - With frequency: {self.fps} Hz\n"
+                    f"    - With illumination mode: {self.illum_mode}"
+                )
+                title = "Recording Info"
 
-            # Use the custom NicePrint utility to display the formatted information.
-            NicePrint(text, title, verbose=self.verbose)
+        # Use the custom NicePrint utility to display the formatted information.
+        NicePrint(text, title, verbose=self.verbose)
 
 
     def _subscribe_warnings(self):
