@@ -2974,10 +2974,11 @@ class ETracker:
         TimeStamp and Events. Input DataFrames are not modified.
 
         Both batches are converted before either is appended, but the two appends
-        are not transactional. Event labels use fixed-width bytes with capacity
-        HDF5_EVENT_BYTES at table creation (currently 50); longer labels can be
-        truncated and text conversion can fail for unsupported characters.
-        pandas.read_hdf() reads these tables as DataFrames and decodes their text.
+        are not transactional. Event labels are stored as UTF-8 bytes in a
+        fixed-width column (HDF5_EVENT_BYTES at table creation); labels that do
+        not fit are truncated with a warning. Non-ASCII text no longer raises an
+        encoding error. pandas.read_hdf() reads these tables as DataFrames and
+        decodes their text.
         """
         with tables.open_file(self.filename, mode='r+') as f:
             batches = [(f.root.gaze, gaze_df), (f.root.events, events_df)]
@@ -2990,7 +2991,18 @@ class ETracker:
 
                 # Exclude temporary columns and use the table's column order.
                 df = df.loc[:, table.colnames].copy()
-                df['Events'] = df['Events'].astype(table.dtype['Events'])
+
+                # Text labels are stored as bytes. Encode UTF-8 first so any
+                # character (é, 😀) is stored without an encoding error, then
+                # warn if the fixed width will cut the label before storing it.
+                df['Events'] = df['Events'].astype(str).str.encode('utf-8')  # text -> UTF-8 bytes (safe for é, 😀)
+                if df['Events'].str.len().gt(table.dtype['Events'].itemsize).any():
+                    warnings.warn(
+                        f"Event label exceeds {table.dtype['Events'].itemsize} bytes "
+                        f"and will be truncated.",
+                        UserWarning,
+                    )
+                df['Events'] = df['Events'].astype(table.dtype['Events'])    # bytes -> S-column (just stores them)
                 column_types = {name: table.dtype[name] for name in table.colnames}
                 records = df.to_records(index=False, column_dtypes=column_types)
                 prepared_batches.append((table, records))

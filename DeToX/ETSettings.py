@@ -298,7 +298,7 @@ class UIElementSizes:
 
 
 # Fixed-width event text capacity in HDF5 storage, in bytes.
-HDF5_EVENT_BYTES = 50
+HDF5_EVENT_BYTES = 100
 
 
 class RawDataColumns:
