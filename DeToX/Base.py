@@ -1870,25 +1870,30 @@ class ETracker:
         if event_count > 0:
             # Convert events to DataFrame
             events_df = pd.DataFrame(save_events)
-            
+
             # --- Timestamp-based event merging ---
-            # Find closest gaze sample for each event using binary search
+            # Map each event to the first gaze sample at or after its timestamp.
             idx = np.searchsorted(gaze_df['system_time_stamp'].values,
                                 events_df['system_time_stamp'].values,
                                 side='left')
 
-            # Check if multiple events map to the same sample
-            if len(idx) != len(np.unique(idx)):
-                # Duplicates detected - use pandas groupby for vectorized aggregation
-                events_df['_target_idx'] = idx
-                grouped = events_df.groupby('_target_idx')['Events'].agg(lambda x: ' | '.join(x))
-                
-                # Vectorized assignment to gaze_df
-                gaze_df.loc[grouped.index, 'Events'] = grouped.values
-                events_df.drop(columns='_target_idx', inplace=True)
-            else:
-                # No duplicates - fast vectorized assignment
-                gaze_df.iloc[idx, gaze_df.columns.get_loc('Events')] = events_df['Events'].values
+            # Events past the last gaze sample have no sample to merge into.
+            # They stay in the events table with their real timestamp; only the
+            # inline gaze column skips them.
+            covered = idx < len(gaze_df)
+            covered_idx = idx[covered]
+            covered_labels = events_df['Events'].values[covered]
+
+            if len(covered_idx) > 0:
+                # Check if multiple events map to the same sample
+                if len(covered_idx) != len(np.unique(covered_idx)):
+                    # Duplicates detected - join them onto one sample
+                    grouped = pd.Series(covered_labels).groupby(covered_idx).agg(
+                        lambda x: ' | '.join(x))
+                    gaze_df.loc[grouped.index, 'Events'] = grouped.values
+                else:
+                    # No duplicates - fast vectorized assignment
+                    gaze_df.iloc[covered_idx, gaze_df.columns.get_loc('Events')] = covered_labels
         else:
             print("|-- No new events to save --|")
             events_df = None
