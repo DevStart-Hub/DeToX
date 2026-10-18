@@ -42,10 +42,18 @@ While the eye-tracking landscape offers many tools—from [PsychoPy](https://psy
 
 ## Learn More
 
-We believe good software requires great documentation. Explore our comprehensive guides and examples:
+We believe good software requires great documentation. The DeToX website is up and running:
 
-📚 [**DeToX Documentation**](https://devstart-hub.github.io/DeToX/) **(coming soon)**
+📚 [**DeToX Documentation**](https://devstart-hub.github.io/DeToX/)
+
+We are working on making it more complete and adding more examples, so keep an eye on it.
 
 ------------------------------------------------------------------------
 
 **Questions or found a bug?** Let us know by creating an issue or starting a discussion here on GitHub!
+
+## License
+
+DeToX is released under the **GNU General Public License v3.0 or later** (GPL-3.0-or-later). See [LICENSE](LICENSE) for the full text.
+
+We hope DeToX makes your eye-tracking studies a little easier. We do our best to keep it friendly and reliable, but it comes with no warranty.
