@@ -12,6 +12,10 @@ python -m unittest discover -s tests -p "test_*.py" -v
 | `test_hdf5_settings.py` | Column order/types, schema generation, empty tables, DataFrame reads |
 | `test_hdf5_recording.py` | Actual recording/storage methods, repeated saves, event matching, format/coordinate policy, raw/simplified timestamps, bounded synchronization, final stop/save, CSV compatibility |
 | `hdf5_fixtures.py` | Shared fake-data helper; not a test suite |
+| `test_tobii_two_processes.py` | Standalone probe validation, worker reporting and cleanup; no hardware required |
+| `test_monitor_window.py` | Direct/legacy subprocess input, stale/invalid feedback, timing validation and SDK/GUI cleanup; no hardware or Tk window |
+| `test_trackbox_resize.py` | Initial-size validation and resize coordinate/gradient updates; no hardware or Tk window |
+| `test_live_monitor_integration.py` | Controller lifecycle, recording isolation, launcher ownership gate and asynchronous cleanup; no hardware or Tk window |
 
 The HDF5 suite contains 14 tests and uses temporary files that are removed afterward.
 The integrated console-formatting suite adds 11 tests in `test_nice_print.py`.
