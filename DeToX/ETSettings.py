@@ -314,7 +314,15 @@ class RawDataColumns:
     (coordinates + validity) together for easier analysis.
     """
     
-    # Column order (list)
+    # Optional SDK fields: older SDKs may supply normalized track-box origins.
+    OPTIONAL_FIELDS = {
+        f'{eye}_gaze_origin_in_trackbox_coordinate_system': [
+            f'{eye}_gaze_origin_in_trackbox_coordinate_system_{axis}' for axis in 'xyz'
+        ]
+        for eye in ('left', 'right')
+    }
+
+    # Complete supported order. Each recording selects its optional columns once.
     ORDER = [
         # Timestamps
         'device_time_stamp', 'system_time_stamp',
@@ -359,6 +367,10 @@ class RawDataColumns:
         'right_gaze_origin_in_user_coordinate_system_z',
         'right_gaze_origin_validity',
         
+        # Optional normalized track-box coordinates
+        *OPTIONAL_FIELDS['left_gaze_origin_in_trackbox_coordinate_system'],
+        *OPTIONAL_FIELDS['right_gaze_origin_in_trackbox_coordinate_system'],
+
         # Events
         'Events'
     ]
@@ -398,11 +410,19 @@ class RawDataColumns:
         # Events - string
         'Events': 'string'
     }
+    for columns in OPTIONAL_FIELDS.values():
+        for column in columns:
+            DTYPES[column] = 'float64'
     
     @classmethod
-    def get_hdf5_dtype(cls):
+    def get_hdf5_dtype(cls, columns=None):
         """
         Build the HDF5 storage schema from the current column definitions.
+
+        Parameters
+        ----------
+        columns : list or None, optional
+            Recording-specific column order. None includes all supported columns.
 
         Returns
         -------
@@ -412,7 +432,7 @@ class RawDataColumns:
         """
         fields = []
 
-        for name in cls.ORDER:
+        for name in cls.ORDER if columns is None else columns:
             field_type = cls.DTYPES[name]
 
             if field_type == 'string':

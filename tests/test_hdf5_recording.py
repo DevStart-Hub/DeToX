@@ -43,7 +43,7 @@ source = ROOT / 'DeToX' / 'Base.py'
 tree = ast.parse(source.read_text(encoding='utf-8'))
 tracker = next(node for node in tree.body if isinstance(node, ast.ClassDef) and node.name == 'ETracker')
 names = {'start_recording', '_adapt_gaze_data', '_check_continuity',
-         '_prepare_recording', '_save_hdf5_data', '_save_csv_data',
+         '_prepare_recording', '_prepare_gaze_schema', '_save_hdf5_data', '_save_csv_data',
          '_on_gaze_data', 'record_event', '_check_gaze_samples',
          'save_data', 'stop_recording', 'stop_live_monitor'}
 methods = [node for node in tracker.body if isinstance(node, ast.FunctionDef) and node.name in names]
@@ -78,6 +78,93 @@ def fake_sdk_sample(timestamp, device_timestamp):
 
 
 class RecordingStorageTests(unittest.TestCase):
+    def test_optional_trackbox_columns_are_selected_once_for_csv_and_hdf5(self):
+        field = 'left_gaze_origin_in_trackbox_coordinate_system'
+        columns = cfg.RawDataColumns.OPTIONAL_FIELDS[field]
+        for extension in ('csv', 'h5'):
+            for available in (False, True):
+                with self.subTest(extension=extension, available=available):
+                    instance = controller(True)
+                    instance._prepare_recording(str(Path(self.temp.name) / f'optional-{available}.{extension}'))
+                    first = fake_sdk_sample(1000, 1000)
+                    if available:
+                        # NaN is an unavailable measurement, not an unavailable field.
+                        first[field] = (np.nan, np.nan, np.nan)
+                    original_order = None
+                    for sample in (first, fake_sdk_sample(2000, 2000)):
+                        gaze, _ = instance._adapt_gaze_data(pd.DataFrame([dict(sample, Events='')]), None)
+                        if original_order is None:
+                            original_order = list(instance.recording_columns)
+                        else:
+                            self.assertEqual(instance.recording_columns, original_order)
+                        if extension == 'csv':
+                            instance._save_csv_data(gaze)
+                        else:
+                            instance._save_hdf5_data(gaze, None)
+                    saved = (pd.read_csv(instance.filename) if extension == 'csv'
+                             else pd.read_hdf(instance.filename, key='gaze'))
+                    self.assertEqual(len(saved), 2)
+                    self.assertEqual(list(saved.columns), original_order)
+                    for column in columns:
+                        self.assertEqual(column in saved.columns, available)
+                        if available:
+                            self.assertTrue(saved[column].isna().all())
+                    right = cfg.RawDataColumns.OPTIONAL_FIELDS[
+                        'right_gaze_origin_in_trackbox_coordinate_system']
+                    self.assertFalse(any(column in saved.columns for column in right))
+
+    def test_trackbox_values_and_nans_are_preserved_and_schema_resets(self):
+        instance = controller(True)
+        field = 'left_gaze_origin_in_trackbox_coordinate_system'
+        columns = cfg.RawDataColumns.OPTIONAL_FIELDS[field]
+        for recording, available in enumerate((True, False)):
+            instance._prepare_recording(str(Path(self.temp.name) / f'reset-{recording}.h5'))
+            sample = fake_sdk_sample(1000, 1000)
+            sample['left_pupil_diameter'] = np.nan
+            sample['left_pupil_validity'] = 0
+            if available:
+                sample[field] = (.2, .4, np.nan)
+            gaze, _ = instance._adapt_gaze_data(pd.DataFrame([dict(sample, Events='')]), None)
+            instance._save_hdf5_data(gaze, None)
+            saved = pd.read_hdf(instance.filename, key='gaze')
+            self.assertTrue(np.isnan(saved['left_pupil_diameter'].iloc[0]))
+            self.assertEqual(saved['left_pupil_validity'].iloc[0], 0)
+            self.assertEqual(columns[0] in saved.columns, available)
+            if available:
+                self.assertEqual(saved[columns[0]].iloc[0], .2)
+                self.assertEqual(saved[columns[1]].iloc[0], .4)
+                self.assertTrue(np.isnan(saved[columns[2]].iloc[0]))
+
+    def test_late_optional_fields_do_not_change_selected_schema(self):
+        instance = controller(True)
+        instance._prepare_recording(str(Path(self.temp.name) / 'late.h5'))
+        sample = fake_sdk_sample(1000, 1000)
+        instance._adapt_gaze_data(pd.DataFrame([dict(sample, Events='')]), None)
+        selected = list(instance.recording_columns)
+        sample['left_gaze_origin_in_trackbox_coordinate_system'] = (.1, .2, .3)
+        gaze, _ = instance._adapt_gaze_data(pd.DataFrame([dict(sample, Events='')]), None)
+        self.assertEqual(list(gaze.columns), selected)
+
+    def test_missing_optional_field_in_one_row_becomes_nan(self):
+        instance = controller(True)
+        instance._prepare_recording(str(Path(self.temp.name) / 'mixed.h5'))
+        first = fake_sdk_sample(1000, 1000)
+        second = fake_sdk_sample(2000, 2000)
+        field = 'left_gaze_origin_in_trackbox_coordinate_system'
+        first[field] = (.1, .2, .3)
+        batch = pd.DataFrame([dict(first, Events=''), dict(second, Events='')])
+        gaze, _ = instance._adapt_gaze_data(batch, None)
+        instance._save_hdf5_data(gaze, None)
+        saved = pd.read_hdf(instance.filename, key='gaze')
+        columns = cfg.RawDataColumns.OPTIONAL_FIELDS[field]
+        np.testing.assert_allclose(saved.loc[0, columns].to_numpy(dtype=float), [.1, .2, .3])
+        self.assertTrue(saved.loc[1, columns].isna().all())
+
+    def test_empty_raw_recording_has_no_continuity_samples(self):
+        instance = controller(True)
+        instance._prepare_recording(str(Path(self.temp.name) / 'empty-raw.h5'))
+        self.assertIsNone(instance._check_continuity())
+
     def setUp(self):
         self.temp = tempfile.TemporaryDirectory(prefix='detox-recording-')
         self.addCleanup(self.temp.cleanup)
@@ -87,6 +174,12 @@ class RecordingStorageTests(unittest.TestCase):
             with self.subTest(raw=raw):
                 instance = controller(raw)
                 instance._prepare_recording(str(Path(self.temp.name) / f'{raw}.h5'))
+                if raw:
+                    with tables.open_file(instance.filename, 'r') as file:
+                        self.assertNotIn('gaze', file.root)
+                    # Raw schema becomes known at the first saved batch.
+                    gaze, _ = fake_batch(raw)
+                    instance._prepare_gaze_schema(gaze)
                 with tables.open_file(instance.filename, 'r') as file:
                     self.assertEqual(file.root.gaze.nrows, 0)
                     self.assertEqual(file.root.events.nrows, 0)
