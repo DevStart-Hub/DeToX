@@ -1523,7 +1523,7 @@ class ETracker:
             self.recording = True
 
         
-    def stop_recording(self, data_check=True):
+    def stop_recording(self, data_check=True, stop_monitor=True):
         """
         Stop gaze data recording and finalize session.
         
@@ -1536,6 +1536,10 @@ class ETracker:
             If True (default), performs data quality check by reading the saved file
             and analyzing timestamp gaps to detect dropped samples. If False, skips
             the quality check and completes faster. Default True.
+        stop_monitor : bool, optional
+            If True (default), also request live-monitor shutdown after attempting
+            to save the remaining data. Cleanup does not wait for the GUI.
+            Set False to keep position feedback open between recordings.
         
         Warns
         -----
@@ -1565,6 +1569,12 @@ class ETracker:
         #### Skip quality check for faster shutdown
         ```python
         ET_controller.stop_recording(data_check=False)
+        ```
+
+        #### Keep live feedback between recordings
+        ```python
+        ET_controller.stop_recording(stop_monitor=False)
+        # Gaze recording is stopped and saved; the feedback window stays open.
         ```
         
         ### Understanding Output
@@ -1622,11 +1632,12 @@ class ETracker:
             # Unsubscribe from Tobii SDK data stream
             self.eyetracker.unsubscribe_from(tr.EYETRACKER_GAZE_DATA, self._on_gaze_data)
 
-        # --- Live monitor cleanup ---
-        self.stop_live_monitor()
-        
         # --- Save final batch ---
-        self.save_data()
+        try:
+            self.save_data()
+        finally:
+            if stop_monitor:
+                self.stop_live_monitor()
         
         # --- Quality check ---
         if data_check:
@@ -2283,15 +2294,22 @@ class ETracker:
         """
         Stop the experimental live eye-position monitor if it is running.
 
-        Safe to call when no monitor is active. This method is called
-        automatically by stop_recording() and during ETracker shutdown.
+        Safe to call repeatedly. Cleanup runs outside the recording path and
+        does not wait for the GUI to respond. Called during ETracker shutdown
+        and by stop_recording() unless stop_monitor=False is passed.
         """
         if self.live_monitor is not None:
-            self.live_monitor.stop()
+            monitor = self.live_monitor
             self.live_monitor = None
+            try:
+                monitor.stop()
+            except Exception as exc:
+                warnings.warn(f'Could not stop eye monitor: {exc}', UserWarning)
 
 
-    def enable_live_monitor(self, scale=1.0, screen=None, update_rate=20):
+    def enable_live_monitor(self, scale=1.0, screen=None, update_rate=20,
+                            size=None, resizable=True, show_images=False,
+                            reverse_eye=False):
         """
         Enable an experimental detached real-time eye-position monitor window.
 
@@ -2309,20 +2327,44 @@ class ETracker:
             is None.
         update_rate : int or float, optional
             Maximum monitor update rate in Hz. Default is 20.
+        size : tuple or None, optional
+            Initial window content size as (width, height) in pixels. Default
+            None uses the natural layout size.
+        resizable : bool, optional
+            Allow dragging window edges to resize the display. Default is True.
+        show_images : bool, optional
+            Show the latest image from each tracker camera alongside position
+            feedback. Default is False. Real hardware only; unavailable camera
+            streams do not disable the position display: image panels are hidden
+            and a warning is printed once. No images are saved.
+        reverse_eye : bool, optional
+            Swap the two camera image panels when show_images=True. Default is
+            False: camera 1 is on the left and camera 0 on the right. This only
+            swaps panel positions; it does not mirror images, swap position dots,
+            or change recorded gaze. Ignored when images are disabled.
 
         Warns
         -----
         UserWarning
-            If the screen geometry cannot be found, the monitor window may open
-            on the default screen.
+            If the screen geometry cannot be found or the optional monitor
+            cannot be launched. Recording remains independent of the monitor.
 
         Notes
         -----
-        The monitor is driven by the gaze stream's eye origins, so it updates
-        while gaze samples arrive (usually during a recording). Those origins are
-        in millimetres and the monitor maps them onto its normalized view
-        approximately, which it labels. It is automatically stopped by
-        stop_recording().
+        On real hardware the child connects directly to the same tracker and
+        receives position feedback before, during and between recordings. It
+        does not change settings or receive samples from the recording callback.
+        In simulation, feedback appears while simulated gaze is generated.
+
+        By default stop_recording() also closes the monitor. Pass
+        stop_monitor=False to keep feedback between recordings. Explicit
+        stop_live_monitor() and ETracker shutdown also close it.
+        Repeated enable calls keep a running monitor; after a child
+        closes or crashes, an explicit enable starts a new one. Startup does not
+        wait for SDK/GUI readiness; errors in the child appear on stderr.
+
+        On Windows, OS ownership also terminates the monitor if the parent dies.
+        Other platforms currently provide cooperative pipe-EOF cleanup only.
 
         The monitor is a Tkinter window, which has no concept of monitor indices,
         so the requested ``screen`` is resolved to pixel coordinates via pyglet
@@ -2342,7 +2384,11 @@ class ETracker:
         ET_controller.enable_live_monitor(screen=1, update_rate=10)
         ```
         """
-        if self.live_monitor is None:
+        try:
+            if self.live_monitor is not None:
+                if self.live_monitor.is_alive():
+                    return
+                self.stop_live_monitor()
             from .gui.LiveMonitor import LiveMonitor
             from .gui.TrackBox import get_screen_rect
 
@@ -2358,13 +2404,6 @@ class ETracker:
                     UserWarning
                 )
 
-            # Eye origins arrive in millimetres; give the monitor the display
-            # size it needs to map them onto its normalized view.
-            display_size_mm = (555.0, 312.0)
-            if not self.simulate:
-                area = self.eyetracker.get_display_area()
-                display_size_mm = (area.width, area.height)
-
             self.live_monitor = LiveMonitor(
                 scale=scale,
                 screen=screen,
@@ -2372,15 +2411,20 @@ class ETracker:
                 update_rate=update_rate,
                 left_eye_color=cfg.colors.left_eye,
                 right_eye_color=cfg.colors.right_eye,
-                display_size_mm=display_size_mm,
-                approximate=not self.simulate
+                tracker_address=None if self.simulate else self.eyetracker.address,
+                size=size,
+                resizable=resizable,
+                show_images=show_images,
+                reverse_eye=reverse_eye
             )
 
             NicePrint(
-                "Live monitor enabled - eye positions appear as the tracker sees them.",
+                "Live monitor launch requested (independent eye-position feedback).",
                 title="Live Monitor",
                 verbose=self.verbose
             )
+        except Exception as exc:
+            warnings.warn(f'Could not enable eye monitor: {exc}', UserWarning)
 
     # --- Internal functions ---
 
@@ -2394,10 +2438,11 @@ class ETracker:
         """
         # --- Graceful shutdown ---
         # Stop recording if active (includes data saving and cleanup)
-        if self.recording:
-            self.stop_recording()
-
-        self.stop_live_monitor()
+        try:
+            if self.recording:
+                self.stop_recording()
+        finally:
+            self.stop_live_monitor()
 
 
     def _check_continuity(self):
@@ -3046,6 +3091,7 @@ class ETracker:
         # --- Thread-safe data storage ---
         # Use lock since this is called from Tobii SDK thread
         with self._buf_lock:
+
             # --- Main recording buffer ---
             # Store complete sample for later processing and file saving
             self.gaze_data.append(gaze_data)
@@ -3057,11 +3103,6 @@ class ETracker:
                     gaze_data.get('left_gaze_point_on_display_area'),
                     gaze_data.get('right_gaze_point_on_display_area')
                 ])
-
-            # --- Detached live monitor ---
-            # Fed from the gaze origins; the monitor maps mm to its own view.
-            if self.live_monitor is not None:
-                self.live_monitor.push_origin(gaze_data)
 
 
     def _on_user_position(self, position_data):

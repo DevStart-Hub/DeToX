@@ -9,6 +9,7 @@ This folder holds the on-screen visual feedback used during an experiment:
 - ``PositioningOverlay.py`` setup overlay shown before recording
 - ``LiveMonitor.py``       client that drives the detached monitor
 - ``MonitorWindow.py``     the window shown by that detached process
+- ``ProcessLifecycle.py``  Windows kill-on-parent-exit ownership for the child
 
 Nothing here is part of the public API; these pieces are used internally by
 ``ETracker.show_status(overlay=True)`` and ``ETracker.enable_live_monitor()``.

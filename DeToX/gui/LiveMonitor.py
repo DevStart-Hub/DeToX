@@ -1,150 +1,219 @@
-"""Experimental client that drives the detached live eye-position monitor.
+"""Launch and own the optional monitor without using the real gaze callback.
 
-The monitor API and platform behavior may change; validate it on the intended
-tracker/display setup before use.
-
-``LiveMonitor`` launches ``MonitorWindow.py`` in a separate process and
-streams throttled, non-blocking eye-position packets to it over stdin.
-
-Running the window in its own process keeps Tkinter isolated from the
-PsychoPy process, so a busy or frozen monitor can never stall data
-collection.
+Real hardware is read directly by the child. Mouse simulation uses a bounded
+latest-packet slot and a background writer; it never writes a pipe in push().
 """
 
 import json
+import math
 import os
 import struct
 import subprocess
 import sys
+import threading
 import time
 
+try:
+    from .ProcessLifecycle import WindowsProcessJob
+except ImportError:
+    from ProcessLifecycle import WindowsProcessJob
 
-# Wire format for packets sent to MonitorWindow.py (keep in sync).
+
 PACKET_FORMAT = '6f'
 
 
 class LiveMonitor:
     """
-    Experimental client for a detached live eye-position monitor subprocess.
+    Launch the independent eye-position subprocess.
 
-    The parent process sends throttled binary eye-position packets to the child
-    process over stdin, keeping Tkinter isolated from the PsychoPy process.
+    Parameters
+    ----------
+    scale : float, optional
+        Scale for fonts, padding and eye dots. Default is 1.
+    screen : int, optional
+        Screen index, used with the pixel rectangle resolved by DeToX.
+    screen_rect : tuple or None, optional
+        Target display rectangle as (x, y, width, height).
+    update_rate : float, optional
+        Maximum feedback refresh rate in Hz. Default is 20.
+    left_eye_color, right_eye_color : tuple or None, optional
+        RGB eye colors, with components from 0 to 255.
+    tracker_address : str or None, optional
+        Tracker URI for the child's own SDK connection. None selects simulation
+        packets; no SDK object is shared between processes.
+    size : tuple or None, optional
+        Initial content size in pixels as (width, height).
+    resizable : bool, optional
+        Allow resizing by dragging the window edges. Default is True.
+    show_images : bool, optional
+        Show optional camera images in the child. Default is False. Real tracker
+        only; unsupported or failed image streams hide the image panels and
+        print one warning, without disabling position feedback.
+    reverse_eye : bool, optional
+        Swap camera panel positions when images are enabled. Default is False.
+        Does not change position dots or gaze data.
+
+    Notes
+    -----
+    Startup does not wait for the GUI or SDK to become ready. Child diagnostics
+    inherit stderr. Windows ownership is established before initialization;
+    other platforms have cooperative EOF cleanup only. Stop runs bounded process
+    cleanup in a background thread unless wait=True is explicitly requested.
     """
 
     def __init__(self, scale=1.0, screen=0, screen_rect=None, update_rate=20,
-                 left_eye_color=None, right_eye_color=None,
-                 display_size_mm=(555.0, 312.0), approximate=False):
+                 left_eye_color=None, right_eye_color=None, tracker_address=None,
+                 size=None, resizable=True, show_images=False, reverse_eye=False):
+        if not math.isfinite(update_rate) or update_rate <= 0:
+            raise ValueError('update_rate must be finite and greater than zero')
+        if not math.isfinite(scale) or scale <= 0:
+            raise ValueError('scale must be finite and greater than zero')
+        if size is not None:
+            if (not isinstance(size, (list, tuple)) or len(size) != 2
+                    or any(type(value) is not int or value <= 0 for value in size)):
+                raise ValueError('size must contain two positive integers')
+        self.process = None
+        self._job = None
+        self._direct = tracker_address is not None
+        self._stopped = threading.Event()
+        self._packet_ready = threading.Event()
+        self._packet_lock = threading.Lock()
+        self._packet = None
+        self._update_interval = 1 / update_rate
+        self._last_update_time = 0
         config = {
-            'scale': scale,
-            'screen': screen,
+            'scale': scale, 'screen': screen,
             'screen_rect': list(screen_rect) if screen_rect else None,
-            'status_text': 'Gaze appears when recording starts',
+            'update_rate': update_rate, 'tracker_address': tracker_address,
+            'size': size, 'resizable': resizable, 'wait_for_start': True,
+            'show_images': show_images,
+            'reverse_eye': reverse_eye,
+            'status_text': 'Waiting for eyes' if self._direct else 'Waiting for simulated gaze',
             'left_eye_color': list(left_eye_color or (0, 212, 255)),
             'right_eye_color': list(right_eye_color or (255, 110, 199)),
-            'approximate': approximate
         }
-
-        monitor_script = os.path.join(
-            os.path.dirname(os.path.abspath(__file__)), 'MonitorWindow.py'
-        )
-
-        self.process = subprocess.Popen(
-            [sys.executable, monitor_script, json.dumps(config)],
-            stdin=subprocess.PIPE,
-            bufsize=0
-        )
+        script = os.path.join(os.path.dirname(os.path.abspath(__file__)), 'MonitorWindow.py')
         try:
-            os.set_blocking(self.process.stdin.fileno(), False)
-        except (OSError, AttributeError):
-            pass
-        self._alive = True
-        self._update_interval = 1.0 / update_rate if update_rate > 0 else 0
-        self._last_update_time = 0
-        self._display_size_mm = display_size_mm
+            if sys.platform == 'win32':
+                self._job = WindowsProcessJob()
+            self.process = subprocess.Popen(
+                [sys.executable, script, json.dumps(config)],
+                stdin=subprocess.PIPE, bufsize=0)
+            if self._job is not None:
+                self._job.assign(self.process.pid)
+            self.process.stdin.write(b'start\n')
+            if not self._direct:
+                threading.Thread(target=self._write_packets, daemon=True).start()
+        except Exception:
+            self.stop(wait=True)
+            raise
 
-    def push_origin(self, gaze_data):
-        """
-        Send one gaze sample's eye origins to the monitor.
-
-        Origins are in the user coordinate system (millimetres). They are mapped
-        onto the monitor's normalized 0-1 view: x and y use the display size, and
-        z uses the tracker's 50-80 cm operating range. This mapping is approximate
-        because the SDK exposes no track-box coordinate system.
-
-        Parameters
-        ----------
-        gaze_data : dict
-            Tobii gaze sample (``as_dictionary=True``) with the per-eye
-            ``*_gaze_origin_in_user_coordinate_system`` and validity fields.
-        """
-        width_mm, height_mm = self._display_size_mm
-
-        def normalized(origin, valid):
-            if not valid or origin is None:
-                return None
-            x, y, z = origin
-            return (0.5 - x / width_mm, 0.5 - y / height_mm, (z - 500.0) / 300.0)
-
-        self.push(
-            normalized(gaze_data.get('left_gaze_origin_in_user_coordinate_system'),
-                       gaze_data.get('left_gaze_origin_validity', 0)),
-            normalized(gaze_data.get('right_gaze_origin_in_user_coordinate_system'),
-                       gaze_data.get('right_gaze_origin_validity', 0)),
-        )
+    def is_alive(self):
+        """Return whether the launched process is still running, not SDK readiness."""
+        return self.process is not None and self.process.poll() is None
 
     def push(self, left_eye, right_eye):
         """
-        Send one eye-position update to the monitor.
+        Offer simulated eye coordinates without waiting on a pipe.
 
         Parameters
         ----------
         left_eye, right_eye : tuple or None
-            Normalized (0-1) coordinates as (x, y, z). None marks an invalid eye.
+            Normalized (x, y, z) coordinates. None represents an invalid eye.
 
         Notes
         -----
-        This never blocks the caller. If the monitor is busy and cannot accept
-        the update immediately, the update is dropped and the next one is sent.
+        Ignored in direct hardware mode. Only one pending packet is retained;
+        newer simulation feedback replaces older feedback while the child is busy.
         """
-        if not self._alive:
+        if self._direct or self._stopped.is_set():
             return
-
-        current_time = time.time()
-        if current_time - self._last_update_time < self._update_interval:
+        now = time.monotonic()
+        if now - self._last_update_time < self._update_interval:
             return
+        self._last_update_time = now
+        left = left_eye if left_eye is not None else (float('nan'),) * 3
+        right = right_eye if right_eye is not None else (float('nan'),) * 3
+        packet = struct.pack(PACKET_FORMAT, *left, *right)
+        with self._packet_lock:
+            self._packet = packet
+        self._packet_ready.set()
 
-        self._last_update_time = current_time
-
+    def _write_packets(self):
+        """Perform simulation-only pipe writes away from acquisition threads."""
+        process = self.process
         try:
-            lx, ly, lz = (float(x) for x in left_eye) if left_eye else (float('nan'), float('nan'), float('nan'))
-            rx, ry, rz = (float(x) for x in right_eye) if right_eye else (float('nan'), float('nan'), float('nan'))
-            packet = struct.pack(PACKET_FORMAT, lx, ly, lz, rx, ry, rz)
-            sent = self.process.stdin.write(packet)
-            if sent is None:
-                return
-        except BlockingIOError:
+            while not self._stopped.is_set():
+                self._packet_ready.wait()
+                with self._packet_lock:
+                    packet = self._packet
+                    self._packet = None
+                    self._packet_ready.clear()
+                if packet is None or self._stopped.is_set():
+                    continue
+                # Raw writes avoid holding a Python file lock during shutdown.
+                remaining = packet
+                while remaining and not self._stopped.is_set():
+                    written = os.write(process.stdin.fileno(), remaining)
+                    if written == 0:
+                        raise BrokenPipeError('Monitor input closed')
+                    remaining = remaining[written:]
+        except (OSError, ValueError):
+            self._stopped.set()
+
+    def stop(self, wait=False):
+        """
+        Request shutdown and reap the child without delaying recording or saving.
+
+        Parameters
+        ----------
+        wait : bool, optional
+            Wait for bounded cleanup instead of starting a background reaper.
+            Default is False. Safe to call repeatedly.
+        """
+        self._stopped.set()
+        self._packet_ready.set()
+        process, job = self.process, self._job
+        self.process = None
+        self._job = None
+        if process is None:
+            if job is not None:
+                job.close()
             return
-        except (BrokenPipeError, OSError, ValueError, AttributeError):
-            self._alive = False
+        if wait:
+            self._reap(process, job)
+        else:
+            threading.Thread(target=self._reap, args=(process, job), daemon=True).start()
 
-    def stop(self):
-        """Stop the monitor subprocess, preferring graceful EOF shutdown."""
-        self._alive = False
-
-        if not self.process:
-            return
-
+    @staticmethod
+    def _close_input(process):
+        """Request EOF away from the caller; a blocked writer may delay close on Windows."""
         try:
-            if self.process.stdin:
-                self.process.stdin.close()
-        except Exception:
+            process.stdin.close()
+        except (OSError, ValueError):
             pass
 
+    @staticmethod
+    def _reap(process, job):
+        """Try EOF first, then terminate/kill; always release Windows ownership."""
+        # Closing a Windows pipe may wait for a blocked writer. Keep termination
+        # independent of that close, so a frozen reader cannot stall shutdown.
         try:
-            self.process.wait(timeout=0.5)
-        except subprocess.TimeoutExpired:
-            self.process.terminate()
+            threading.Thread(target=LiveMonitor._close_input, args=(process,), daemon=True).start()
             try:
-                self.process.wait(timeout=0.5)
+                process.wait(timeout=1)
             except subprocess.TimeoutExpired:
-                self.process.kill()
+                process.terminate()
+                try:
+                    process.wait(timeout=1)
+                except subprocess.TimeoutExpired:
+                    process.kill()
+                    process.wait(timeout=1)
+        except (OSError, subprocess.TimeoutExpired) as exc:
+            print(f'[Eye Monitor] Cleanup failed: {exc}', file=sys.stderr)
+        finally:
+            if job is not None:
+                try:
+                    job.close()
+                except OSError as exc:
+                    print(f'[Eye Monitor] Ownership cleanup failed: {exc}', file=sys.stderr)
