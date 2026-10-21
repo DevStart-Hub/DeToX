@@ -1,4 +1,5 @@
 import os
+import math
 import time
 import tables
 import atexit
@@ -656,7 +657,9 @@ class ETracker:
                 audio=True,
                 anim_type='zoom',
                 stim_size='big',
-                visualization_style='circles'
+                visualization_style='circles',
+                auto_paced=False,
+                inter_point_delay=0.25
     ):
         """
         Run infant-friendly calibration procedure.
@@ -723,6 +726,19 @@ class ETracker:
              - **'circles'** shows small filled circles at each gaze sample position. 
              - **'lines'** draws lines from targets to gaze samples. 
 
+        auto_paced : bool, optional
+            Automatically show points in point-number order, while still requiring
+            SPACE to collect samples at each point. Results appear automatically
+            after the last point. Selected retries use the same progression.
+            Default False preserves manual number-key point selection.
+
+        inter_point_delay : float, optional
+            Blank interval in seconds between auto-paced points, after collection
+            finishes. Must be finite and non-negative. Default 0.25.
+            This is separate from the existing pre-collection focus time.
+
+            Example: ``controller.calibrate(auto_paced=True, inter_point_delay=0.25)``.
+
         Returns
         -------
         bool
@@ -734,7 +750,8 @@ class ETracker:
         ValueError
             If `calibration_points` is not 5, 9, or a valid list of coordinate tuples; 
             if `visualization_style` is not 'circles' or 'lines'; 
-            or if `infant_stims` format is unrecognized.
+            if `infant_stims` format is unrecognized;
+            or if `inter_point_delay` is negative or non-finite.
         TypeError
             If pre-loaded stimuli include unsupported types (e.g., TextStim, MovieStim).
 
@@ -841,6 +858,9 @@ class ETracker:
                 controller.stop_recording()
         ```
         """
+        if not math.isfinite(inter_point_delay) or inter_point_delay < 0:
+            raise ValueError("inter_point_delay must be finite and non-negative.")
+
         # --- Visualization Style Validation ---
         valid_styles = ['lines', 'circles']
         if visualization_style not in valid_styles:
@@ -988,7 +1008,11 @@ class ETracker:
             )
 
         # --- Run calibration ---
-        success = session.run(norm_points)
+        success = session.run(
+            norm_points,
+            auto_paced=auto_paced,
+            inter_point_delay=inter_point_delay,
+        )
 
         return success
 

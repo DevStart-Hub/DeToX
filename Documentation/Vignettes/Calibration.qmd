@@ -180,7 +180,27 @@ Press any key when you're ready to begin.
 
 #### Data Collection
 
-The calibration screen appears with a thin red border indicating you're in calibration mode. Press a number key (1-5) to display an animated stimulus at the corresponding calibration point. The participant should look at the stimulus while it animates. When you're confident they're fixating on the target, press **SPACE** to collect gaze samples. The system waits briefly (0.25 seconds) to ensure stable fixation, then records the eye tracking data for that point. Repeat this process for all calibration points. You don't need to go in order.
+The calibration screen appears with a thin red border indicating you're in calibration mode. Press a number key (1-5) to display an animated stimulus at the corresponding calibration point. The participant should look at the stimulus while it animates. When you're confident they're fixating on the target, press **SPACE** to collect gaze samples. The system waits briefly (0.5 seconds by default) to ensure stable fixation, then records the eye tracking data for that point. Repeat this process for all calibration points. You don't need to go in order.
+
+#### Optional: Auto-Paced Calibration
+
+To show calibration points automatically while still collecting samples manually:
+
+```python
+ET_controller.calibrate(auto_paced=True, inter_point_delay=0.25)
+```
+
+Press **SPACE** on the instruction screen to show the first target. When the
+participant looks at it, press **SPACE** again to collect samples. After collection
+finishes, the screen is blank for `inter_point_delay` seconds (default 0.25), then
+the next target appears automatically. This interval is separate from the existing
+pre-collection focus time (`cfg.animation.focus_time`, default 0.5 seconds).
+
+Results appear automatically after the last point. Selected retry points also
+advance automatically, in point-number order. **ESCAPE** exits during collection
+or between points. Mouse simulation uses the same controls; move the mouse to each
+target before pressing Space. The default, `auto_paced=False`, retains manual
+number-key point selection and **ENTER** to finish collection.
 
 #### Step 3: Review Results
 
@@ -199,7 +219,7 @@ At this stage, you have several options:
 └──────────────────────────────────────────────────┘
 ```
 
-**Accept the calibration**: If the results look good across all points, press **SPACE** to accept and move forward with your experiment.
+**Accept the calibration**: If the results look good across all points, press **ENTER** to accept and move forward with your experiment.
 
 **Retry specific points**: Notice one or two points with poor accuracy? Press the number keys corresponding to those points—they'll highlight in yellow to confirm your selection. You can select multiple points if needed. Once you've marked all points for retry, press **SPACE** again to recollect data for just those points. This targeted approach is especially valuable with infants and children, where you might get excellent data at most points but struggle with one or two locations.
 
