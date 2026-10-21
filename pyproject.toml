@@ -2,31 +2,92 @@
 requires = ["setuptools", "wheel"]
 build-backend = "setuptools.build_meta"
 
+# Package metadata and runtime dependencies (used by pip).
 [project]
-# This is the PYPI name (what users pip install)
 name = "dvst-detox"
-
 version = "0.2.1"
-description = "Lightweight Python wrapper around tobii-researcher"
+description = "Lightweight Python wrapper around PsychoPy and tobii-research"
 readme = "README.md"
-requires-python = ">=3.10"
+# tobii-research 2.1.0 provides wheels only for Python 3.10.
+requires-python = ">=3.10,<3.11"
 
 dependencies = [
     "tobii-research",
     "psychopy",
+    "numpy",
+    "pandas",
+    "tables",
+    "pillow",
 ]
 
 authors = [
     { name = "Tommaso Ghilardi", email = "tommaso.ghilardi93@gmail.com" },
 ]
 
-[tool.setuptools]
+[project.urls]
+Repository = "https://github.com/DevStart-Hub/DeToX"
+Documentation = "https://detox.devstart.org/"
+Issues = "https://github.com/DevStart-Hub/DeToX/issues"
 
-# Automatically discover the DeToX package and its subpackages
-# (e.g. DeToX.gui) so new subpackages ship without extra edits.
+# Keep automatic discovery so future DeToX subpackages are included too.
 [tool.setuptools.packages.find]
 where = ["."]
 include = ["DeToX*"]
 
 [tool.setuptools.package-data]
 DeToX = ["stimuli/*.png", "stimuli/*.mp4", "stimuli/*.wav"]
+
+# Pixi development environments; resolved versions are tracked in pixi.lock.
+[tool.pixi.workspace]
+channels = ["conda-forge"]
+platforms = ["linux-64", "win-64"]
+
+# Runtime development: editable install uses the dependencies in [project].
+[tool.pixi.feature.base]
+platforms = ["linux-64", "win-64"]
+
+[tool.pixi.feature.base.dependencies]
+python = ">=3.10,<3.11"
+
+[tool.pixi.feature.base.pypi-dependencies]
+dvst-detox = { path = ".", editable = true }
+
+# Standalone hardware probes: no DeToX/PsychoPy installation needed.
+[tool.pixi.feature.tracker-test.dependencies]
+python = ">=3.10,<3.11"
+
+[tool.pixi.feature.tracker-test.pypi-dependencies]
+tobii-research = "==2.1.0"
+pillow = "*"
+
+# Docs stay isolated from PsychoPy/Tobii. Static introspection (dynamic: false)
+# allows a different Python version without importing the runtime package.
+[tool.pixi.feature.docs]
+platforms = ["linux-64", "win-64"]
+
+[tool.pixi.feature.docs.dependencies]
+python = "==3.12"
+ipycytoscape = ">=1.3.3,<2"
+# Coordinate diagrams in user_guide/.
+matplotlib = ">=3.8"
+quarto = ">=1.9.38,<2"
+
+[tool.pixi.feature.docs.pypi-dependencies]
+great-docs = ">=0.14.1,<0.15"
+
+[tool.pixi.feature.docs.activation.env]
+# Avoid Windows cp1252 errors when Great Docs writes Unicode docstrings.
+PYTHONUTF8 = "1"
+PYTHONIOENCODING = "utf-8"
+
+[tool.pixi.feature.docs.tasks]
+# Run with: pixi run -e docs <task-name>
+docs-scan = "great-docs scan --verbose"
+docs-build = "great-docs build"
+docs-preview = "great-docs preview"
+
+# Explicit feature sets keep runtime and docs dependencies separate.
+[tool.pixi.environments]
+default = { features = ["base"], no-default-feature = true, solve-group = "default" }
+docs = { features = ["docs"], no-default-feature = true, solve-group = "docs" }
+tracker-test = { features = ["tracker-test"], no-default-feature = true }

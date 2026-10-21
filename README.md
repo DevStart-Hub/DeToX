@@ -49,3 +49,18 @@ We believe good software requires great documentation. Explore our comprehensive
 ------------------------------------------------------------------------
 
 **Questions or found a bug?** Let us know by creating an issue or starting a discussion here on GitHub!
+
+## Development environments
+
+With Pixi installed, the checked-in `pixi.lock` provides separate environments:
+
+- `pixi run python ...`: DeToX/PsychoPy runtime, using Python 3.10.
+- `pixi run -e tracker-test python ...`: SDK-only environment with Tobii Research
+  2.1.0 and Pillow; no DeToX or PsychoPy installation.
+- `pixi run -e docs docs-build`: isolated documentation build on Python 3.12.
+
+The runtime and SDK-only environments target Windows/Linux 64-bit. The Tobii
+2.1.0 Python wheels require Python 3.10; documentation uses static introspection
+and does not import the runtime. `pixi install --locked` installs the default
+environment without updating the lockfile. Environment files stay in `.pixi/`,
+which Git ignores. These setup changes do not change acquisition or saved data.

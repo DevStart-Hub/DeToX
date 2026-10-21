@@ -4,3 +4,4 @@
 .Ruserdata
 *.egg-info/
 __pycache__/
+.pixi/
