@@ -1294,6 +1294,9 @@ class ETracker:
         raw_format : bool, optional
             If True, uses the configured raw SDK fields, splitting coordinate
             tuples into x/y/z columns and preserving SDK microsecond timestamps.
+            Optional track-box columns are selected once from the first saved
+            batch. The raw header/gaze table is created at that first save;
+            later missing optional values remain NaN without changing columns.
             If False (default), uses simplified column names and subset of columns
             (gaze positions, pupil diameters, validity flags only).
             See [Data Format Options](#data-format-options) for more information.
@@ -2484,6 +2487,10 @@ class ETracker:
         - At 120Hz: expected interval = 8333µs (or 8.33ms), tolerance = ±50%
         - At 60Hz: expected interval = 16667µs (or 16.67ms), tolerance = ±50%
         """
+        # An empty raw recording has no gaze schema until its first saved batch.
+        if not self._gaze_schema_ready:
+            return None
+
         # --- Determine correct timestamp column name based on format ---
         if self.raw_format:
             timestamp_col = 'system_time_stamp'
@@ -2737,8 +2744,9 @@ class ETracker:
         """
         Initialize file structure with metadata and validate recording setup.
         
-        Creates the output file immediately with metadata and empty typed tables
-        for HDF5, or column headers for CSV. No dummy samples are inserted.
+        Creates the output file immediately. Simplified gaze tables/headers are
+        created here; raw gaze tables/headers wait until the first saved batch
+        reveals the optional SDK fields. No dummy samples are inserted.
         
         For HDF5, creates file with root-level metadata including session info,
         hardware configuration, recording settings, and display configuration.
@@ -2795,6 +2803,10 @@ class ETracker:
                     f"Supported formats: .csv, .h5, .hdf5"
                 )
         
+        # Raw columns depend on the first saved gaze batch. Simplified is fixed.
+        self.recording_columns = None if self.raw_format else list(cfg.SimplifiedDataColumns.ORDER)
+        self._gaze_schema_ready = not self.raw_format
+
         # --- File conflict prevention ---
         if os.path.exists(self.filename):
             base, ext = os.path.splitext(self.filename)
@@ -2836,28 +2848,43 @@ class ETracker:
                 f.root._v_attrs.timestamp_units = 'us' if self.raw_format else 'ms'
 
                 # Create typed tables without inserting dummy samples.
-                if self.raw_format:
-                    gaze_dtype = cfg.RawDataColumns.get_hdf5_dtype()
-                else:
+                if not self.raw_format:
                     gaze_dtype = cfg.SimplifiedDataColumns.get_hdf5_dtype()
+                    f.create_table('/', 'gaze', description=gaze_dtype, title='Gaze data samples')
 
                 events_dtype = cfg.EventDataColumns.get_hdf5_dtype(self.raw_format)
-                f.create_table('/', 'gaze', description=gaze_dtype, title='Gaze data samples')
                 f.create_table('/', 'events', description=events_dtype, title='Event markers')
         
         elif self.file_format == 'csv':
             # --- CSV: Write column headers ---
             # Determine column names based on format
-            if self.raw_format:
-                columns = cfg.RawDataColumns.ORDER
-            else:
-                columns = cfg.SimplifiedDataColumns.ORDER
             
             # Write header row
             import csv
             with open(self.filename, 'w', newline='') as f:
                 writer = csv.writer(f)
-                writer.writerow(columns)
+                if not self.raw_format:
+                    writer.writerow(self.recording_columns)
+
+
+    def _prepare_gaze_schema(self, gaze_df):
+        """Create the raw header/table once, after the available columns are known."""
+        if self._gaze_schema_ready:
+            return
+        if self.recording_columns is None:
+            optional = {name for columns in cfg.RawDataColumns.OPTIONAL_FIELDS.values()
+                        for name in columns}
+            self.recording_columns = [name for name in cfg.RawDataColumns.ORDER
+                                      if name not in optional or name in gaze_df.columns]
+        if self.file_format == 'hdf5':
+            with tables.open_file(self.filename, mode='r+') as f:
+                dtype = cfg.RawDataColumns.get_hdf5_dtype(self.recording_columns)
+                f.create_table('/', 'gaze', description=dtype, title='Gaze data samples')
+        else:
+            import csv
+            with open(self.filename, 'a', newline='') as f:
+                csv.writer(f).writerow(self.recording_columns)
+        self._gaze_schema_ready = True
 
 
     def _adapt_gaze_data(self, df, df_ev):
@@ -2888,7 +2915,7 @@ class ETracker:
         tuple
             (adapted_gaze_df, adapted_events_df)
             
-            Raw format returns all Tobii columns with tuples expanded to x, y, z
+            Raw format returns supported Tobii columns with tuples expanded to x, y, z
             components. Nothing is converted: 2D coordinates stay in Tobii ADCS
             (0-1), 3D spatial coordinates retain their SDK User Coordinate
             System units, and timestamps stay in the SDK's original microseconds.
@@ -2919,6 +2946,25 @@ class ETracker:
         """
 
         if self.raw_format:
+            # Select optional groups by field presence, never by validity or NaN.
+            # Keep this order fixed across all saves in the recording.
+            if self.recording_columns is None:
+                unavailable = set()
+                for field, columns in cfg.RawDataColumns.OPTIONAL_FIELDS.items():
+                    if field not in df.columns:
+                        unavailable.update(columns)
+                self.recording_columns = [name for name in cfg.RawDataColumns.ORDER
+                                          if name not in unavailable]
+
+            # Optional fields may be absent in later batches or individual rows.
+            # Preserve missing values; never repeat an earlier eye position.
+            for field, columns in cfg.RawDataColumns.OPTIONAL_FIELDS.items():
+                if columns[0] not in self.recording_columns:
+                    continue
+                values = df[field] if field in df.columns else [(np.nan,) * 3] * len(df)
+                positions = [value if isinstance(value, (tuple, list)) and len(value) == 3
+                             else (np.nan,) * 3 for value in values]
+                df[columns] = np.asarray(positions)
             # =====================================================================
             # RAW FORMAT: keep the data exactly as the Tobii SDK delivered it.
             # No timestamp conversion (stays in microseconds); no coordinate
@@ -2955,7 +3001,7 @@ class ETracker:
             df = df.drop(columns=display_columns + spatial_columns)
 
             # Return with enforced column order
-            return (df[cfg.RawDataColumns.ORDER], df_ev)
+            return (df[self.recording_columns], df_ev)
 
         else:
             # =====================================================================
@@ -3006,8 +3052,8 @@ class ETracker:
         """
         Save data in CSV format with append mode.
         
-        Appends data to existing file. Header was already written in
-        _prepare_recording().
+        Appends data to the existing file. For raw output, the first save writes
+        the header after optional columns have been selected.
         
         Parameters
         ----------
@@ -3015,7 +3061,8 @@ class ETracker:
             DataFrame containing gaze data with events merged in Events column.
         """
         # Always append without header (header already written)
-        gaze_df.to_csv(self.filename, index=False, mode='a', header=False)
+        self._prepare_gaze_schema(gaze_df)
+        gaze_df.loc[:, self.recording_columns].to_csv(self.filename, index=False, mode='a', header=False)
 
 
     def _save_hdf5_data(self, gaze_df, events_df):
@@ -3043,6 +3090,7 @@ class ETracker:
         encoding error. pandas.read_hdf() reads these tables as DataFrames and
         decodes their text.
         """
+        self._prepare_gaze_schema(gaze_df)
         with tables.open_file(self.filename, mode='r+') as f:
             batches = [(f.root.gaze, gaze_df), (f.root.events, events_df)]
             prepared_batches = []

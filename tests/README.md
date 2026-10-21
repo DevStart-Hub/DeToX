@@ -17,7 +17,7 @@ python -m unittest discover -s tests -p "test_*.py" -v
 | `test_trackbox_resize.py` | Initial-size validation and resize coordinate/gradient updates; no hardware or Tk window |
 | `test_live_monitor_integration.py` | Controller lifecycle, recording isolation, launcher ownership gate and asynchronous cleanup; no hardware or Tk window |
 
-The HDF5 suite contains 14 tests and uses temporary files that are removed afterward.
+The HDF5 suite uses temporary files that are removed afterward.
 The integrated console-formatting suite adds 11 tests in `test_nice_print.py`.
 It does not open windows or require a tracker. Settings are loaded directly;
 recording tests compile selected methods unchanged from `DeToX/Base.py` and the
@@ -37,3 +37,11 @@ The existing fixed-width event-text limit is not a truncation-prevention feature
 Manual hardware/window demonstrations live in [`../examples/`](../examples/),
 not in the automated suite. Historical prototype writers and generated demo
 files are not part of the maintained tests.
+
+
+Raw recordings select optional track-box columns by field presence in the first
+saved batch, not by validity or NaN. Missing later values remain NaN; the schema
+stays fixed until the next recording. The raw CSV header/HDF5 gaze table is
+created at the first save. An empty raw recording has no gaze header/table yet.
+Simplified output is unchanged. Tests cover CSV/HDF5, missing fields within and
+between batches, all-NaN fields, late fields and schema reset between recordings.
