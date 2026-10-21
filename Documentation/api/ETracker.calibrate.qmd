@@ -9,6 +9,8 @@ ETracker.calibrate(
     anim_type='zoom',
     stim_size='big',
     visualization_style='circles',
+    auto_paced=False,
+    inter_point_delay=0.25,
 )
 ```
 
@@ -71,6 +73,20 @@ mode (real eye tracker vs. mouse simulation).
 |                     |                                                                                                                     |  - **'circles'** shows small filled circles at each gaze sample position.                                                                          |             |
 |                     |                                                                                                                     |  - **'lines'** draws lines from targets to gaze samples.                                                                                           |             |
 +---------------------+---------------------------------------------------------------------------------------------------------------------+----------------------------------------------------------------------------------------------------------------------------------------------------+-------------+
+
+### Automatic point progression
+
+- **`auto_paced`** (`bool`, default `False`): Show points automatically in
+  point-number order. SPACE begins calibration and a separate SPACE press collects
+  samples at each target. Results appear after the final collection. Selected
+  retries follow the same progression; manual number-key selection remains the default.
+- **`inter_point_delay`** (`float`, default `0.25`): Blank interval in seconds
+  after collection, before the next auto-paced target. Must be finite and
+  non-negative. Separate from the existing pre-collection focus time.
+
+```python
+controller.calibrate(auto_paced=True, inter_point_delay=0.25)
+```
 
 ## Returns {.doc-section .doc-section-returns}
 

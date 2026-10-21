@@ -176,7 +176,7 @@ class BaseCalibrationSession:
         self.border_right.draw()
     
         
-    def show_message_and_wait(self, body, title="", pos=(0, -0.15)):
+    def show_message_and_wait(self, body, title="", pos=(0, -0.15), key_list=None):
         """
         Display a message on screen and in console, then wait for keypress.
         
@@ -192,6 +192,8 @@ class BaseCalibrationSession:
             Title for the message box. Default empty string.
         pos : tuple, optional
             Position of the message box center on screen. Default (0, -0.15).
+        key_list : list of str, optional
+            Accepted keys. Default None accepts any key. Returns the pressed keys.
         """
         # --- Console Output ---
         formatted_text = NicePrint(body, title, self.verbose)
@@ -223,7 +225,22 @@ class BaseCalibrationSession:
         core.wait(0.5)
         
         # --- Wait for intentional keypress ---
-        event.waitKeys()
+        return event.waitKeys(keyList=key_list)
+
+    def _show_auto_paced_instructions(self, looking_instruction):
+        """Wait for Space to start, or Escape to exit before calibration begins."""
+        instructions = f"""Auto-Paced Calibration:
+
+    - Press SPACE to begin
+    - {looking_instruction}
+    - Press SPACE to collect samples at the current point
+    - The next target appears automatically
+    - Results appear after all points are collected
+    - Press ESCAPE to exit calibration"""
+        keys = self.show_message_and_wait(
+            instructions, "Calibration Setup", key_list=['space', 'escape']
+        )
+        return 'escape' not in keys
             
     
     def check_points(self, calibration_points):
@@ -556,7 +573,8 @@ class BaseCalibrationSession:
                     return None
 
                     
-    def _collection_phase(self, calibration_points, **kwargs):
+    def _collection_phase(self, calibration_points, auto_paced=False,
+                          inter_point_delay=0.25, **kwargs):
         """
         Unified collection phase for both calibration types.
         
@@ -568,6 +586,10 @@ class BaseCalibrationSession:
         ----------
         calibration_points : list of (float, float)
             List of calibration point coordinates in window units.
+        auto_paced : bool, optional
+            Show pending points sequentially instead of selecting them by number.
+        inter_point_delay : float, optional
+            Blank interval after collection, before the next auto-paced point.
         **kwargs : dict
             Additional arguments passed to collect method. Mode-specific parameters
             such as 'num_samples' for mouse calibration.
@@ -578,6 +600,11 @@ class BaseCalibrationSession:
             True if collection completed successfully, False if user pressed escape
             to abort calibration.
         """
+        if auto_paced:
+            return self._auto_paced_collection_phase(
+                calibration_points, inter_point_delay, **kwargs
+            )
+
         # --- Animation Timing Setup ---
         clock = core.Clock()
         point_idx = -1
@@ -637,6 +664,61 @@ class BaseCalibrationSession:
             self.win.flip()
     
     
+    def _auto_paced_collection_phase(self, calibration_points, inter_point_delay, **kwargs):
+        """Show each pending point in order; only Space starts sample collection."""
+        point_indices = sorted(self.remaining_points)
+        clock = core.Clock()
+
+        for position, point_idx in enumerate(point_indices):
+            # Ignore buffered collection keys, but never discard an Escape request.
+            if 'escape' in event.getKeys():
+                self._clear_collected_data()
+                return False
+
+            stim = self.stim_objects[point_idx % len(self.stim_objects)]
+            stim.setPos(calibration_points[point_idx])
+            clock.reset()
+            if self.audio and not self.audio.isPlaying:
+                self.audio.play()
+
+            while True:
+                self.win.clearBuffer()
+                self._draw_calibration_border()
+                self._animate(stim, clock, point_idx)
+                self.win.flip()
+
+                # Draw the target before accepting a collection key.
+                keys = event.getKeys()
+                if 'escape' in keys:
+                    if self.audio:
+                        self.audio.stop()
+                    self._clear_collected_data()
+                    return False
+                if 'space' in keys:
+                    if self._collect_data_at_point(
+                        calibration_points[point_idx], point_idx, **kwargs
+                    ):
+                        break
+
+            # Collection is blocking. Consume keys pressed during it so they
+            # cannot collect the next target or act on the results screen.
+            if 'escape' in event.getKeys():
+                self._clear_collected_data()
+                return False
+
+            # Keep the pause responsive, without changing the sampling routine.
+            # The final point goes straight to the existing results screen.
+            clock.reset()
+            while position < len(point_indices) - 1 and clock.getTime() < inter_point_delay:
+                self.win.clearBuffer()
+                self._draw_calibration_border()
+                self.win.flip()
+                if 'escape' in event.getKeys():
+                    self._clear_collected_data()
+                    return False
+
+        return True
+
     def _create_calibration_result_image(self, sample_data):
             """
             Common function to create calibration result visualization.
@@ -808,7 +890,7 @@ class TobiiCalibrationSession(BaseCalibrationSession):
         self.calibration = calibration_api
         self.verbose = verbose
 
-    def run(self, calibration_points):
+    def run(self, calibration_points, auto_paced=False, inter_point_delay=0.25):
         """
         Main routine to run the full Tobii calibration workflow.
 
@@ -821,6 +903,10 @@ class TobiiCalibrationSession(BaseCalibrationSession):
         calibration_points : list of (float, float)
             List of calibration points in NORMALIZED coordinates [-1, 1].
             Will be converted to window units and then to Tobii ADCS format.
+        auto_paced : bool, optional
+            Advance targets automatically; SPACE still triggers each collection.
+        inter_point_delay : float, optional
+            Blank interval between auto-paced points, in seconds. Default 0.25.
 
         Returns
         -------
@@ -829,18 +915,7 @@ class TobiiCalibrationSession(BaseCalibrationSession):
             aborted via escape key or if calibration computation failed.
         """
 
-        # --- 1. Calibration Mode Activation ---
-        self.calibration.enter_calibration_mode()
-
-        try:
-            return self._run_calibration_session(calibration_points)
-        finally:
-            # Always leave calibration mode, even if a step above raised.
-            self.calibration.leave_calibration_mode()
-
-    def _run_calibration_session(self, calibration_points):
-        """Run the calibration steps while calibration mode is active."""
-        # --- 2. Instruction Display ---
+        # --- Instruction Display (before entering calibration mode) ---
         instructions_text = f"""Tobii Eye Tracker Calibration Setup:
 
     - Press number keys (1-{len(calibration_points)}) to select calibration points
@@ -851,8 +926,26 @@ class TobiiCalibrationSession(BaseCalibrationSession):
 
     Any key will start calibration immediately!"""
 
-        self.show_message_and_wait(instructions_text, "Eye Tracker Calibration")
+        if auto_paced:
+            if not self._show_auto_paced_instructions(
+                "Wait until the participant looks at the animated target"
+            ):
+                return False
+        else:
+            self.show_message_and_wait(instructions_text, "Eye Tracker Calibration")
 
+        self.calibration.enter_calibration_mode()
+        try:
+            return self._run_calibration_session(
+                calibration_points, auto_paced, inter_point_delay
+            )
+        finally:
+            # Always leave calibration mode, even if a step above raised.
+            self.calibration.leave_calibration_mode()
+
+    def _run_calibration_session(self, calibration_points, auto_paced=False,
+                                 inter_point_delay=0.25):
+        """Run the calibration steps while calibration mode is active."""
         # --- 3. Setup and Validation ---
         self.check_points(calibration_points)
         self._prepare_session(calibration_points)
@@ -864,7 +957,11 @@ class TobiiCalibrationSession(BaseCalibrationSession):
         # --- 5. Main Calibration Loop ---
         while True:
             # --- 5a. Data Collection ---
-            success = self._collection_phase(self.calibration_points)
+            success = self._collection_phase(
+                self.calibration_points,
+                auto_paced=auto_paced,
+                inter_point_delay=inter_point_delay,
+            )
             
             if not success:
                 return False
@@ -1115,7 +1212,7 @@ class MouseCalibrationSession(BaseCalibrationSession):
         self.verbose = verbose
 
 
-    def run(self, calibration_points):
+    def run(self, calibration_points, auto_paced=False, inter_point_delay=0.25):
         """
         Main function to run the mouse-based calibration routine.
         
@@ -1128,6 +1225,10 @@ class MouseCalibrationSession(BaseCalibrationSession):
         calibration_points : list of (float, float)
             List of calibration points in NORMALIZED coordinates [-1, 1].
             Will be converted to window units automatically.
+        auto_paced : bool, optional
+            Advance targets automatically; SPACE still triggers each collection.
+        inter_point_delay : float, optional
+            Blank interval between auto-paced points, in seconds. Default 0.25.
 
         Returns
         -------
@@ -1147,7 +1248,13 @@ class MouseCalibrationSession(BaseCalibrationSession):
 
     Any key will start calibration immediately!"""
         
-        self.show_message_and_wait(instructions_text, "Calibration Setup")
+        if auto_paced:
+            if not self._show_auto_paced_instructions(
+                "Move your mouse to the animated target"
+            ):
+                return False
+        else:
+            self.show_message_and_wait(instructions_text, "Calibration Setup")
         
         
         # --- 3. Setup and Validation ---
@@ -1157,7 +1264,12 @@ class MouseCalibrationSession(BaseCalibrationSession):
         # --- 4. Main Calibration Loop ---
         while True:
             # --- 5a. Data Collection ---
-            success = self._collection_phase(self.calibration_points, num_samples=cfg.calibration.num_samples_mouse)
+            success = self._collection_phase(
+                self.calibration_points,
+                auto_paced=auto_paced,
+                inter_point_delay=inter_point_delay,
+                num_samples=cfg.calibration.num_samples_mouse,
+            )
             if not success:
                 return False
                 
