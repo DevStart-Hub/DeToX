@@ -288,22 +288,33 @@ Reasons:
 - Shrinking the target encourages fixation on the exact calibration point.
 - The collection animation runs throughout settling and Tobii collection, so the target does not appear frozen.
 
-### Starting size ideas
+### Direct size settings
 
-These are starting points for visual/hardware testing, not final fixed values:
+Every phase and preset size is configured directly in
+`ETSettings.AnimationSettings`. No runtime midpoint or threshold calculation
+is performed.
 
-- Attention zoom: approximately 100% ↔ 10% of the nominal maximum.
-- Collection zoom: approximately 50% ↔ 10%.
-- Collection trill: a smaller fixed target, initially around 30%.
-
-- `stim_size='big'/'small'` continues to select the absolute preset.
-- Percentages are relative to that nominal maximum, not percentages of screen height.
-- Reset orientation when changing out of a trill animation.
+- Big preset:
+  - attention zoom: 9.5–16% of screen height;
+  - collection zoom: 5–9.5%;
+  - attention trill: 12.75%;
+  - collection trill: 7.25%.
+- Small preset:
+  - attention zoom: 3–6% of screen height;
+  - collection zoom: 1–3%;
+  - attention trill: 4.5%;
+  - collection trill: 2%.
+- Attention and collection trill rotation ranges are also configured
+  independently.
+- `stim_size='big'/'small'` selects the preset.
+- Reset orientation smoothly when changing out of a trill animation.
 
 ### Current staged state
 
 - `collection_anim_type` is accepted, stored and propagated.
-- It is not applied yet; the collection animation step is still pending.
+- Attention and collection sizes are now explicit in `AnimationSettings`.
+- The current attention animation uses the new attention size fields.
+- The collection animation is not applied yet; that step is still pending.
 - Current defaults remain `'zoom'` for both phases until the second phase is implemented.
 - Once both phases are active, change the recommended default to `anim_type='trill'`, `collection_anim_type='zoom'`.
 
@@ -320,6 +331,10 @@ Completed:
 - [x] Keep the existing collection implementation temporarily as a bridge.
 - [x] Update tests for the new public contract.
 - [x] Full test suite passes after the API wiring stage.
+- [x] Add direct attention and collection size settings for both presets.
+- [x] Point the current attention animation at the new attention fields.
+- [x] Add zoom and trill pose calculations with a selectable animation phase.
+- [x] Add focused tests for bounds, phase selection, rotation and pauses.
 
 Still temporary:
 
@@ -333,17 +348,18 @@ Still temporary:
 
 ## Remaining Implementation Order
 
-1. [ ] Replace `_collection_phase()` with `_present_and_collect_calibration_points()`.
-2. [ ] Delete `_auto_paced_collection_phase()` and the blank interval.
-3. [ ] Implement the shared manual/auto state machine.
-4. [ ] Convert Tobii focus/fade handling to non-blocking frame updates.
-5. [ ] Add background Tobii collection through a single executor and Future.
-6. [ ] Handle failure, Escape, executor shutdown and calibration-mode cleanup.
-7. [ ] Add the collection animation phase and activate `collection_anim_type`.
-8. [ ] Switch the recommended default to attention `trill`, collection `zoom`.
-9. [ ] Update tests for manual pacing, automatic pacing, recurrence and aborts.
-10. [ ] Perform a real Tobii hardware timing/animation test.
-11. [ ] Update API and vignette documentation.
+1. [x] Add the zoom/trill calculation helpers using the explicit animation settings.
+2. [ ] Replace `_collection_phase()` with `_present_and_collect_calibration_points()`.
+3. [ ] Delete `_auto_paced_collection_phase()` and the blank interval.
+4. [ ] Implement the shared manual/auto state machine.
+5. [ ] Convert Tobii focus/fade handling to non-blocking frame updates.
+6. [ ] Add background Tobii collection through a single executor and Future.
+7. [ ] Handle failure, Escape, executor shutdown and calibration-mode cleanup.
+8. [ ] Add the collection animation phase and activate `collection_anim_type`.
+9. [ ] Switch the recommended default to attention `trill`, collection `zoom`.
+10. [ ] Update tests for manual pacing, automatic pacing, recurrence and aborts.
+11. [ ] Perform a real Tobii hardware timing/animation test.
+12. [ ] Update API and vignette documentation.
 
 ## Explicitly Rejected
 

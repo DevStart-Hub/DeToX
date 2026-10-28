@@ -14,7 +14,7 @@ Modify settings in your experiment script:
 >>> from DeToX import ETSettings as cfg
 >>> 
 >>> # Access animation settings
->>> cfg.animation.max_zoom_size = 0.15
+>>> cfg.animation.attention_zoom_max_size_big = 0.18
 >>> cfg.animation.focus_time = 1.0
 >>> 
 >>> # Change colors
@@ -38,44 +38,71 @@ import numpy as np
 @dataclass
 class AnimationSettings:
     """Animation parameters for calibration stimuli.
-    
-    Controls the behavior and appearance of animated calibration targets
-    including zoom and trill animations. All size parameters are specified
-    in height units (percentage of screen height).
-    
+
+    Calibration uses two animation phases. The attention phase attracts the
+    participant before collection. The collection phase holds attention while
+    gaze samples are acquired. Each phase has independently configurable zoom
+    bounds and trill size for both the big and small presets.
+
+    All size parameters are specified in height units (percentage of screen
+    height). Collection values should normally remain smaller than the
+    corresponding attention values.
+
     Two size presets are available:
     - **big**: Larger stimuli recommended for infants/children (default)
     - **small**: Smaller stimuli recommended for adults
-    
+
     Attributes
     ----------
     focus_time : float
         Wait time in seconds before collecting calibration data at each point.
-        Allows participant to fixate on the target. Default is 0.5 seconds.
+        Allows the participant to fixate on the target. Default is 0.5 seconds.
     zoom_speed : float
-        Speed multiplier for the zoom animation. Higher values make the
+        Shared speed multiplier for zoom animations. Higher values make the
         size oscillation faster. Default is 6.0.
-    max_zoom_size_big : float
-        Maximum size for zoom animation (big preset) as percentage of screen height.
-        Recommended for infants/children. Default is 0.16 (16% of screen height).
-    min_zoom_size_big : float
-        Minimum size for zoom animation (big preset) as percentage of screen height.
+    attention_zoom_max_size_big : float
+        Largest attention target size for the big preset.
+        Default is 0.16 (16% of screen height).
+    attention_zoom_min_size_big : float
+        Smallest attention target size for the big preset.
+        Default is 0.095 (9.5% of screen height).
+    collection_zoom_max_size_big : float
+        Largest collection target size for the big preset.
+        Default is 0.095 (9.5% of screen height).
+    collection_zoom_min_size_big : float
+        Smallest collection target size for the big preset.
         Default is 0.05 (5% of screen height).
-    trill_size_big : float
-        Fixed size for trill animation (big preset) as percentage of screen height.
-        Default is 0.14 (14% of screen height).
-    max_zoom_size_small : float
-        Maximum size for zoom animation (small preset) as percentage of screen height.
-        Recommended for adults. Default is 0.06 (6% of screen height).
-    min_zoom_size_small : float
-        Minimum size for zoom animation (small preset) as percentage of screen height.
+    attention_trill_size_big : float
+        Fixed attention trill size for the big preset.
+        Default is 0.1275 (12.75% of screen height).
+    collection_trill_size_big : float
+        Fixed collection trill size for the big preset.
+        Default is 0.0725 (7.25% of screen height).
+    attention_zoom_max_size_small : float
+        Largest attention target size for the small preset.
+        Default is 0.06 (6% of screen height).
+    attention_zoom_min_size_small : float
+        Smallest attention target size for the small preset.
+        Default is 0.03 (3% of screen height).
+    collection_zoom_max_size_small : float
+        Largest collection target size for the small preset.
+        Default is 0.03 (3% of screen height).
+    collection_zoom_min_size_small : float
+        Smallest collection target size for the small preset.
         Default is 0.01 (1% of screen height).
-    trill_size_small : float
-        Fixed size for trill animation (small preset) as percentage of screen height.
-        Default is 0.04 (4% of screen height).
-    trill_rotation_range : float
-        Maximum rotation angle in degrees for trill animation.
+    attention_trill_size_small : float
+        Fixed attention trill size for the small preset.
+        Default is 0.045 (4.5% of screen height).
+    collection_trill_size_small : float
+        Fixed collection trill size for the small preset.
+        Default is 0.02 (2% of screen height).
+    attention_trill_rotation_range : float
+        Maximum rotation angle in degrees for attention trills.
         Default is 20 degrees.
+    collection_trill_rotation_range : float
+        Maximum rotation angle in degrees for collection trills. A smaller
+        target may need a larger angle to remain noticeable.
+        Default is 30 degrees.
     trill_cycle_duration : float
         Total cycle time for trill animation in seconds (active + pause).
         Default is 1.5 seconds.
@@ -84,29 +111,36 @@ class AnimationSettings:
         Default is 1.1 seconds (leaves 0.4s pause).
     trill_frequency : float
         Number of back-and-forth rotation oscillations per second during
-        active trill phase. Default is 3.0 oscillations/second.
-    
+        the active trill phase. Default is 3.0 oscillations/second.
+
     Examples
     --------
     >>> settings = AnimationSettings()
-    >>> settings.max_zoom_size_big = 0.18  # Increase big max size to 18%
-    >>> settings.trill_frequency = 5.0  # Faster trill
+    >>> settings.attention_zoom_max_size_big = 0.18
+    >>> settings.collection_trill_rotation_range = 35
     """
-    
+
     focus_time: float = 0.5
     zoom_speed: float = 6.0
-    
-    # Big size preset (infants/children - default)
-    max_zoom_size_big: float = 0.16
-    min_zoom_size_big: float = 0.05
-    trill_size_big: float = 0.14
-    
-    # Small size preset (adults)
-    max_zoom_size_small: float = 0.06
-    min_zoom_size_small: float = 0.01
-    trill_size_small: float = 0.04
-    
-    trill_rotation_range: float = 20
+
+    # Big preset (infants/children - default)
+    attention_zoom_max_size_big: float = 0.16
+    attention_zoom_min_size_big: float = 0.095
+    collection_zoom_max_size_big: float = 0.095
+    collection_zoom_min_size_big: float = 0.05
+    attention_trill_size_big: float = 0.1275
+    collection_trill_size_big: float = 0.0725
+
+    # Small preset (adults)
+    attention_zoom_max_size_small: float = 0.06
+    attention_zoom_min_size_small: float = 0.03
+    collection_zoom_max_size_small: float = 0.03
+    collection_zoom_min_size_small: float = 0.01
+    attention_trill_size_small: float = 0.045
+    collection_trill_size_small: float = 0.02
+
+    attention_trill_rotation_range: float = 20
+    collection_trill_rotation_range: float = 30
     trill_cycle_duration: float = 1.5
     trill_active_duration: float = 1.1
     trill_frequency: float = 3.0
@@ -565,7 +599,7 @@ class EventDataColumns:
 #: Examples
 #: --------
 #: >>> from DeToX import ETSettings as cfg
-#: >>> cfg.animation.max_zoom_size = 0.15
+#: >>> cfg.animation.attention_zoom_max_size_big = 0.18
 #: >>> cfg.animation.focus_time = 1.0
 animation = AnimationSettings()
 

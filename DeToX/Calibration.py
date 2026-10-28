@@ -73,13 +73,16 @@ class BaseCalibrationSession:
             from ``anim_type`` so the two phases can use different animations.
             Default 'zoom'.
         stim_size : {'big', 'small'}, optional
-            Size preset for calibration stimuli:
+            Size preset for calibration stimuli. Attention and collection
+            sizes are configured independently in ``cfg.animation``:
             - 'big': Larger stimuli recommended for infants/children (default)
-            * Zoom animation: 5-16% of screen height
-            * Trill animation: 14% of screen height
+            * Attention zoom: 9.5-16% of screen height
+            * Collection zoom: 5-9.5% of screen height
+            * Attention trill: 12.75%; collection trill: 7.25%
             - 'small': Smaller stimuli recommended for adults
-            * Zoom animation: 3-8% of screen height
-            * Trill animation: 6% of screen height
+            * Attention zoom: 3-6% of screen height
+            * Collection zoom: 1-3% of screen height
+            * Attention trill: 4.5%; collection trill: 2%
             Default 'big'.
         visualization_style : {'lines', 'circles'}, optional
             Style for calibration result visualization:
@@ -320,70 +323,189 @@ class BaseCalibrationSession:
         self.remaining_points = list(range(len(calibration_points)))
     
         
-    def _animate(self, stim, clock, point_idx):
+    def _zoom_animation(self, elapsed_time, min_size, max_size):
         """
-        Animate calibration stimulus with automatic unit conversion.
-        
-        Converts animation sizes from config (height units) to match the
-        stimulus's unit system, preserving the user's original stimulus size.
-        
+        Calculate a smooth zoom pose.
+
+        The target starts at its maximum size, shrinks to its minimum size,
+        then grows again. Attention and collection use the same motion with
+        different bounds configured in ``ETSettings``.
+
+        Parameters
+        ----------
+        elapsed_time : float
+            Time in seconds since the current animation phase began.
+        min_size : float
+            Smallest target size in the stimulus's units.
+        max_size : float
+            Largest target size in the stimulus's units.
+
+        Returns
+        -------
+        tuple of float
+            Current size and rotation in degrees. Zoom never rotates, so the
+            rotation is always zero.
+        """
+
+        # --- Smooth Size Oscillation ---
+        # A cosine starts at the maximum size and changes direction smoothly
+        # at both ends, avoiding abrupt jumps in size.
+        scaled_time = elapsed_time * cfg.animation.zoom_speed
+        normalized_oscillation = (np.cos(scaled_time) + 1) / 2.0
+        current_size = min_size + normalized_oscillation * (max_size - min_size)
+
+        # Returning zero explicitly prevents an old trill angle from remaining
+        # on the stimulus when switching to zoom.
+        return current_size, 0.0
+
+    def _trill_animation(self, elapsed_time, size, rotation_range):
+        """
+        Calculate a fixed-size trill pose.
+
+        A trill is a burst of back-and-forth rotation followed by a brief
+        pause. The rotation fades in and out smoothly so the target does not
+        snap back to upright at the start or end of a burst.
+
+        Parameters
+        ----------
+        elapsed_time : float
+            Time in seconds since the current animation phase began.
+        size : float
+            Fixed target size in the stimulus's units.
+        rotation_range : float
+            Maximum rotation in degrees for this animation phase.
+
+        Returns
+        -------
+        tuple of float
+            Fixed size and current rotation in degrees.
+        """
+
+        # --- Locate the Current Rotation Burst ---
+        cycle_position = elapsed_time % cfg.animation.trill_cycle_duration
+        rotation = 0.0
+
+        if cycle_position < cfg.animation.trill_active_duration:
+            # --- Smooth Start and End of the Burst ---
+            # The sine-squared envelope reaches zero at both ends of the
+            # active period, leaving the target upright during the pause.
+            burst_progress = (
+                cycle_position / cfg.animation.trill_active_duration
+            )
+            movement_strength = np.sin(np.pi * burst_progress) ** 2
+
+            # --- Back-and-Forth Rotation ---
+            trill_time = (
+                cycle_position
+                * cfg.animation.trill_frequency
+                * 2
+                * np.pi
+            )
+            rotation = (
+                np.sin(trill_time)
+                * rotation_range
+                * movement_strength
+            )
+
+        return size, rotation
+
+    def _animate(self, stim, clock, point_idx, phase='attention'):
+        """
+        Animate a calibration target for the current presentation phase.
+
+        Attention and collection use independent animation types and sizes
+        from ``ETSettings``. The phase is selected by the presentation loop:
+        attention while waiting for the experimenter, collection while the
+        participant settles and gaze samples are acquired.
+
         Parameters
         ----------
         stim : psychopy.visual stimulus
-            The stimulus object to animate
+            The stimulus object to animate.
         clock : psychopy.core.Clock
-            Clock for timing the animation
+            Clock for timing the current animation phase.
         point_idx : int
-            Index of the current calibration point
+            Index of the current calibration point.
+        phase : {'attention', 'collection'}, optional
+            Animation phase to present. Default is 'attention'.
         """
-        
-        if self.anim_type == 'zoom':
-            # --- Zoom Animation: Smooth Size Oscillation ---
-            elapsed_time = clock.getTime() * cfg.animation.zoom_speed
-            
-            # Select size settings based on stim_size preset (in height units)
+
+        if phase not in ('attention', 'collection'):
+            raise ValueError(
+                f"Invalid animation phase: '{phase}'. "
+                "Must be 'attention' or 'collection'."
+            )
+
+        # --- Select Phase Animation and Size Settings ---
+        if phase == 'attention':
+            animation_type = self.anim_type
             if self.stim_size == 'big':
-                min_size_height = cfg.animation.min_zoom_size_big
-                max_size_height = cfg.animation.max_zoom_size_big
-            else:  # 'small'
-                min_size_height = cfg.animation.min_zoom_size_small
-                max_size_height = cfg.animation.max_zoom_size_small
-            
-            # Convert config sizes to stimulus's units
-            min_size = convert_height_to_units(self.win, min_size_height, target_units=stim.units)
-            max_size = convert_height_to_units(self.win, max_size_height, target_units=stim.units)
-            
-            # Calculate smooth oscillation
-            size_range = max_size - min_size
-            normalized_oscillation = (np.cos(elapsed_time) + 1) / 2.0
-            current_size = min_size + (normalized_oscillation * size_range)
-            
-            stim.setSize(current_size)
-            
-        elif self.anim_type == 'trill':
-            # --- Trill Animation: Rapid Rotation with Pauses ---
-            # Select size setting based on stim_size preset (in height units)
-            if self.stim_size == 'big':
-                trill_size_height = cfg.animation.trill_size_big
-            else:  # 'small'
-                trill_size_height = cfg.animation.trill_size_small
-            
-            # Convert config size to stimulus's units
-            trill_size = convert_height_to_units(self.win, trill_size_height, target_units=stim.units)
-            
-            stim.setSize(trill_size)
-            
-            # Rotation logic
-            elapsed_time = clock.getTime()
-            cycle_position = elapsed_time % cfg.animation.trill_cycle_duration
-            
-            if cycle_position < cfg.animation.trill_active_duration:
-                trill_time = cycle_position * cfg.animation.trill_frequency * 2 * np.pi
-                rotation_angle = np.sin(trill_time) * cfg.animation.trill_rotation_range
-                stim.setOri(rotation_angle)
+                zoom_min_size = cfg.animation.attention_zoom_min_size_big
+                zoom_max_size = cfg.animation.attention_zoom_max_size_big
+                trill_size = cfg.animation.attention_trill_size_big
             else:
-                stim.setOri(0)
-        
+                zoom_min_size = cfg.animation.attention_zoom_min_size_small
+                zoom_max_size = cfg.animation.attention_zoom_max_size_small
+                trill_size = cfg.animation.attention_trill_size_small
+            trill_rotation_range = (
+                cfg.animation.attention_trill_rotation_range
+            )
+        else:
+            animation_type = self.collection_anim_type
+            if self.stim_size == 'big':
+                zoom_min_size = cfg.animation.collection_zoom_min_size_big
+                zoom_max_size = cfg.animation.collection_zoom_max_size_big
+                trill_size = cfg.animation.collection_trill_size_big
+            else:
+                zoom_min_size = cfg.animation.collection_zoom_min_size_small
+                zoom_max_size = cfg.animation.collection_zoom_max_size_small
+                trill_size = cfg.animation.collection_trill_size_small
+            trill_rotation_range = (
+                cfg.animation.collection_trill_rotation_range
+            )
+
+        # --- Calculate Current Pose ---
+        elapsed_time = clock.getTime()
+
+        if animation_type == 'zoom':
+            # Convert height-unit settings to the stimulus's own units.
+            min_size = convert_height_to_units(
+                self.win,
+                zoom_min_size,
+                target_units=stim.units,
+            )
+            max_size = convert_height_to_units(
+                self.win,
+                zoom_max_size,
+                target_units=stim.units,
+            )
+            size, rotation = self._zoom_animation(
+                elapsed_time,
+                min_size,
+                max_size,
+            )
+
+        elif animation_type == 'trill':
+            size = convert_height_to_units(
+                self.win,
+                trill_size,
+                target_units=stim.units,
+            )
+            size, rotation = self._trill_animation(
+                elapsed_time,
+                size,
+                trill_rotation_range,
+            )
+
+        else:
+            raise ValueError(
+                f"Invalid animation type: '{animation_type}'. "
+                "Must be 'zoom' or 'trill'."
+            )
+
+        # --- Apply Pose and Draw ---
+        stim.setSize(size)
+        stim.setOri(rotation)
         stim.draw()
     
 
@@ -886,9 +1008,12 @@ class TobiiCalibrationSession(BaseCalibrationSession):
             Animation style used during settling and data collection.
             Default 'zoom'.
         stim_size : {'big', 'small'}, optional
-            Size preset for calibration stimuli:
-            - 'big': Larger stimuli for infants/children (zoom: 5-16%, trill: 14%)
-            - 'small': Smaller stimuli for adults (zoom: 3-8%, trill: 6%)
+            Size preset for calibration stimuli. Attention and collection
+            sizes are configured independently in ``cfg.animation``:
+            - 'big': Attention zoom 9.5-16%, collection zoom 5-9.5%;
+              attention trill 12.75%, collection trill 7.25%.
+            - 'small': Attention zoom 3-6%, collection zoom 1-3%;
+              attention trill 4.5%, collection trill 2%.
             Default 'big'.
         visualization_style : {'lines', 'circles'}, optional
             Style for calibration result visualization:
@@ -1211,9 +1336,12 @@ class MouseCalibrationSession(BaseCalibrationSession):
             Animation style used during settling and data collection.
             Default 'zoom'.
         stim_size : {'big', 'small'}, optional
-            Size preset for calibration stimuli:
-            - 'big': Larger stimuli for infants/children (zoom: 5-16%, trill: 14%)
-            - 'small': Smaller stimuli for adults (zoom: 3-8%, trill: 6%)
+            Size preset for calibration stimuli. Attention and collection
+            sizes are configured independently in ``cfg.animation``:
+            - 'big': Attention zoom 9.5-16%, collection zoom 5-9.5%;
+              attention trill 12.75%, collection trill 7.25%.
+            - 'small': Attention zoom 3-6%, collection zoom 1-3%;
+              attention trill 4.5%, collection trill 2%.
             Default 'big'.
         visualization_style : {'lines', 'circles'}, optional
             Style for calibration result visualization:

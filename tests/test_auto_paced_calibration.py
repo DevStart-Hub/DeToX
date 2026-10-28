@@ -1,6 +1,7 @@
 """Hardware-free calibration checks: python -m unittest discover -s tests -p "test_*.py"."""
 
 import importlib
+import math
 from pathlib import Path
 import sys
 import types
@@ -222,6 +223,97 @@ class AutoPacedCalibrationTests(unittest.TestCase):
         self.assertEqual(self.collected, [0, 1, 2, 0, 2])
         session.calibration.enter_calibration_mode.assert_called_once()
         session.calibration.leave_calibration_mode.assert_called_once()
+
+
+class CalibrationAnimationTests(unittest.TestCase):
+    def setUp(self):
+        self.session = calibration.MouseCalibrationSession.__new__(
+            calibration.MouseCalibrationSession
+        )
+        self.session.win = Mock()
+        self.session.stim_size = 'big'
+        self.session.anim_type = 'zoom'
+        self.session.collection_anim_type = 'zoom'
+        self.stim = Mock(units='height')
+        self.session._draw_calibration_border = Mock()
+        self.clock = Mock()
+        self.clock.getTime.return_value = 0.0
+
+    def animate(self, phase):
+        with patch.object(
+            calibration,
+            'convert_height_to_units',
+            side_effect=lambda win, value, target_units: value,
+        ):
+            self.session._animate(self.stim, self.clock, 0, phase)
+
+    def test_zoom_starts_at_maximum_and_reaches_minimum(self):
+        size, rotation = self.session._zoom_animation(
+            0.0, min_size=0.05, max_size=0.16
+        )
+        self.assertAlmostEqual(size, 0.16)
+        self.assertEqual(rotation, 0.0)
+
+        half_cycle = math.pi / calibration.cfg.animation.zoom_speed
+        size, rotation = self.session._zoom_animation(
+            half_cycle, min_size=0.05, max_size=0.16
+        )
+        self.assertAlmostEqual(size, 0.05)
+        self.assertEqual(rotation, 0.0)
+
+    def test_animate_selects_attention_and_collection_zoom_bounds(self):
+        self.animate('attention')
+        self.assertAlmostEqual(
+            self.stim.setSize.call_args.args[0],
+            calibration.cfg.animation.attention_zoom_max_size_big,
+        )
+        self.assertEqual(self.stim.setOri.call_args.args[0], 0.0)
+
+        self.stim.reset_mock()
+        self.animate('collection')
+        self.assertAlmostEqual(
+            self.stim.setSize.call_args.args[0],
+            calibration.cfg.animation.collection_zoom_max_size_big,
+        )
+        self.assertEqual(self.stim.setOri.call_args.args[0], 0.0)
+
+    def test_trill_uses_fixed_size_and_bounded_rotation_with_pauses(self):
+        rotations = [
+            self.session._trill_animation(index / 1000, 0.14, 20)[1]
+            for index in range(1100)
+        ]
+        self.assertGreaterEqual(max(abs(value) for value in rotations), 18)
+        self.assertLessEqual(max(abs(value) for value in rotations), 20)
+
+        size, rotation = self.session._trill_animation(0.0, 0.14, 20)
+        self.assertEqual(size, 0.14)
+        self.assertEqual(rotation, 0.0)
+
+        size, rotation = self.session._trill_animation(1.2, 0.14, 20)
+        self.assertEqual(size, 0.14)
+        self.assertEqual(rotation, 0.0)
+
+    def test_collection_trill_can_rotate_more_than_attention(self):
+        self.session.anim_type = 'trill'
+        self.session.collection_anim_type = 'trill'
+        self.clock.getTime.return_value = 0.25
+
+        self.animate('attention')
+        attention_rotation = self.stim.setOri.call_args.args[0]
+
+        self.stim.reset_mock()
+        self.animate('collection')
+        collection_rotation = self.stim.setOri.call_args.args[0]
+
+        self.assertGreater(abs(collection_rotation), abs(attention_rotation))
+        self.assertAlmostEqual(
+            self.stim.setSize.call_args.args[0],
+            calibration.cfg.animation.collection_trill_size_big,
+        )
+
+    def test_unknown_animation_phase_is_rejected(self):
+        with self.assertRaisesRegex(ValueError, 'animation phase'):
+            self.session._animate(self.stim, self.clock, 0, 'invalid')
 
 
 class CalibrationApiTests(unittest.TestCase):
