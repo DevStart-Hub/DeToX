@@ -53,7 +53,13 @@ class AutoPacedCalibrationTests(unittest.TestCase):
         self.session._draw_calibration_border = Mock()
         self.session._clear_collected_data = Mock()
         self.session._animate = Mock(side_effect=self.animate)
-        self.session._collect_data_at_point = Mock(side_effect=self.collect)
+        self.session._start_point_data_collection = Mock(
+            side_effect=self.start_collection
+        )
+        self.session._update_point_data_collection = Mock(
+            side_effect=self.update_collection
+        )
+        self.pending_collection_result = None
         self.session.win.clearBuffer.side_effect = self.clear_frame
         self.session.win.flip.side_effect = self.flip
 
@@ -83,12 +89,17 @@ class AutoPacedCalibrationTests(unittest.TestCase):
         self.time += 0.1
         self.frames.append(self.current_target)
 
-    def collect(self, target, point_idx, **kwargs):
+    def start_collection(self, point_idx, target_pos, **kwargs):
         # Collection must never happen before the correct target is displayed.
         self.assertEqual(self.frames[-1], point_idx)
         self.collected.append(point_idx)
         self.collection_times.append(self.time)
-        return True
+        self.pending_collection_result = True
+
+    def update_collection(self, **kwargs):
+        result = self.pending_collection_result
+        self.pending_collection_result = None
+        return result
 
     def run_collection(self, keys, presentation_order=(1, 2, 3)):
         with patch.object(calibration.event, 'getKeys', side_effect=keys):
@@ -113,8 +124,8 @@ class AutoPacedCalibrationTests(unittest.TestCase):
         self.assertEqual(self.collected, [0, 1, 2])
         self.assertNotIn(None, self.frames)  # No blank interval.
         self.assertEqual(self.session.remaining_points, [0, 1, 2])
-        self.session._collect_data_at_point.assert_called_with(
-            self.points[2], 2, num_samples=5
+        self.session._start_point_data_collection.assert_called_with(
+            2, self.points[2], num_samples=5
         )
 
     def test_retry_subset_uses_the_requested_order_without_a_blank_gap(self):
@@ -194,13 +205,13 @@ class AutoPacedCalibrationTests(unittest.TestCase):
         self.session.audio.setVolume.assert_called_once_with(1.0)
 
     def test_failed_collection_keeps_same_automatic_point_for_retry(self):
-        def fail_then_succeed(target, point_idx, **kwargs):
+        def fail_then_succeed(point_idx, target_pos, **kwargs):
             self.assertEqual(self.frames[-1], point_idx)
             self.collected.append(point_idx)
-            return len(self.collected) > 1
+            self.pending_collection_result = len(self.collected) > 1
 
         self.session.remaining_points = [0]
-        self.session._collect_data_at_point = Mock(
+        self.session._start_point_data_collection = Mock(
             side_effect=fail_then_succeed
         )
         keys = [[], ['space'], [], ['space'], []]
@@ -210,10 +221,23 @@ class AutoPacedCalibrationTests(unittest.TestCase):
         self.assertEqual(self.collected, [0, 0])
 
     def test_temporary_adapters_consume_collection_result_once(self):
-        self.session._collect_data_at_point = Mock(return_value=True)
-        self.session._start_point_data_collection(0, self.points[0])
-        self.assertTrue(self.session._update_point_data_collection())
-        self.assertIsNone(self.session._update_point_data_collection())
+        session = calibration.BaseCalibrationSession.__new__(
+            calibration.BaseCalibrationSession
+        )
+        session._collect_data_at_point = Mock(return_value=True)
+        calibration.BaseCalibrationSession._start_point_data_collection(
+            session, 0, self.points[0]
+        )
+        self.assertTrue(
+            calibration.BaseCalibrationSession._update_point_data_collection(
+                session
+            )
+        )
+        self.assertIsNone(
+            calibration.BaseCalibrationSession._update_point_data_collection(
+                session
+            )
+        )
 
     def test_auto_instructions_use_space_or_escape_and_do_not_mention_gap(self):
         self.session.show_message_and_wait = Mock(return_value=['space'])
@@ -307,6 +331,109 @@ class AutoPacedCalibrationTests(unittest.TestCase):
         self.assertEqual(self.collected, [0, 1, 2, 0, 2])
         session.calibration.enter_calibration_mode.assert_called_once()
         session.calibration.leave_calibration_mode.assert_called_once()
+
+
+class MouseCollectionTests(unittest.TestCase):
+    def setUp(self):
+        self.session = calibration.MouseCalibrationSession.__new__(
+            calibration.MouseCalibrationSession
+        )
+        self.session.mouse = Mock()
+        self.session.calibration_data = {}
+        self.session._mouse_collection_point_idx = None
+        self.session._mouse_collection_target_pos = None
+        self.session._mouse_collection_samples = []
+        self.session._mouse_collection_sample_count = 0
+        self.session._mouse_collection_sample_interval = 0.0
+        self.session._mouse_collection_next_sample_time = 0.0
+
+    def test_samples_are_taken_one_at_a_time_and_stored_at_completion(self):
+        self.session.mouse.getPos.side_effect = [
+            (0, 0), (1, 0), (2, 0), (3, 0), (4, 0)
+        ]
+        with patch.object(
+            calibration.time,
+            'perf_counter',
+            side_effect=[10.0, 10.05, 10.21, 10.41, 10.61, 10.81],
+        ), patch.object(calibration.time, 'time', return_value=123.0):
+            self.session._start_point_data_collection(
+                0, (0, 0), num_samples=5
+            )
+            self.assertEqual(
+                len(self.session._mouse_collection_samples), 1
+            )
+            self.assertEqual(self.session.calibration_data, {})
+
+            self.assertIsNone(self.session._update_point_data_collection())
+            self.assertIsNone(self.session._update_point_data_collection())
+            self.assertIsNone(self.session._update_point_data_collection())
+            self.assertIsNone(self.session._update_point_data_collection())
+            self.assertTrue(self.session._update_point_data_collection())
+
+        samples = self.session.calibration_data[0]
+        self.assertEqual(len(samples), 5)
+        self.assertEqual(
+            [sample[1] for sample in samples],
+            [(0, 0), (1, 0), (2, 0), (3, 0), (4, 0)],
+        )
+
+    def test_late_frame_takes_one_sample_without_catch_up(self):
+        self.session.mouse.getPos.side_effect = [(0, 0), (1, 0)]
+        with patch.object(
+            calibration.time,
+            'perf_counter',
+            side_effect=[0.0, 10.0],
+        ), patch.object(calibration.time, 'time', return_value=123.0):
+            self.session._start_point_data_collection(
+                0, (0, 0), num_samples=5
+            )
+            self.assertIsNone(self.session._update_point_data_collection())
+
+        self.assertEqual(
+            len(self.session._mouse_collection_samples), 2
+        )
+        self.assertEqual(self.session.calibration_data, {})
+
+    def test_retry_replaces_only_that_points_samples(self):
+        self.session.mouse.getPos.side_effect = [
+            (0, 0), (1, 0), (2, 0), (3, 0)
+        ]
+        with patch.object(
+            calibration.time,
+            'perf_counter',
+            side_effect=[0.0, 1.0, 2.0, 3.0],
+        ), patch.object(calibration.time, 'time', return_value=123.0):
+            self.session._start_point_data_collection(
+                0, (0, 0), num_samples=2
+            )
+            self.assertTrue(self.session._update_point_data_collection())
+
+            self.session._start_point_data_collection(
+                0, (0, 0), num_samples=2
+            )
+            self.assertTrue(self.session._update_point_data_collection())
+
+        samples = self.session.calibration_data[0]
+        self.assertEqual(
+            [sample[1] for sample in samples],
+            [(2, 0), (3, 0)],
+        )
+
+    def test_clear_discards_pending_samples(self):
+        self.session.mouse.getPos.return_value = (0, 0)
+        with patch.object(
+            calibration.time,
+            'perf_counter',
+            return_value=0.0,
+        ), patch.object(calibration.time, 'time', return_value=123.0):
+            self.session._start_point_data_collection(
+                0, (0, 0), num_samples=5
+            )
+            self.session._clear_collected_data()
+
+        self.assertEqual(self.session.calibration_data, {})
+        self.assertEqual(self.session._mouse_collection_samples, [])
+        self.assertIsNone(self.session._mouse_collection_point_idx)
 
 
 class CalibrationAnimationTests(unittest.TestCase):

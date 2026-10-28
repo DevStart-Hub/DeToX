@@ -343,14 +343,15 @@ Completed:
 - [x] Move the focus period into the presentation loop.
 - [x] Fade audio incrementally from elapsed settling time.
 - [x] Remove blocking focus waits and the stepped audio fade from collectors.
+- [x] Advance mouse sampling from the presentation loop.
+- [x] Reset pending mouse samples when calibration is aborted.
 
 Still temporary:
 
-- Tobii collection and mouse sample intervals still block the display.
-- The collection animation is selected but cannot remain visible while collection
-  blocks the main thread.
+- Tobii collection still blocks the display.
+- The collection animation is selected but cannot remain visible while Tobii
+  collection blocks the main thread.
 - Static API/vignette documentation still describes the old auto-paced arguments.
-- Mouse simulation changes are not part of this plan.
 
 ## Remaining Implementation Order
 
@@ -359,7 +360,7 @@ Still temporary:
 3. [x] Delete `_auto_paced_collection_phase()` and the blank interval.
 4. [x] Implement the shared manual/auto state machine.
 5. [x] Convert focus/fade handling to non-blocking frame updates.
-6. [ ] Convert mouse sample collection to frame-based updates.
+6. [x] Convert mouse sample collection to frame-based updates.
 7. [ ] Add background Tobii collection through a single executor and Future.
 8. [ ] Handle failure, Escape, executor shutdown and calibration-mode cleanup.
 9. [ ] Add the smooth transition into the continuous collection animation.

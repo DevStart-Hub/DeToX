@@ -1459,6 +1459,16 @@ class MouseCalibrationSession(BaseCalibrationSession):
         self.calibration_data = {}  # point_idx -> list of (target_pos, sample_pos, timestamp)
         self.verbose = verbose
 
+        # --- Current Simulated Collection ---
+        # Mouse sampling is advanced by the presentation loop instead of
+        # blocking the display for the full sample period.
+        self._mouse_collection_point_idx = None
+        self._mouse_collection_target_pos = None
+        self._mouse_collection_samples = []
+        self._mouse_collection_sample_count = 0
+        self._mouse_collection_sample_interval = 0.0
+        self._mouse_collection_next_sample_time = 0.0
+
 
     def run(self, calibration_points, pacing='manual', presentation_order='random'):
         """
@@ -1543,59 +1553,94 @@ class MouseCalibrationSession(BaseCalibrationSession):
 
     
     
-    def _collect_data_at_point(self, target_pos, point_idx, **kwargs): # TODO: remove kwargs
+    def _start_point_data_collection(self, point_idx, target_pos, **kwargs):
         """
-        Collect mouse samples at a single calibration target.
-        
-        Gathers multiple mouse position samples over a brief period to simulate
-        the variability of real gaze data. Samples are distributed over time
-        to capture any mouse movement or positioning adjustments. Settling and
-        audio fading are handled by the presentation loop before this collector
-        is called.
+        Start simulated mouse collection for one calibration point.
 
-        Parameters
-        ----------
-        target_pos : tuple
-            The (x, y) coordinates of the current calibration target in PsychoPy units.
-        point_idx : int
-            The index of this calibration point in the full list.
-        **kwargs : dict
-            Must contain 'num_samples': number of mouse samples to collect.
-            Typically 5-10 samples for reasonable averaging.
-
-        Returns
-        -------
-        bool
-            Always returns True to indicate samples were collected successfully.
+        Mouse positions stand in for gaze samples during calibration
+        development. Samples are spread across later display frames so the
+        target can keep animating; the mouse is never read from a worker thread.
         """
+
         # --- Existing Data Cleanup ---
+        # A retry replaces this point's previous samples.
         if point_idx in self.calibration_data:
             del self.calibration_data[point_idx]
 
         # --- Sampling Configuration ---
-        num_samples = kwargs.get('num_samples', 5)
+        # Keep the existing approximately one-second sampling window. With the
+        # default five samples, observations are spaced about 0.2 seconds apart.
+        sample_count = max(1, int(kwargs.get('num_samples', 5)))
+        sample_interval = 1.0 / sample_count
+        current_time = time.perf_counter()
 
-        # --- Sample Collection Setup ---
-        # The presentation loop has already completed settling and faded audio.
-        samples = []
-        sample_duration = 1.0
-        sample_interval = sample_duration / num_samples
+        self._mouse_collection_point_idx = point_idx
+        self._mouse_collection_target_pos = target_pos
+        self._mouse_collection_samples = []
+        self._mouse_collection_sample_count = sample_count
+        self._mouse_collection_sample_interval = sample_interval
+        self._mouse_collection_next_sample_time = (
+            current_time + sample_interval
+        )
 
-        # --- Mouse Position Sampling ---
-        for i in range(num_samples):
-            mouse_pos = self.mouse.getPos()
-            timestamp = time.time()
-            samples.append((target_pos, mouse_pos, timestamp))
+        # --- Take the First Real Observation ---
+        # Collection starts immediately after settling, without another wait.
+        self._mouse_collection_samples.append((
+            target_pos,
+            self.mouse.getPos(),
+            time.time(),
+        ))
 
-            if i < num_samples - 1:
-                core.wait(sample_interval)
+    def _update_point_data_collection(self, **kwargs):
+        """
+        Advance simulated mouse collection by at most one sample.
 
-        # --- Data Storage ---
-        if point_idx not in self.calibration_data:
-            self.calibration_data[point_idx] = []
-        self.calibration_data[point_idx].extend(samples)
+        Reading the mouse on the main thread is quick, so it needs no worker.
+        If a frame arrives late, only one observation is taken; the next sample
+        is scheduled from that actual reading rather than inventing positions
+        for the missed interval.
 
-        return True
+        Returns
+        -------
+        None
+            Collection is still in progress.
+        bool
+            True when all samples for this point have been stored.
+        """
+
+        # --- Collect One Due Sample ---
+        if self._mouse_collection_point_idx is not None:
+            current_time = time.perf_counter()
+
+            if (
+                current_time >= self._mouse_collection_next_sample_time
+                and len(self._mouse_collection_samples)
+                < self._mouse_collection_sample_count
+            ):
+                self._mouse_collection_samples.append((
+                    self._mouse_collection_target_pos,
+                    self.mouse.getPos(),
+                    time.time(),
+                ))
+                self._mouse_collection_next_sample_time = (
+                    current_time + self._mouse_collection_sample_interval
+                )
+
+        # --- Store Completed Collection ---
+        if (
+            self._mouse_collection_point_idx is not None
+            and len(self._mouse_collection_samples)
+            >= self._mouse_collection_sample_count
+        ):
+            self.calibration_data.setdefault(
+                self._mouse_collection_point_idx, []
+            ).extend(self._mouse_collection_samples)
+            self._mouse_collection_point_idx = None
+            self._mouse_collection_target_pos = None
+            self._mouse_collection_samples = []
+            return True
+
+        return None
 
 
     def _clear_collected_data(self):
@@ -1608,6 +1653,16 @@ class MouseCalibrationSession(BaseCalibrationSession):
         """
         # --- Data Dictionary Reset ---
         self.calibration_data.clear()
+
+        # --- Pending Sample Reset ---
+        # An abort must not leave observations that could be added to a later
+        # collection attempt.
+        self._mouse_collection_point_idx = None
+        self._mouse_collection_target_pos = None
+        self._mouse_collection_samples = []
+        self._mouse_collection_sample_count = 0
+        self._mouse_collection_sample_interval = 0.0
+        self._mouse_collection_next_sample_time = 0.0
 
 
     def _show_results(self, calibration_points):
