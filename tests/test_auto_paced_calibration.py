@@ -86,10 +86,14 @@ class AutoPacedCalibrationTests(unittest.TestCase):
         self.collected.append(point_idx)
         return True
 
-    def run_collection(self, keys, delay=0):
+    def run_collection(self, keys, presentation_order=(1, 2, 3), delay=0):
         with patch.object(calibration.event, 'getKeys', side_effect=keys):
             return self.session._collection_phase(
-                self.points, auto_paced=True, inter_point_delay=delay, num_samples=5
+                self.points,
+                pacing='auto',
+                presentation_order=presentation_order,
+                inter_point_delay=delay,
+                num_samples=5,
             )
 
     def test_sequential_points_require_space_and_ignore_number_and_enter_keys(self):
@@ -145,11 +149,27 @@ class AutoPacedCalibrationTests(unittest.TestCase):
         self.session.show_message_and_wait.return_value = ['escape']
         self.assertFalse(self.session._show_auto_paced_instructions('Look at the target'))
 
+    def test_auto_order_is_followed(self):
+        keys = [[], ['space'], []] * 8
+        self.assertTrue(
+            self.run_collection(keys, presentation_order=(3, 1, 2))
+        )
+        self.assertEqual(self.collected, [2, 0, 1])
+
+    def test_random_order_shuffles_pending_points(self):
+        keys = [[], ['space'], []] * 8
+        with patch.object(calibration.random, 'shuffle', side_effect=lambda points: points.reverse()):
+            with patch.object(calibration.event, 'getKeys', side_effect=keys):
+                self.assertTrue(self.session._collection_phase(
+                    self.points, pacing='auto', inter_point_delay=0, num_samples=5
+                ))
+        self.assertEqual(self.collected, [2, 1, 0])
+
     def test_tobii_startup_escape_does_not_enter_calibration_mode(self):
         session = calibration.TobiiCalibrationSession.__new__(calibration.TobiiCalibrationSession)
         session.calibration = Mock()
         session._show_auto_paced_instructions = Mock(return_value=False)
-        self.assertFalse(session.run(self.points, auto_paced=True))
+        self.assertFalse(session.run(self.points, pacing='auto'))
         session.calibration.enter_calibration_mode.assert_not_called()
 
     def test_tobii_session_error_still_leaves_calibration_mode(self):
@@ -158,7 +178,7 @@ class AutoPacedCalibrationTests(unittest.TestCase):
         session._show_auto_paced_instructions = Mock(return_value=True)
         session._run_calibration_session = Mock(side_effect=RuntimeError('collection failed'))
         with self.assertRaisesRegex(RuntimeError, 'collection failed'):
-            session.run(self.points, auto_paced=True)
+            session.run(self.points, pacing='auto')
         session.calibration.enter_calibration_mode.assert_called_once()
         session.calibration.leave_calibration_mode.assert_called_once()
 
@@ -171,8 +191,12 @@ class AutoPacedCalibrationTests(unittest.TestCase):
         session._prepare_session = Mock()
         session._show_results = Mock()
         session._selection_phase = Mock(side_effect=[[2, 0], None, []])
-        with patch.object(calibration.event, 'getKeys', side_effect=[[], ['space'], []] * 8):
-            self.assertTrue(session.run(self.points, auto_paced=True, inter_point_delay=0))
+        with patch.object(calibration.event, 'getKeys', side_effect=[[], ['space'], []] * 40):
+            self.assertTrue(
+                session.run(
+                    self.points, pacing='auto', presentation_order=(1, 2, 3)
+                )
+            )
         self.assertEqual(self.collected, [0, 1, 2, 0, 2, 0, 1, 2])
 
     def test_tobii_run_collects_retry_points_and_leaves_calibration_mode(self):
@@ -189,8 +213,12 @@ class AutoPacedCalibrationTests(unittest.TestCase):
         session._discard_phase = Mock()
         session._selection_phase = Mock(side_effect=[[2, 0], []])
         with patch.object(calibration, 'get_tobii_pos', return_value=self.points):
-            with patch.object(calibration.event, 'getKeys', side_effect=[[], ['space'], []] * 5):
-                self.assertTrue(session.run(self.points, auto_paced=True, inter_point_delay=0))
+            with patch.object(calibration.event, 'getKeys', side_effect=[[], ['space'], []] * 30):
+                self.assertTrue(
+                    session.run(
+                        self.points, pacing='auto', presentation_order=(1, 2, 3)
+                    )
+                )
         self.assertEqual(self.collected, [0, 1, 2, 0, 2])
         session.calibration.enter_calibration_mode.assert_called_once()
         session.calibration.leave_calibration_mode.assert_called_once()
@@ -212,23 +240,65 @@ class CalibrationApiTests(unittest.TestCase):
                 session.return_value.run.return_value = True
                 self.assertTrue(self.controller.calibrate(
                     infant_stims=False, audio=False, shuffle=False,
-                    auto_paced=True, inter_point_delay=0.4,
+                    anim_type='trill', collection_anim_type='zoom',
+                    pacing='auto', presentation_order=[3, 1, 2, 4, 5],
                 ))
                 session.return_value.run.assert_called_once_with(
-                    base.cfg.calibration.points_5, auto_paced=True, inter_point_delay=0.4
+                    base.cfg.calibration.points_5,
+                    pacing='auto',
+                    presentation_order=(3, 1, 2, 4, 5),
+                )
+                self.assertEqual(
+                    session.call_args.kwargs['collection_anim_type'], 'zoom'
                 )
 
-    def test_default_is_manual(self):
+    def test_default_is_manual_with_random_auto_order(self):
         with patch.object(base, 'MouseCalibrationSession') as session:
             self.controller.calibrate(infant_stims=False, audio=False)
             session.return_value.run.assert_called_once_with(
-                base.cfg.calibration.points_5, auto_paced=False, inter_point_delay=0.25
+                base.cfg.calibration.points_5,
+                pacing='manual',
+                presentation_order='random',
             )
 
-    def test_negative_and_non_finite_delays_are_rejected(self):
-        for delay in [-0.1, float('inf'), float('-inf'), float('nan')]:
-            with self.subTest(delay=delay), self.assertRaisesRegex(ValueError, 'inter_point_delay'):
-                self.controller.calibrate(auto_paced=True, inter_point_delay=delay)
+    def test_manual_pacing_ignores_presentation_order(self):
+        with patch.object(base, 'MouseCalibrationSession') as session:
+            self.assertTrue(self.controller.calibrate(
+                infant_stims=False, audio=False, pacing='manual',
+                presentation_order=['not', 'used'],
+            ))
+            session.return_value.run.assert_called_once_with(
+                base.cfg.calibration.points_5,
+                pacing='manual',
+                presentation_order='random',
+            )
+
+    def test_invalid_pacing_and_animation_types_are_rejected(self):
+        cases = [
+            ({'pacing': 'sometimes'}, 'pacing'),
+            ({'anim_type': 'spin'}, 'anim_type'),
+            ({'collection_anim_type': 'spin'}, 'collection_anim_type'),
+        ]
+        for kwargs, message in cases:
+            with self.subTest(kwargs=kwargs), self.assertRaisesRegex(ValueError, message):
+                self.controller.calibrate(**kwargs)
+
+    def test_presentation_order_must_be_a_complete_1_based_permutation(self):
+        invalid_orders = [
+            [1, 2, 3, 4],
+            [1, 2, 3, 4, 6],
+            [1, 2, 3, 4, 4],
+            [1, 2, 3, 4, True],
+            [1, 2, 3, 4, '5'],
+            None,
+        ]
+        for presentation_order in invalid_orders:
+            with self.subTest(presentation_order=presentation_order):
+                with self.assertRaisesRegex(ValueError, 'presentation_order'):
+                    self.controller.calibrate(
+                        pacing='auto',
+                        presentation_order=presentation_order,
+                    )
 
 
 if __name__ == '__main__':

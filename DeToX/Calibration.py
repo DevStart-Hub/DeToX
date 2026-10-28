@@ -1,4 +1,5 @@
 # Standard library imports
+import random
 import time
 import warnings
 
@@ -36,6 +37,7 @@ class BaseCalibrationSession:
         infant_stims,
         audio=None,
         anim_type='zoom',
+        collection_anim_type='zoom',
         stim_size='big',
         visualization_style='lines'
     ):
@@ -62,9 +64,13 @@ class BaseCalibrationSession:
             Sound to play when user selects a calibration point. Provides auditory
             feedback during the calibration process. Default None (no sound).
         anim_type : {'zoom', 'trill'}, optional
-            Animation style for calibration targets:
+            Animation style for attracting attention before collection:
             - 'zoom': Smooth size oscillation using cosine function
             - 'trill': Rapid rotation with intermittent stops
+            Default 'zoom'.
+        collection_anim_type : {'zoom', 'trill'}, optional
+            Animation style for settling and sample collection. Kept separate
+            from ``anim_type`` so the two phases can use different animations.
             Default 'zoom'.
         stim_size : {'big', 'small'}, optional
             Size preset for calibration stimuli:
@@ -88,6 +94,7 @@ class BaseCalibrationSession:
         self.audio = audio
         self.focus_time = cfg.animation.focus_time
         self.anim_type = anim_type
+        self.collection_anim_type = collection_anim_type
         self.stim_size = stim_size  # ← Store stim_size
         self.visualization_style = visualization_style
         
@@ -573,8 +580,9 @@ class BaseCalibrationSession:
                     return None
 
                     
-    def _collection_phase(self, calibration_points, auto_paced=False,
-                          inter_point_delay=0.25, **kwargs):
+    def _collection_phase(self, calibration_points, pacing='manual',
+                          presentation_order='random', inter_point_delay=0.25,
+                          **kwargs):
         """
         Unified collection phase for both calibration types.
         
@@ -586,13 +594,17 @@ class BaseCalibrationSession:
         ----------
         calibration_points : list of (float, float)
             List of calibration point coordinates in window units.
-        auto_paced : bool, optional
-            Show pending points sequentially instead of selecting them by number.
+        pacing : {'manual', 'auto'}, optional
+            Manual pacing waits for number-key point selection. Auto pacing
+            starts each pass with its first ordered point and advances
+            automatically.
+        presentation_order : {'random'} or tuple of int, optional
+            Automatic presentation order as 1-based point numbers.
         inter_point_delay : float, optional
-            Blank interval after collection, before the next auto-paced point.
+            Blank interval after collection, before the next auto point.
         **kwargs : dict
-            Additional arguments passed to collect method. Mode-specific parameters
-            such as 'num_samples' for mouse calibration.
+            Additional arguments passed to collect method. Hardware-specific
+            parameters such as 'num_samples' for mouse calibration.
         
         Returns
         -------
@@ -600,9 +612,18 @@ class BaseCalibrationSession:
             True if collection completed successfully, False if user pressed escape
             to abort calibration.
         """
-        if auto_paced:
+        if pacing == 'auto':
+            point_indices = list(self.remaining_points)
+            if presentation_order == 'random':
+                random.shuffle(point_indices)
+            else:
+                point_indices = [
+                    point_number - 1
+                    for point_number in presentation_order
+                    if point_number - 1 in self.remaining_points
+                ]
             return self._auto_paced_collection_phase(
-                calibration_points, inter_point_delay, **kwargs
+                calibration_points, point_indices, inter_point_delay, **kwargs
             )
 
         # --- Animation Timing Setup ---
@@ -664,9 +685,9 @@ class BaseCalibrationSession:
             self.win.flip()
     
     
-    def _auto_paced_collection_phase(self, calibration_points, inter_point_delay, **kwargs):
+    def _auto_paced_collection_phase(self, calibration_points, point_indices,
+                                     inter_point_delay, **kwargs):
         """Show each pending point in order; only Space starts sample collection."""
-        point_indices = sorted(self.remaining_points)
         clock = core.Clock()
 
         for position, point_idx in enumerate(point_indices):
@@ -826,6 +847,7 @@ class TobiiCalibrationSession(BaseCalibrationSession):
         infant_stims,
         audio=None,
         anim_type='zoom',
+        collection_anim_type='zoom',
         stim_size='big',
         visualization_style='lines',
         verbose=True
@@ -858,9 +880,10 @@ class TobiiCalibrationSession(BaseCalibrationSession):
             Provides auditory feedback during the calibration process. If None,
             no sound is played. Default None.
         anim_type : {'zoom', 'trill'}, optional
-            Animation style for calibration targets:
-            - 'zoom': Smooth size oscillation using cosine function
-            - 'trill': Rapid rotation with intermittent stops
+            Animation style used to attract attention before data collection.
+            Default 'zoom'.
+        collection_anim_type : {'zoom', 'trill'}, optional
+            Animation style used during settling and data collection.
             Default 'zoom'.
         stim_size : {'big', 'small'}, optional
             Size preset for calibration stimuli:
@@ -882,6 +905,7 @@ class TobiiCalibrationSession(BaseCalibrationSession):
             infant_stims=infant_stims,
             audio=audio,
             anim_type=anim_type,
+            collection_anim_type=collection_anim_type,
             stim_size=stim_size,
             visualization_style=visualization_style
         )
@@ -890,7 +914,7 @@ class TobiiCalibrationSession(BaseCalibrationSession):
         self.calibration = calibration_api
         self.verbose = verbose
 
-    def run(self, calibration_points, auto_paced=False, inter_point_delay=0.25):
+    def run(self, calibration_points, pacing='manual', presentation_order='random'):
         """
         Main routine to run the full Tobii calibration workflow.
 
@@ -903,10 +927,12 @@ class TobiiCalibrationSession(BaseCalibrationSession):
         calibration_points : list of (float, float)
             List of calibration points in NORMALIZED coordinates [-1, 1].
             Will be converted to window units and then to Tobii ADCS format.
-        auto_paced : bool, optional
-            Advance targets automatically; SPACE still triggers each collection.
-        inter_point_delay : float, optional
-            Blank interval between auto-paced points, in seconds. Default 0.25.
+        pacing : {'manual', 'auto'}, optional
+            Manual pacing waits for number-key point selection. Auto pacing
+            presents targets progressively while SPACE controls collection.
+        presentation_order : {'random'} or tuple of int, optional
+            Automatic presentation order as 1-based point numbers. Retry
+            passes retain this relative order after filtering.
 
         Returns
         -------
@@ -926,7 +952,7 @@ class TobiiCalibrationSession(BaseCalibrationSession):
 
     Any key will start calibration immediately!"""
 
-        if auto_paced:
+        if pacing == 'auto':
             if not self._show_auto_paced_instructions(
                 "Wait until the participant looks at the animated target"
             ):
@@ -937,14 +963,14 @@ class TobiiCalibrationSession(BaseCalibrationSession):
         self.calibration.enter_calibration_mode()
         try:
             return self._run_calibration_session(
-                calibration_points, auto_paced, inter_point_delay
+                calibration_points, pacing, presentation_order
             )
         finally:
             # Always leave calibration mode, even if a step above raised.
             self.calibration.leave_calibration_mode()
 
-    def _run_calibration_session(self, calibration_points, auto_paced=False,
-                                 inter_point_delay=0.25):
+    def _run_calibration_session(self, calibration_points, pacing='manual',
+                                 presentation_order='random'):
         """Run the calibration steps while calibration mode is active."""
         # --- 3. Setup and Validation ---
         self.check_points(calibration_points)
@@ -959,8 +985,8 @@ class TobiiCalibrationSession(BaseCalibrationSession):
             # --- 5a. Data Collection ---
             success = self._collection_phase(
                 self.calibration_points,
-                auto_paced=auto_paced,
-                inter_point_delay=inter_point_delay,
+                pacing=pacing,
+                presentation_order=presentation_order,
             )
             
             if not success:
@@ -1147,6 +1173,7 @@ class MouseCalibrationSession(BaseCalibrationSession):
         mouse,
         audio=None,
         anim_type='zoom',
+        collection_anim_type='zoom',
         stim_size='big',
         visualization_style='lines',
         verbose=True
@@ -1178,9 +1205,10 @@ class MouseCalibrationSession(BaseCalibrationSession):
             Provides auditory feedback during the calibration process. If None,
             no sound is played. Default None.
         anim_type : {'zoom', 'trill'}, optional
-            Animation style for calibration targets:
-            - 'zoom': Smooth size oscillation using cosine function
-            - 'trill': Rapid rotation with intermittent stops
+            Animation style used to attract attention before data collection.
+            Default 'zoom'.
+        collection_anim_type : {'zoom', 'trill'}, optional
+            Animation style used during settling and data collection.
             Default 'zoom'.
         stim_size : {'big', 'small'}, optional
             Size preset for calibration stimuli:
@@ -1202,6 +1230,7 @@ class MouseCalibrationSession(BaseCalibrationSession):
             infant_stims=infant_stims,
             audio=audio,
             anim_type=anim_type,
+            collection_anim_type=collection_anim_type,
             stim_size=stim_size,
             visualization_style=visualization_style
         )
@@ -1212,7 +1241,7 @@ class MouseCalibrationSession(BaseCalibrationSession):
         self.verbose = verbose
 
 
-    def run(self, calibration_points, auto_paced=False, inter_point_delay=0.25):
+    def run(self, calibration_points, pacing='manual', presentation_order='random'):
         """
         Main function to run the mouse-based calibration routine.
         
@@ -1225,10 +1254,12 @@ class MouseCalibrationSession(BaseCalibrationSession):
         calibration_points : list of (float, float)
             List of calibration points in NORMALIZED coordinates [-1, 1].
             Will be converted to window units automatically.
-        auto_paced : bool, optional
-            Advance targets automatically; SPACE still triggers each collection.
-        inter_point_delay : float, optional
-            Blank interval between auto-paced points, in seconds. Default 0.25.
+        pacing : {'manual', 'auto'}, optional
+            Manual pacing waits for number-key point selection. Auto pacing
+            presents targets progressively while SPACE controls collection.
+        presentation_order : {'random'} or tuple of int, optional
+            Automatic presentation order as 1-based point numbers. Retry
+            passes retain this relative order after filtering.
 
         Returns
         -------
@@ -1248,7 +1279,7 @@ class MouseCalibrationSession(BaseCalibrationSession):
 
     Any key will start calibration immediately!"""
         
-        if auto_paced:
+        if pacing == 'auto':
             if not self._show_auto_paced_instructions(
                 "Move your mouse to the animated target"
             ):
@@ -1266,8 +1297,8 @@ class MouseCalibrationSession(BaseCalibrationSession):
             # --- 5a. Data Collection ---
             success = self._collection_phase(
                 self.calibration_points,
-                auto_paced=auto_paced,
-                inter_point_delay=inter_point_delay,
+                pacing=pacing,
+                presentation_order=presentation_order,
                 num_samples=cfg.calibration.num_samples_mouse,
             )
             if not success:
