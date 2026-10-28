@@ -510,45 +510,6 @@ class BaseCalibrationSession:
         stim.draw()
     
 
-    def _fade_sound(self, sound, fade_duration=0.5, steps=10):
-        """
-        Gradually fade out a sound over the specified duration.
-        
-        Reduces sound volume from its current level to silence over the fade
-        duration, then stops playback and resets volume to maximum. Useful for 
-        smooth audio transitions during calibration without abrupt cutoffs that 
-        might startle participants.
-        
-        Parameters
-        ----------
-        sound : psychopy.sound.Sound
-            The sound object to fade out. Must be currently playing.
-        fade_duration : float, optional
-            Total time in seconds for the fade-out effect. Default 0.5 seconds.
-        steps : int, optional
-            Number of volume steps in the fade. More steps create smoother fade
-            but increase CPU overhead. Default 20 steps provides smooth transition
-            without performance impact.
-            
-        Notes
-        -----
-        The sound is automatically stopped after the fade completes, and volume
-        is reset to 1.0 (maximum) so it's ready for the next playback at full volume.
-        """
-        # --- Fade-out Loop ---
-        # Gradually decrease volume from current level to 0
-        for i in range(steps, 0, -1):
-            sound.setVolume(i / steps)
-            core.wait(fade_duration / steps)
-        
-        # --- Final Cleanup ---
-        # Stop sound playback after fade completes
-        sound.stop()
-        
-        # Reset volume to maximum for next playback
-        sound.setVolume(1.0)
-
-
     def _create_legend_visuals(self, base_y_pos):
         """
         Create legend visual elements showing eye color coding.
@@ -846,6 +807,7 @@ class BaseCalibrationSession:
 
         presentation_state = WAITING_FOR_COLLECTION
         animation_clock = core.Clock()
+        settling_clock = core.Clock()
         abort_requested = False
 
         if current_point_idx is not None:
@@ -893,9 +855,10 @@ class BaseCalibrationSession:
 
                 elif key == 'space' and current_point_idx is not None:
                     # The experimenter has decided that the participant is
-                    # looking at the target. The collector applies the focus
-                    # period before acquisition.
+                    # looking at the target. Video and audio now hold attention
+                    # while the participant settles before measurement.
                     presentation_state = SETTLING_ON_TARGET
+                    settling_clock.reset()
                     self._activate_calibration_target(
                         current_point_idx,
                         calibration_points[current_point_idx],
@@ -904,15 +867,33 @@ class BaseCalibrationSession:
 
             # --- 3b. Start or Update Data Collection ---
             if presentation_state == SETTLING_ON_TARGET:
-                # The existing collector still includes the focus wait and
-                # blocks here. The next implementation step moves that wait
-                # into the frame loop.
-                self._start_point_data_collection(
-                    current_point_idx,
-                    calibration_points[current_point_idx],
-                    **kwargs,
-                )
-                presentation_state = COLLECTING_DATA
+                elapsed_settling = settling_clock.getTime()
+                focus_time = max(self.focus_time, 0.0)
+
+                # --- Fade Attention Audio Without Blocking Drawing ---
+                # The fade follows the same elapsed time as settling, so audio
+                # reaches silence exactly when sample collection begins.
+                if self.audio and focus_time > 0:
+                    remaining_volume = max(
+                        0.0,
+                        1.0 - elapsed_settling / focus_time,
+                    )
+                    self.audio.setVolume(remaining_volume)
+
+                if focus_time == 0 or elapsed_settling >= focus_time:
+                    # --- Settling Complete ---
+                    # Measurement starts only after the target has had time to
+                    # capture stable fixation.
+                    if self.audio:
+                        self.audio.setVolume(0.0)
+                        self.audio.stop()
+
+                    self._start_point_data_collection(
+                        current_point_idx,
+                        calibration_points[current_point_idx],
+                        **kwargs,
+                    )
+                    presentation_state = COLLECTING_DATA
 
             elif presentation_state == COLLECTING_DATA:
                 collection_result = self._update_point_data_collection(**kwargs)
@@ -1264,8 +1245,8 @@ class TobiiCalibrationSession(BaseCalibrationSession):
         
         Interfaces with the Tobii SDK to collect gaze samples while the participant
         looks at the calibration target. Uses pre-converted coordinates from
-        self.tobii_points for efficiency. Provides focus time either through audio
-        fade-out (smooth) or silent wait.
+        self.tobii_points for efficiency. Settling and audio fading are handled by
+        the presentation loop before this collector is called.
         
         Parameters
         ----------
@@ -1287,16 +1268,9 @@ class TobiiCalibrationSession(BaseCalibrationSession):
         
         # --- Data Cleanup ---
         self.calibration.discard_data(x, y)
-        
-        # --- Focus Time (with or without audio) ---
-        if self.audio:
-            # Fade audio while participant fixates (dual purpose)
-            self._fade_sound(self.audio, fade_duration=self.focus_time)
-        else:
-            # Silent wait for fixation
-            core.wait(self.focus_time)
-        
+
         # --- Data Collection ---
+        # The presentation loop has already completed settling and faded audio.
         self.calibration.collect_data(x, y)
         return True
     
@@ -1575,8 +1549,9 @@ class MouseCalibrationSession(BaseCalibrationSession):
         
         Gathers multiple mouse position samples over a brief period to simulate
         the variability of real gaze data. Samples are distributed over time
-        to capture any mouse movement or positioning adjustments. Provides focus
-        time either through audio fade-out (smooth) or silent wait.
+        to capture any mouse movement or positioning adjustments. Settling and
+        audio fading are handled by the presentation loop before this collector
+        is called.
 
         Parameters
         ----------
@@ -1600,15 +1575,8 @@ class MouseCalibrationSession(BaseCalibrationSession):
         # --- Sampling Configuration ---
         num_samples = kwargs.get('num_samples', 5)
 
-        # --- Focus Time (with or without audio) ---
-        if self.audio:
-            # Fade audio while participant fixates (dual purpose)
-            self._fade_sound(self.audio, fade_duration=self.focus_time)
-        else:
-            # Silent wait for fixation
-            core.wait(self.focus_time)
-
         # --- Sample Collection Setup ---
+        # The presentation loop has already completed settling and faded audio.
         samples = []
         sample_duration = 1.0
         sample_interval = sample_duration / num_samples

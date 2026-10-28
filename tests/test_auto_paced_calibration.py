@@ -40,11 +40,13 @@ class AutoPacedCalibrationTests(unittest.TestCase):
         self.frames = []
         self.current_target = None
         self.collected = []
+        self.collection_times = []
         self.session = calibration.MouseCalibrationSession.__new__(
             calibration.MouseCalibrationSession
         )
         self.session.win = Mock()
         self.session.audio = Mock(isPlaying=False)
+        self.session.focus_time = 0.0
         self.session.stim_objects = [Mock(), Mock(), Mock()]
         self.session.remaining_points = [0, 1, 2]
         self.points = [(0, 0), (-0.5, 0.5), (0.5, -0.5)]
@@ -85,6 +87,7 @@ class AutoPacedCalibrationTests(unittest.TestCase):
         # Collection must never happen before the correct target is displayed.
         self.assertEqual(self.frames[-1], point_idx)
         self.collected.append(point_idx)
+        self.collection_times.append(self.time)
         return True
 
     def run_collection(self, keys, presentation_order=(1, 2, 3)):
@@ -157,6 +160,24 @@ class AutoPacedCalibrationTests(unittest.TestCase):
                 )
             )
         self.assertEqual(self.collected, [0, 0])
+
+    def test_settling_fades_audio_before_collection(self):
+        self.session.focus_time = 0.5
+        self.session.remaining_points = [0]
+        keys = [[], ['space'], [], [], [], [], [], []]
+
+        self.assertTrue(
+            self.run_collection(keys, presentation_order=(1,))
+        )
+
+        self.assertEqual(self.collected, [0])
+        self.assertGreaterEqual(self.collection_times[0], 0.6)
+        volumes = [
+            call.args[0]
+            for call in self.session.audio.setVolume.call_args_list
+        ]
+        self.assertTrue(any(0.0 < volume < 1.0 for volume in volumes))
+        self.session.audio.stop.assert_called_once()
 
     def test_activate_target_sets_position_orientation_and_audio(self):
         animation_clock = Mock()

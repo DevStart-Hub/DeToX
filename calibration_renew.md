@@ -340,10 +340,13 @@ Completed:
 - [x] Add temporary blocking collection adapters.
 - [x] Remove `_auto_paced_collection_phase()` and the blank interval.
 - [x] Update tests for manual pacing, automatic pacing, retries and aborts.
+- [x] Move the focus period into the presentation loop.
+- [x] Fade audio incrementally from elapsed settling time.
+- [x] Remove blocking focus waits and the stepped audio fade from collectors.
 
 Still temporary:
 
-- Focus wait and Tobii collection still block the display.
+- Tobii collection and mouse sample intervals still block the display.
 - The collection animation is selected but cannot remain visible while collection
   blocks the main thread.
 - Static API/vignette documentation still describes the old auto-paced arguments.
@@ -355,13 +358,14 @@ Still temporary:
 2. [x] Replace `_collection_phase()` with `_present_and_collect_calibration_points()`.
 3. [x] Delete `_auto_paced_collection_phase()` and the blank interval.
 4. [x] Implement the shared manual/auto state machine.
-5. [ ] Convert focus/fade handling and collection adapters to non-blocking frame updates.
-6. [ ] Add background Tobii collection through a single executor and Future.
-7. [ ] Handle failure, Escape, executor shutdown and calibration-mode cleanup.
-8. [ ] Add the smooth transition into the continuous collection animation.
-9. [ ] Switch the recommended default to attention `trill`, collection `zoom`.
-10. [ ] Perform a real Tobii hardware timing/animation test.
-11. [ ] Update API and vignette documentation.
+5. [x] Convert focus/fade handling to non-blocking frame updates.
+6. [ ] Convert mouse sample collection to frame-based updates.
+7. [ ] Add background Tobii collection through a single executor and Future.
+8. [ ] Handle failure, Escape, executor shutdown and calibration-mode cleanup.
+9. [ ] Add the smooth transition into the continuous collection animation.
+10. [ ] Switch the recommended default to attention `trill`, collection `zoom`.
+11. [ ] Perform a real Tobii hardware timing/animation test.
+12. [ ] Update API and vignette documentation.
 
 ## Explicitly Rejected
 
