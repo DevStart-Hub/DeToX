@@ -338,9 +338,9 @@ class BaseCalibrationSession:
         elapsed_time : float
             Time in seconds since the current animation phase began.
         min_size : float
-            Smallest target size in the stimulus's units.
+            Smallest target size in height units.
         max_size : float
-            Largest target size in the stimulus's units.
+            Largest target size in height units.
 
         Returns
         -------
@@ -373,7 +373,7 @@ class BaseCalibrationSession:
         elapsed_time : float
             Time in seconds since the current animation phase began.
         size : float
-            Fixed target size in the stimulus's units.
+            Fixed target size in height units.
         rotation_range : float
             Maximum rotation in degrees for this animation phase.
 
@@ -411,14 +411,21 @@ class BaseCalibrationSession:
 
         return size, rotation
 
-    def _animate(self, stim, clock, point_idx, phase='attention'):
+    def _animate(
+        self,
+        stim,
+        clock,
+        point_idx,
+        phase='attention',
+        transition_start=None,
+    ):
         """
-        Animate a calibration target for the current presentation phase.
+        Draw a calibration target for its attention or collection phase.
 
         Attention and collection use independent animation types and sizes
-        from ``ETSettings``. The phase is selected by the presentation loop:
-        attention while waiting for the experimenter, collection while the
-        participant settles and gaze samples are acquired.
+        from ``ETSettings``. When collection starts, ``transition_start``
+        supplies the last displayed size and rotation so the target blends
+        smoothly into its smaller collection animation.
 
         Parameters
         ----------
@@ -430,6 +437,9 @@ class BaseCalibrationSession:
             Index of the current calibration point.
         phase : {'attention', 'collection'}, optional
             Animation phase to present. Default is 'attention'.
+        transition_start : tuple or None, optional
+            Previously displayed ``(size, rotation)`` to blend from when
+            entering collection. Default None starts immediately.
         """
 
         if phase not in ('attention', 'collection'):
@@ -438,74 +448,91 @@ class BaseCalibrationSession:
                 "Must be 'attention' or 'collection'."
             )
 
-        # --- Select Phase Animation and Size Settings ---
+        # --- Select Animation and Phase Settings ---
         if phase == 'attention':
             animation_type = self.anim_type
-            if self.stim_size == 'big':
-                zoom_min_size = cfg.animation.attention_zoom_min_size_big
-                zoom_max_size = cfg.animation.attention_zoom_max_size_big
-                trill_size = cfg.animation.attention_trill_size_big
-            else:
-                zoom_min_size = cfg.animation.attention_zoom_min_size_small
-                zoom_max_size = cfg.animation.attention_zoom_max_size_small
-                trill_size = cfg.animation.attention_trill_size_small
-            trill_rotation_range = (
-                cfg.animation.attention_trill_rotation_range
-            )
+            transition_duration = 0.0
         else:
             animation_type = self.collection_anim_type
-            if self.stim_size == 'big':
-                zoom_min_size = cfg.animation.collection_zoom_min_size_big
-                zoom_max_size = cfg.animation.collection_zoom_max_size_big
-                trill_size = cfg.animation.collection_trill_size_big
-            else:
-                zoom_min_size = cfg.animation.collection_zoom_min_size_small
-                zoom_max_size = cfg.animation.collection_zoom_max_size_small
-                trill_size = cfg.animation.collection_trill_size_small
-            trill_rotation_range = (
-                cfg.animation.collection_trill_rotation_range
+            transition_duration = (
+                max(0.0, self.focus_time)
+                if transition_start is not None
+                else 0.0
             )
 
-        # --- Calculate Current Pose ---
-        elapsed_time = clock.getTime()
+        elapsed_time = max(0.0, clock.getTime())
 
+        # --- Calculate Appearance in Height Units ---
+        # Setting names identify both phase and preset, for example
+        # attention_zoom_min_size_big.
+        preset = self.stim_size
         if animation_type == 'zoom':
-            # Convert height-unit settings to the stimulus's own units.
-            min_size = convert_height_to_units(
-                self.win,
-                zoom_min_size,
-                target_units=stim.units,
+            min_size_height = getattr(
+                cfg.animation,
+                f'{phase}_zoom_min_size_{preset}',
             )
-            max_size = convert_height_to_units(
-                self.win,
-                zoom_max_size,
-                target_units=stim.units,
+            max_size_height = getattr(
+                cfg.animation,
+                f'{phase}_zoom_max_size_{preset}',
             )
-            size, rotation = self._zoom_animation(
-                elapsed_time,
-                min_size,
-                max_size,
-            )
-
         elif animation_type == 'trill':
-            size = convert_height_to_units(
-                self.win,
-                trill_size,
-                target_units=stim.units,
+            trill_size_height = getattr(
+                cfg.animation,
+                f'{phase}_trill_size_{preset}',
             )
-            size, rotation = self._trill_animation(
-                elapsed_time,
-                size,
-                trill_rotation_range,
+            rotation_range = getattr(
+                cfg.animation,
+                f'{phase}_trill_rotation_range',
             )
-
         else:
             raise ValueError(
                 f"Invalid animation type: '{animation_type}'. "
                 "Must be 'zoom' or 'trill'."
             )
 
+        # --- Hold Collection at Its Starting Pose During the Transition ---
+        # The collection animation then starts without another clock reset.
+        motion_time = max(0.0, elapsed_time - transition_duration)
+
+        if animation_type == 'zoom':
+            size_height, rotation = self._zoom_animation(
+                motion_time,
+                min_size_height,
+                max_size_height,
+            )
+        else:
+            size_height, rotation = self._trill_animation(
+                motion_time,
+                trill_size_height,
+                rotation_range,
+            )
+
+        # --- Convert the Current Size Once ---
+        # ETSettings and animation calculations use height units. PsychoPy
+        # draws with the stimulus's own units.
+        size = convert_height_to_units(
+            self.win,
+            size_height,
+            target_units=stim.units,
+        )
+
+        # --- Blend From the Last Attention Appearance ---
+        # The saved size already uses the stimulus's units, so both ends of
+        # the interpolation use the same coordinate system.
+        if transition_duration > 0 and elapsed_time < transition_duration:
+            start_size, start_rotation = transition_start
+            progress = elapsed_time / transition_duration
+
+            # Smoothstep gives the transition a gentle start and finish.
+            blend = progress * progress * (3.0 - 2.0 * progress)
+
+            size = start_size + blend * (size - start_size)
+            rotation = start_rotation + blend * (
+                rotation - start_rotation
+            )
+
         # --- Apply Pose and Draw ---
+        # The target position stays fixed throughout both animation phases.
         stim.setSize(size)
         stim.setOri(rotation)
         stim.draw()
@@ -774,6 +801,7 @@ class BaseCalibrationSession:
         animation_clock = core.Clock()
         settling_clock = core.Clock()
         abort_requested = False
+        transition_start = None
 
         if current_point_idx is not None:
             self._activate_calibration_target(
@@ -816,6 +844,7 @@ class BaseCalibrationSession:
                     candidate_point_idx = cfg.numkey_dict[key]
                     if candidate_point_idx in eligible_point_indices:
                         current_point_idx = candidate_point_idx
+                        transition_start = None
                         self._activate_calibration_target(
                             current_point_idx,
                             calibration_points[current_point_idx],
@@ -824,15 +853,18 @@ class BaseCalibrationSession:
 
                 elif key == 'space' and current_point_idx is not None:
                     # The experimenter has decided that the participant is
-                    # looking at the target. Video and audio now hold attention
-                    # while the participant settles before measurement.
-                    presentation_state = SETTLING_ON_TARGET
-                    settling_clock.reset()
-                    self._activate_calibration_target(
-                        current_point_idx,
-                        calibration_points[current_point_idx],
-                        animation_clock,
+                    # looking at the target. Preserve exactly what is on screen
+                    # so the collection animation can blend from that pose.
+                    stim = self.stim_objects[
+                        current_point_idx % len(self.stim_objects)
+                    ]
+                    transition_start = (
+                        np.array(stim.size, dtype=float, copy=True),
+                        float(stim.ori),
                     )
+                    animation_clock.reset()
+                    settling_clock.reset()
+                    presentation_state = SETTLING_ON_TARGET
 
             # --- 3b. Start or Update Data Collection ---
             if presentation_state == SETTLING_ON_TARGET:
@@ -882,6 +914,7 @@ class BaseCalibrationSession:
                                 return True
 
                             current_point_idx = automatic_point_queue[0]
+                            transition_start = None
                             self._activate_calibration_target(
                                 current_point_idx,
                                 calibration_points[current_point_idx],
@@ -891,11 +924,13 @@ class BaseCalibrationSession:
                             # Manual pacing hides the target until the
                             # experimenter selects another point.
                             current_point_idx = None
+                            transition_start = None
 
                     else:
                         # --- Failed Collection ---
                         # Keep the same target available for another attempt.
                         # Automatic pacing must not advance the queue.
+                        transition_start = None
                         self._activate_calibration_target(
                             current_point_idx,
                             calibration_points[current_point_idx],
@@ -925,6 +960,7 @@ class BaseCalibrationSession:
                     animation_clock,
                     current_point_idx,
                     phase=animation_phase,
+                    transition_start=transition_start,
                 )
 
             self.win.flip()

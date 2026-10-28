@@ -49,6 +49,9 @@ class AutoPacedCalibrationTests(unittest.TestCase):
         self.session.focus_time = 0.0
         self.session._defer_collection_abort = False
         self.session.stim_objects = [Mock(), Mock(), Mock()]
+        for stim in self.session.stim_objects:
+            stim.size = 0.1
+            stim.ori = 0.0
         self.session.remaining_points = [0, 1, 2]
         self.points = [(0, 0), (-0.5, 0.5), (0.5, -0.5)]
         self.session._draw_calibration_border = Mock()
@@ -83,7 +86,8 @@ class AutoPacedCalibrationTests(unittest.TestCase):
     def clear_frame(self):
         self.current_target = None
 
-    def animate(self, stim, clock, point_idx, phase='attention'):
+    def animate(self, stim, clock, point_idx, phase='attention',
+                transition_start=None):
         self.current_target = point_idx
 
     def flip(self):
@@ -540,6 +544,7 @@ class CalibrationAnimationTests(unittest.TestCase):
         self.session.stim_size = 'big'
         self.session.anim_type = 'zoom'
         self.session.collection_anim_type = 'zoom'
+        self.session.focus_time = 0.5
         self.stim = Mock(units='height')
         self.session._draw_calibration_border = Mock()
         self.clock = Mock()
@@ -616,6 +621,70 @@ class CalibrationAnimationTests(unittest.TestCase):
             self.stim.setSize.call_args.args[0],
             calibration.cfg.animation.collection_trill_size_big,
         )
+
+    def test_collection_transition_starts_from_displayed_pose(self):
+        self.clock.getTime.return_value = 0.0
+
+        with patch.object(
+            calibration,
+            'convert_height_to_units',
+            side_effect=lambda win, value, target_units: value,
+        ):
+            self.session._animate(
+                self.stim,
+                self.clock,
+                0,
+                phase='collection',
+                transition_start=(0.123, 12.0),
+            )
+
+        self.assertAlmostEqual(self.stim.setSize.call_args.args[0], 0.123)
+        self.assertAlmostEqual(self.stim.setOri.call_args.args[0], 12.0)
+
+    def test_collection_transition_finishes_at_collection_pose(self):
+        self.clock.getTime.return_value = self.session.focus_time
+
+        with patch.object(
+            calibration,
+            'convert_height_to_units',
+            side_effect=lambda win, value, target_units: value,
+        ):
+            self.session._animate(
+                self.stim,
+                self.clock,
+                0,
+                phase='collection',
+                transition_start=(0.123, 12.0),
+            )
+
+        self.assertAlmostEqual(
+            self.stim.setSize.call_args.args[0],
+            calibration.cfg.animation.collection_zoom_max_size_big,
+        )
+        self.assertAlmostEqual(self.stim.setOri.call_args.args[0], 0.0)
+
+    def test_zero_focus_time_skips_animation_transition(self):
+        self.session.focus_time = 0.0
+        self.clock.getTime.return_value = 0.0
+
+        with patch.object(
+            calibration,
+            'convert_height_to_units',
+            side_effect=lambda win, value, target_units: value,
+        ):
+            self.session._animate(
+                self.stim,
+                self.clock,
+                0,
+                phase='collection',
+                transition_start=(0.123, 12.0),
+            )
+
+        self.assertAlmostEqual(
+            self.stim.setSize.call_args.args[0],
+            calibration.cfg.animation.collection_zoom_max_size_big,
+        )
+        self.assertAlmostEqual(self.stim.setOri.call_args.args[0], 0.0)
 
     def test_unknown_animation_phase_is_rejected(self):
         with self.assertRaisesRegex(ValueError, 'animation phase'):

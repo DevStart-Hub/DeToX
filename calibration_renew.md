@@ -351,10 +351,12 @@ Completed:
 - [x] Defer Escape only while Tobii collection is active.
 - [x] Finish pending collection before leaving calibration mode.
 
+- [x] Blend from the displayed attention pose into the collection animation.
+- [x] Reuse `focus_time` as the transition duration; no separate timing setting.
+- [x] Convert the calculated height-unit size once before blending and drawing.
+
 Still temporary:
 
-- The animation still jumps from the current attention pose directly into
-  collection rather than blending smoothly.
 - Static API/vignette documentation still describes the old auto-paced arguments.
 
 ## Remaining Implementation Order
@@ -367,7 +369,7 @@ Still temporary:
 6. [x] Convert mouse sample collection to frame-based updates.
 7. [x] Add background Tobii collection through a single executor and Future.
 8. [x] Handle failure, Escape, executor shutdown and calibration-mode cleanup.
-9. [ ] Add the smooth transition into the continuous collection animation.
+9. [x] Add the smooth transition into the continuous collection animation.
 10. [ ] Switch the recommended default to attention `trill`, collection `zoom`.
 11. [ ] Perform a real Tobii hardware timing/animation test.
 12. [ ] Update API and vignette documentation.
