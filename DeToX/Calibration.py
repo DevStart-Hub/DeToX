@@ -37,7 +37,7 @@ class BaseCalibrationSession:
         win,
         infant_stims,
         audio=None,
-        anim_type='zoom',
+        anim_type='trill',
         collection_anim_type='zoom',
         stim_size='big',
         visualization_style='lines'
@@ -66,9 +66,9 @@ class BaseCalibrationSession:
             feedback during the calibration process. Default None (no sound).
         anim_type : {'zoom', 'trill'}, optional
             Animation style for attracting attention before collection:
-            - 'zoom': Smooth size oscillation using cosine function
             - 'trill': Rapid rotation with intermittent stops
-            Default 'zoom'.
+            - 'zoom': Smooth size oscillation using cosine function
+            Default 'trill'.
         collection_anim_type : {'zoom', 'trill'}, optional
             Animation style for settling and sample collection. Kept separate
             from ``anim_type`` so the two phases can use different animations.
@@ -239,22 +239,6 @@ class BaseCalibrationSession:
         # --- Wait for intentional keypress ---
         return event.waitKeys(keyList=key_list)
 
-    def _show_auto_paced_instructions(self, looking_instruction):
-        """Wait for Space to start, or Escape to exit before calibration begins."""
-        instructions = f"""Auto-Paced Calibration:
-
-    - Press SPACE to begin
-    - {looking_instruction}
-    - Press SPACE to collect samples at the current point
-    - The next target appears automatically
-    - Results appear after all points are collected
-    - Press ESCAPE to exit calibration"""
-        keys = self.show_message_and_wait(
-            instructions, "Calibration Setup", key_list=['space', 'escape']
-        )
-        return 'escape' not in keys
-            
-    
     def check_points(self, calibration_points):
         """
         Ensure number of calibration points is within allowed range.
@@ -1071,7 +1055,7 @@ class TobiiCalibrationSession(BaseCalibrationSession):
         calibration_api,
         infant_stims,
         audio=None,
-        anim_type='zoom',
+        anim_type='trill',
         collection_anim_type='zoom',
         stim_size='big',
         visualization_style='lines',
@@ -1106,7 +1090,7 @@ class TobiiCalibrationSession(BaseCalibrationSession):
             no sound is played. Default None.
         anim_type : {'zoom', 'trill'}, optional
             Animation style used to attract attention before data collection.
-            Default 'zoom'.
+            Default 'trill'.
         collection_anim_type : {'zoom', 'trill'}, optional
             Animation style used during settling and data collection.
             Default 'zoom'.
@@ -1176,23 +1160,32 @@ class TobiiCalibrationSession(BaseCalibrationSession):
         """
 
         # --- Instruction Display (before entering calibration mode) ---
-        instructions_text = f"""Tobii Eye Tracker Calibration Setup:
+        if pacing == 'auto':
+            instructions_text = f"""Automatic Pacing:
 
+    - Press SPACE to begin
+    - Wait until the participant looks at the animated target
+    - Press SPACE to collect samples at the current point
+    - The next target appears automatically
+    - Results appear after all points are collected
+    - Press ESCAPE to exit calibration"""
+        else:
+            instructions_text = f"""Tobii Eye Tracker Calibration Setup:
+
+    - Press SPACE to begin
     - Press number keys (1-{len(calibration_points)}) to select calibration points
     - Look at the animated stimulus when it appears
     - Press SPACE to collect samples at the selected point
     - Press ENTER to finish collecting and see results
-    - Press ESCAPE to exit calibration
+    - Press ESCAPE to exit calibration"""
 
-    Any key will start calibration immediately!"""
-
-        if pacing == 'auto':
-            if not self._show_auto_paced_instructions(
-                "Wait until the participant looks at the animated target"
-            ):
-                return False
-        else:
-            self.show_message_and_wait(instructions_text, "Eye Tracker Calibration")
+        keys = self.show_message_and_wait(
+            instructions_text,
+            "Eye Tracker Calibration",
+            key_list=['space', 'escape'],
+        )
+        if 'escape' in keys:
+            return False
 
         # --- Start the Collection Worker ---
         # One worker handles all points in this calibration session. No dummy
@@ -1440,7 +1433,7 @@ class MouseCalibrationSession(BaseCalibrationSession):
         infant_stims,
         mouse,
         audio=None,
-        anim_type='zoom',
+        anim_type='trill',
         collection_anim_type='zoom',
         stim_size='big',
         visualization_style='lines',
@@ -1474,7 +1467,7 @@ class MouseCalibrationSession(BaseCalibrationSession):
             no sound is played. Default None.
         anim_type : {'zoom', 'trill'}, optional
             Animation style used to attract attention before data collection.
-            Default 'zoom'.
+            Default 'trill'.
         collection_anim_type : {'zoom', 'trill'}, optional
             Animation style used during settling and data collection.
             Default 'zoom'.
@@ -1550,25 +1543,33 @@ class MouseCalibrationSession(BaseCalibrationSession):
         """
 
         # --- 1. Instruction Display ---
-        instructions_text = f"""Mouse-Based Calibration Setup:
+        if pacing == 'auto':
+            instructions_text = f"""Automatic Pacing:
 
+    - Press SPACE to begin
+    - Move your mouse to the animated target
+    - Press SPACE to collect samples at the current point
+    - The next target appears automatically
+    - Results appear after all points are collected
+    - Press ESCAPE to exit calibration"""
+        else:
+            instructions_text = f"""Mouse-Based Calibration Setup:
+
+    - Press SPACE to begin
     - Press number keys (1-{len(calibration_points)}) to select calibration points
     - Move your mouse to the animated stimulus
     - Press SPACE to collect samples at the selected point
     - Press ENTER to finish collecting and see results
-    - Press ESCAPE to exit calibration
+    - Press ESCAPE to exit calibration"""
 
-    Any key will start calibration immediately!"""
-        
-        if pacing == 'auto':
-            if not self._show_auto_paced_instructions(
-                "Move your mouse to the animated target"
-            ):
-                return False
-        else:
-            self.show_message_and_wait(instructions_text, "Calibration Setup")
-        
-        
+        keys = self.show_message_and_wait(
+            instructions_text,
+            "Calibration Setup",
+            key_list=['space', 'escape'],
+        )
+        if 'escape' in keys:
+            return False
+
         # --- 3. Setup and Validation ---
         self.check_points(calibration_points)
         self._prepare_session(calibration_points)

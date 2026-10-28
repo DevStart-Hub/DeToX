@@ -164,43 +164,48 @@ First, you'll see instructions explaining the controls:
 ┌──────────────────── Calibration Setup ─────────────────────┐
 │Mouse-Based Calibration Setup:                              │
 │                                                            │
+│    - Press SPACE to begin                                  │
 │    - Press number keys (1-5) to select calibration points  │
 │    - Move your mouse to the animated stimulus              │
 │    - Press SPACE to collect samples at the selected point  │
 │    - Press ENTER to finish collecting and see results      │
 │    - Press ESCAPE to exit calibration                      │
 │                                                            │
-│    Any key will start calibration immediately!             │
 └────────────────────────────────────────────────────────────┘
 ```
 
-these instructions will tell you how to control the calibration using your keyboard.
+These instructions tell you how to control calibration using the keyboard.
 
-Press any key when you're ready to begin.
+Press **SPACE** when you're ready to begin, or **ESCAPE** to cancel.
 
 #### Data Collection
 
 The calibration screen appears with a thin red border indicating you're in calibration mode. Press a number key (1-5) to display an animated stimulus at the corresponding calibration point. The participant should look at the stimulus while it animates. When you're confident they're fixating on the target, press **SPACE** to collect gaze samples. The system waits briefly (0.5 seconds by default) to ensure stable fixation, then records the eye tracking data for that point. Repeat this process for all calibration points. You don't need to go in order.
 
-#### Optional: Auto-Paced Calibration
+#### Optional: Automatic Pacing
 
 To show calibration points automatically while still collecting samples manually:
 
 ```python
-ET_controller.calibrate(auto_paced=True, inter_point_delay=0.25)
+ET_controller.calibrate(pacing='auto', presentation_order='random')
 ```
 
 Press **SPACE** on the instruction screen to show the first target. When the
-participant looks at it, press **SPACE** again to collect samples. After collection
-finishes, the screen is blank for `inter_point_delay` seconds (default 0.25), then
-the next target appears automatically. This interval is separate from the existing
-pre-collection focus time (`cfg.animation.focus_time`, default 0.5 seconds).
+participant looks at it, press **SPACE** again to collect samples. After successful
+collection, the next target appears immediately, with no blank interval.
 
-Results appear automatically after the last point. Selected retry points also
-advance automatically, in point-number order. **ESCAPE** exits during collection
-or between points. Mouse simulation uses the same controls; move the mouse to each
-target before pressing Space. The default, `auto_paced=False`, retains manual
-number-key point selection and **ENTER** to finish collection.
+Random presentation order is the default. A fixed sequence can be requested with
+1-based point numbers:
+
+```python
+ET_controller.calibrate(pacing='auto', presentation_order=[1, 5, 2, 3, 4])
+```
+
+Results appear automatically after the last point. Selected retry points retain
+their relative presentation order. **ESCAPE** exits during collection or between
+points. Mouse simulation uses the same controls; move the mouse to each target
+before pressing Space. The default, `pacing='manual'`, retains number-key point
+selection and **ENTER** to finish collection.
 
 #### Step 3: Review Results
 

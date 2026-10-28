@@ -240,16 +240,39 @@ class AutoPacedCalibrationTests(unittest.TestCase):
         )
         self.assertEqual(self.collected, [0, 0])
 
-    def test_auto_instructions_use_space_or_escape_and_do_not_mention_gap(self):
-        self.session.show_message_and_wait = Mock(return_value=['space'])
-        self.assertTrue(self.session._show_auto_paced_instructions('Look at the target'))
-        args, kwargs = self.session.show_message_and_wait.call_args
-        self.assertIn('Look at the target', args[0])
-        self.assertNotIn('gap', args[0].lower())
-        self.assertNotIn('blank', args[0].lower())
-        self.assertEqual(kwargs['key_list'], ['space', 'escape'])
-        self.session.show_message_and_wait.return_value = ['escape']
-        self.assertFalse(self.session._show_auto_paced_instructions('Look at the target'))
+    def test_manual_and_automatic_instructions_wait_for_space_or_escape(self):
+        session = calibration.MouseCalibrationSession.__new__(
+            calibration.MouseCalibrationSession
+        )
+        session.show_message_and_wait = Mock(return_value=['space'])
+        session.check_points = Mock()
+        session._prepare_session = Mock()
+        session.calibration_points = self.points
+        session._present_and_collect_calibration_points = Mock(
+            return_value=False
+        )
+
+        session.run(self.points, pacing='auto')
+        auto_text, _ = session.show_message_and_wait.call_args.args
+        self.assertIn('Automatic Pacing', auto_text)
+        self.assertIn('Move your mouse', auto_text)
+        self.assertEqual(
+            session.show_message_and_wait.call_args.kwargs['key_list'],
+            ['space', 'escape'],
+        )
+
+        session.show_message_and_wait.reset_mock()
+        session.run(self.points, pacing='manual')
+        manual_text, _ = session.show_message_and_wait.call_args.args
+        self.assertIn('Mouse-Based Calibration Setup', manual_text)
+        self.assertIn('Press SPACE to begin', manual_text)
+        self.assertEqual(
+            session.show_message_and_wait.call_args.kwargs['key_list'],
+            ['space', 'escape'],
+        )
+
+        session.show_message_and_wait.return_value = ['escape']
+        self.assertFalse(session.run(self.points, pacing='auto'))
 
     def test_auto_order_is_followed(self):
         keys = [[], ['space'], [], ['space'], [], ['space'], []]
@@ -278,14 +301,14 @@ class AutoPacedCalibrationTests(unittest.TestCase):
     def test_tobii_startup_escape_does_not_enter_calibration_mode(self):
         session = calibration.TobiiCalibrationSession.__new__(calibration.TobiiCalibrationSession)
         session.calibration = Mock()
-        session._show_auto_paced_instructions = Mock(return_value=False)
+        session.show_message_and_wait = Mock(return_value=['escape'])
         self.assertFalse(session.run(self.points, pacing='auto'))
         session.calibration.enter_calibration_mode.assert_not_called()
 
     def test_tobii_session_error_still_leaves_calibration_mode(self):
         session = calibration.TobiiCalibrationSession.__new__(calibration.TobiiCalibrationSession)
         session.calibration = Mock()
-        session._show_auto_paced_instructions = Mock(return_value=True)
+        session.show_message_and_wait = Mock(return_value=['space'])
         session._run_calibration_session = Mock(side_effect=RuntimeError('collection failed'))
         with self.assertRaisesRegex(RuntimeError, 'collection failed'):
             session.run(self.points, pacing='auto')
@@ -296,7 +319,7 @@ class AutoPacedCalibrationTests(unittest.TestCase):
         session = self.session
         session.calibration_points = self.points
         session.calibration_data = {}
-        session._show_auto_paced_instructions = Mock(return_value=True)
+        session.show_message_and_wait = Mock(return_value=['space'])
         session.check_points = Mock()
         session._prepare_session = Mock()
         session._show_results = Mock()
@@ -316,7 +339,7 @@ class AutoPacedCalibrationTests(unittest.TestCase):
         session.calstim_units = 'height'
         session.calibration = Mock()
         session.calibration.compute_and_apply.return_value.status = calibration.tr.CALIBRATION_STATUS_SUCCESS
-        session._show_auto_paced_instructions = Mock(return_value=True)
+        session.show_message_and_wait = Mock(return_value=['space'])
         session.check_points = Mock()
         session._prepare_session = Mock()
         session._show_calibration_result = Mock()
@@ -403,7 +426,7 @@ class TobiiCollectionTests(unittest.TestCase):
         self.assertIsNone(self.session._collection_future)
 
     def test_run_shuts_down_worker_before_leaving_calibration_mode(self):
-        self.session._show_auto_paced_instructions = Mock(return_value=True)
+        self.session.show_message_and_wait = Mock(return_value=['space'])
         self.session._run_calibration_session = Mock(return_value=True)
         events = []
         self.session.calibration.enter_calibration_mode.side_effect = (
@@ -719,13 +742,19 @@ class CalibrationApiTests(unittest.TestCase):
                     session.call_args.kwargs['collection_anim_type'], 'zoom'
                 )
 
-    def test_default_is_manual_with_random_auto_order(self):
+    def test_defaults_use_manual_pacing_and_two_phase_animations(self):
         with patch.object(base, 'MouseCalibrationSession') as session:
             self.controller.calibrate(infant_stims=False, audio=False)
             session.return_value.run.assert_called_once_with(
                 base.cfg.calibration.points_5,
                 pacing='manual',
                 presentation_order='random',
+            )
+            self.assertEqual(
+                session.call_args.kwargs['anim_type'], 'trill'
+            )
+            self.assertEqual(
+                session.call_args.kwargs['collection_anim_type'], 'zoom'
             )
 
     def test_manual_pacing_ignores_presentation_order(self):

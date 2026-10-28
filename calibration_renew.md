@@ -309,14 +309,12 @@ is performed.
 - `stim_size='big'/'small'` selects the preset.
 - Reset orientation smoothly when changing out of a trill animation.
 
-### Current staged state
+### Current defaults
 
-- `collection_anim_type` is accepted, stored and propagated.
-- Attention and collection sizes are now explicit in `AnimationSettings`.
-- The current attention animation uses the new attention size fields.
-- The collection animation is not applied yet; that step is still pending.
-- Current defaults remain `'zoom'` for both phases until the second phase is implemented.
-- Once both phases are active, change the recommended default to `anim_type='trill'`, `collection_anim_type='zoom'`.
+- Attention animation: `trill`.
+- Collection animation: `zoom`.
+- Attention and collection sizes are explicit in `AnimationSettings`.
+- Both phases are active, with a smooth blend during `focus_time`.
 
 ## Current Status
 
@@ -354,6 +352,7 @@ Completed:
 - [x] Blend from the displayed attention pose into the collection animation.
 - [x] Reuse `focus_time` as the transition duration; no separate timing setting.
 - [x] Convert the calculated height-unit size once before blending and drawing.
+- [x] Default to attention `trill` and collection `zoom`.
 
 Still temporary:
 
@@ -370,7 +369,7 @@ Still temporary:
 7. [x] Add background Tobii collection through a single executor and Future.
 8. [x] Handle failure, Escape, executor shutdown and calibration-mode cleanup.
 9. [x] Add the smooth transition into the continuous collection animation.
-10. [ ] Switch the recommended default to attention `trill`, collection `zoom`.
+10. [x] Switch the recommended default to attention `trill`, collection `zoom`.
 11. [ ] Perform a real Tobii hardware timing/animation test.
 12. [ ] Update API and vignette documentation.
 

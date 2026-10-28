@@ -662,7 +662,7 @@ class ETracker:
         stim_size='big',
 
         # Attention
-        anim_type='zoom',
+        anim_type='trill',
         collection_anim_type='zoom',
         audio=True,
 
@@ -736,8 +736,8 @@ class ETracker:
         anim_type : {'zoom', 'trill'}, optional
             Animation style used to attract attention before data collection:
 
-             - **'zoom'** applies smooth size oscillation using a cosine function (default). 
-             - **'trill'** uses rapid rotation with intermittent pauses.
+             - **'trill'** uses rapid rotation with intermittent pauses (default).
+             - **'zoom'** applies smooth size oscillation using a cosine function.
 
         collection_anim_type : {'zoom', 'trill'}, optional
             Animation style used while the participant settles on the target and
