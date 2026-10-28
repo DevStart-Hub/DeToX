@@ -74,7 +74,7 @@ class AutoPacedCalibrationTests(unittest.TestCase):
     def clear_frame(self):
         self.current_target = None
 
-    def animate(self, stim, clock, point_idx):
+    def animate(self, stim, clock, point_idx, phase='attention'):
         self.current_target = point_idx
 
     def flip(self):
@@ -87,34 +87,40 @@ class AutoPacedCalibrationTests(unittest.TestCase):
         self.collected.append(point_idx)
         return True
 
-    def run_collection(self, keys, presentation_order=(1, 2, 3), delay=0):
+    def run_collection(self, keys, presentation_order=(1, 2, 3)):
         with patch.object(calibration.event, 'getKeys', side_effect=keys):
-            return self.session._collection_phase(
+            return self.session._present_and_collect_calibration_points(
                 self.points,
                 pacing='auto',
                 presentation_order=presentation_order,
-                inter_point_delay=delay,
                 num_samples=5,
             )
 
-    def test_sequential_points_require_space_and_ignore_number_and_enter_keys(self):
-        keys = [[], ['1', 'return'], [], ['space'], ['space']]
-        keys += [[], ['space'], []] * 2
+    def test_automatic_points_require_one_space_each_and_ignore_numbers(self):
+        keys = [
+            [],           # Show the first target.
+            ['1', 'space'],  # Number is ignored; collect the first target.
+            [],           # Consume result and show the next target.
+            ['space'],    # Collect the second target.
+            [],           # Consume result and show the third target.
+            ['space'],    # Collect the third target.
+            [],           # Consume result and finish the pass.
+        ]
         self.assertTrue(self.run_collection(keys))
         self.assertEqual(self.collected, [0, 1, 2])
-        self.assertNotIn(None, self.frames)  # Zero delay adds no blank frames.
+        self.assertNotIn(None, self.frames)  # No blank interval.
         self.assertEqual(self.session.remaining_points, [0, 1, 2])
         self.session._collect_data_at_point.assert_called_with(
             self.points[2], 2, num_samples=5
         )
 
-    def test_retry_subset_is_sorted_and_has_a_blank_gap_only_between_points(self):
+    def test_retry_subset_uses_the_requested_order_without_a_blank_gap(self):
         self.session.remaining_points = [2, 0]
-        keys = [[], ['space'], [], ['space'], [], [], [], ['space'], []]
-        self.assertTrue(self.run_collection(keys, delay=0.25))
+        keys = [[], ['space'], [], ['space'], []]
+        self.assertTrue(self.run_collection(keys))
         self.assertEqual(self.collected, [0, 2])
-        self.assertEqual(self.frames, [0, None, None, None, 2])
-        self.assertGreaterEqual(self.time, 0.45)
+        self.assertNotIn(None, self.frames)
+        self.assertEqual(self.frames[-1], 2)
 
     def test_escape_while_waiting_stops_audio_and_clears_data(self):
         self.assertFalse(self.run_collection([[], ['escape', 'space']]))
@@ -127,17 +133,66 @@ class AutoPacedCalibrationTests(unittest.TestCase):
         self.assertEqual(self.collected, [0])
         self.session._clear_collected_data.assert_called_once()
 
-    def test_escape_in_blank_gap_aborts(self):
+    def test_escape_after_success_stops_before_next_collection(self):
         keys = [[], ['space'], [], ['escape']]
-        self.assertFalse(self.run_collection(keys, delay=0.25))
+        self.assertFalse(self.run_collection(keys))
         self.assertEqual(self.collected, [0])
-        self.assertEqual(self.frames, [0, None])
+        self.assertNotIn(None, self.frames)
 
     def test_manual_default_still_allows_recollection_and_enter_to_finish(self):
-        keys = [['1'], ['space'], ['1'], ['space'], ['return']]
+        keys = [
+            ['1'],       # Show point 1.
+            ['space'],   # Collect it.
+            [],          # Consume result; target disappears.
+            ['1'],       # Show point 1 again.
+            ['space'],   # Recollect it.
+            [],          # Consume result.
+            ['return'],  # Show results.
+        ]
         with patch.object(calibration.event, 'getKeys', side_effect=keys):
-            self.assertTrue(self.session._collection_phase(self.points))
+            self.assertTrue(
+                self.session._present_and_collect_calibration_points(
+                    self.points,
+                    pacing='manual',
+                )
+            )
         self.assertEqual(self.collected, [0, 0])
+
+    def test_activate_target_sets_position_orientation_and_audio(self):
+        animation_clock = Mock()
+        self.session._activate_calibration_target(
+            1,
+            self.points[1],
+            animation_clock,
+        )
+        stim = self.session.stim_objects[1]
+        stim.setPos.assert_called_once_with(self.points[1])
+        stim.setOri.assert_called_once_with(0)
+        animation_clock.reset.assert_called_once_with()
+        self.session.audio.play.assert_called_once_with()
+        self.session.audio.setVolume.assert_called_once_with(1.0)
+
+    def test_failed_collection_keeps_same_automatic_point_for_retry(self):
+        def fail_then_succeed(target, point_idx, **kwargs):
+            self.assertEqual(self.frames[-1], point_idx)
+            self.collected.append(point_idx)
+            return len(self.collected) > 1
+
+        self.session.remaining_points = [0]
+        self.session._collect_data_at_point = Mock(
+            side_effect=fail_then_succeed
+        )
+        keys = [[], ['space'], [], ['space'], []]
+        self.assertTrue(
+            self.run_collection(keys, presentation_order=(1,))
+        )
+        self.assertEqual(self.collected, [0, 0])
+
+    def test_temporary_adapters_consume_collection_result_once(self):
+        self.session._collect_data_at_point = Mock(return_value=True)
+        self.session._start_point_data_collection(0, self.points[0])
+        self.assertTrue(self.session._update_point_data_collection())
+        self.assertIsNone(self.session._update_point_data_collection())
 
     def test_auto_instructions_use_space_or_escape_and_do_not_mention_gap(self):
         self.session.show_message_and_wait = Mock(return_value=['space'])
@@ -151,19 +206,27 @@ class AutoPacedCalibrationTests(unittest.TestCase):
         self.assertFalse(self.session._show_auto_paced_instructions('Look at the target'))
 
     def test_auto_order_is_followed(self):
-        keys = [[], ['space'], []] * 8
+        keys = [[], ['space'], [], ['space'], [], ['space'], []]
         self.assertTrue(
             self.run_collection(keys, presentation_order=(3, 1, 2))
         )
         self.assertEqual(self.collected, [2, 0, 1])
 
     def test_random_order_shuffles_pending_points(self):
-        keys = [[], ['space'], []] * 8
-        with patch.object(calibration.random, 'shuffle', side_effect=lambda points: points.reverse()):
+        keys = [[], ['space'], [], ['space'], [], ['space'], []]
+        with patch.object(
+            calibration.random,
+            'shuffle',
+            side_effect=lambda points: points.reverse(),
+        ):
             with patch.object(calibration.event, 'getKeys', side_effect=keys):
-                self.assertTrue(self.session._collection_phase(
-                    self.points, pacing='auto', inter_point_delay=0, num_samples=5
-                ))
+                self.assertTrue(
+                    self.session._present_and_collect_calibration_points(
+                        self.points,
+                        pacing='auto',
+                        num_samples=5,
+                    )
+                )
         self.assertEqual(self.collected, [2, 1, 0])
 
     def test_tobii_startup_escape_does_not_enter_calibration_mode(self):

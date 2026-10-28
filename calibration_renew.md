@@ -335,31 +335,33 @@ Completed:
 - [x] Point the current attention animation at the new attention fields.
 - [x] Add zoom and trill pose calculations with a selectable animation phase.
 - [x] Add focused tests for bounds, phase selection, rotation and pauses.
+- [x] Replace the two collection loops with one shared presentation loop.
+- [x] Add automatic point ordering and target activation helpers.
+- [x] Add temporary blocking collection adapters.
+- [x] Remove `_auto_paced_collection_phase()` and the blank interval.
+- [x] Update tests for manual pacing, automatic pacing, retries and aborts.
 
 Still temporary:
 
-- `_collection_phase()` still dispatches to the old automatic loop.
-- `_auto_paced_collection_phase()` still exists.
-- The blank interval still exists internally.
 - Focus wait and Tobii collection still block the display.
-- `collection_anim_type` is inert.
+- The collection animation is selected but cannot remain visible while collection
+  blocks the main thread.
 - Static API/vignette documentation still describes the old auto-paced arguments.
 - Mouse simulation changes are not part of this plan.
 
 ## Remaining Implementation Order
 
 1. [x] Add the zoom/trill calculation helpers using the explicit animation settings.
-2. [ ] Replace `_collection_phase()` with `_present_and_collect_calibration_points()`.
-3. [ ] Delete `_auto_paced_collection_phase()` and the blank interval.
-4. [ ] Implement the shared manual/auto state machine.
-5. [ ] Convert Tobii focus/fade handling to non-blocking frame updates.
+2. [x] Replace `_collection_phase()` with `_present_and_collect_calibration_points()`.
+3. [x] Delete `_auto_paced_collection_phase()` and the blank interval.
+4. [x] Implement the shared manual/auto state machine.
+5. [ ] Convert focus/fade handling and collection adapters to non-blocking frame updates.
 6. [ ] Add background Tobii collection through a single executor and Future.
 7. [ ] Handle failure, Escape, executor shutdown and calibration-mode cleanup.
-8. [ ] Add the collection animation phase and activate `collection_anim_type`.
+8. [ ] Add the smooth transition into the continuous collection animation.
 9. [ ] Switch the recommended default to attention `trill`, collection `zoom`.
-10. [ ] Update tests for manual pacing, automatic pacing, recurrence and aborts.
-11. [ ] Perform a real Tobii hardware timing/animation test.
-12. [ ] Update API and vignette documentation.
+10. [ ] Perform a real Tobii hardware timing/animation test.
+11. [ ] Update API and vignette documentation.
 
 ## Explicitly Rejected
 
