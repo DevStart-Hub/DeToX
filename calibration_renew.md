@@ -345,12 +345,16 @@ Completed:
 - [x] Remove blocking focus waits and the stepped audio fade from collectors.
 - [x] Advance mouse sampling from the presentation loop.
 - [x] Reset pending mouse samples when calibration is aborted.
+- [x] Run Tobii collection through one executor and Future per session.
+- [x] Poll Tobii completion while target animation continues.
+- [x] Check Tobii success/failure and propagate worker exceptions.
+- [x] Defer Escape only while Tobii collection is active.
+- [x] Finish pending collection before leaving calibration mode.
 
 Still temporary:
 
-- Tobii collection still blocks the display.
-- The collection animation is selected but cannot remain visible while Tobii
-  collection blocks the main thread.
+- The animation still jumps from the current attention pose directly into
+  collection rather than blending smoothly.
 - Static API/vignette documentation still describes the old auto-paced arguments.
 
 ## Remaining Implementation Order
@@ -361,8 +365,8 @@ Still temporary:
 4. [x] Implement the shared manual/auto state machine.
 5. [x] Convert focus/fade handling to non-blocking frame updates.
 6. [x] Convert mouse sample collection to frame-based updates.
-7. [ ] Add background Tobii collection through a single executor and Future.
-8. [ ] Handle failure, Escape, executor shutdown and calibration-mode cleanup.
+7. [x] Add background Tobii collection through a single executor and Future.
+8. [x] Handle failure, Escape, executor shutdown and calibration-mode cleanup.
 9. [ ] Add the smooth transition into the continuous collection animation.
 10. [ ] Switch the recommended default to attention `trill`, collection `zoom`.
 11. [ ] Perform a real Tobii hardware timing/animation test.

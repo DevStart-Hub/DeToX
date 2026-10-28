@@ -47,6 +47,7 @@ class AutoPacedCalibrationTests(unittest.TestCase):
         self.session.win = Mock()
         self.session.audio = Mock(isPlaying=False)
         self.session.focus_time = 0.0
+        self.session._defer_collection_abort = False
         self.session.stim_objects = [Mock(), Mock(), Mock()]
         self.session.remaining_points = [0, 1, 2]
         self.points = [(0, 0), (-0.5, 0.5), (0.5, -0.5)]
@@ -142,9 +143,24 @@ class AutoPacedCalibrationTests(unittest.TestCase):
         self.session.audio.stop.assert_called_once()
         self.session._clear_collected_data.assert_called_once()
 
-    def test_escape_pressed_during_collection_is_not_discarded(self):
+    def test_escape_during_mouse_collection_aborts_immediately(self):
         self.assertFalse(self.run_collection([[], ['space'], ['escape']]))
         self.assertEqual(self.collected, [0])
+        self.session._update_point_data_collection.assert_not_called()
+        self.session._clear_collected_data.assert_called_once()
+
+    def test_escape_during_tobii_collection_is_deferred(self):
+        self.session._defer_collection_abort = True
+        self.session._update_point_data_collection = Mock(
+            side_effect=[None, True]
+        )
+        keys = [[], ['space'], ['escape'], []]
+
+        self.assertFalse(self.run_collection(keys))
+
+        self.assertEqual(
+            self.session._update_point_data_collection.call_count, 2
+        )
         self.session._clear_collected_data.assert_called_once()
 
     def test_escape_after_success_stops_before_next_collection(self):
@@ -219,25 +235,6 @@ class AutoPacedCalibrationTests(unittest.TestCase):
             self.run_collection(keys, presentation_order=(1,))
         )
         self.assertEqual(self.collected, [0, 0])
-
-    def test_temporary_adapters_consume_collection_result_once(self):
-        session = calibration.BaseCalibrationSession.__new__(
-            calibration.BaseCalibrationSession
-        )
-        session._collect_data_at_point = Mock(return_value=True)
-        calibration.BaseCalibrationSession._start_point_data_collection(
-            session, 0, self.points[0]
-        )
-        self.assertTrue(
-            calibration.BaseCalibrationSession._update_point_data_collection(
-                session
-            )
-        )
-        self.assertIsNone(
-            calibration.BaseCalibrationSession._update_point_data_collection(
-                session
-            )
-        )
 
     def test_auto_instructions_use_space_or_escape_and_do_not_mention_gap(self):
         self.session.show_message_and_wait = Mock(return_value=['space'])
@@ -331,6 +328,104 @@ class AutoPacedCalibrationTests(unittest.TestCase):
         self.assertEqual(self.collected, [0, 1, 2, 0, 2])
         session.calibration.enter_calibration_mode.assert_called_once()
         session.calibration.leave_calibration_mode.assert_called_once()
+
+
+class TobiiCollectionTests(unittest.TestCase):
+    def setUp(self):
+        self.session = calibration.TobiiCalibrationSession.__new__(
+            calibration.TobiiCalibrationSession
+        )
+        self.session.calibration = Mock()
+        self.session.tobii_points = [(0.2, 0.3)]
+        self.session._collection_executor = Mock()
+        self.session._collection_future = None
+        self.session._defer_collection_abort = True
+
+    def test_start_submits_only_the_tobii_collection_call(self):
+        future = Mock()
+        self.session._collection_executor.submit.return_value = future
+
+        self.session._start_point_data_collection(0, (0, 0))
+
+        self.session.calibration.discard_data.assert_called_once_with(0.2, 0.3)
+        self.session._collection_executor.submit.assert_called_once_with(
+            self.session.calibration.collect_data,
+            0.2,
+            0.3,
+        )
+        self.assertIs(self.session._collection_future, future)
+
+    def test_start_rejects_overlapping_collection(self):
+        self.session._collection_future = Mock()
+        with self.assertRaisesRegex(RuntimeError, 'already pending'):
+            self.session._start_point_data_collection(0, (0, 0))
+        self.session._collection_executor.submit.assert_not_called()
+
+    def test_update_returns_none_while_collection_runs(self):
+        future = Mock()
+        future.done.return_value = False
+        self.session._collection_future = future
+
+        self.assertIsNone(self.session._update_point_data_collection())
+        future.result.assert_not_called()
+
+    def test_update_reads_success_and_clears_future(self):
+        future = Mock()
+        future.done.return_value = True
+        future.result.return_value = calibration.tr.CALIBRATION_STATUS_SUCCESS
+        self.session._collection_future = future
+
+        self.assertTrue(self.session._update_point_data_collection())
+        future.result.assert_called_once_with()
+        self.assertIsNone(self.session._collection_future)
+
+    def test_update_reads_failure_and_clears_future(self):
+        future = Mock()
+        future.done.return_value = True
+        future.result.return_value = calibration.tr.CALIBRATION_STATUS_FAILURE
+        self.session._collection_future = future
+
+        self.assertFalse(self.session._update_point_data_collection())
+        self.assertIsNone(self.session._collection_future)
+
+    def test_worker_exception_propagates_and_clears_future(self):
+        future = Mock()
+        future.done.return_value = True
+        future.result.side_effect = RuntimeError('collection failed')
+        self.session._collection_future = future
+
+        with self.assertRaisesRegex(RuntimeError, 'collection failed'):
+            self.session._update_point_data_collection()
+        self.assertIsNone(self.session._collection_future)
+
+    def test_run_shuts_down_worker_before_leaving_calibration_mode(self):
+        self.session._show_auto_paced_instructions = Mock(return_value=True)
+        self.session._run_calibration_session = Mock(return_value=True)
+        events = []
+        self.session.calibration.enter_calibration_mode.side_effect = (
+            lambda: events.append('enter')
+        )
+        self.session.calibration.leave_calibration_mode.side_effect = (
+            lambda: events.append('leave')
+        )
+
+        with patch.object(calibration, 'ThreadPoolExecutor') as executor_factory:
+            executor_factory.return_value.shutdown.side_effect = (
+                lambda **kwargs: events.append('shutdown')
+            )
+            self.assertTrue(
+                self.session.run([(0, 0), (1, 1)], pacing='auto')
+            )
+
+        executor_factory.assert_called_once_with(
+            max_workers=1,
+            thread_name_prefix='detox-calibration',
+        )
+        executor_factory.return_value.shutdown.assert_called_once_with(
+            wait=True
+        )
+        self.assertEqual(events, ['enter', 'shutdown', 'leave'])
+        self.assertIsNone(self.session._collection_executor)
 
 
 class MouseCollectionTests(unittest.TestCase):

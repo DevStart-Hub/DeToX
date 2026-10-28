@@ -1,4 +1,5 @@
 # Standard library imports
+from concurrent.futures import ThreadPoolExecutor
 import random
 import time
 import warnings
@@ -105,7 +106,7 @@ class BaseCalibrationSession:
         # Initialize calibration state variables
         self.stim_objects = None
         self.remaining_points = []  # Track which points still need calibration
-        self._temporary_collection_result = None
+        self._defer_collection_abort = False
         
         # --- Visual Setup ---
         # Create calibration border (red thin border)
@@ -731,42 +732,6 @@ class BaseCalibrationSession:
                 self.audio.play()
             self.audio.setVolume(1.0)
 
-    def _start_point_data_collection(self, point_idx, target_pos, **kwargs):
-        """
-        Start collecting data for one calibration point.
-
-        This temporary adapter still calls the existing blocking collector.
-        The presentation engine uses a separate update method so the final
-        non-blocking mouse and Tobii implementations can replace this method
-        without changing the state machine.
-        """
-
-        # --- Start Collection Through the Existing Blocking Collector ---
-        self._temporary_collection_result = self._collect_data_at_point(
-            target_pos,
-            point_idx,
-            **kwargs,
-        )
-
-    def _update_point_data_collection(self, **kwargs):
-        """
-        Report whether data collection for the current point has finished.
-
-        Returns
-        -------
-        None
-            Collection is still in progress.
-        bool
-            Collection result from the temporary blocking collector.
-        """
-
-        # --- Consume the Temporary Blocking Result ---
-        # The final implementations will poll a Future or advance mouse
-        # sampling here instead of returning an already-completed result.
-        result = self._temporary_collection_result
-        self._temporary_collection_result = None
-        return result
-
     def _present_and_collect_calibration_points(
         self,
         calibration_points,
@@ -824,12 +789,16 @@ class BaseCalibrationSession:
             # during settling or collection would invalidate its gaze samples.
             for key in event.getKeys():
                 if key == 'escape':
-                    if presentation_state == COLLECTING_DATA:
-                        # The temporary collector has already returned, but
-                        # the final implementation may still be running SDK
-                        # work. Defer cleanup until collection is complete.
+                    if (
+                        presentation_state == COLLECTING_DATA
+                        and self._defer_collection_abort
+                    ):
+                        # Tobii cannot cancel a running collect_data() call.
+                        # Remember the request and clean up after the worker
+                        # returns so the display keeps animating meanwhile.
                         abort_requested = True
                     else:
+                        # Waiting, settling and mouse sampling can stop now.
                         if self.audio:
                             self.audio.stop()
                         self._clear_collected_data()
@@ -1137,6 +1106,12 @@ class TobiiCalibrationSession(BaseCalibrationSession):
         self.calibration = calibration_api
         self.verbose = verbose
 
+        # Tobii collection runs in one background worker. The executor is
+        # created by run() and shut down before calibration mode is left.
+        self._collection_executor = None
+        self._collection_future = None
+        self._defer_collection_abort = True
+
     def run(self, calibration_points, pacing='manual', presentation_order='random'):
         """
         Main routine to run the full Tobii calibration workflow.
@@ -1183,14 +1158,31 @@ class TobiiCalibrationSession(BaseCalibrationSession):
         else:
             self.show_message_and_wait(instructions_text, "Eye Tracker Calibration")
 
-        self.calibration.enter_calibration_mode()
+        # --- Start the Collection Worker ---
+        # One worker handles all points in this calibration session. No dummy
+        # task is submitted: the thread starts with the first real collection.
+        self._collection_executor = ThreadPoolExecutor(
+            max_workers=1,
+            thread_name_prefix='detox-calibration',
+        )
+
+        entered_calibration_mode = False
         try:
+            self.calibration.enter_calibration_mode()
+            entered_calibration_mode = True
             return self._run_calibration_session(
                 calibration_points, pacing, presentation_order
             )
         finally:
-            # Always leave calibration mode, even if a step above raised.
-            self.calibration.leave_calibration_mode()
+            # --- Finish Pending Collection Before Leaving Calibration Mode ---
+            # shutdown(wait=True) keeps the SDK call alive until it has
+            # completed. Escape cleanup and leaving calibration mode must not
+            # race with an active worker.
+            self._collection_executor.shutdown(wait=True)
+            self._collection_executor = None
+
+            if entered_calibration_mode:
+                self.calibration.leave_calibration_mode()
 
     def _run_calibration_session(self, calibration_points, pacing='manual',
                                  presentation_order='random'):
@@ -1239,40 +1231,64 @@ class TobiiCalibrationSession(BaseCalibrationSession):
         return (self.calibration_result.status == tr.CALIBRATION_STATUS_SUCCESS)
 
 
-    def _collect_data_at_point(self, target_pos, point_idx, **kwargs):
+    def _start_point_data_collection(self, point_idx, target_pos, **kwargs):
         """
-        Collect Tobii eye tracking data at a calibration point.
-        
-        Interfaces with the Tobii SDK to collect gaze samples while the participant
-        looks at the calibration target. Uses pre-converted coordinates from
-        self.tobii_points for efficiency. Settling and audio fading are handled by
-        the presentation loop before this collector is called.
-        
-        Parameters
-        ----------
-        target_pos : tuple
-            Target position in PsychoPy coordinates (window units).
-        point_idx : int
-            Index of the calibration point being collected.
-        **kwargs : dict
-            Unused for Tobii calibration, included for interface compatibility.
-            
-        Returns
-        -------
-        bool
-            Always returns True to indicate data collection was initiated.
-            Actual success is determined during calibration computation.
+        Start Tobii collection for one calibration point.
+
+        The public collect_data() call blocks until the tracker has enough
+        samples. It runs in a single background worker so the presentation loop
+        can continue drawing the collection animation.
         """
+
+        # --- Prevent Overlapping Collection Attempts ---
+        if self._collection_future is not None:
+            raise RuntimeError("A calibration collection is already pending.")
+        if self._collection_executor is None:
+            raise RuntimeError("The Tobii collection executor is not running.")
+
         # --- Use Pre-converted Coordinates ---
         x, y = self.tobii_points[point_idx]
-        
-        # --- Data Cleanup ---
+
+        # --- Remove Previous Samples for This Point ---
         self.calibration.discard_data(x, y)
 
-        # --- Data Collection ---
-        # The presentation loop has already completed settling and faded audio.
-        self.calibration.collect_data(x, y)
-        return True
+        # --- Start Eye-Tracker Collection ---
+        # Only the blocking SDK call belongs in the worker. PsychoPy, audio
+        # and calibration state remain owned by the main thread.
+        self._collection_future = self._collection_executor.submit(
+            self.calibration.collect_data,
+            x,
+            y,
+        )
+
+    def _update_point_data_collection(self, **kwargs):
+        """
+        Check whether Tobii collection for the current point has finished.
+
+        Returns
+        -------
+        None
+            Collection is still running.
+        bool
+            True on success, False when Tobii reports collection failure.
+        """
+
+        # --- Poll Without Blocking the Display ---
+        future = self._collection_future
+        if future is None:
+            raise RuntimeError("No calibration collection has been started.")
+        if not future.done():
+            return None
+
+        # --- Read the Completed SDK Result ---
+        # result() raises any worker exception on the main thread. Clearing the
+        # Future in finally lets cleanup recover even when that happens.
+        try:
+            status = future.result()
+        finally:
+            self._collection_future = None
+
+        return status == tr.CALIBRATION_STATUS_SUCCESS
     
     
     def _clear_collected_data(self):
