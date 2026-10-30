@@ -803,6 +803,9 @@ class BaseCalibrationSession:
         settling_clock = core.Clock()
         abort_requested = False
         transition_start = None
+        displayed_point_idx = None
+        displayed_phase = None
+        collection_pose_displayed = False
 
         if current_point_idx is not None:
             self._activate_calibration_target(
@@ -814,6 +817,8 @@ class BaseCalibrationSession:
         # --- 3. Present and Collect Points Frame by Frame ---
         try:
             while True:
+                settling_complete = False
+
                 # --- 3a. Process Keyboard Input ---
                 # Target changes are only accepted while waiting. Changing a target
                 # during settling or collection would invalidate its gaze samples.
@@ -853,10 +858,16 @@ class BaseCalibrationSession:
                                 animation_clock,
                             )
 
-                    elif key == 'space' and current_point_idx is not None:
-                        # The experimenter has decided that the participant is
-                        # looking at the target. Preserve exactly what is on screen
-                        # so the collection animation can blend from that pose.
+                    elif (
+                        key == 'space'
+                        and current_point_idx is not None
+                        and displayed_point_idx == current_point_idx
+                        and displayed_phase == 'attention'
+                    ):
+                        # Collection is accepted only after this target has
+                        # actually been drawn in its attention phase. This
+                        # prevents a number and Space in the same frame from
+                        # collecting a target that was never shown.
                         stim = self.stim_objects[
                             current_point_idx % len(self.stim_objects)
                         ]
@@ -866,6 +877,7 @@ class BaseCalibrationSession:
                         )
                         animation_clock.reset()
                         settling_clock.reset()
+                        collection_pose_displayed = False
                         presentation_state = SETTLING_ON_TARGET
 
                 # --- 3b. Start or Update Data Collection ---
@@ -883,20 +895,10 @@ class BaseCalibrationSession:
                         )
                         self.audio.setVolume(remaining_volume)
 
-                    if focus_time == 0 or elapsed_settling >= focus_time:
-                        # --- Settling Complete ---
-                        # Measurement starts only after the target has had time to
-                        # capture stable fixation.
-                        if self.audio:
-                            self.audio.setVolume(0.0)
-                            self.audio.stop()
-
-                        self._start_point_data_collection(
-                            current_point_idx,
-                            calibration_points[current_point_idx],
-                            **kwargs,
-                        )
-                        presentation_state = COLLECTING_DATA
+                    settling_complete = (
+                        focus_time == 0
+                        or elapsed_settling >= focus_time
+                    )
 
                 elif presentation_state == COLLECTING_DATA:
                     collection_result = self._update_point_data_collection(**kwargs)
@@ -945,6 +947,7 @@ class BaseCalibrationSession:
                 self.win.clearBuffer()
                 self._draw_calibration_border()
 
+                animation_phase = None
                 if current_point_idx is not None:
                     stim = self.stim_objects[
                         current_point_idx % len(self.stim_objects)
@@ -966,6 +969,31 @@ class BaseCalibrationSession:
                     )
 
                 self.win.flip()
+                displayed_point_idx = current_point_idx
+                displayed_phase = animation_phase
+
+                if animation_phase == 'collection':
+                    collection_pose_displayed = True
+
+                # --- 3d. Begin Collection After Its Pose Is Visible ---
+                # Starting here guarantees that the frame on screen matches
+                # the target position sent to the eye tracker, including when
+                # settling is configured as zero.
+                if (
+                    presentation_state == SETTLING_ON_TARGET
+                    and settling_complete
+                    and collection_pose_displayed
+                ):
+                    if self.audio:
+                        self.audio.setVolume(0.0)
+                        self.audio.stop()
+
+                    self._start_point_data_collection(
+                        current_point_idx,
+                        calibration_points[current_point_idx],
+                        **kwargs,
+                    )
+                    presentation_state = COLLECTING_DATA
         finally:
             # Audio must never continue into results, an abort,
             # or an exception after leaving the target screen.
