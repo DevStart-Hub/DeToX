@@ -730,6 +730,24 @@ class BaseCalibrationSession:
             if point_number - 1 in eligible_point_indices
         ]
 
+    def _start_point_data_preparation(self, point_idx, **kwargs):
+        """
+        Prepare a point before collection begins.
+
+        Mouse simulation has nothing to prepare, so its base implementation is
+        intentionally empty. Tobii overrides this to discard old samples while
+        the participant is settling.
+        """
+
+    def _update_point_data_preparation(self, **kwargs):
+        """
+        Report whether point preparation has finished.
+
+        The base session needs no preparation and is always ready. Tobii
+        overrides this to poll its preparation worker.
+        """
+        return True
+
     def _activate_calibration_target(
         self,
         point_idx,
@@ -806,6 +824,8 @@ class BaseCalibrationSession:
         displayed_point_idx = None
         displayed_phase = None
         collection_pose_displayed = False
+        preparation_complete = True
+        settling_audio_stopped = False
 
         if current_point_idx is not None:
             self._activate_calibration_target(
@@ -824,16 +844,24 @@ class BaseCalibrationSession:
                 # during settling or collection would invalidate its gaze samples.
                 for key in event.getKeys():
                     if key == 'escape':
-                        if (
-                            presentation_state == COLLECTING_DATA
-                            and self._defer_collection_abort
-                        ):
-                            # Tobii cannot cancel a running collect_data() call.
-                            # Remember the request and clean up after the worker
-                            # returns so the display keeps animating meanwhile.
+                        # Tobii cannot interrupt an SDK call already running in
+                        # its worker. Defer cleanup until that call returns.
+                        defer_escape = (
+                            self._defer_collection_abort
+                            and (
+                                presentation_state == COLLECTING_DATA
+                                or (
+                                    presentation_state == SETTLING_ON_TARGET
+                                    and not preparation_complete
+                                )
+                            )
+                        )
+
+                        if defer_escape:
                             abort_requested = True
                         else:
-                            # Waiting, settling and mouse sampling can stop now.
+                            # Waiting, ready settling and mouse sampling can
+                            # stop immediately.
                             if self.audio:
                                 self.audio.stop()
                             self._clear_collected_data()
@@ -878,7 +906,16 @@ class BaseCalibrationSession:
                         animation_clock.reset()
                         settling_clock.reset()
                         collection_pose_displayed = False
+                        preparation_complete = False
+                        settling_audio_stopped = False
                         presentation_state = SETTLING_ON_TARGET
+
+                        # Start clearing any old samples now, while the target
+                        # is settling, so the worker can overlap the delay.
+                        self._start_point_data_preparation(
+                            current_point_idx,
+                            **kwargs,
+                        )
 
                 # --- 3b. Start or Update Data Collection ---
                 if presentation_state == SETTLING_ON_TARGET:
@@ -899,6 +936,14 @@ class BaseCalibrationSession:
                         focus_time == 0
                         or elapsed_settling >= focus_time
                     )
+
+                    # Audio stops at the settling deadline even if point
+                    # preparation happens to take longer than expected.
+                    if settling_complete and not settling_audio_stopped:
+                        if self.audio:
+                            self.audio.setVolume(0.0)
+                            self.audio.stop()
+                        settling_audio_stopped = True
 
                 elif presentation_state == COLLECTING_DATA:
                     collection_result = self._update_point_data_collection(**kwargs)
@@ -975,19 +1020,35 @@ class BaseCalibrationSession:
                 if animation_phase == 'collection':
                     collection_pose_displayed = True
 
-                # --- 3d. Begin Collection After Its Pose Is Visible ---
-                # Starting here guarantees that the frame on screen matches
-                # the target position sent to the eye tracker, including when
-                # settling is configured as zero.
+                # --- 3d. Prepare and Begin Collection ---
+                # Preparation overlaps settling. Poll it every frame so an
+                # Escape request can be honoured as soon as the SDK call ends.
+                if (
+                    presentation_state == SETTLING_ON_TARGET
+                    and not preparation_complete
+                ):
+                    preparation_complete = (
+                        self._update_point_data_preparation(**kwargs)
+                    )
+
+                if (
+                    presentation_state == SETTLING_ON_TARGET
+                    and abort_requested
+                    and preparation_complete
+                ):
+                    if self.audio:
+                        self.audio.stop()
+                    self._clear_collected_data()
+                    return False
+
+                # Collection begins only after the focus time, preparation,
+                # and a visible collection frame have all completed.
                 if (
                     presentation_state == SETTLING_ON_TARGET
                     and settling_complete
                     and collection_pose_displayed
+                    and preparation_complete
                 ):
-                    if self.audio:
-                        self.audio.setVolume(0.0)
-                        self.audio.stop()
-
                     self._start_point_data_collection(
                         current_point_idx,
                         calibration_points[current_point_idx],
@@ -1182,6 +1243,7 @@ class TobiiCalibrationSession(BaseCalibrationSession):
         # Tobii collection runs in one background worker. The executor is
         # created by run() and shut down before calibration mode is left.
         self._collection_executor = None
+        self._preparation_future = None
         self._collection_future = None
         self._defer_collection_abort = True
 
@@ -1313,6 +1375,78 @@ class TobiiCalibrationSession(BaseCalibrationSession):
         return (self.calibration_result.status == tr.CALIBRATION_STATUS_SUCCESS)
 
 
+    def _start_point_data_preparation(self, point_idx, **kwargs):
+        """
+        Discard old Tobii samples for a point while it is settling.
+
+        Recollecting a point must not mix old and new calibration samples.
+        Running this in the shared worker overlaps the SDK call with focus time
+        instead of delaying collection after settling.
+        """
+
+        # --- Prevent Overlapping Preparation ---
+        if self._preparation_future is not None:
+            raise RuntimeError("Calibration preparation is already pending.")
+        if self._collection_executor is None:
+            raise RuntimeError("The Tobii collection executor is not running.")
+
+        # --- Remove Previous Samples for This Point ---
+        x, y = self.tobii_points[point_idx]
+        self._preparation_future = self._collection_executor.submit(
+            self._discard_point_data,
+            x,
+            y,
+        )
+
+    def _discard_point_data(self, x, y):
+        """Discard one point's samples and return how long Tobii took."""
+        started_at = time.perf_counter()
+        self.calibration.discard_data(x, y)
+        return time.perf_counter() - started_at
+
+    def _update_point_data_preparation(self, **kwargs):
+        """
+        Report whether preparation for the current point has finished.
+
+        Returns
+        -------
+        bool
+            True when old samples have been discarded. False while the worker
+            is still running.
+        """
+
+        # --- Poll Without Blocking Drawing ---
+        future = self._preparation_future
+        if future is None:
+            raise RuntimeError("No calibration preparation has been started.")
+        if not future.done():
+            return False
+
+        # --- Read the Completed SDK Result and Actual Duration ---
+        try:
+            elapsed = future.result()
+        finally:
+            self._preparation_future = None
+
+        # --- Report Preparation That Exceeded Settling ---
+        # This is informational: collection still starts only after the
+        # tracker buffer is safely prepared.
+        if elapsed > self.focus_time:
+            beyond_ms = (elapsed - self.focus_time) * 1000
+            settled_ms = self.focus_time * 1000
+            NicePrint(
+                "Preparing this calibration point took "
+                f"{elapsed * 1000:.0f} ms, exceeding the configured "
+                f"settling time of {settled_ms:.0f} ms by "
+                f"{beyond_ms:.0f} ms.\n"
+                "Collection was delayed until preparation completed. "
+                "This does not indicate a calibration failure.",
+                title="Calibration Preparation",
+                verbose=self.verbose,
+            )
+
+        return True
+
     def _start_point_data_collection(self, point_idx, target_pos, **kwargs):
         """
         Start Tobii collection for one calibration point.
@@ -1331,12 +1465,8 @@ class TobiiCalibrationSession(BaseCalibrationSession):
         # --- Use Pre-converted Coordinates ---
         x, y = self.tobii_points[point_idx]
 
-        # --- Remove Previous Samples for This Point ---
-        self.calibration.discard_data(x, y)
-
         # --- Start Eye-Tracker Collection ---
-        # Only the blocking SDK call belongs in the worker. PsychoPy, audio
-        # and calibration state remain owned by the main thread.
+        # Preparation has already discarded old samples in the same worker.
         self._collection_future = self._collection_executor.submit(
             self.calibration.collect_data,
             x,

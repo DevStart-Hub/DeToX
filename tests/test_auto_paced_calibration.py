@@ -167,6 +167,22 @@ class AutoPacedCalibrationTests(unittest.TestCase):
         )
         self.session._clear_collected_data.assert_called_once()
 
+    def test_escape_during_tobii_preparation_waits_for_worker(self):
+        self.session._defer_collection_abort = True
+        self.session.focus_time = 0.5
+        self.session._start_point_data_preparation = Mock()
+        self.session._update_point_data_preparation = Mock(
+            side_effect=[False, False, True]
+        )
+        keys = [[], ['space'], ['escape'], []]
+
+        self.assertFalse(self.run_collection(keys))
+
+        self.assertEqual(
+            self.session._update_point_data_preparation.call_count, 3
+        )
+        self.session._clear_collected_data.assert_called_once()
+
     def test_escape_after_success_stops_before_next_collection(self):
         keys = [[], ['space'], [], ['escape']]
         self.assertFalse(self.run_collection(keys))
@@ -344,6 +360,8 @@ class AutoPacedCalibrationTests(unittest.TestCase):
         session._prepare_session = Mock()
         session._show_calibration_result = Mock()
         session._discard_phase = Mock()
+        session._start_point_data_preparation = Mock()
+        session._update_point_data_preparation = Mock(return_value=True)
         session._selection_phase = Mock(side_effect=[[2, 0], []])
         with patch.object(calibration, 'get_tobii_pos', return_value=self.points):
             with patch.object(calibration.event, 'getKeys', side_effect=[[], ['space'], []] * 30):
@@ -365,8 +383,58 @@ class TobiiCollectionTests(unittest.TestCase):
         self.session.calibration = Mock()
         self.session.tobii_points = [(0.2, 0.3)]
         self.session._collection_executor = Mock()
+        self.session._preparation_future = None
         self.session._collection_future = None
         self.session._defer_collection_abort = True
+        self.session.focus_time = 0.5
+        self.session.verbose = False
+
+    def test_preparation_discards_samples_in_the_worker(self):
+        future = Mock()
+        self.session._collection_executor.submit.return_value = future
+
+        self.session._start_point_data_preparation(0)
+
+        self.session._collection_executor.submit.assert_called_once_with(
+            self.session._discard_point_data,
+            0.2,
+            0.3,
+        )
+        self.assertIs(self.session._preparation_future, future)
+
+        future.done.return_value = False
+        self.assertFalse(self.session._update_point_data_preparation())
+        future.done.return_value = True
+        future.result.return_value = 0.01
+        self.assertTrue(self.session._update_point_data_preparation())
+        self.assertIsNone(self.session._preparation_future)
+
+    def test_discard_duration_is_measured_inside_the_worker(self):
+        with patch.object(
+            calibration.time,
+            'perf_counter',
+            side_effect=[10.0, 10.2],
+        ):
+            elapsed = self.session._discard_point_data(0.2, 0.3)
+
+        self.session.calibration.discard_data.assert_called_once_with(0.2, 0.3)
+        self.assertAlmostEqual(elapsed, 0.2)
+
+    def test_preparation_overrun_is_reported_as_a_message(self):
+        future = Mock()
+        future.done.return_value = True
+        future.result.return_value = 0.75
+        self.session._collection_executor.submit.return_value = future
+
+        with patch.object(calibration, 'NicePrint') as message:
+            self.session._start_point_data_preparation(0)
+            self.assertTrue(self.session._update_point_data_preparation())
+
+        body = message.call_args.args[0]
+        self.assertIn('750 ms', body)
+        self.assertIn('500 ms', body)
+        self.assertIn('250 ms', body)
+        self.assertIn('does not indicate a calibration failure', body)
 
     def test_start_submits_only_the_tobii_collection_call(self):
         future = Mock()
@@ -374,7 +442,7 @@ class TobiiCollectionTests(unittest.TestCase):
 
         self.session._start_point_data_collection(0, (0, 0))
 
-        self.session.calibration.discard_data.assert_called_once_with(0.2, 0.3)
+        self.session.calibration.discard_data.assert_not_called()
         self.session._collection_executor.submit.assert_called_once_with(
             self.session.calibration.collect_data,
             0.2,
