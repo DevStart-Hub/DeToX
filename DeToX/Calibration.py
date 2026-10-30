@@ -300,10 +300,27 @@ class BaseCalibrationSession:
         self.calstim_units = self.stim_objects[0].units  # Store units of stimuli
 
         # --- Convert Calibration Points ---
-        self.calibration_points = norm_to_window_units(self.win, calibration_points, target_units=self.calstim_units)
-        
-        # --- Store the target points in pixels ---
-        self.calibration_targets_pixels = psychopy_to_pixels(self.win, self.calibration_points, source_units='height')
+        # Targets use the stimulus's units. Retry highlights use height units
+        # because their configured radius is also expressed in height units.
+        self.calibration_points = norm_to_window_units(
+            self.win,
+            calibration_points,
+            target_units=self.calstim_units,
+        )
+        self.calibration_points_height = norm_to_window_units(
+            self.win,
+            calibration_points,
+            target_units='height',
+        )
+
+        # --- Store the Target Points in Pixels ---
+        # Convert from the units actually used by the stimuli so custom
+        # stimuli on pixel or degree windows remain correctly positioned.
+        self.calibration_targets_pixels = psychopy_to_pixels(
+            self.win,
+            self.calibration_points,
+            source_units=self.calstim_units,
+        )
 
         # --- Point Tracking Setup ---
         self.remaining_points = list(range(len(calibration_points)))
@@ -640,12 +657,12 @@ class BaseCalibrationSession:
                     highlight = visual.Circle(
                         self.win,
                         radius=highlight_radius,
-                        pos=calibration_points[retry_idx],
+                        pos=self.calibration_points_height[retry_idx],
                         lineColor=cfg.colors.highlight,
                         fillColor=None,
                         lineWidth=max(1, int(line_width_pixels)),
                         edges=128,
-                        units= 'height' #self.win.units
+                        units='height',
                     )
                     highlight.draw()
             self.win.flip()
@@ -993,9 +1010,10 @@ class BaseCalibrationSession:
             elif self.visualization_style == 'lines':
                 for point_idx, samples in sample_data.items():
                     if point_idx < len(self.calibration_points):
-                        target_pos = self.calibration_points[point_idx]
-                        target_pix = psychopy_to_pixels(self.win, target_pos)
-                        
+                        # Reuse the converted target position so result lines
+                        # and target circles share exactly the same pixel point.
+                        target_pix = self.calibration_targets_pixels[point_idx]
+
                         for sample_pix, line_color in samples:
                             img_draw.line(
                                 (target_pix[0], target_pix[1], 
