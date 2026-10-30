@@ -795,159 +795,166 @@ class BaseCalibrationSession:
             )
 
         # --- 3. Present and Collect Points Frame by Frame ---
-        while True:
-            # --- 3a. Process Keyboard Input ---
-            # Target changes are only accepted while waiting. Changing a target
-            # during settling or collection would invalidate its gaze samples.
-            for key in event.getKeys():
-                if key == 'escape':
-                    if (
-                        presentation_state == COLLECTING_DATA
-                        and self._defer_collection_abort
-                    ):
-                        # Tobii cannot cancel a running collect_data() call.
-                        # Remember the request and clean up after the worker
-                        # returns so the display keeps animating meanwhile.
-                        abort_requested = True
-                    else:
-                        # Waiting, settling and mouse sampling can stop now.
-                        if self.audio:
-                            self.audio.stop()
-                        self._clear_collected_data()
-                        return False
-                    break
+        try:
+            while True:
+                # --- 3a. Process Keyboard Input ---
+                # Target changes are only accepted while waiting. Changing a target
+                # during settling or collection would invalidate its gaze samples.
+                for key in event.getKeys():
+                    if key == 'escape':
+                        if (
+                            presentation_state == COLLECTING_DATA
+                            and self._defer_collection_abort
+                        ):
+                            # Tobii cannot cancel a running collect_data() call.
+                            # Remember the request and clean up after the worker
+                            # returns so the display keeps animating meanwhile.
+                            abort_requested = True
+                        else:
+                            # Waiting, settling and mouse sampling can stop now.
+                            if self.audio:
+                                self.audio.stop()
+                            self._clear_collected_data()
+                            return False
+                        break
 
-                if presentation_state != WAITING_FOR_COLLECTION:
-                    continue
+                    if presentation_state != WAITING_FOR_COLLECTION:
+                        continue
 
-                if key == 'return':
-                    # Preserve the existing early-results workflow.
-                    return True
+                    if key == 'return':
+                        # Preserve the existing early-results workflow.
+                        return True
 
-                if pacing == 'manual' and key in cfg.numkey_dict:
-                    candidate_point_idx = cfg.numkey_dict[key]
-                    if candidate_point_idx in eligible_point_indices:
-                        current_point_idx = candidate_point_idx
-                        transition_start = None
-                        self._activate_calibration_target(
-                            current_point_idx,
-                            calibration_points[current_point_idx],
-                            animation_clock,
-                        )
-
-                elif key == 'space' and current_point_idx is not None:
-                    # The experimenter has decided that the participant is
-                    # looking at the target. Preserve exactly what is on screen
-                    # so the collection animation can blend from that pose.
-                    stim = self.stim_objects[
-                        current_point_idx % len(self.stim_objects)
-                    ]
-                    transition_start = (
-                        np.array(stim.size, dtype=float, copy=True),
-                        float(stim.ori),
-                    )
-                    animation_clock.reset()
-                    settling_clock.reset()
-                    presentation_state = SETTLING_ON_TARGET
-
-            # --- 3b. Start or Update Data Collection ---
-            if presentation_state == SETTLING_ON_TARGET:
-                elapsed_settling = settling_clock.getTime()
-                focus_time = max(self.focus_time, 0.0)
-
-                # --- Fade Attention Audio Without Blocking Drawing ---
-                # The fade follows the same elapsed time as settling, so audio
-                # reaches silence exactly when sample collection begins.
-                if self.audio and focus_time > 0:
-                    remaining_volume = max(
-                        0.0,
-                        1.0 - elapsed_settling / focus_time,
-                    )
-                    self.audio.setVolume(remaining_volume)
-
-                if focus_time == 0 or elapsed_settling >= focus_time:
-                    # --- Settling Complete ---
-                    # Measurement starts only after the target has had time to
-                    # capture stable fixation.
-                    if self.audio:
-                        self.audio.setVolume(0.0)
-                        self.audio.stop()
-
-                    self._start_point_data_collection(
-                        current_point_idx,
-                        calibration_points[current_point_idx],
-                        **kwargs,
-                    )
-                    presentation_state = COLLECTING_DATA
-
-            elif presentation_state == COLLECTING_DATA:
-                collection_result = self._update_point_data_collection(**kwargs)
-
-                if collection_result is not None:
-                    if abort_requested:
-                        if self.audio:
-                            self.audio.stop()
-                        self._clear_collected_data()
-                        return False
-
-                    if collection_result:
-                        # --- Successful Collection ---
-                        if pacing == 'auto':
-                            automatic_point_queue.pop(0)
-                            if not automatic_point_queue:
-                                return True
-
-                            current_point_idx = automatic_point_queue[0]
+                    if pacing == 'manual' and key in cfg.numkey_dict:
+                        candidate_point_idx = cfg.numkey_dict[key]
+                        if candidate_point_idx in eligible_point_indices:
+                            current_point_idx = candidate_point_idx
                             transition_start = None
                             self._activate_calibration_target(
                                 current_point_idx,
                                 calibration_points[current_point_idx],
                                 animation_clock,
                             )
-                        else:
-                            # Manual pacing hides the target until the
-                            # experimenter selects another point.
-                            current_point_idx = None
-                            transition_start = None
 
-                    else:
-                        # --- Failed Collection ---
-                        # Keep the same target available for another attempt.
-                        # Automatic pacing must not advance the queue.
-                        transition_start = None
-                        self._activate_calibration_target(
+                    elif key == 'space' and current_point_idx is not None:
+                        # The experimenter has decided that the participant is
+                        # looking at the target. Preserve exactly what is on screen
+                        # so the collection animation can blend from that pose.
+                        stim = self.stim_objects[
+                            current_point_idx % len(self.stim_objects)
+                        ]
+                        transition_start = (
+                            np.array(stim.size, dtype=float, copy=True),
+                            float(stim.ori),
+                        )
+                        animation_clock.reset()
+                        settling_clock.reset()
+                        presentation_state = SETTLING_ON_TARGET
+
+                # --- 3b. Start or Update Data Collection ---
+                if presentation_state == SETTLING_ON_TARGET:
+                    elapsed_settling = settling_clock.getTime()
+                    focus_time = max(self.focus_time, 0.0)
+
+                    # --- Fade Attention Audio Without Blocking Drawing ---
+                    # The fade follows the same elapsed time as settling, so audio
+                    # reaches silence exactly when sample collection begins.
+                    if self.audio and focus_time > 0:
+                        remaining_volume = max(
+                            0.0,
+                            1.0 - elapsed_settling / focus_time,
+                        )
+                        self.audio.setVolume(remaining_volume)
+
+                    if focus_time == 0 or elapsed_settling >= focus_time:
+                        # --- Settling Complete ---
+                        # Measurement starts only after the target has had time to
+                        # capture stable fixation.
+                        if self.audio:
+                            self.audio.setVolume(0.0)
+                            self.audio.stop()
+
+                        self._start_point_data_collection(
                             current_point_idx,
                             calibration_points[current_point_idx],
-                            animation_clock,
+                            **kwargs,
                         )
+                        presentation_state = COLLECTING_DATA
 
-                    presentation_state = WAITING_FOR_COLLECTION
+                elif presentation_state == COLLECTING_DATA:
+                    collection_result = self._update_point_data_collection(**kwargs)
 
-            # --- 3c. Draw Current Frame ---
-            self.win.clearBuffer()
-            self._draw_calibration_border()
+                    if collection_result is not None:
+                        if abort_requested:
+                            if self.audio:
+                                self.audio.stop()
+                            self._clear_collected_data()
+                            return False
 
-            if current_point_idx is not None:
-                stim = self.stim_objects[
-                    current_point_idx % len(self.stim_objects)
-                ]
-                animation_phase = (
-                    'collection'
-                    if presentation_state in (
-                        SETTLING_ON_TARGET,
-                        COLLECTING_DATA,
+                        if collection_result:
+                            # --- Successful Collection ---
+                            if pacing == 'auto':
+                                automatic_point_queue.pop(0)
+                                if not automatic_point_queue:
+                                    return True
+
+                                current_point_idx = automatic_point_queue[0]
+                                transition_start = None
+                                self._activate_calibration_target(
+                                    current_point_idx,
+                                    calibration_points[current_point_idx],
+                                    animation_clock,
+                                )
+                            else:
+                                # Manual pacing hides the target until the
+                                # experimenter selects another point.
+                                current_point_idx = None
+                                transition_start = None
+
+                        else:
+                            # --- Failed Collection ---
+                            # Keep the same target available for another attempt.
+                            # Automatic pacing must not advance the queue.
+                            transition_start = None
+                            self._activate_calibration_target(
+                                current_point_idx,
+                                calibration_points[current_point_idx],
+                                animation_clock,
+                            )
+
+                        presentation_state = WAITING_FOR_COLLECTION
+
+                # --- 3c. Draw Current Frame ---
+                self.win.clearBuffer()
+                self._draw_calibration_border()
+
+                if current_point_idx is not None:
+                    stim = self.stim_objects[
+                        current_point_idx % len(self.stim_objects)
+                    ]
+                    animation_phase = (
+                        'collection'
+                        if presentation_state in (
+                            SETTLING_ON_TARGET,
+                            COLLECTING_DATA,
+                        )
+                        else 'attention'
                     )
-                    else 'attention'
-                )
-                self._animate(
-                    stim,
-                    animation_clock,
-                    current_point_idx,
-                    phase=animation_phase,
-                    transition_start=transition_start,
-                )
+                    self._animate(
+                        stim,
+                        animation_clock,
+                        current_point_idx,
+                        phase=animation_phase,
+                        transition_start=transition_start,
+                    )
 
-            self.win.flip()
+                self.win.flip()
+        finally:
+            # Audio must never continue into results, an abort,
+            # or an exception after leaving the target screen.
+            if self.audio and self.audio.isPlaying:
+                self.audio.stop()
+
 
     def _create_calibration_result_image(self, sample_data):
             """
