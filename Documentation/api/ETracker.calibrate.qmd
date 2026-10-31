@@ -6,7 +6,7 @@ ETracker.calibrate(
     infant_stims=True,
     shuffle=True,
     audio=True,
-    anim_type='zoom',
+    anim_type='trill',
     stim_size='big',
     visualization_style='circles',
     auto_paced=False,
@@ -58,10 +58,10 @@ mode (real eye tracker vs. mouse simulation).
 |                     |                                                                                                                     | (ensure it is configured appropriately, e.g., ``loops=-1`` for continuous looping).                                                                |             |
 |                     |                                                                                                                     | Audio plays when a calibration point is selected and fades out during data collection.                                                             |             |
 +---------------------+---------------------------------------------------------------------------------------------------------------------+----------------------------------------------------------------------------------------------------------------------------------------------------+-------------+
-| anim_type           | ([zoom](`zoom`), [trill](`trill`))                                                                                  | Animation style for calibration stimuli:                                                                                                           | `'zoom'`    |
+| anim_type           | ([zoom](`zoom`), [trill](`trill`))                                                                                  | Animation style for attracting attention before collection:                                                                                        | `'trill'`   |
 |                     |                                                                                                                     |                                                                                                                                                    |             |
-|                     |                                                                                                                     |  - **'zoom'** applies smooth size oscillation using a cosine function (default).                                                                   |             |
-|                     |                                                                                                                     |  - **'trill'** uses rapid rotation with intermittent pauses.                                                                                       |             |
+|                     |                                                                                                                     |  - **'trill'** uses rapid rotation with intermittent pauses (default).                                                                             |             |
+|                     |                                                                                                                     |  - **'zoom'** applies smooth size oscillation using a cosine function.                                                                             |             |
 +---------------------+---------------------------------------------------------------------------------------------------------------------+----------------------------------------------------------------------------------------------------------------------------------------------------+-------------+
 | stim_size           | ([big](`big`), [small](`small`))                                                                                    | Size preset for calibration stimuli:                                                                                                               | `'big'`     |
 |                     |                                                                                                                     |                                                                                                                                                    |             |

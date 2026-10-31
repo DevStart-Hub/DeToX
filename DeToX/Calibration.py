@@ -1,4 +1,6 @@
 # Standard library imports
+from concurrent.futures import ThreadPoolExecutor
+import random
 import time
 import warnings
 
@@ -35,7 +37,8 @@ class BaseCalibrationSession:
         win,
         infant_stims,
         audio=None,
-        anim_type='zoom',
+        anim_type='trill',
+        collection_anim_type='zoom',
         stim_size='big',
         visualization_style='lines'
     ):
@@ -62,18 +65,25 @@ class BaseCalibrationSession:
             Sound to play when user selects a calibration point. Provides auditory
             feedback during the calibration process. Default None (no sound).
         anim_type : {'zoom', 'trill'}, optional
-            Animation style for calibration targets:
-            - 'zoom': Smooth size oscillation using cosine function
+            Animation style for attracting attention before collection:
             - 'trill': Rapid rotation with intermittent stops
+            - 'zoom': Smooth size oscillation using cosine function
+            Default 'trill'.
+        collection_anim_type : {'zoom', 'trill'}, optional
+            Animation style for settling and sample collection. Kept separate
+            from ``anim_type`` so the two phases can use different animations.
             Default 'zoom'.
         stim_size : {'big', 'small'}, optional
-            Size preset for calibration stimuli:
+            Size preset for calibration stimuli. Attention and collection
+            sizes are configured independently in ``cfg.animation``:
             - 'big': Larger stimuli recommended for infants/children (default)
-            * Zoom animation: 5-16% of screen height
-            * Trill animation: 14% of screen height
+            * Attention zoom: 9.5-16% of screen height
+            * Collection zoom: 5-9.5% of screen height
+            * Attention trill: 12.75%; collection trill: 7.25%
             - 'small': Smaller stimuli recommended for adults
-            * Zoom animation: 3-8% of screen height
-            * Trill animation: 6% of screen height
+            * Attention zoom: 3-6% of screen height
+            * Collection zoom: 1-3% of screen height
+            * Attention trill: 4.5%; collection trill: 2%
             Default 'big'.
         visualization_style : {'lines', 'circles'}, optional
             Style for calibration result visualization:
@@ -88,6 +98,7 @@ class BaseCalibrationSession:
         self.audio = audio
         self.focus_time = cfg.animation.focus_time
         self.anim_type = anim_type
+        self.collection_anim_type = collection_anim_type
         self.stim_size = stim_size  # ← Store stim_size
         self.visualization_style = visualization_style
         
@@ -95,6 +106,7 @@ class BaseCalibrationSession:
         # Initialize calibration state variables
         self.stim_objects = None
         self.remaining_points = []  # Track which points still need calibration
+        self._defer_collection_abort = False
         
         # --- Visual Setup ---
         # Create calibration border (red thin border)
@@ -227,22 +239,6 @@ class BaseCalibrationSession:
         # --- Wait for intentional keypress ---
         return event.waitKeys(keyList=key_list)
 
-    def _show_auto_paced_instructions(self, looking_instruction):
-        """Wait for Space to start, or Escape to exit before calibration begins."""
-        instructions = f"""Auto-Paced Calibration:
-
-    - Press SPACE to begin
-    - {looking_instruction}
-    - Press SPACE to collect samples at the current point
-    - The next target appears automatically
-    - Results appear after all points are collected
-    - Press ESCAPE to exit calibration"""
-        keys = self.show_message_and_wait(
-            instructions, "Calibration Setup", key_list=['space', 'escape']
-        )
-        return 'escape' not in keys
-            
-    
     def check_points(self, calibration_points):
         """
         Ensure number of calibration points is within allowed range.
@@ -304,120 +300,244 @@ class BaseCalibrationSession:
         self.calstim_units = self.stim_objects[0].units  # Store units of stimuli
 
         # --- Convert Calibration Points ---
-        self.calibration_points = norm_to_window_units(self.win, calibration_points, target_units=self.calstim_units)
-        
-        # --- Store the target points in pixels ---
-        self.calibration_targets_pixels = psychopy_to_pixels(self.win, self.calibration_points, source_units='height')
+        # Targets use the stimulus's units. Retry highlights use height units
+        # because their configured radius is also expressed in height units.
+        self.calibration_points = norm_to_window_units(
+            self.win,
+            calibration_points,
+            target_units=self.calstim_units,
+        )
+        self.calibration_points_height = norm_to_window_units(
+            self.win,
+            calibration_points,
+            target_units='height',
+        )
+
+        # --- Store the Target Points in Pixels ---
+        # Convert from the units actually used by the stimuli so custom
+        # stimuli on pixel or degree windows remain correctly positioned.
+        self.calibration_targets_pixels = psychopy_to_pixels(
+            self.win,
+            self.calibration_points,
+            source_units=self.calstim_units,
+        )
 
         # --- Point Tracking Setup ---
         self.remaining_points = list(range(len(calibration_points)))
     
         
-    def _animate(self, stim, clock, point_idx):
+    def _zoom_animation(self, elapsed_time, min_size, max_size):
         """
-        Animate calibration stimulus with automatic unit conversion.
-        
-        Converts animation sizes from config (height units) to match the
-        stimulus's unit system, preserving the user's original stimulus size.
-        
+        Calculate a smooth zoom pose.
+
+        The target starts at its maximum size, shrinks to its minimum size,
+        then grows again. Attention and collection use the same motion with
+        different bounds configured in ``ETSettings``.
+
+        Parameters
+        ----------
+        elapsed_time : float
+            Time in seconds since the current animation phase began.
+        min_size : float
+            Smallest target size in height units.
+        max_size : float
+            Largest target size in height units.
+
+        Returns
+        -------
+        tuple of float
+            Current size and rotation in degrees. Zoom never rotates, so the
+            rotation is always zero.
+        """
+
+        # --- Smooth Size Oscillation ---
+        # A cosine starts at the maximum size and changes direction smoothly
+        # at both ends, avoiding abrupt jumps in size.
+        scaled_time = elapsed_time * cfg.animation.zoom_speed
+        normalized_oscillation = (np.cos(scaled_time) + 1) / 2.0
+        current_size = min_size + normalized_oscillation * (max_size - min_size)
+
+        # Returning zero explicitly prevents an old trill angle from remaining
+        # on the stimulus when switching to zoom.
+        return current_size, 0.0
+
+    def _trill_animation(self, elapsed_time, size, rotation_range):
+        """
+        Calculate a fixed-size trill pose.
+
+        A trill is a burst of back-and-forth rotation followed by a brief
+        pause. The rotation fades in and out smoothly so the target does not
+        snap back to upright at the start or end of a burst.
+
+        Parameters
+        ----------
+        elapsed_time : float
+            Time in seconds since the current animation phase began.
+        size : float
+            Fixed target size in height units.
+        rotation_range : float
+            Maximum rotation in degrees for this animation phase.
+
+        Returns
+        -------
+        tuple of float
+            Fixed size and current rotation in degrees.
+        """
+
+        # --- Locate the Current Rotation Burst ---
+        cycle_position = elapsed_time % cfg.animation.trill_cycle_duration
+        rotation = 0.0
+
+        if cycle_position < cfg.animation.trill_active_duration:
+            # --- Smooth Start and End of the Burst ---
+            # The sine-squared envelope reaches zero at both ends of the
+            # active period, leaving the target upright during the pause.
+            burst_progress = (
+                cycle_position / cfg.animation.trill_active_duration
+            )
+            movement_strength = np.sin(np.pi * burst_progress) ** 2
+
+            # --- Back-and-Forth Rotation ---
+            trill_time = (
+                cycle_position
+                * cfg.animation.trill_frequency
+                * 2
+                * np.pi
+            )
+            rotation = (
+                np.sin(trill_time)
+                * rotation_range
+                * movement_strength
+            )
+
+        return size, rotation
+
+    def _animate(
+        self,
+        stim,
+        clock,
+        point_idx,
+        phase='attention',
+        transition_start=None,
+    ):
+        """
+        Draw a calibration target for its attention or collection phase.
+
+        Attention and collection use independent animation types and sizes
+        from ``ETSettings``. When collection starts, ``transition_start``
+        supplies the last displayed size and rotation so the target blends
+        smoothly into its smaller collection animation.
+
         Parameters
         ----------
         stim : psychopy.visual stimulus
-            The stimulus object to animate
+            The stimulus object to animate.
         clock : psychopy.core.Clock
-            Clock for timing the animation
+            Clock for timing the current animation phase.
         point_idx : int
-            Index of the current calibration point
+            Index of the current calibration point.
+        phase : {'attention', 'collection'}, optional
+            Animation phase to present. Default is 'attention'.
+        transition_start : tuple or None, optional
+            Previously displayed ``(size, rotation)`` to blend from when
+            entering collection. Default None starts immediately.
         """
-        
-        if self.anim_type == 'zoom':
-            # --- Zoom Animation: Smooth Size Oscillation ---
-            elapsed_time = clock.getTime() * cfg.animation.zoom_speed
-            
-            # Select size settings based on stim_size preset (in height units)
-            if self.stim_size == 'big':
-                min_size_height = cfg.animation.min_zoom_size_big
-                max_size_height = cfg.animation.max_zoom_size_big
-            else:  # 'small'
-                min_size_height = cfg.animation.min_zoom_size_small
-                max_size_height = cfg.animation.max_zoom_size_small
-            
-            # Convert config sizes to stimulus's units
-            min_size = convert_height_to_units(self.win, min_size_height, target_units=stim.units)
-            max_size = convert_height_to_units(self.win, max_size_height, target_units=stim.units)
-            
-            # Calculate smooth oscillation
-            size_range = max_size - min_size
-            normalized_oscillation = (np.cos(elapsed_time) + 1) / 2.0
-            current_size = min_size + (normalized_oscillation * size_range)
-            
-            stim.setSize(current_size)
-            
-        elif self.anim_type == 'trill':
-            # --- Trill Animation: Rapid Rotation with Pauses ---
-            # Select size setting based on stim_size preset (in height units)
-            if self.stim_size == 'big':
-                trill_size_height = cfg.animation.trill_size_big
-            else:  # 'small'
-                trill_size_height = cfg.animation.trill_size_small
-            
-            # Convert config size to stimulus's units
-            trill_size = convert_height_to_units(self.win, trill_size_height, target_units=stim.units)
-            
-            stim.setSize(trill_size)
-            
-            # Rotation logic
-            elapsed_time = clock.getTime()
-            cycle_position = elapsed_time % cfg.animation.trill_cycle_duration
-            
-            if cycle_position < cfg.animation.trill_active_duration:
-                trill_time = cycle_position * cfg.animation.trill_frequency * 2 * np.pi
-                rotation_angle = np.sin(trill_time) * cfg.animation.trill_rotation_range
-                stim.setOri(rotation_angle)
-            else:
-                stim.setOri(0)
-        
+
+        if phase not in ('attention', 'collection'):
+            raise ValueError(
+                f"Invalid animation phase: '{phase}'. "
+                "Must be 'attention' or 'collection'."
+            )
+
+        # --- Select Animation and Phase Settings ---
+        if phase == 'attention':
+            animation_type = self.anim_type
+            transition_duration = 0.0
+        else:
+            animation_type = self.collection_anim_type
+            transition_duration = (
+                max(0.0, self.focus_time)
+                if transition_start is not None
+                else 0.0
+            )
+
+        elapsed_time = max(0.0, clock.getTime())
+
+        # --- Calculate Appearance in Height Units ---
+        # Setting names identify both phase and preset, for example
+        # attention_zoom_min_size_big.
+        preset = self.stim_size
+        if animation_type == 'zoom':
+            min_size_height = getattr(
+                cfg.animation,
+                f'{phase}_zoom_min_size_{preset}',
+            )
+            max_size_height = getattr(
+                cfg.animation,
+                f'{phase}_zoom_max_size_{preset}',
+            )
+        elif animation_type == 'trill':
+            trill_size_height = getattr(
+                cfg.animation,
+                f'{phase}_trill_size_{preset}',
+            )
+            rotation_range = getattr(
+                cfg.animation,
+                f'{phase}_trill_rotation_range',
+            )
+        else:
+            raise ValueError(
+                f"Invalid animation type: '{animation_type}'. "
+                "Must be 'zoom' or 'trill'."
+            )
+
+        # --- Hold Collection at Its Starting Pose During the Transition ---
+        # The collection animation then starts without another clock reset.
+        motion_time = max(0.0, elapsed_time - transition_duration)
+
+        if animation_type == 'zoom':
+            size_height, rotation = self._zoom_animation(
+                motion_time,
+                min_size_height,
+                max_size_height,
+            )
+        else:
+            size_height, rotation = self._trill_animation(
+                motion_time,
+                trill_size_height,
+                rotation_range,
+            )
+
+        # --- Convert the Current Size Once ---
+        # ETSettings and animation calculations use height units. PsychoPy
+        # draws with the stimulus's own units.
+        size = convert_height_to_units(
+            self.win,
+            size_height,
+            target_units=stim.units,
+        )
+
+        # --- Blend From the Last Attention Appearance ---
+        # The saved size already uses the stimulus's units, so both ends of
+        # the interpolation use the same coordinate system.
+        if transition_duration > 0 and elapsed_time < transition_duration:
+            start_size, start_rotation = transition_start
+            progress = elapsed_time / transition_duration
+
+            # Smoothstep gives the transition a gentle start and finish.
+            blend = progress * progress * (3.0 - 2.0 * progress)
+
+            size = start_size + blend * (size - start_size)
+            rotation = start_rotation + blend * (
+                rotation - start_rotation
+            )
+
+        # --- Apply Pose and Draw ---
+        # The target position stays fixed throughout both animation phases.
+        stim.setSize(size)
+        stim.setOri(rotation)
         stim.draw()
     
-
-    def _fade_sound(self, sound, fade_duration=0.5, steps=10):
-        """
-        Gradually fade out a sound over the specified duration.
-        
-        Reduces sound volume from its current level to silence over the fade
-        duration, then stops playback and resets volume to maximum. Useful for 
-        smooth audio transitions during calibration without abrupt cutoffs that 
-        might startle participants.
-        
-        Parameters
-        ----------
-        sound : psychopy.sound.Sound
-            The sound object to fade out. Must be currently playing.
-        fade_duration : float, optional
-            Total time in seconds for the fade-out effect. Default 0.5 seconds.
-        steps : int, optional
-            Number of volume steps in the fade. More steps create smoother fade
-            but increase CPU overhead. Default 20 steps provides smooth transition
-            without performance impact.
-            
-        Notes
-        -----
-        The sound is automatically stopped after the fade completes, and volume
-        is reset to 1.0 (maximum) so it's ready for the next playback at full volume.
-        """
-        # --- Fade-out Loop ---
-        # Gradually decrease volume from current level to 0
-        for i in range(steps, 0, -1):
-            sound.setVolume(i / steps)
-            core.wait(fade_duration / steps)
-        
-        # --- Final Cleanup ---
-        # Stop sound playback after fade completes
-        sound.stop()
-        
-        # Reset volume to maximum for next playback
-        sound.setVolume(1.0)
-
 
     def _create_legend_visuals(self, base_y_pos):
         """
@@ -537,12 +657,12 @@ class BaseCalibrationSession:
                     highlight = visual.Circle(
                         self.win,
                         radius=highlight_radius,
-                        pos=calibration_points[retry_idx],
+                        pos=self.calibration_points_height[retry_idx],
                         lineColor=cfg.colors.highlight,
                         fillColor=None,
                         lineWidth=max(1, int(line_width_pixels)),
                         edges=128,
-                        units= 'height' #self.win.units
+                        units='height',
                     )
                     highlight.draw()
             self.win.flip()
@@ -573,151 +693,374 @@ class BaseCalibrationSession:
                     return None
 
                     
-    def _collection_phase(self, calibration_points, auto_paced=False,
-                          inter_point_delay=0.25, **kwargs):
+    def _prepare_automatic_point_order(self, pacing, presentation_order):
         """
-        Unified collection phase for both calibration types.
-        
-        Uses callback methods for type-specific data collection while providing
-        common interaction logic. Only allows interaction with points in the
-        remaining_points list to prevent redundant calibration.
-        
-        Parameters
-        ----------
-        calibration_points : list of (float, float)
-            List of calibration point coordinates in window units.
-        auto_paced : bool, optional
-            Show pending points sequentially instead of selecting them by number.
-        inter_point_delay : float, optional
-            Blank interval after collection, before the next auto-paced point.
-        **kwargs : dict
-            Additional arguments passed to collect method. Mode-specific parameters
-            such as 'num_samples' for mouse calibration.
-        
+        Prepare the target sequence for an automatic calibration pass.
+
+        Random order prevents the participant from anticipating the next target
+        location. An explicit order supports fixed research protocols. Retry
+        passes filter the requested order to the selected points while keeping
+        their relative sequence.
+
+        Returns
+        -------
+        list of int
+            Zero-based calibration point indices. Empty for manual pacing.
+        """
+
+        # --- Manual Pacing ---
+        # Manual calibration is driven by number keys, so it needs no queue.
+        if pacing != 'auto':
+            return []
+
+        # --- Random Presentation Order ---
+        # Shuffle only the points belonging to this pass.
+        if presentation_order == 'random':
+            point_order = list(self.remaining_points)
+            random.shuffle(point_order)
+            return point_order
+
+        # --- Explicit Presentation Order ---
+        # Convert the public 1-based point numbers to zero-based indices and
+        # remove points that do not belong to the current retry pass.
+        eligible_point_indices = set(self.remaining_points)
+        return [
+            point_number - 1
+            for point_number in presentation_order
+            if point_number - 1 in eligible_point_indices
+        ]
+
+    def _start_point_data_preparation(self, point_idx, **kwargs):
+        """
+        Prepare a point before collection begins.
+
+        Mouse simulation has nothing to prepare, so its base implementation is
+        intentionally empty. Tobii overrides this to discard old samples while
+        the participant is settling.
+        """
+
+    def _update_point_data_preparation(self, **kwargs):
+        """
+        Report whether point preparation has finished.
+
+        The base session needs no preparation and is always ready. Tobii
+        overrides this to poll its preparation worker.
+        """
+        return True
+
+    def _activate_calibration_target(
+        self,
+        point_idx,
+        target_pos,
+        animation_clock,
+    ):
+        """
+        Place a target and restart its attention animation and audio.
+
+        The target remains at this known screen position while the participant
+        looks at it and calibration samples are acquired. Restarting the clock
+        gives every newly visible target a fresh animation cycle.
+        """
+
+        # --- Target Placement ---
+        # Reset rotation so an orientation from a previous trill does not carry
+        # into the next target.
+        stim = self.stim_objects[point_idx % len(self.stim_objects)]
+        stim.setPos(target_pos)
+        stim.setOri(0)
+        animation_clock.reset()
+
+        # --- Attention Audio ---
+        # Audio helps attract the participant. Reset its volume because a
+        # previous collection may have faded it to silence.
+        if self.audio:
+            if not self.audio.isPlaying:
+                self.audio.play()
+            self.audio.setVolume(1.0)
+
+    def _present_and_collect_calibration_points(
+        self,
+        calibration_points,
+        pacing='manual',
+        presentation_order='random',
+        **kwargs,
+    ):
+        """
+        Present calibration targets and collect data for one pass.
+
+        Calibration shows a target at a known screen position and records gaze
+        samples while the participant looks at it. Manual pacing lets the
+        experimenter choose every target. Automatic pacing presents targets in
+        a prepared order while SPACE still controls when collection begins.
+
         Returns
         -------
         bool
-            True if collection completed successfully, False if user pressed escape
-            to abort calibration.
+            True when the pass is complete, False if the experimenter aborts.
         """
-        if auto_paced:
-            return self._auto_paced_collection_phase(
-                calibration_points, inter_point_delay, **kwargs
+
+        # --- 1. Prepare Points for This Pass ---
+        # remaining_points contains every point initially, or only the selected
+        # retry points on a later pass.
+        eligible_point_indices = set(self.remaining_points)
+        automatic_point_queue = self._prepare_automatic_point_order(
+            pacing,
+            presentation_order,
+        )
+        current_point_idx = (
+            automatic_point_queue[0] if automatic_point_queue else None
+        )
+
+        # --- 2. Initialize Presentation State ---
+        WAITING_FOR_COLLECTION = 'waiting_for_collection'
+        SETTLING_ON_TARGET = 'settling_on_target'
+        COLLECTING_DATA = 'collecting_data'
+
+        presentation_state = WAITING_FOR_COLLECTION
+        animation_clock = core.Clock()
+        settling_clock = core.Clock()
+        abort_requested = False
+        transition_start = None
+        displayed_point_idx = None
+        displayed_phase = None
+        collection_pose_displayed = False
+        preparation_complete = True
+        settling_audio_stopped = False
+
+        if current_point_idx is not None:
+            self._activate_calibration_target(
+                current_point_idx,
+                calibration_points[current_point_idx],
+                animation_clock,
             )
 
-        # --- Animation Timing Setup ---
-        clock = core.Clock()
-        point_idx = -1
-        
-        # --- Main Collection Loop ---
-        while True:
-            # --- Frame Setup ---
-            # Clear screen and draw calibration border
-            self.win.clearBuffer()
-            self._draw_calibration_border()
-            
-            # --- Keyboard Input Processing ---
-            for key in event.getKeys():
-                if key in cfg.numkey_dict:
-                    # --- Point Selection ---
-                    # Select point; play audio if available
-                    candidate_idx = cfg.numkey_dict[key]
-                    # Only allow selection of points that are still remaining
-                    if candidate_idx in self.remaining_points:
-                        point_idx = candidate_idx
-                        if self.audio:
-                            if not self.audio.isPlaying:
-                                self.audio.play()
-                    else:
-                        # Ignore key press for points not in remaining list
-                        point_idx = -1
-                        
-                elif key == 'space' and point_idx in self.remaining_points:
-                    # --- Data Collection Trigger ---
-                    # Collect data using subclass-specific method
-                    success = self._collect_data_at_point(
-                        calibration_points[point_idx], 
-                        point_idx, 
-                        **kwargs
-                    )
-                    if success:
-                        # DON'T remove from remaining points - allow re-doing same point
-                        point_idx = -1
-                        
-                elif key == 'return':
-                    # --- Early Completion ---
-                    return True
-                        
-                elif key == 'escape':
-                    # --- Abort Calibration ---
-                    self._clear_collected_data()
-                    return False
-            
-            # --- Stimulus Presentation ---
-            # Show stimulus at selected point (only if it's in remaining points)
-            if point_idx in self.remaining_points:
-                stim_idx = point_idx % len(self.stim_objects)
-                stim = self.stim_objects[stim_idx]
-                stim.setPos(calibration_points[point_idx])
-                self._animate(stim, clock, point_idx)
-            
-            self.win.flip()
-    
-    
-    def _auto_paced_collection_phase(self, calibration_points, inter_point_delay, **kwargs):
-        """Show each pending point in order; only Space starts sample collection."""
-        point_indices = sorted(self.remaining_points)
-        clock = core.Clock()
-
-        for position, point_idx in enumerate(point_indices):
-            # Ignore buffered collection keys, but never discard an Escape request.
-            if 'escape' in event.getKeys():
-                self._clear_collected_data()
-                return False
-
-            stim = self.stim_objects[point_idx % len(self.stim_objects)]
-            stim.setPos(calibration_points[point_idx])
-            clock.reset()
-            if self.audio and not self.audio.isPlaying:
-                self.audio.play()
-
+        # --- 3. Present and Collect Points Frame by Frame ---
+        try:
             while True:
+                settling_complete = False
+
+                # --- 3a. Process Keyboard Input ---
+                # Target changes are only accepted while waiting. Changing a target
+                # during settling or collection would invalidate its gaze samples.
+                for key in event.getKeys():
+                    if key == 'escape':
+                        # Tobii cannot interrupt an SDK call already running in
+                        # its worker. Defer cleanup until that call returns.
+                        defer_escape = (
+                            self._defer_collection_abort
+                            and (
+                                presentation_state == COLLECTING_DATA
+                                or (
+                                    presentation_state == SETTLING_ON_TARGET
+                                    and not preparation_complete
+                                )
+                            )
+                        )
+
+                        if defer_escape:
+                            abort_requested = True
+                        else:
+                            # Waiting, ready settling and mouse sampling can
+                            # stop immediately.
+                            if self.audio:
+                                self.audio.stop()
+                            self._clear_collected_data()
+                            return False
+                        break
+
+                    if presentation_state != WAITING_FOR_COLLECTION:
+                        continue
+
+                    if key == 'return':
+                        # Preserve the existing early-results workflow.
+                        return True
+
+                    if pacing == 'manual' and key in cfg.numkey_dict:
+                        candidate_point_idx = cfg.numkey_dict[key]
+                        if candidate_point_idx in eligible_point_indices:
+                            current_point_idx = candidate_point_idx
+                            transition_start = None
+                            self._activate_calibration_target(
+                                current_point_idx,
+                                calibration_points[current_point_idx],
+                                animation_clock,
+                            )
+
+                    elif (
+                        key == 'space'
+                        and current_point_idx is not None
+                        and displayed_point_idx == current_point_idx
+                        and displayed_phase == 'attention'
+                    ):
+                        # Collection is accepted only after this target has
+                        # actually been drawn in its attention phase. This
+                        # prevents a number and Space in the same frame from
+                        # collecting a target that was never shown.
+                        stim = self.stim_objects[
+                            current_point_idx % len(self.stim_objects)
+                        ]
+                        transition_start = (
+                            np.array(stim.size, dtype=float, copy=True),
+                            float(stim.ori),
+                        )
+                        animation_clock.reset()
+                        settling_clock.reset()
+                        collection_pose_displayed = False
+                        preparation_complete = False
+                        settling_audio_stopped = False
+                        presentation_state = SETTLING_ON_TARGET
+
+                        # Start clearing any old samples now, while the target
+                        # is settling, so the worker can overlap the delay.
+                        self._start_point_data_preparation(
+                            current_point_idx,
+                            **kwargs,
+                        )
+
+                # --- 3b. Start or Update Data Collection ---
+                if presentation_state == SETTLING_ON_TARGET:
+                    elapsed_settling = settling_clock.getTime()
+                    focus_time = max(self.focus_time, 0.0)
+
+                    # --- Fade Attention Audio Without Blocking Drawing ---
+                    # The fade follows the same elapsed time as settling, so audio
+                    # reaches silence exactly when sample collection begins.
+                    if self.audio and focus_time > 0:
+                        remaining_volume = max(
+                            0.0,
+                            1.0 - elapsed_settling / focus_time,
+                        )
+                        self.audio.setVolume(remaining_volume)
+
+                    settling_complete = (
+                        focus_time == 0
+                        or elapsed_settling >= focus_time
+                    )
+
+                    # Audio stops at the settling deadline even if point
+                    # preparation happens to take longer than expected.
+                    if settling_complete and not settling_audio_stopped:
+                        if self.audio:
+                            self.audio.setVolume(0.0)
+                            self.audio.stop()
+                        settling_audio_stopped = True
+
+                elif presentation_state == COLLECTING_DATA:
+                    collection_result = self._update_point_data_collection(**kwargs)
+
+                    if collection_result is not None:
+                        if abort_requested:
+                            if self.audio:
+                                self.audio.stop()
+                            self._clear_collected_data()
+                            return False
+
+                        if collection_result:
+                            # --- Successful Collection ---
+                            if pacing == 'auto':
+                                automatic_point_queue.pop(0)
+                                if not automatic_point_queue:
+                                    return True
+
+                                current_point_idx = automatic_point_queue[0]
+                                transition_start = None
+                                self._activate_calibration_target(
+                                    current_point_idx,
+                                    calibration_points[current_point_idx],
+                                    animation_clock,
+                                )
+                            else:
+                                # Manual pacing hides the target until the
+                                # experimenter selects another point.
+                                current_point_idx = None
+                                transition_start = None
+
+                        else:
+                            # --- Failed Collection ---
+                            # Keep the same target available for another attempt.
+                            # Automatic pacing must not advance the queue.
+                            transition_start = None
+                            self._activate_calibration_target(
+                                current_point_idx,
+                                calibration_points[current_point_idx],
+                                animation_clock,
+                            )
+
+                        presentation_state = WAITING_FOR_COLLECTION
+
+                # --- 3c. Draw Current Frame ---
                 self.win.clearBuffer()
                 self._draw_calibration_border()
-                self._animate(stim, clock, point_idx)
-                self.win.flip()
 
-                # Draw the target before accepting a collection key.
-                keys = event.getKeys()
-                if 'escape' in keys:
+                animation_phase = None
+                if current_point_idx is not None:
+                    stim = self.stim_objects[
+                        current_point_idx % len(self.stim_objects)
+                    ]
+                    animation_phase = (
+                        'collection'
+                        if presentation_state in (
+                            SETTLING_ON_TARGET,
+                            COLLECTING_DATA,
+                        )
+                        else 'attention'
+                    )
+                    self._animate(
+                        stim,
+                        animation_clock,
+                        current_point_idx,
+                        phase=animation_phase,
+                        transition_start=transition_start,
+                    )
+
+                self.win.flip()
+                displayed_point_idx = current_point_idx
+                displayed_phase = animation_phase
+
+                if animation_phase == 'collection':
+                    collection_pose_displayed = True
+
+                # --- 3d. Prepare and Begin Collection ---
+                # Preparation overlaps settling. Poll it every frame so an
+                # Escape request can be honoured as soon as the SDK call ends.
+                if (
+                    presentation_state == SETTLING_ON_TARGET
+                    and not preparation_complete
+                ):
+                    preparation_complete = (
+                        self._update_point_data_preparation(**kwargs)
+                    )
+
+                if (
+                    presentation_state == SETTLING_ON_TARGET
+                    and abort_requested
+                    and preparation_complete
+                ):
                     if self.audio:
                         self.audio.stop()
                     self._clear_collected_data()
                     return False
-                if 'space' in keys:
-                    if self._collect_data_at_point(
-                        calibration_points[point_idx], point_idx, **kwargs
-                    ):
-                        break
 
-            # Collection is blocking. Consume keys pressed during it so they
-            # cannot collect the next target or act on the results screen.
-            if 'escape' in event.getKeys():
-                self._clear_collected_data()
-                return False
+                # Collection begins only after the focus time, preparation,
+                # and a visible collection frame have all completed.
+                if (
+                    presentation_state == SETTLING_ON_TARGET
+                    and settling_complete
+                    and collection_pose_displayed
+                    and preparation_complete
+                ):
+                    self._start_point_data_collection(
+                        current_point_idx,
+                        calibration_points[current_point_idx],
+                        **kwargs,
+                    )
+                    presentation_state = COLLECTING_DATA
+        finally:
+            # Audio must never continue into results, an abort,
+            # or an exception after leaving the target screen.
+            if self.audio and self.audio.isPlaying:
+                self.audio.stop()
 
-            # Keep the pause responsive, without changing the sampling routine.
-            # The final point goes straight to the existing results screen.
-            clock.reset()
-            while position < len(point_indices) - 1 and clock.getTime() < inter_point_delay:
-                self.win.clearBuffer()
-                self._draw_calibration_border()
-                self.win.flip()
-                if 'escape' in event.getKeys():
-                    self._clear_collected_data()
-                    return False
-
-        return True
 
     def _create_calibration_result_image(self, sample_data):
             """
@@ -756,9 +1099,10 @@ class BaseCalibrationSession:
             elif self.visualization_style == 'lines':
                 for point_idx, samples in sample_data.items():
                     if point_idx < len(self.calibration_points):
-                        target_pos = self.calibration_points[point_idx]
-                        target_pix = psychopy_to_pixels(self.win, target_pos)
-                        
+                        # Reuse the converted target position so result lines
+                        # and target circles share exactly the same pixel point.
+                        target_pix = self.calibration_targets_pixels[point_idx]
+
                         for sample_pix, line_color in samples:
                             img_draw.line(
                                 (target_pix[0], target_pix[1], 
@@ -825,7 +1169,8 @@ class TobiiCalibrationSession(BaseCalibrationSession):
         calibration_api,
         infant_stims,
         audio=None,
-        anim_type='zoom',
+        anim_type='trill',
+        collection_anim_type='zoom',
         stim_size='big',
         visualization_style='lines',
         verbose=True
@@ -858,14 +1203,18 @@ class TobiiCalibrationSession(BaseCalibrationSession):
             Provides auditory feedback during the calibration process. If None,
             no sound is played. Default None.
         anim_type : {'zoom', 'trill'}, optional
-            Animation style for calibration targets:
-            - 'zoom': Smooth size oscillation using cosine function
-            - 'trill': Rapid rotation with intermittent stops
+            Animation style used to attract attention before data collection.
+            Default 'trill'.
+        collection_anim_type : {'zoom', 'trill'}, optional
+            Animation style used during settling and data collection.
             Default 'zoom'.
         stim_size : {'big', 'small'}, optional
-            Size preset for calibration stimuli:
-            - 'big': Larger stimuli for infants/children (zoom: 5-16%, trill: 14%)
-            - 'small': Smaller stimuli for adults (zoom: 3-8%, trill: 6%)
+            Size preset for calibration stimuli. Attention and collection
+            sizes are configured independently in ``cfg.animation``:
+            - 'big': Attention zoom 9.5-16%, collection zoom 5-9.5%;
+              attention trill 12.75%, collection trill 7.25%.
+            - 'small': Attention zoom 3-6%, collection zoom 1-3%;
+              attention trill 4.5%, collection trill 2%.
             Default 'big'.
         visualization_style : {'lines', 'circles'}, optional
             Style for calibration result visualization:
@@ -882,6 +1231,7 @@ class TobiiCalibrationSession(BaseCalibrationSession):
             infant_stims=infant_stims,
             audio=audio,
             anim_type=anim_type,
+            collection_anim_type=collection_anim_type,
             stim_size=stim_size,
             visualization_style=visualization_style
         )
@@ -890,7 +1240,14 @@ class TobiiCalibrationSession(BaseCalibrationSession):
         self.calibration = calibration_api
         self.verbose = verbose
 
-    def run(self, calibration_points, auto_paced=False, inter_point_delay=0.25):
+        # Tobii collection runs in one background worker. The executor is
+        # created by run() and shut down before calibration mode is left.
+        self._collection_executor = None
+        self._preparation_future = None
+        self._collection_future = None
+        self._defer_collection_abort = True
+
+    def run(self, calibration_points, pacing='manual', presentation_order='random'):
         """
         Main routine to run the full Tobii calibration workflow.
 
@@ -903,10 +1260,12 @@ class TobiiCalibrationSession(BaseCalibrationSession):
         calibration_points : list of (float, float)
             List of calibration points in NORMALIZED coordinates [-1, 1].
             Will be converted to window units and then to Tobii ADCS format.
-        auto_paced : bool, optional
-            Advance targets automatically; SPACE still triggers each collection.
-        inter_point_delay : float, optional
-            Blank interval between auto-paced points, in seconds. Default 0.25.
+        pacing : {'manual', 'auto'}, optional
+            Manual pacing waits for number-key point selection. Auto pacing
+            presents targets progressively while SPACE controls collection.
+        presentation_order : {'random'} or tuple of int, optional
+            Automatic presentation order as 1-based point numbers. Retry
+            passes retain this relative order after filtering.
 
         Returns
         -------
@@ -916,35 +1275,61 @@ class TobiiCalibrationSession(BaseCalibrationSession):
         """
 
         # --- Instruction Display (before entering calibration mode) ---
-        instructions_text = f"""Tobii Eye Tracker Calibration Setup:
+        if pacing == 'auto':
+            instructions_text = f"""Automatic Pacing:
 
+    - Press SPACE to begin
+    - Wait until the participant looks at the animated target
+    - Press SPACE to collect samples at the current point
+    - The next target appears automatically
+    - Results appear after all points are collected
+    - Press ESCAPE to exit calibration"""
+        else:
+            instructions_text = f"""Tobii Eye Tracker Calibration Setup:
+
+    - Press SPACE to begin
     - Press number keys (1-{len(calibration_points)}) to select calibration points
     - Look at the animated stimulus when it appears
     - Press SPACE to collect samples at the selected point
     - Press ENTER to finish collecting and see results
-    - Press ESCAPE to exit calibration
+    - Press ESCAPE to exit calibration"""
 
-    Any key will start calibration immediately!"""
+        keys = self.show_message_and_wait(
+            instructions_text,
+            "Eye Tracker Calibration",
+            key_list=['space', 'escape'],
+        )
+        if 'escape' in keys:
+            return False
 
-        if auto_paced:
-            if not self._show_auto_paced_instructions(
-                "Wait until the participant looks at the animated target"
-            ):
-                return False
-        else:
-            self.show_message_and_wait(instructions_text, "Eye Tracker Calibration")
+        # --- Start the Collection Worker ---
+        # One worker handles all points in this calibration session. No dummy
+        # task is submitted: the thread starts with the first real collection.
+        self._collection_executor = ThreadPoolExecutor(
+            max_workers=1,
+            thread_name_prefix='detox-calibration',
+        )
 
-        self.calibration.enter_calibration_mode()
+        entered_calibration_mode = False
         try:
+            self.calibration.enter_calibration_mode()
+            entered_calibration_mode = True
             return self._run_calibration_session(
-                calibration_points, auto_paced, inter_point_delay
+                calibration_points, pacing, presentation_order
             )
         finally:
-            # Always leave calibration mode, even if a step above raised.
-            self.calibration.leave_calibration_mode()
+            # --- Finish Pending Collection Before Leaving Calibration Mode ---
+            # shutdown(wait=True) keeps the SDK call alive until it has
+            # completed. Escape cleanup and leaving calibration mode must not
+            # race with an active worker.
+            self._collection_executor.shutdown(wait=True)
+            self._collection_executor = None
 
-    def _run_calibration_session(self, calibration_points, auto_paced=False,
-                                 inter_point_delay=0.25):
+            if entered_calibration_mode:
+                self.calibration.leave_calibration_mode()
+
+    def _run_calibration_session(self, calibration_points, pacing='manual',
+                                 presentation_order='random'):
         """Run the calibration steps while calibration mode is active."""
         # --- 3. Setup and Validation ---
         self.check_points(calibration_points)
@@ -957,10 +1342,10 @@ class TobiiCalibrationSession(BaseCalibrationSession):
         # --- 5. Main Calibration Loop ---
         while True:
             # --- 5a. Data Collection ---
-            success = self._collection_phase(
+            success = self._present_and_collect_calibration_points(
                 self.calibration_points,
-                auto_paced=auto_paced,
-                inter_point_delay=inter_point_delay,
+                pacing=pacing,
+                presentation_order=presentation_order,
             )
             
             if not success:
@@ -990,47 +1375,132 @@ class TobiiCalibrationSession(BaseCalibrationSession):
         return (self.calibration_result.status == tr.CALIBRATION_STATUS_SUCCESS)
 
 
-    def _collect_data_at_point(self, target_pos, point_idx, **kwargs):
+    def _start_point_data_preparation(self, point_idx, **kwargs):
         """
-        Collect Tobii eye tracking data at a calibration point.
-        
-        Interfaces with the Tobii SDK to collect gaze samples while the participant
-        looks at the calibration target. Uses pre-converted coordinates from
-        self.tobii_points for efficiency. Provides focus time either through audio
-        fade-out (smooth) or silent wait.
-        
-        Parameters
-        ----------
-        target_pos : tuple
-            Target position in PsychoPy coordinates (window units).
-        point_idx : int
-            Index of the calibration point being collected.
-        **kwargs : dict
-            Unused for Tobii calibration, included for interface compatibility.
-            
+        Discard old Tobii samples for a point while it is settling.
+
+        Recollecting a point must not mix old and new calibration samples.
+        Running this in the shared worker overlaps the SDK call with focus time
+        instead of delaying collection after settling.
+        """
+
+        # --- Prevent Overlapping Preparation ---
+        if self._preparation_future is not None:
+            raise RuntimeError("Calibration preparation is already pending.")
+        if self._collection_executor is None:
+            raise RuntimeError("The Tobii collection executor is not running.")
+
+        # --- Remove Previous Samples for This Point ---
+        x, y = self.tobii_points[point_idx]
+        self._preparation_future = self._collection_executor.submit(
+            self._discard_point_data,
+            x,
+            y,
+        )
+
+    def _discard_point_data(self, x, y):
+        """Discard one point's samples and return how long Tobii took."""
+        started_at = time.perf_counter()
+        self.calibration.discard_data(x, y)
+        return time.perf_counter() - started_at
+
+    def _update_point_data_preparation(self, **kwargs):
+        """
+        Report whether preparation for the current point has finished.
+
         Returns
         -------
         bool
-            Always returns True to indicate data collection was initiated.
-            Actual success is determined during calibration computation.
+            True when old samples have been discarded. False while the worker
+            is still running.
         """
+
+        # --- Poll Without Blocking Drawing ---
+        future = self._preparation_future
+        if future is None:
+            raise RuntimeError("No calibration preparation has been started.")
+        if not future.done():
+            return False
+
+        # --- Read the Completed SDK Result and Actual Duration ---
+        try:
+            elapsed = future.result()
+        finally:
+            self._preparation_future = None
+
+        # --- Report Preparation That Exceeded Settling ---
+        # This is informational: collection still starts only after the
+        # tracker buffer is safely prepared.
+        if elapsed > self.focus_time:
+            beyond_ms = (elapsed - self.focus_time) * 1000
+            settled_ms = self.focus_time * 1000
+            NicePrint(
+                "Preparing this calibration point took "
+                f"{elapsed * 1000:.0f} ms, exceeding the configured "
+                f"settling time of {settled_ms:.0f} ms by "
+                f"{beyond_ms:.0f} ms.\n"
+                "Collection was delayed until preparation completed. "
+                "This does not indicate a calibration failure.",
+                title="Calibration Preparation",
+                verbose=self.verbose,
+            )
+
+        return True
+
+    def _start_point_data_collection(self, point_idx, target_pos, **kwargs):
+        """
+        Start Tobii collection for one calibration point.
+
+        The public collect_data() call blocks until the tracker has enough
+        samples. It runs in a single background worker so the presentation loop
+        can continue drawing the collection animation.
+        """
+
+        # --- Prevent Overlapping Collection Attempts ---
+        if self._collection_future is not None:
+            raise RuntimeError("A calibration collection is already pending.")
+        if self._collection_executor is None:
+            raise RuntimeError("The Tobii collection executor is not running.")
+
         # --- Use Pre-converted Coordinates ---
         x, y = self.tobii_points[point_idx]
-        
-        # --- Data Cleanup ---
-        self.calibration.discard_data(x, y)
-        
-        # --- Focus Time (with or without audio) ---
-        if self.audio:
-            # Fade audio while participant fixates (dual purpose)
-            self._fade_sound(self.audio, fade_duration=self.focus_time)
-        else:
-            # Silent wait for fixation
-            core.wait(self.focus_time)
-        
-        # --- Data Collection ---
-        self.calibration.collect_data(x, y)
-        return True
+
+        # --- Start Eye-Tracker Collection ---
+        # Preparation has already discarded old samples in the same worker.
+        self._collection_future = self._collection_executor.submit(
+            self.calibration.collect_data,
+            x,
+            y,
+        )
+
+    def _update_point_data_collection(self, **kwargs):
+        """
+        Check whether Tobii collection for the current point has finished.
+
+        Returns
+        -------
+        None
+            Collection is still running.
+        bool
+            True on success, False when Tobii reports collection failure.
+        """
+
+        # --- Poll Without Blocking the Display ---
+        future = self._collection_future
+        if future is None:
+            raise RuntimeError("No calibration collection has been started.")
+        if not future.done():
+            return None
+
+        # --- Read the Completed SDK Result ---
+        # result() raises any worker exception on the main thread. Clearing the
+        # Future in finally lets cleanup recover even when that happens.
+        try:
+            status = future.result()
+        finally:
+            self._collection_future = None
+
+        return status == tr.CALIBRATION_STATUS_SUCCESS
     
     
     def _clear_collected_data(self):
@@ -1146,7 +1616,8 @@ class MouseCalibrationSession(BaseCalibrationSession):
         infant_stims,
         mouse,
         audio=None,
-        anim_type='zoom',
+        anim_type='trill',
+        collection_anim_type='zoom',
         stim_size='big',
         visualization_style='lines',
         verbose=True
@@ -1178,14 +1649,18 @@ class MouseCalibrationSession(BaseCalibrationSession):
             Provides auditory feedback during the calibration process. If None,
             no sound is played. Default None.
         anim_type : {'zoom', 'trill'}, optional
-            Animation style for calibration targets:
-            - 'zoom': Smooth size oscillation using cosine function
-            - 'trill': Rapid rotation with intermittent stops
+            Animation style used to attract attention before data collection.
+            Default 'trill'.
+        collection_anim_type : {'zoom', 'trill'}, optional
+            Animation style used during settling and data collection.
             Default 'zoom'.
         stim_size : {'big', 'small'}, optional
-            Size preset for calibration stimuli:
-            - 'big': Larger stimuli for infants/children (zoom: 5-16%, trill: 14%)
-            - 'small': Smaller stimuli for adults (zoom: 3-8%, trill: 6%)
+            Size preset for calibration stimuli. Attention and collection
+            sizes are configured independently in ``cfg.animation``:
+            - 'big': Attention zoom 9.5-16%, collection zoom 5-9.5%;
+              attention trill 12.75%, collection trill 7.25%.
+            - 'small': Attention zoom 3-6%, collection zoom 1-3%;
+              attention trill 4.5%, collection trill 2%.
             Default 'big'.
         visualization_style : {'lines', 'circles'}, optional
             Style for calibration result visualization:
@@ -1202,6 +1677,7 @@ class MouseCalibrationSession(BaseCalibrationSession):
             infant_stims=infant_stims,
             audio=audio,
             anim_type=anim_type,
+            collection_anim_type=collection_anim_type,
             stim_size=stim_size,
             visualization_style=visualization_style
         )
@@ -1211,8 +1687,18 @@ class MouseCalibrationSession(BaseCalibrationSession):
         self.calibration_data = {}  # point_idx -> list of (target_pos, sample_pos, timestamp)
         self.verbose = verbose
 
+        # --- Current Simulated Collection ---
+        # Mouse sampling is advanced by the presentation loop instead of
+        # blocking the display for the full sample period.
+        self._mouse_collection_point_idx = None
+        self._mouse_collection_target_pos = None
+        self._mouse_collection_samples = []
+        self._mouse_collection_sample_count = 0
+        self._mouse_collection_sample_interval = 0.0
+        self._mouse_collection_next_sample_time = 0.0
 
-    def run(self, calibration_points, auto_paced=False, inter_point_delay=0.25):
+
+    def run(self, calibration_points, pacing='manual', presentation_order='random'):
         """
         Main function to run the mouse-based calibration routine.
         
@@ -1225,10 +1711,12 @@ class MouseCalibrationSession(BaseCalibrationSession):
         calibration_points : list of (float, float)
             List of calibration points in NORMALIZED coordinates [-1, 1].
             Will be converted to window units automatically.
-        auto_paced : bool, optional
-            Advance targets automatically; SPACE still triggers each collection.
-        inter_point_delay : float, optional
-            Blank interval between auto-paced points, in seconds. Default 0.25.
+        pacing : {'manual', 'auto'}, optional
+            Manual pacing waits for number-key point selection. Auto pacing
+            presents targets progressively while SPACE controls collection.
+        presentation_order : {'random'} or tuple of int, optional
+            Automatic presentation order as 1-based point numbers. Retry
+            passes retain this relative order after filtering.
 
         Returns
         -------
@@ -1238,25 +1726,33 @@ class MouseCalibrationSession(BaseCalibrationSession):
         """
 
         # --- 1. Instruction Display ---
-        instructions_text = f"""Mouse-Based Calibration Setup:
+        if pacing == 'auto':
+            instructions_text = f"""Automatic Pacing:
 
+    - Press SPACE to begin
+    - Move your mouse to the animated target
+    - Press SPACE to collect samples at the current point
+    - The next target appears automatically
+    - Results appear after all points are collected
+    - Press ESCAPE to exit calibration"""
+        else:
+            instructions_text = f"""Mouse-Based Calibration Setup:
+
+    - Press SPACE to begin
     - Press number keys (1-{len(calibration_points)}) to select calibration points
     - Move your mouse to the animated stimulus
     - Press SPACE to collect samples at the selected point
     - Press ENTER to finish collecting and see results
-    - Press ESCAPE to exit calibration
+    - Press ESCAPE to exit calibration"""
 
-    Any key will start calibration immediately!"""
-        
-        if auto_paced:
-            if not self._show_auto_paced_instructions(
-                "Move your mouse to the animated target"
-            ):
-                return False
-        else:
-            self.show_message_and_wait(instructions_text, "Calibration Setup")
-        
-        
+        keys = self.show_message_and_wait(
+            instructions_text,
+            "Calibration Setup",
+            key_list=['space', 'escape'],
+        )
+        if 'escape' in keys:
+            return False
+
         # --- 3. Setup and Validation ---
         self.check_points(calibration_points)
         self._prepare_session(calibration_points)
@@ -1264,10 +1760,10 @@ class MouseCalibrationSession(BaseCalibrationSession):
         # --- 4. Main Calibration Loop ---
         while True:
             # --- 5a. Data Collection ---
-            success = self._collection_phase(
+            success = self._present_and_collect_calibration_points(
                 self.calibration_points,
-                auto_paced=auto_paced,
-                inter_point_delay=inter_point_delay,
+                pacing=pacing,
+                presentation_order=presentation_order,
                 num_samples=cfg.calibration.num_samples_mouse,
             )
             if not success:
@@ -1293,65 +1789,94 @@ class MouseCalibrationSession(BaseCalibrationSession):
 
     
     
-    def _collect_data_at_point(self, target_pos, point_idx, **kwargs): # TODO: remove kwargs
+    def _start_point_data_collection(self, point_idx, target_pos, **kwargs):
         """
-        Collect mouse samples at a single calibration target.
-        
-        Gathers multiple mouse position samples over a brief period to simulate
-        the variability of real gaze data. Samples are distributed over time
-        to capture any mouse movement or positioning adjustments. Provides focus
-        time either through audio fade-out (smooth) or silent wait.
+        Start simulated mouse collection for one calibration point.
 
-        Parameters
-        ----------
-        target_pos : tuple
-            The (x, y) coordinates of the current calibration target in PsychoPy units.
-        point_idx : int
-            The index of this calibration point in the full list.
-        **kwargs : dict
-            Must contain 'num_samples': number of mouse samples to collect.
-            Typically 5-10 samples for reasonable averaging.
-
-        Returns
-        -------
-        bool
-            Always returns True to indicate samples were collected successfully.
+        Mouse positions stand in for gaze samples during calibration
+        development. Samples are spread across later display frames so the
+        target can keep animating; the mouse is never read from a worker thread.
         """
+
         # --- Existing Data Cleanup ---
+        # A retry replaces this point's previous samples.
         if point_idx in self.calibration_data:
             del self.calibration_data[point_idx]
 
         # --- Sampling Configuration ---
-        num_samples = kwargs.get('num_samples', 5)
+        # Keep the existing approximately one-second sampling window. With the
+        # default five samples, observations are spaced about 0.2 seconds apart.
+        sample_count = max(1, int(kwargs.get('num_samples', 5)))
+        sample_interval = 1.0 / sample_count
+        current_time = time.perf_counter()
 
-        # --- Focus Time (with or without audio) ---
-        if self.audio:
-            # Fade audio while participant fixates (dual purpose)
-            self._fade_sound(self.audio, fade_duration=self.focus_time)
-        else:
-            # Silent wait for fixation
-            core.wait(self.focus_time)
+        self._mouse_collection_point_idx = point_idx
+        self._mouse_collection_target_pos = target_pos
+        self._mouse_collection_samples = []
+        self._mouse_collection_sample_count = sample_count
+        self._mouse_collection_sample_interval = sample_interval
+        self._mouse_collection_next_sample_time = (
+            current_time + sample_interval
+        )
 
-        # --- Sample Collection Setup ---
-        samples = []
-        sample_duration = 1.0
-        sample_interval = sample_duration / num_samples
+        # --- Take the First Real Observation ---
+        # Collection starts immediately after settling, without another wait.
+        self._mouse_collection_samples.append((
+            target_pos,
+            self.mouse.getPos(),
+            time.time(),
+        ))
 
-        # --- Mouse Position Sampling ---
-        for i in range(num_samples):
-            mouse_pos = self.mouse.getPos()
-            timestamp = time.time()
-            samples.append((target_pos, mouse_pos, timestamp))
+    def _update_point_data_collection(self, **kwargs):
+        """
+        Advance simulated mouse collection by at most one sample.
 
-            if i < num_samples - 1:
-                core.wait(sample_interval)
+        Reading the mouse on the main thread is quick, so it needs no worker.
+        If a frame arrives late, only one observation is taken; the next sample
+        is scheduled from that actual reading rather than inventing positions
+        for the missed interval.
 
-        # --- Data Storage ---
-        if point_idx not in self.calibration_data:
-            self.calibration_data[point_idx] = []
-        self.calibration_data[point_idx].extend(samples)
+        Returns
+        -------
+        None
+            Collection is still in progress.
+        bool
+            True when all samples for this point have been stored.
+        """
 
-        return True
+        # --- Collect One Due Sample ---
+        if self._mouse_collection_point_idx is not None:
+            current_time = time.perf_counter()
+
+            if (
+                current_time >= self._mouse_collection_next_sample_time
+                and len(self._mouse_collection_samples)
+                < self._mouse_collection_sample_count
+            ):
+                self._mouse_collection_samples.append((
+                    self._mouse_collection_target_pos,
+                    self.mouse.getPos(),
+                    time.time(),
+                ))
+                self._mouse_collection_next_sample_time = (
+                    current_time + self._mouse_collection_sample_interval
+                )
+
+        # --- Store Completed Collection ---
+        if (
+            self._mouse_collection_point_idx is not None
+            and len(self._mouse_collection_samples)
+            >= self._mouse_collection_sample_count
+        ):
+            self.calibration_data.setdefault(
+                self._mouse_collection_point_idx, []
+            ).extend(self._mouse_collection_samples)
+            self._mouse_collection_point_idx = None
+            self._mouse_collection_target_pos = None
+            self._mouse_collection_samples = []
+            return True
+
+        return None
 
 
     def _clear_collected_data(self):
@@ -1364,6 +1889,16 @@ class MouseCalibrationSession(BaseCalibrationSession):
         """
         # --- Data Dictionary Reset ---
         self.calibration_data.clear()
+
+        # --- Pending Sample Reset ---
+        # An abort must not leave observations that could be added to a later
+        # collection attempt.
+        self._mouse_collection_point_idx = None
+        self._mouse_collection_target_pos = None
+        self._mouse_collection_samples = []
+        self._mouse_collection_sample_count = 0
+        self._mouse_collection_sample_interval = 0.0
+        self._mouse_collection_next_sample_time = 0.0
 
 
     def _show_results(self, calibration_points):

@@ -1,6 +1,7 @@
 """Hardware-free calibration checks: python -m unittest discover -s tests -p "test_*.py"."""
 
 import importlib
+import math
 from pathlib import Path
 import sys
 import types
@@ -39,18 +40,30 @@ class AutoPacedCalibrationTests(unittest.TestCase):
         self.frames = []
         self.current_target = None
         self.collected = []
+        self.collection_times = []
         self.session = calibration.MouseCalibrationSession.__new__(
             calibration.MouseCalibrationSession
         )
         self.session.win = Mock()
         self.session.audio = Mock(isPlaying=False)
+        self.session.focus_time = 0.0
+        self.session._defer_collection_abort = False
         self.session.stim_objects = [Mock(), Mock(), Mock()]
+        for stim in self.session.stim_objects:
+            stim.size = 0.1
+            stim.ori = 0.0
         self.session.remaining_points = [0, 1, 2]
         self.points = [(0, 0), (-0.5, 0.5), (0.5, -0.5)]
         self.session._draw_calibration_border = Mock()
         self.session._clear_collected_data = Mock()
         self.session._animate = Mock(side_effect=self.animate)
-        self.session._collect_data_at_point = Mock(side_effect=self.collect)
+        self.session._start_point_data_collection = Mock(
+            side_effect=self.start_collection
+        )
+        self.session._update_point_data_collection = Mock(
+            side_effect=self.update_collection
+        )
+        self.pending_collection_result = None
         self.session.win.clearBuffer.side_effect = self.clear_frame
         self.session.win.flip.side_effect = self.flip
 
@@ -73,43 +86,60 @@ class AutoPacedCalibrationTests(unittest.TestCase):
     def clear_frame(self):
         self.current_target = None
 
-    def animate(self, stim, clock, point_idx):
+    def animate(self, stim, clock, point_idx, phase='attention',
+                transition_start=None):
         self.current_target = point_idx
 
     def flip(self):
         self.time += 0.1
         self.frames.append(self.current_target)
 
-    def collect(self, target, point_idx, **kwargs):
+    def start_collection(self, point_idx, target_pos, **kwargs):
         # Collection must never happen before the correct target is displayed.
         self.assertEqual(self.frames[-1], point_idx)
         self.collected.append(point_idx)
-        return True
+        self.collection_times.append(self.time)
+        self.pending_collection_result = True
 
-    def run_collection(self, keys, delay=0):
+    def update_collection(self, **kwargs):
+        result = self.pending_collection_result
+        self.pending_collection_result = None
+        return result
+
+    def run_collection(self, keys, presentation_order=(1, 2, 3)):
         with patch.object(calibration.event, 'getKeys', side_effect=keys):
-            return self.session._collection_phase(
-                self.points, auto_paced=True, inter_point_delay=delay, num_samples=5
+            return self.session._present_and_collect_calibration_points(
+                self.points,
+                pacing='auto',
+                presentation_order=presentation_order,
+                num_samples=5,
             )
 
-    def test_sequential_points_require_space_and_ignore_number_and_enter_keys(self):
-        keys = [[], ['1', 'return'], [], ['space'], ['space']]
-        keys += [[], ['space'], []] * 2
+    def test_automatic_points_require_one_space_each_and_ignore_numbers(self):
+        keys = [
+            [],           # Show the first target.
+            ['1', 'space'],  # Number is ignored; collect the first target.
+            [],           # Consume result and show the next target.
+            ['space'],    # Collect the second target.
+            [],           # Consume result and show the third target.
+            ['space'],    # Collect the third target.
+            [],           # Consume result and finish the pass.
+        ]
         self.assertTrue(self.run_collection(keys))
         self.assertEqual(self.collected, [0, 1, 2])
-        self.assertNotIn(None, self.frames)  # Zero delay adds no blank frames.
+        self.assertNotIn(None, self.frames)  # No blank interval.
         self.assertEqual(self.session.remaining_points, [0, 1, 2])
-        self.session._collect_data_at_point.assert_called_with(
-            self.points[2], 2, num_samples=5
+        self.session._start_point_data_collection.assert_called_with(
+            2, self.points[2], num_samples=5
         )
 
-    def test_retry_subset_is_sorted_and_has_a_blank_gap_only_between_points(self):
+    def test_retry_subset_uses_the_requested_order_without_a_blank_gap(self):
         self.session.remaining_points = [2, 0]
-        keys = [[], ['space'], [], ['space'], [], [], [], ['space'], []]
-        self.assertTrue(self.run_collection(keys, delay=0.25))
+        keys = [[], ['space'], [], ['space'], []]
+        self.assertTrue(self.run_collection(keys))
         self.assertEqual(self.collected, [0, 2])
-        self.assertEqual(self.frames, [0, None, None, None, 2])
-        self.assertGreaterEqual(self.time, 0.45)
+        self.assertNotIn(None, self.frames)
+        self.assertEqual(self.frames[-1], 2)
 
     def test_escape_while_waiting_stops_audio_and_clears_data(self):
         self.assertFalse(self.run_collection([[], ['escape', 'space']]))
@@ -117,48 +147,187 @@ class AutoPacedCalibrationTests(unittest.TestCase):
         self.session.audio.stop.assert_called_once()
         self.session._clear_collected_data.assert_called_once()
 
-    def test_escape_pressed_during_collection_is_not_discarded(self):
+    def test_escape_during_mouse_collection_aborts_immediately(self):
         self.assertFalse(self.run_collection([[], ['space'], ['escape']]))
         self.assertEqual(self.collected, [0])
+        self.session._update_point_data_collection.assert_not_called()
         self.session._clear_collected_data.assert_called_once()
 
-    def test_escape_in_blank_gap_aborts(self):
+    def test_escape_during_tobii_collection_is_deferred(self):
+        self.session._defer_collection_abort = True
+        self.session._update_point_data_collection = Mock(
+            side_effect=[None, True]
+        )
+        keys = [[], ['space'], ['escape'], []]
+
+        self.assertFalse(self.run_collection(keys))
+
+        self.assertEqual(
+            self.session._update_point_data_collection.call_count, 2
+        )
+        self.session._clear_collected_data.assert_called_once()
+
+    def test_escape_during_tobii_preparation_waits_for_worker(self):
+        self.session._defer_collection_abort = True
+        self.session.focus_time = 0.5
+        self.session._start_point_data_preparation = Mock()
+        self.session._update_point_data_preparation = Mock(
+            side_effect=[False, False, True]
+        )
+        keys = [[], ['space'], ['escape'], []]
+
+        self.assertFalse(self.run_collection(keys))
+
+        self.assertEqual(
+            self.session._update_point_data_preparation.call_count, 3
+        )
+        self.session._clear_collected_data.assert_called_once()
+
+    def test_escape_after_success_stops_before_next_collection(self):
         keys = [[], ['space'], [], ['escape']]
-        self.assertFalse(self.run_collection(keys, delay=0.25))
+        self.assertFalse(self.run_collection(keys))
         self.assertEqual(self.collected, [0])
-        self.assertEqual(self.frames, [0, None])
+        self.assertNotIn(None, self.frames)
 
     def test_manual_default_still_allows_recollection_and_enter_to_finish(self):
-        keys = [['1'], ['space'], ['1'], ['space'], ['return']]
+        keys = [
+            ['1'],       # Show point 1.
+            ['space'],   # Collect it.
+            [],          # Consume result; target disappears.
+            ['1'],       # Show point 1 again.
+            ['space'],   # Recollect it.
+            [],          # Consume result.
+            ['return'],  # Show results.
+        ]
         with patch.object(calibration.event, 'getKeys', side_effect=keys):
-            self.assertTrue(self.session._collection_phase(self.points))
+            self.assertTrue(
+                self.session._present_and_collect_calibration_points(
+                    self.points,
+                    pacing='manual',
+                )
+            )
         self.assertEqual(self.collected, [0, 0])
 
-    def test_auto_instructions_use_space_or_escape_and_do_not_mention_gap(self):
-        self.session.show_message_and_wait = Mock(return_value=['space'])
-        self.assertTrue(self.session._show_auto_paced_instructions('Look at the target'))
-        args, kwargs = self.session.show_message_and_wait.call_args
-        self.assertIn('Look at the target', args[0])
-        self.assertNotIn('gap', args[0].lower())
-        self.assertNotIn('blank', args[0].lower())
-        self.assertEqual(kwargs['key_list'], ['space', 'escape'])
-        self.session.show_message_and_wait.return_value = ['escape']
-        self.assertFalse(self.session._show_auto_paced_instructions('Look at the target'))
+    def test_settling_fades_audio_before_collection(self):
+        self.session.focus_time = 0.5
+        self.session.remaining_points = [0]
+        keys = [[], ['space'], [], [], [], [], [], []]
+
+        self.assertTrue(
+            self.run_collection(keys, presentation_order=(1,))
+        )
+
+        self.assertEqual(self.collected, [0])
+        self.assertGreaterEqual(self.collection_times[0], 0.6)
+        volumes = [
+            call.args[0]
+            for call in self.session.audio.setVolume.call_args_list
+        ]
+        self.assertTrue(any(0.0 < volume < 1.0 for volume in volumes))
+        self.session.audio.stop.assert_called_once()
+
+    def test_activate_target_sets_position_orientation_and_audio(self):
+        animation_clock = Mock()
+        self.session._activate_calibration_target(
+            1,
+            self.points[1],
+            animation_clock,
+        )
+        stim = self.session.stim_objects[1]
+        stim.setPos.assert_called_once_with(self.points[1])
+        stim.setOri.assert_called_once_with(0)
+        animation_clock.reset.assert_called_once_with()
+        self.session.audio.play.assert_called_once_with()
+        self.session.audio.setVolume.assert_called_once_with(1.0)
+
+    def test_failed_collection_keeps_same_automatic_point_for_retry(self):
+        def fail_then_succeed(point_idx, target_pos, **kwargs):
+            self.assertEqual(self.frames[-1], point_idx)
+            self.collected.append(point_idx)
+            self.pending_collection_result = len(self.collected) > 1
+
+        self.session.remaining_points = [0]
+        self.session._start_point_data_collection = Mock(
+            side_effect=fail_then_succeed
+        )
+        keys = [[], ['space'], [], ['space'], []]
+        self.assertTrue(
+            self.run_collection(keys, presentation_order=(1,))
+        )
+        self.assertEqual(self.collected, [0, 0])
+
+    def test_manual_and_automatic_instructions_wait_for_space_or_escape(self):
+        session = calibration.MouseCalibrationSession.__new__(
+            calibration.MouseCalibrationSession
+        )
+        session.show_message_and_wait = Mock(return_value=['space'])
+        session.check_points = Mock()
+        session._prepare_session = Mock()
+        session.calibration_points = self.points
+        session._present_and_collect_calibration_points = Mock(
+            return_value=False
+        )
+
+        session.run(self.points, pacing='auto')
+        auto_text, _ = session.show_message_and_wait.call_args.args
+        self.assertIn('Automatic Pacing', auto_text)
+        self.assertIn('Move your mouse', auto_text)
+        self.assertEqual(
+            session.show_message_and_wait.call_args.kwargs['key_list'],
+            ['space', 'escape'],
+        )
+
+        session.show_message_and_wait.reset_mock()
+        session.run(self.points, pacing='manual')
+        manual_text, _ = session.show_message_and_wait.call_args.args
+        self.assertIn('Mouse-Based Calibration Setup', manual_text)
+        self.assertIn('Press SPACE to begin', manual_text)
+        self.assertEqual(
+            session.show_message_and_wait.call_args.kwargs['key_list'],
+            ['space', 'escape'],
+        )
+
+        session.show_message_and_wait.return_value = ['escape']
+        self.assertFalse(session.run(self.points, pacing='auto'))
+
+    def test_auto_order_is_followed(self):
+        keys = [[], ['space'], [], ['space'], [], ['space'], []]
+        self.assertTrue(
+            self.run_collection(keys, presentation_order=(3, 1, 2))
+        )
+        self.assertEqual(self.collected, [2, 0, 1])
+
+    def test_random_order_shuffles_pending_points(self):
+        keys = [[], ['space'], [], ['space'], [], ['space'], []]
+        with patch.object(
+            calibration.random,
+            'shuffle',
+            side_effect=lambda points: points.reverse(),
+        ):
+            with patch.object(calibration.event, 'getKeys', side_effect=keys):
+                self.assertTrue(
+                    self.session._present_and_collect_calibration_points(
+                        self.points,
+                        pacing='auto',
+                        num_samples=5,
+                    )
+                )
+        self.assertEqual(self.collected, [2, 1, 0])
 
     def test_tobii_startup_escape_does_not_enter_calibration_mode(self):
         session = calibration.TobiiCalibrationSession.__new__(calibration.TobiiCalibrationSession)
         session.calibration = Mock()
-        session._show_auto_paced_instructions = Mock(return_value=False)
-        self.assertFalse(session.run(self.points, auto_paced=True))
+        session.show_message_and_wait = Mock(return_value=['escape'])
+        self.assertFalse(session.run(self.points, pacing='auto'))
         session.calibration.enter_calibration_mode.assert_not_called()
 
     def test_tobii_session_error_still_leaves_calibration_mode(self):
         session = calibration.TobiiCalibrationSession.__new__(calibration.TobiiCalibrationSession)
         session.calibration = Mock()
-        session._show_auto_paced_instructions = Mock(return_value=True)
+        session.show_message_and_wait = Mock(return_value=['space'])
         session._run_calibration_session = Mock(side_effect=RuntimeError('collection failed'))
         with self.assertRaisesRegex(RuntimeError, 'collection failed'):
-            session.run(self.points, auto_paced=True)
+            session.run(self.points, pacing='auto')
         session.calibration.enter_calibration_mode.assert_called_once()
         session.calibration.leave_calibration_mode.assert_called_once()
 
@@ -166,13 +335,17 @@ class AutoPacedCalibrationTests(unittest.TestCase):
         session = self.session
         session.calibration_points = self.points
         session.calibration_data = {}
-        session._show_auto_paced_instructions = Mock(return_value=True)
+        session.show_message_and_wait = Mock(return_value=['space'])
         session.check_points = Mock()
         session._prepare_session = Mock()
         session._show_results = Mock()
         session._selection_phase = Mock(side_effect=[[2, 0], None, []])
-        with patch.object(calibration.event, 'getKeys', side_effect=[[], ['space'], []] * 8):
-            self.assertTrue(session.run(self.points, auto_paced=True, inter_point_delay=0))
+        with patch.object(calibration.event, 'getKeys', side_effect=[[], ['space'], []] * 40):
+            self.assertTrue(
+                session.run(
+                    self.points, pacing='auto', presentation_order=(1, 2, 3)
+                )
+            )
         self.assertEqual(self.collected, [0, 1, 2, 0, 2, 0, 1, 2])
 
     def test_tobii_run_collects_retry_points_and_leaves_calibration_mode(self):
@@ -182,18 +355,431 @@ class AutoPacedCalibrationTests(unittest.TestCase):
         session.calstim_units = 'height'
         session.calibration = Mock()
         session.calibration.compute_and_apply.return_value.status = calibration.tr.CALIBRATION_STATUS_SUCCESS
-        session._show_auto_paced_instructions = Mock(return_value=True)
+        session.show_message_and_wait = Mock(return_value=['space'])
         session.check_points = Mock()
         session._prepare_session = Mock()
         session._show_calibration_result = Mock()
         session._discard_phase = Mock()
+        session._start_point_data_preparation = Mock()
+        session._update_point_data_preparation = Mock(return_value=True)
         session._selection_phase = Mock(side_effect=[[2, 0], []])
         with patch.object(calibration, 'get_tobii_pos', return_value=self.points):
-            with patch.object(calibration.event, 'getKeys', side_effect=[[], ['space'], []] * 5):
-                self.assertTrue(session.run(self.points, auto_paced=True, inter_point_delay=0))
+            with patch.object(calibration.event, 'getKeys', side_effect=[[], ['space'], []] * 30):
+                self.assertTrue(
+                    session.run(
+                        self.points, pacing='auto', presentation_order=(1, 2, 3)
+                    )
+                )
         self.assertEqual(self.collected, [0, 1, 2, 0, 2])
         session.calibration.enter_calibration_mode.assert_called_once()
         session.calibration.leave_calibration_mode.assert_called_once()
+
+
+class TobiiCollectionTests(unittest.TestCase):
+    def setUp(self):
+        self.session = calibration.TobiiCalibrationSession.__new__(
+            calibration.TobiiCalibrationSession
+        )
+        self.session.calibration = Mock()
+        self.session.tobii_points = [(0.2, 0.3)]
+        self.session._collection_executor = Mock()
+        self.session._preparation_future = None
+        self.session._collection_future = None
+        self.session._defer_collection_abort = True
+        self.session.focus_time = 0.5
+        self.session.verbose = False
+
+    def test_preparation_discards_samples_in_the_worker(self):
+        future = Mock()
+        self.session._collection_executor.submit.return_value = future
+
+        self.session._start_point_data_preparation(0)
+
+        self.session._collection_executor.submit.assert_called_once_with(
+            self.session._discard_point_data,
+            0.2,
+            0.3,
+        )
+        self.assertIs(self.session._preparation_future, future)
+
+        future.done.return_value = False
+        self.assertFalse(self.session._update_point_data_preparation())
+        future.done.return_value = True
+        future.result.return_value = 0.01
+        self.assertTrue(self.session._update_point_data_preparation())
+        self.assertIsNone(self.session._preparation_future)
+
+    def test_discard_duration_is_measured_inside_the_worker(self):
+        with patch.object(
+            calibration.time,
+            'perf_counter',
+            side_effect=[10.0, 10.2],
+        ):
+            elapsed = self.session._discard_point_data(0.2, 0.3)
+
+        self.session.calibration.discard_data.assert_called_once_with(0.2, 0.3)
+        self.assertAlmostEqual(elapsed, 0.2)
+
+    def test_preparation_overrun_is_reported_as_a_message(self):
+        future = Mock()
+        future.done.return_value = True
+        future.result.return_value = 0.75
+        self.session._collection_executor.submit.return_value = future
+
+        with patch.object(calibration, 'NicePrint') as message:
+            self.session._start_point_data_preparation(0)
+            self.assertTrue(self.session._update_point_data_preparation())
+
+        body = message.call_args.args[0]
+        self.assertIn('750 ms', body)
+        self.assertIn('500 ms', body)
+        self.assertIn('250 ms', body)
+        self.assertIn('does not indicate a calibration failure', body)
+
+    def test_start_submits_only_the_tobii_collection_call(self):
+        future = Mock()
+        self.session._collection_executor.submit.return_value = future
+
+        self.session._start_point_data_collection(0, (0, 0))
+
+        self.session.calibration.discard_data.assert_not_called()
+        self.session._collection_executor.submit.assert_called_once_with(
+            self.session.calibration.collect_data,
+            0.2,
+            0.3,
+        )
+        self.assertIs(self.session._collection_future, future)
+
+    def test_start_rejects_overlapping_collection(self):
+        self.session._collection_future = Mock()
+        with self.assertRaisesRegex(RuntimeError, 'already pending'):
+            self.session._start_point_data_collection(0, (0, 0))
+        self.session._collection_executor.submit.assert_not_called()
+
+    def test_update_returns_none_while_collection_runs(self):
+        future = Mock()
+        future.done.return_value = False
+        self.session._collection_future = future
+
+        self.assertIsNone(self.session._update_point_data_collection())
+        future.result.assert_not_called()
+
+    def test_update_reads_success_and_clears_future(self):
+        future = Mock()
+        future.done.return_value = True
+        future.result.return_value = calibration.tr.CALIBRATION_STATUS_SUCCESS
+        self.session._collection_future = future
+
+        self.assertTrue(self.session._update_point_data_collection())
+        future.result.assert_called_once_with()
+        self.assertIsNone(self.session._collection_future)
+
+    def test_update_reads_failure_and_clears_future(self):
+        future = Mock()
+        future.done.return_value = True
+        future.result.return_value = calibration.tr.CALIBRATION_STATUS_FAILURE
+        self.session._collection_future = future
+
+        self.assertFalse(self.session._update_point_data_collection())
+        self.assertIsNone(self.session._collection_future)
+
+    def test_worker_exception_propagates_and_clears_future(self):
+        future = Mock()
+        future.done.return_value = True
+        future.result.side_effect = RuntimeError('collection failed')
+        self.session._collection_future = future
+
+        with self.assertRaisesRegex(RuntimeError, 'collection failed'):
+            self.session._update_point_data_collection()
+        self.assertIsNone(self.session._collection_future)
+
+    def test_run_shuts_down_worker_before_leaving_calibration_mode(self):
+        self.session.show_message_and_wait = Mock(return_value=['space'])
+        self.session._run_calibration_session = Mock(return_value=True)
+        events = []
+        self.session.calibration.enter_calibration_mode.side_effect = (
+            lambda: events.append('enter')
+        )
+        self.session.calibration.leave_calibration_mode.side_effect = (
+            lambda: events.append('leave')
+        )
+
+        with patch.object(calibration, 'ThreadPoolExecutor') as executor_factory:
+            executor_factory.return_value.shutdown.side_effect = (
+                lambda **kwargs: events.append('shutdown')
+            )
+            self.assertTrue(
+                self.session.run([(0, 0), (1, 1)], pacing='auto')
+            )
+
+        executor_factory.assert_called_once_with(
+            max_workers=1,
+            thread_name_prefix='detox-calibration',
+        )
+        executor_factory.return_value.shutdown.assert_called_once_with(
+            wait=True
+        )
+        self.assertEqual(events, ['enter', 'shutdown', 'leave'])
+        self.assertIsNone(self.session._collection_executor)
+
+
+class MouseCollectionTests(unittest.TestCase):
+    def setUp(self):
+        self.session = calibration.MouseCalibrationSession.__new__(
+            calibration.MouseCalibrationSession
+        )
+        self.session.mouse = Mock()
+        self.session.calibration_data = {}
+        self.session._mouse_collection_point_idx = None
+        self.session._mouse_collection_target_pos = None
+        self.session._mouse_collection_samples = []
+        self.session._mouse_collection_sample_count = 0
+        self.session._mouse_collection_sample_interval = 0.0
+        self.session._mouse_collection_next_sample_time = 0.0
+
+    def test_samples_are_taken_one_at_a_time_and_stored_at_completion(self):
+        self.session.mouse.getPos.side_effect = [
+            (0, 0), (1, 0), (2, 0), (3, 0), (4, 0)
+        ]
+        with patch.object(
+            calibration.time,
+            'perf_counter',
+            side_effect=[10.0, 10.05, 10.21, 10.41, 10.61, 10.81],
+        ), patch.object(calibration.time, 'time', return_value=123.0):
+            self.session._start_point_data_collection(
+                0, (0, 0), num_samples=5
+            )
+            self.assertEqual(
+                len(self.session._mouse_collection_samples), 1
+            )
+            self.assertEqual(self.session.calibration_data, {})
+
+            self.assertIsNone(self.session._update_point_data_collection())
+            self.assertIsNone(self.session._update_point_data_collection())
+            self.assertIsNone(self.session._update_point_data_collection())
+            self.assertIsNone(self.session._update_point_data_collection())
+            self.assertTrue(self.session._update_point_data_collection())
+
+        samples = self.session.calibration_data[0]
+        self.assertEqual(len(samples), 5)
+        self.assertEqual(
+            [sample[1] for sample in samples],
+            [(0, 0), (1, 0), (2, 0), (3, 0), (4, 0)],
+        )
+
+    def test_late_frame_takes_one_sample_without_catch_up(self):
+        self.session.mouse.getPos.side_effect = [(0, 0), (1, 0)]
+        with patch.object(
+            calibration.time,
+            'perf_counter',
+            side_effect=[0.0, 10.0],
+        ), patch.object(calibration.time, 'time', return_value=123.0):
+            self.session._start_point_data_collection(
+                0, (0, 0), num_samples=5
+            )
+            self.assertIsNone(self.session._update_point_data_collection())
+
+        self.assertEqual(
+            len(self.session._mouse_collection_samples), 2
+        )
+        self.assertEqual(self.session.calibration_data, {})
+
+    def test_retry_replaces_only_that_points_samples(self):
+        self.session.mouse.getPos.side_effect = [
+            (0, 0), (1, 0), (2, 0), (3, 0)
+        ]
+        with patch.object(
+            calibration.time,
+            'perf_counter',
+            side_effect=[0.0, 1.0, 2.0, 3.0],
+        ), patch.object(calibration.time, 'time', return_value=123.0):
+            self.session._start_point_data_collection(
+                0, (0, 0), num_samples=2
+            )
+            self.assertTrue(self.session._update_point_data_collection())
+
+            self.session._start_point_data_collection(
+                0, (0, 0), num_samples=2
+            )
+            self.assertTrue(self.session._update_point_data_collection())
+
+        samples = self.session.calibration_data[0]
+        self.assertEqual(
+            [sample[1] for sample in samples],
+            [(2, 0), (3, 0)],
+        )
+
+    def test_clear_discards_pending_samples(self):
+        self.session.mouse.getPos.return_value = (0, 0)
+        with patch.object(
+            calibration.time,
+            'perf_counter',
+            return_value=0.0,
+        ), patch.object(calibration.time, 'time', return_value=123.0):
+            self.session._start_point_data_collection(
+                0, (0, 0), num_samples=5
+            )
+            self.session._clear_collected_data()
+
+        self.assertEqual(self.session.calibration_data, {})
+        self.assertEqual(self.session._mouse_collection_samples, [])
+        self.assertIsNone(self.session._mouse_collection_point_idx)
+
+
+class CalibrationAnimationTests(unittest.TestCase):
+    def setUp(self):
+        self.session = calibration.MouseCalibrationSession.__new__(
+            calibration.MouseCalibrationSession
+        )
+        self.session.win = Mock()
+        self.session.stim_size = 'big'
+        self.session.anim_type = 'zoom'
+        self.session.collection_anim_type = 'zoom'
+        self.session.focus_time = 0.5
+        self.stim = Mock(units='height')
+        self.session._draw_calibration_border = Mock()
+        self.clock = Mock()
+        self.clock.getTime.return_value = 0.0
+
+    def animate(self, phase):
+        with patch.object(
+            calibration,
+            'convert_height_to_units',
+            side_effect=lambda win, value, target_units: value,
+        ):
+            self.session._animate(self.stim, self.clock, 0, phase)
+
+    def test_zoom_starts_at_maximum_and_reaches_minimum(self):
+        size, rotation = self.session._zoom_animation(
+            0.0, min_size=0.05, max_size=0.16
+        )
+        self.assertAlmostEqual(size, 0.16)
+        self.assertEqual(rotation, 0.0)
+
+        half_cycle = math.pi / calibration.cfg.animation.zoom_speed
+        size, rotation = self.session._zoom_animation(
+            half_cycle, min_size=0.05, max_size=0.16
+        )
+        self.assertAlmostEqual(size, 0.05)
+        self.assertEqual(rotation, 0.0)
+
+    def test_animate_selects_attention_and_collection_zoom_bounds(self):
+        self.animate('attention')
+        self.assertAlmostEqual(
+            self.stim.setSize.call_args.args[0],
+            calibration.cfg.animation.attention_zoom_max_size_big,
+        )
+        self.assertEqual(self.stim.setOri.call_args.args[0], 0.0)
+
+        self.stim.reset_mock()
+        self.animate('collection')
+        self.assertAlmostEqual(
+            self.stim.setSize.call_args.args[0],
+            calibration.cfg.animation.collection_zoom_max_size_big,
+        )
+        self.assertEqual(self.stim.setOri.call_args.args[0], 0.0)
+
+    def test_trill_uses_fixed_size_and_bounded_rotation_with_pauses(self):
+        rotations = [
+            self.session._trill_animation(index / 1000, 0.14, 20)[1]
+            for index in range(1100)
+        ]
+        self.assertGreaterEqual(max(abs(value) for value in rotations), 18)
+        self.assertLessEqual(max(abs(value) for value in rotations), 20)
+
+        size, rotation = self.session._trill_animation(0.0, 0.14, 20)
+        self.assertEqual(size, 0.14)
+        self.assertEqual(rotation, 0.0)
+
+        size, rotation = self.session._trill_animation(1.2, 0.14, 20)
+        self.assertEqual(size, 0.14)
+        self.assertEqual(rotation, 0.0)
+
+    def test_collection_trill_can_rotate_more_than_attention(self):
+        self.session.anim_type = 'trill'
+        self.session.collection_anim_type = 'trill'
+        self.clock.getTime.return_value = 0.25
+
+        self.animate('attention')
+        attention_rotation = self.stim.setOri.call_args.args[0]
+
+        self.stim.reset_mock()
+        self.animate('collection')
+        collection_rotation = self.stim.setOri.call_args.args[0]
+
+        self.assertGreater(abs(collection_rotation), abs(attention_rotation))
+        self.assertAlmostEqual(
+            self.stim.setSize.call_args.args[0],
+            calibration.cfg.animation.collection_trill_size_big,
+        )
+
+    def test_collection_transition_starts_from_displayed_pose(self):
+        self.clock.getTime.return_value = 0.0
+
+        with patch.object(
+            calibration,
+            'convert_height_to_units',
+            side_effect=lambda win, value, target_units: value,
+        ):
+            self.session._animate(
+                self.stim,
+                self.clock,
+                0,
+                phase='collection',
+                transition_start=(0.123, 12.0),
+            )
+
+        self.assertAlmostEqual(self.stim.setSize.call_args.args[0], 0.123)
+        self.assertAlmostEqual(self.stim.setOri.call_args.args[0], 12.0)
+
+    def test_collection_transition_finishes_at_collection_pose(self):
+        self.clock.getTime.return_value = self.session.focus_time
+
+        with patch.object(
+            calibration,
+            'convert_height_to_units',
+            side_effect=lambda win, value, target_units: value,
+        ):
+            self.session._animate(
+                self.stim,
+                self.clock,
+                0,
+                phase='collection',
+                transition_start=(0.123, 12.0),
+            )
+
+        self.assertAlmostEqual(
+            self.stim.setSize.call_args.args[0],
+            calibration.cfg.animation.collection_zoom_max_size_big,
+        )
+        self.assertAlmostEqual(self.stim.setOri.call_args.args[0], 0.0)
+
+    def test_zero_focus_time_skips_animation_transition(self):
+        self.session.focus_time = 0.0
+        self.clock.getTime.return_value = 0.0
+
+        with patch.object(
+            calibration,
+            'convert_height_to_units',
+            side_effect=lambda win, value, target_units: value,
+        ):
+            self.session._animate(
+                self.stim,
+                self.clock,
+                0,
+                phase='collection',
+                transition_start=(0.123, 12.0),
+            )
+
+        self.assertAlmostEqual(
+            self.stim.setSize.call_args.args[0],
+            calibration.cfg.animation.collection_zoom_max_size_big,
+        )
+        self.assertAlmostEqual(self.stim.setOri.call_args.args[0], 0.0)
+
+    def test_unknown_animation_phase_is_rejected(self):
+        with self.assertRaisesRegex(ValueError, 'animation phase'):
+            self.session._animate(self.stim, self.clock, 0, 'invalid')
 
 
 class CalibrationApiTests(unittest.TestCase):
@@ -212,23 +798,71 @@ class CalibrationApiTests(unittest.TestCase):
                 session.return_value.run.return_value = True
                 self.assertTrue(self.controller.calibrate(
                     infant_stims=False, audio=False, shuffle=False,
-                    auto_paced=True, inter_point_delay=0.4,
+                    anim_type='trill', collection_anim_type='zoom',
+                    pacing='auto', presentation_order=[3, 1, 2, 4, 5],
                 ))
                 session.return_value.run.assert_called_once_with(
-                    base.cfg.calibration.points_5, auto_paced=True, inter_point_delay=0.4
+                    base.cfg.calibration.points_5,
+                    pacing='auto',
+                    presentation_order=(3, 1, 2, 4, 5),
+                )
+                self.assertEqual(
+                    session.call_args.kwargs['collection_anim_type'], 'zoom'
                 )
 
-    def test_default_is_manual(self):
+    def test_defaults_use_manual_pacing_and_two_phase_animations(self):
         with patch.object(base, 'MouseCalibrationSession') as session:
             self.controller.calibrate(infant_stims=False, audio=False)
             session.return_value.run.assert_called_once_with(
-                base.cfg.calibration.points_5, auto_paced=False, inter_point_delay=0.25
+                base.cfg.calibration.points_5,
+                pacing='manual',
+                presentation_order='random',
+            )
+            self.assertEqual(
+                session.call_args.kwargs['anim_type'], 'trill'
+            )
+            self.assertEqual(
+                session.call_args.kwargs['collection_anim_type'], 'zoom'
             )
 
-    def test_negative_and_non_finite_delays_are_rejected(self):
-        for delay in [-0.1, float('inf'), float('-inf'), float('nan')]:
-            with self.subTest(delay=delay), self.assertRaisesRegex(ValueError, 'inter_point_delay'):
-                self.controller.calibrate(auto_paced=True, inter_point_delay=delay)
+    def test_manual_pacing_ignores_presentation_order(self):
+        with patch.object(base, 'MouseCalibrationSession') as session:
+            self.assertTrue(self.controller.calibrate(
+                infant_stims=False, audio=False, pacing='manual',
+                presentation_order=['not', 'used'],
+            ))
+            session.return_value.run.assert_called_once_with(
+                base.cfg.calibration.points_5,
+                pacing='manual',
+                presentation_order='random',
+            )
+
+    def test_invalid_pacing_and_animation_types_are_rejected(self):
+        cases = [
+            ({'pacing': 'sometimes'}, 'pacing'),
+            ({'anim_type': 'spin'}, 'anim_type'),
+            ({'collection_anim_type': 'spin'}, 'collection_anim_type'),
+        ]
+        for kwargs, message in cases:
+            with self.subTest(kwargs=kwargs), self.assertRaisesRegex(ValueError, message):
+                self.controller.calibrate(**kwargs)
+
+    def test_presentation_order_must_be_a_complete_1_based_permutation(self):
+        invalid_orders = [
+            [1, 2, 3, 4],
+            [1, 2, 3, 4, 6],
+            [1, 2, 3, 4, 4],
+            [1, 2, 3, 4, True],
+            [1, 2, 3, 4, '5'],
+            None,
+        ]
+        for presentation_order in invalid_orders:
+            with self.subTest(presentation_order=presentation_order):
+                with self.assertRaisesRegex(ValueError, 'presentation_order'):
+                    self.controller.calibrate(
+                        pacing='auto',
+                        presentation_order=presentation_order,
+                    )
 
 
 if __name__ == '__main__':

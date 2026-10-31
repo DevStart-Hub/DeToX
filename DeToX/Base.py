@@ -1,5 +1,4 @@
 import os
-import math
 import time
 import tables
 import atexit
@@ -650,16 +649,25 @@ class ETracker:
             core.wait(0.5)
 
 
-    def calibrate(self,
-                calibration_points=5,
-                infant_stims=True,
-                shuffle=True,
-                audio=True,
-                anim_type='zoom',
-                stim_size='big',
-                visualization_style='circles',
-                auto_paced=False,
-                inter_point_delay=0.25
+    def calibrate(
+        self,
+        # Calibration procedure
+        calibration_points=5,
+        pacing='manual',
+        presentation_order='random',
+
+        # Stimuli
+        infant_stims=True,
+        shuffle=True,
+        stim_size='big',
+
+        # Attention
+        anim_type='trill',
+        collection_anim_type='zoom',
+        audio=True,
+
+        # Results
+        visualization_style='circles',
     ):
         """
         Run infant-friendly calibration procedure.
@@ -680,6 +688,26 @@ class ETracker:
              - Alternatively, provide a **list of tuples** with custom points in normalized 
              - coordinates [-1, 1]. Example: ``[(-0.4, 0.4), (0.4, 0.4), (0.0, 0.0)]``.
 
+        pacing : {'manual', 'auto'}, optional
+            Controls how calibration targets are presented:
+
+             - **'manual'** waits for a number key to present a target. SPACE
+               collects samples at the visible target. This preserves the
+               experimenter's control over presentation timing (default).
+             - **'auto'** presents the first target automatically and presents the
+               next target after each successful collection. SPACE still controls
+               when collection starts.
+
+        presentation_order : {'random'} or list of int, optional
+            Order in which automatic calibration presents points. Applies only
+            when ``pacing='auto'``.
+
+             - **'random'** shuffles all points in the current pass (default).
+             - A list of **1-based point numbers** may be supplied instead, for
+               example ``[1, 5, 2, 3, 4]``. It must contain every calibration
+               point exactly once. Retry passes retain this relative order after
+               filtering to the selected points.
+
         infant_stims : True or str or list or visual stimulus, optional
             Calibration stimulus specification. Accepts multiple formats
 
@@ -699,45 +727,38 @@ class ETracker:
             Whether to randomize stimulus presentation order after any necessary 
             repetition. Helps prevent habituation to stimulus sequence. Default is True.
 
-        audio : True or False or None or psychopy.sound.Sound, optional
-            Controls attention-getting audio during calibration:
-
-             -**True** uses the built-in looping calibration sound (default). 
-             -**False** or **None** disables audio. 
-            A **psychopy.sound.Sound** object may be provided for custom audio 
-            (ensure it is configured appropriately, e.g., ``loops=-1`` for continuous looping). 
-            Audio plays when a calibration point is selected and fades out during data collection.
-
-        anim_type : {'zoom', 'trill'}, optional
-            Animation style for calibration stimuli:
-
-             - **'zoom'** applies smooth size oscillation using a cosine function (default). 
-             - **'trill'** uses rapid rotation with intermittent pauses.
-
         stim_size : {'big', 'small'}, optional
             Size preset for calibration stimuli:
 
-             - **'big'** uses larger stimuli recommended for infants and children (default). 
+             - **'big'** uses larger stimuli recommended for infants and children (default).
              -**'small'** uses smaller stimuli for adults.
+
+        anim_type : {'zoom', 'trill'}, optional
+            Animation style used to attract attention before data collection:
+
+             - **'trill'** uses rapid rotation with intermittent pauses (default).
+             - **'zoom'** applies smooth size oscillation using a cosine function.
+
+        collection_anim_type : {'zoom', 'trill'}, optional
+            Animation style used while the participant settles on the target and
+            gaze samples are collected. This is separate from ``anim_type`` so the
+            attention and collection phases can use different animations.
+            Default is **'zoom'**.
+
+        audio : True or False or None or psychopy.sound.Sound, optional
+            Controls attention-getting audio during calibration:
+
+             -**True** uses the built-in looping calibration sound (default).
+             -**False** or **None** disables audio.
+            A **psychopy.sound.Sound** object may be provided for custom audio
+            (ensure it is configured appropriately, e.g., ``loops=-1`` for continuous looping).
+            Audio plays when a calibration point is selected and fades out during data collection.
 
         visualization_style : {'circles', 'lines'}, optional
             How to display calibration results:
 
              - **'circles'** shows small filled circles at each gaze sample position. 
              - **'lines'** draws lines from targets to gaze samples. 
-
-        auto_paced : bool, optional
-            Automatically show points in point-number order, while still requiring
-            SPACE to collect samples at each point. Results appear automatically
-            after the last point. Selected retries use the same progression.
-            Default False preserves manual number-key point selection.
-
-        inter_point_delay : float, optional
-            Blank interval in seconds between auto-paced points, after collection
-            finishes. Must be finite and non-negative. Default 0.25.
-            This is separate from the existing pre-collection focus time.
-
-            Example: ``controller.calibrate(auto_paced=True, inter_point_delay=0.25)``.
 
         Returns
         -------
@@ -751,7 +772,10 @@ class ETracker:
             If `calibration_points` is not 5, 9, or a valid list of coordinate tuples; 
             if `visualization_style` is not 'circles' or 'lines'; 
             if `infant_stims` format is unrecognized;
-            or if `inter_point_delay` is negative or non-finite.
+            if either animation type is invalid;
+            if `pacing` is invalid;
+            or if an automatic `presentation_order` is not 'random' or a complete
+            permutation of the 1-based calibration point numbers.
         TypeError
             If pre-loaded stimuli include unsupported types (e.g., TextStim, MovieStim).
 
@@ -823,6 +847,23 @@ class ETracker:
             controller.calibrate(5, audio=False, anim_type='trill')
         ```
         
+        ### Target Presentation
+
+        #### Fully manual presentation
+        ```python
+            controller.calibrate(5, pacing='manual')
+        ```
+
+        #### Automatic presentation in a random order
+        ```python
+            controller.calibrate(5, pacing='auto', presentation_order='random')
+        ```
+
+        #### Automatic presentation in a fixed order
+        ```python
+            controller.calibrate(5, pacing='auto', presentation_order=[1, 5, 2, 3, 4])
+        ```
+
         ### Visualization Styles
         
         #### Lines visualization
@@ -858,8 +899,12 @@ class ETracker:
                 controller.stop_recording()
         ```
         """
-        if not math.isfinite(inter_point_delay) or inter_point_delay < 0:
-            raise ValueError("inter_point_delay must be finite and non-negative.")
+        # --- Pacing and Presentation Order Validation ---
+        valid_pacing = ['manual', 'auto']
+        if pacing not in valid_pacing:
+            raise ValueError(
+                f"Invalid pacing: '{pacing}'. Must be one of {valid_pacing}."
+            )
 
         # --- Visualization Style Validation ---
         valid_styles = ['lines', 'circles']
@@ -868,7 +913,19 @@ class ETracker:
                 f"Invalid visualization_style: '{visualization_style}'. "
                 f"Must be one of {valid_styles}."
             )
-        
+
+        # --- Animation Style Validation ---
+        valid_anim_types = ['zoom', 'trill']
+        for name, value in (
+            ('anim_type', anim_type),
+            ('collection_anim_type', collection_anim_type),
+        ):
+            if value not in valid_anim_types:
+                raise ValueError(
+                    f"Invalid {name}: '{value}'. "
+                    f"Must be one of {valid_anim_types}."
+                )
+
         # --- Calibration Points Processing ---
         if isinstance(calibration_points, int):
             # Load standard pattern from config
@@ -906,6 +963,34 @@ class ETracker:
         
         # Number of calibration points
         num_points = len(norm_points)
+
+        # --- Automatic Presentation Order Validation ---
+        if pacing == 'auto':
+            if presentation_order == 'random':
+                resolved_presentation_order = presentation_order
+            elif isinstance(presentation_order, (list, tuple)):
+                if any(
+                    isinstance(point_number, bool)
+                    or not isinstance(point_number, int)
+                    for point_number in presentation_order
+                ):
+                    raise ValueError(
+                        "presentation_order must contain integer point numbers."
+                    )
+                expected_order = list(range(1, num_points + 1))
+                if sorted(presentation_order) != expected_order:
+                    raise ValueError(
+                        "presentation_order must contain every calibration point "
+                        f"exactly once, using 1-based numbers 1-{num_points}."
+                    )
+                resolved_presentation_order = tuple(presentation_order)
+            else:
+                raise ValueError(
+                    "presentation_order must be 'random' or a list of "
+                    "1-based point numbers."
+                )
+        else:
+            resolved_presentation_order = 'random'
 
 
         # --- Stimulus Size Validation ---
@@ -991,6 +1076,7 @@ class ETracker:
                 mouse=self.mouse,
                 audio=audio_stim,
                 anim_type=anim_type,
+                collection_anim_type=collection_anim_type,
                 stim_size=stim_size,  
                 visualization_style=visualization_style,
                 verbose=self.verbose
@@ -1002,6 +1088,7 @@ class ETracker:
                 infant_stims=stim_list,
                 audio=audio_stim,
                 anim_type=anim_type,
+                collection_anim_type=collection_anim_type,
                 stim_size=stim_size,  
                 visualization_style=visualization_style,
                 verbose=self.verbose
@@ -1010,8 +1097,8 @@ class ETracker:
         # --- Run calibration ---
         success = session.run(
             norm_points,
-            auto_paced=auto_paced,
-            inter_point_delay=inter_point_delay,
+            pacing=pacing,
+            presentation_order=resolved_presentation_order,
         )
 
         return success
